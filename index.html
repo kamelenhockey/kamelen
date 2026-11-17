@@ -314,6 +314,38 @@ table.fines td,table.fines th{white-space:normal}
   .ladder span:last-child{grid-column:2}
 }
 
+/* ---------- Voorspeller ---------- */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;background:var(--ink);color:#fff;font-weight:700;font-size:.85rem;text-decoration:none;border:0;cursor:pointer;font-family:inherit}
+.btn:hover{background:var(--ink-2)}
+.btn.sm{padding:5px 11px;font-size:.8rem}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--bg)}
+.page-wide{max-width:1120px}
+.pred-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:var(--gap);align-items:start}
+.pred-table-card{position:sticky;top:64px}
+.pred-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--ink);color:#fff;border-radius:var(--r);overflow:hidden}
+.pred-summary > div{padding:14px 18px}
+.pred-summary > div + div{border-left:1px solid rgba(255,255,255,.12)}
+.pred-summary .k{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.pred-summary .v{font-family:var(--font-display);font-weight:800;font-size:1.6rem}
+.pred-summary .v.up{color:#7fd6a2}.pred-summary .v.down{color:#ff9d8a}
+.pred-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-4px 0 10px;font-size:.82rem;color:var(--muted)}
+.pred-list{max-height:640px}
+.pm{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px;padding:7px 8px;border-radius:8px;font-size:.92rem}
+.pm.us{background:var(--orange-soft)}
+.pm .h{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pm .a{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pm .inputs{display:flex;align-items:center;gap:4px}
+.pm input{width:42px;height:34px;text-align:center;font:inherit;font-family:var(--font-display);font-weight:800;font-size:1.05rem;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);-moz-appearance:textfield}
+.pm input::-webkit-outer-spin-button,.pm input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pm input:focus{outline:2px solid var(--orange);outline-offset:0;border-color:var(--orange)}
+.pm.filled input{background:var(--ink);color:#fff;border-color:var(--ink)}
+.mv{display:inline-block;min-width:2rem;font-size:.78rem;font-weight:800;text-align:center}
+.mv.up{color:var(--win)}.mv.down{color:var(--loss)}.mv.same{color:var(--muted)}
+td.delta{color:var(--muted);font-size:.8rem}
+@media (max-width:900px){ .pred-grid{grid-template-columns:1fr} .pred-table-card{position:static} }
+@media (max-width:560px){ .pred-summary{grid-template-columns:1fr} .pred-summary > div + div{border-left:0;border-top:1px solid rgba(255,255,255,.12)} }
+
 footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 
 @media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
@@ -379,6 +411,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
     <li><a href="#topscorers">Topscorers</a></li>
     <li><a href="#liters">Literklassement</a></li>
     <li class="nav-sep" aria-hidden="true"></li>
+    <li><a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a></li>
     <li><a href="#regels" data-view-link="regels">Kamelen-regels</a></li>
     <li><a href="#mex" data-view-link="mex">Mex</a></li>
   </ul>
@@ -407,7 +440,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
   </section>
 
   <section class="card wide" id="stand" aria-labelledby="h-stand">
-    <div class="card-head"><div><h2 id="h-stand">Stand</h2><p id="stand-sub"></p></div></div>
+    <div class="card-head"><div><h2 id="h-stand">Stand</h2><p id="stand-sub"></p></div><a class="btn" href="#voorspeller">Voorspel de stand →</a></div>
     <div id="standings"></div>
   </section>
 
@@ -427,6 +460,33 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
     <div class="legend"><span><span class="g" style="--d:100%;--o:0%"><i class="d"></i></span>Gedaan</span><span><span class="g" style="--d:0%;--o:100%"><i class="o"></i></span>Nog open</span><span>1 glas = 1 liter · stille meter = 3,25 L</span></div>
   </section>
 </main>
+</div>
+
+<!-- ================= VOORSPELLER ================= -->
+<div id="view-voorspeller" class="view" hidden>
+  <div class="wrap page page-wide">
+    <header class="page-head">
+      <div class="eyebrow">Wat als…</div>
+      <h1>Standvoorspeller</h1>
+      <p>Vul uitslagen in voor de komende wedstrijden en zie direct hoe de stand eruit zou zien. Je invoer blijft bewaard in deze browser en verandert niets aan de echte stand.</p>
+    </header>
+    <div id="pred-summary" class="pred-summary"></div>
+    <div class="pred-grid">
+      <section class="card">
+        <div class="card-head"><div><h2>Wedstrijden</h2><p id="pred-count"></p></div><div id="pred-toggle"></div></div>
+        <div class="pred-tools"><span>Snel invullen voor de Kamelen:</span>
+          <button type="button" class="btn sm" data-fill="W">Alles winnen</button>
+          <button type="button" class="btn sm" data-fill="G">Alles gelijk</button>
+          <button type="button" class="btn sm" data-fill="V">Alles verliezen</button>
+          <button type="button" class="btn sm ghost" id="pred-reset">Alles wissen</button></div>
+        <div id="pred-matches" class="list pred-list"></div>
+      </section>
+      <section class="card pred-table-card">
+        <div class="card-head"><div><h2>Voorspelde stand</h2><p>Pijltjes tonen het verschil met de huidige stand</p></div></div>
+        <div id="pred-table"></div>
+      </section>
+    </div>
+  </div>
 </div>
 
 <!-- ================= KAMELEN-REGELS ================= -->
@@ -834,8 +894,7 @@ function renderLiters(){
   document.getElementById("rank").innerHTML = list.map((p, i) => {
     const id = `f${i}`;
     const tags = [
-      p.open > 0 ? `<span class="pill open">${fmtL(p.open)} L open</span>` : (p.liters > 0 ? `<span class="pill done">alles gedaan</span>` : ""),
-      p.stil ? `<span class="pill">${p.stil}× stille meter</span>` : ""
+      p.open > 0 ? `<span class="pill open">${fmtL(p.open)} L open</span>` : (p.liters > 0 ? `<span class="pill done">alles gedaan</span>` : "")
     ].join("");
     return `<li><button aria-expanded="false" aria-controls="${id}">
         <span class="pos">${p.pos}</span>
@@ -919,6 +978,94 @@ function renderTopscorers(){
 }
 
 
+
+/* ---------- Standvoorspeller ---------- */
+const PRED_KEY = "kamelen-voorspelling";
+let PRED = {};
+try { PRED = JSON.parse(localStorage.getItem(PRED_KEY) || "{}") || {}; } catch { PRED = {}; }
+const savePred = () => { try { localStorage.setItem(PRED_KEY, JSON.stringify(PRED)); } catch {} };
+const matchKey = m => `${m.datum}|${m.thuis}|${m.uit}`;
+let predOnlyUs = true;
+
+function predictedTable(){
+  const base = (DATA.stand || []).map(t => { const x = teamStats(t.team); return { team:t.team, positie:t.positie, gs:t.gespeeld, pt:t.punten, dv:x.dv, dt:x.dt, w:x.w, g:x.g, v:x.v }; });
+  const by = Object.fromEntries(base.map(t => [t.team, { ...t }]));
+  let n = 0;
+  for (const m of DATA.programma || []){
+    const p = PRED[matchKey(m)]; if (!p || p[0] === "" || p[1] === "" || p[0] == null || p[1] == null) continue;
+    const a = Number(p[0]), b = Number(p[1]); if (isNaN(a) || isNaN(b)) continue;
+    const H = by[m.thuis], U = by[m.uit]; if (!H || !U) continue;
+    n++;
+    H.gs++; U.gs++; H.dv += a; H.dt += b; U.dv += b; U.dt += a;
+    if (a > b){ H.pt += 3; H.w++; U.v++; } else if (a < b){ U.pt += 3; U.w++; H.v++; } else { H.pt++; U.pt++; H.g++; U.g++; }
+  }
+  const rows = Object.values(by).sort((x,y) => y.pt - x.pt || (y.dv-y.dt) - (x.dv-x.dt) || y.dv - x.dv || x.team.localeCompare(y.team));
+  rows.forEach((r,i) => r.nieuw = i + 1);
+  return { rows, n };
+}
+
+function renderPredTable(){
+  const { rows, n } = predictedTable();
+  const aftrek = DATA.puntenAftrek || {};
+  document.getElementById("pred-count").textContent = `${n} ${n===1?"uitslag":"uitslagen"} ingevuld`;
+  document.getElementById("pred-table").innerHTML = `<div class="tablewrap"><table><thead><tr>
+      <th class="r">#</th><th></th><th>Team</th><th class="r">GS</th><th class="r hide-sm">W</th><th class="r hide-sm">G</th><th class="r hide-sm">V</th><th class="r">DS</th><th class="r">PT</th></tr></thead><tbody>
+    ${rows.map(r => { const d = r.positie - r.nieuw, ds = r.dv - r.dt;
+      const mv = d > 0 ? `<span class="mv up">▲${d}</span>` : d < 0 ? `<span class="mv down">▼${-d}</span>` : `<span class="mv same">–</span>`;
+      return `<tr class="${isUs(r.team)?"us":""}"><td class="r pos">${r.nieuw}</td><td>${mv}</td><td>${teamLink(r.team)}</td><td class="r">${r.gs}</td>
+        <td class="r hide-sm">${r.w}</td><td class="r hide-sm">${r.g}</td><td class="r hide-sm">${r.v}</td>
+        <td class="r ${ds>0?"gd-pos":ds<0?"gd-neg":""}">${ds>0?"+":""}${ds}</td><td class="r pts">${r.pt}${aftrek[r.team]?"<sup>*</sup>":""}</td></tr>`; }).join("")}
+    </tbody></table></div>
+    <p class="note">Volgorde: punten, dan doelsaldo, dan doelpunten voor.${Object.keys(aftrek).length ? " * inclusief puntenaftrek." : ""}</p>`;
+  const us = rows.find(r => isUs(r.team));
+  if (us){
+    const d = us.positie - us.nieuw;
+    document.getElementById("pred-summary").innerHTML = `
+      <div><div class="k">Kamelen nu</div><div class="v">${us.positie}e · ${(DATA.stand||[]).find(t=>isUs(t.team))?.punten ?? "-"} pt</div></div>
+      <div><div class="k">Kamelen voorspeld</div><div class="v ${d>0?"up":d<0?"down":""}">${us.nieuw}e · ${us.pt} pt</div></div>
+      <div><div class="k">Verschil</div><div class="v ${d>0?"up":d<0?"down":""}">${d>0?`▲ ${d} plek${d>1?"ken":""}`:d<0?`▼ ${-d} plek${d<-1?"ken":""}`:"gelijk"}</div></div>`;
+  }
+}
+
+function renderPredMatches(){
+  const all = DATA.programma || [];
+  const list = predOnlyUs ? all.filter(m => isUs(m.thuis + m.uit)) : all;
+  document.getElementById("pred-matches").innerHTML = list.length ? groupByDate(list).map(([d, ms]) => `<div class="day">${fmtDay(d)}</div>` + ms.map(m => {
+    const k = matchKey(m), p = PRED[k] || ["",""], filled = p[0] !== "" && p[1] !== "" && p[0] != null && p[1] != null;
+    return `<div class="pm ${isUs(m.thuis+m.uit)?"us":""} ${filled?"filled":""}" data-key="${esc(k)}">
+      <span class="h">${teamLink(m.thuis)}</span>
+      <span class="inputs"><input type="number" inputmode="numeric" min="0" max="40" aria-label="Doelpunten ${esc(m.thuis)}" value="${esc(p[0] ?? "")}" data-i="0">
+        <span>–</span><input type="number" inputmode="numeric" min="0" max="40" aria-label="Doelpunten ${esc(m.uit)}" value="${esc(p[1] ?? "")}" data-i="1"></span>
+      <span class="a">${teamLink(m.uit)}</span></div>`; }).join("")).join("") : `<div class="empty">Geen wedstrijden meer in het programma.</div>`;
+}
+
+function initPredictor(){
+  if (!document.getElementById("pred-matches")) return;
+  segToggle(document.getElementById("pred-toggle"), "Kamelen", "Hele poule", only => { predOnlyUs = only; renderPredMatches(); });
+  document.getElementById("pred-matches").addEventListener("input", e => {
+    const inp = e.target.closest("input[data-i]"); if (!inp) return;
+    const row = inp.closest("[data-key]"), k = row.dataset.key;
+    const v = inp.value === "" ? "" : String(Math.max(0, Math.min(40, Math.floor(Number(inp.value)) || 0)));
+    const p = PRED[k] || ["",""]; p[Number(inp.dataset.i)] = v; PRED[k] = p;
+    if (p[0] === "" && p[1] === "") delete PRED[k];
+    row.classList.toggle("filled", p[0] !== "" && p[1] !== "");
+    savePred(); renderPredTable();
+  });
+  document.querySelector("#view-voorspeller .pred-tools").addEventListener("click", e => {
+    const fill = e.target.closest("[data-fill]")?.dataset.fill;
+    if (fill){
+      for (const m of DATA.programma || []){
+        if (!isUs(m.thuis + m.uit)) continue;
+        const home = isUs(m.thuis);
+        PRED[matchKey(m)] = fill === "G" ? ["1","1"] : (fill === "W") === home ? ["2","1"] : ["1","2"];
+      }
+    } else if (e.target.id === "pred-reset"){ PRED = {}; }
+    else return;
+    savePred(); renderPredMatches(); renderPredTable();
+  });
+  renderPredTable();
+}
+
 /* ---------- Dobbelstenen (SVG) ---------- */
 const PIPS = {1:[[50,50]],2:[[28,28],[72,72]],3:[[28,28],[50,50],[72,72]],4:[[28,28],[72,28],[28,72],[72,72]],5:[[28,28],[72,28],[50,50],[28,72],[72,72]],6:[[28,26],[72,26],[28,50],[72,50],[28,74],[72,74]]};
 const dieSvg = (n, keep) => `<svg class="die${keep ? " keep" : ""}" viewBox="0 0 100 100" role="img" aria-label="${n}"><rect x="5" y="5" width="90" height="90" rx="18"/>${PIPS[n].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="9"/>`).join("")}</svg>`;
@@ -929,7 +1076,7 @@ document.querySelectorAll("[data-dice]").forEach(el => {
 });
 
 /* ---------- Pagina's: home, regels, mex ---------- */
-const VIEWS = ["regels", "mex"];
+const VIEWS = ["voorspeller", "regels", "mex"];
 function showView(){
   const h = location.hash.replace("#", "");
   const view = VIEWS.includes(h) ? h : "home";
@@ -959,7 +1106,7 @@ Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("ops
     DATA = { ...comp, ...lit, ...(live ? {liters: live} : {}), opstelling: ops.spelers || [], opstellingWedstrijd: ops.wedstrijd || null, doelpunten };
     if (!comp.programma && !DATA.liters) throw new Error("geen gegevens");
     if (DATA.competitie) document.getElementById("league").textContent = DATA.competitie;
-    renderStats(); renderNext(); renderProgram(); renderResults(); renderStandings(); renderTopscorers(); renderLiters();
+    renderStats(); renderNext(); renderProgram(); renderResults(); renderStandings(); renderTopscorers(); renderLiters(); initPredictor();
     const f = x => { const d = new Date(x); return isNaN(d) ? "onbekend" : d.toLocaleString("nl-NL",{dateStyle:"long",timeStyle:"short",timeZone:"Europe/Amsterdam"}); };
     document.getElementById("foot").textContent = `Competitie: laatste wijziging ${f(DATA.competitieBijgewerkt)} (bron hockey.nl) · Literklassement en topscorers: ${live ? "live uit de spreadsheet" : "bijgewerkt " + f(DATA.bijgewerkt)}`;
   })
