@@ -7,13 +7,21 @@
    "datum": "2026-11-17",
    "thuis": "GCHC H13",
    "tijd": "19:00",
-   "uit": "Eemsmond H1"
+   "uit": "Eemsmond H1",
+   "wedstrijdId": "2105958",
+   "veld": "Veld 2 (Semiveld)",
+   "accommodatie": "Paddepoel",
+   "adres": "Blauwborgje 26 9747AC Groningen"
   },
   {
    "datum": "2026-11-22",
    "thuis": "GHBS H13",
    "tijd": "09:00",
-   "uit": "GCHC H13"
+   "uit": "GCHC H13",
+   "wedstrijdId": "2105965",
+   "veld": "Veld 3 - Riant Makelaars Groningen (Waterveld)",
+   "accommodatie": "Corpus den Hoorn",
+   "adres": "Laan Corpus den Hoorn 101 9728JR Groningen"
   },
   {
    "datum": "2026-11-22",
@@ -79,7 +87,11 @@
    "datum": "2026-11-29",
    "thuis": "GCHC H13",
    "tijd": "15:30",
-   "uit": "Leeuwarden H2-O"
+   "uit": "Leeuwarden H2-O",
+   "wedstrijdId": "2105976",
+   "veld": "Veld 2 (Semiveld)",
+   "accommodatie": "Paddepoel",
+   "adres": "Blauwborgje 26 9747AC Groningen"
   },
   {
    "datum": "2027-02-28",
@@ -888,5 +900,5 @@
  "puntenAftrek": {
   "GCHC H13": 3
  },
- "competitieBijgewerkt": "2026-11-17T14:13:16.151Z"
+ "competitieBijgewerkt": "2026-11-17T14:44:13.911Z"
 }
