@@ -97,6 +97,10 @@ const { stand, standPer } = parseStand(overzichtTekst);
 
 const oud = JSON.parse(await readFile("competitie.json", "utf8"));
 
+// Aanvangstijd bewaren bij gespeelde wedstrijden (hockey.nl toont die niet bij uitslagen; de toto heeft hem nodig)
+const tijdVan = new Map([...(oud.uitslagen || []), ...(oud.programma || [])].filter(w => w.tijd).map(w => [`${w.datum}|${w.thuis}|${w.uit}`, w.tijd]));
+for (const w of uitslagen) { const t = tijdVan.get(`${w.datum}|${w.thuis}|${w.uit}`); if (t) w.tijd = t; }
+
 // Veiligheidscheck: bij rare gegevens niets overschrijven
 if (stand.length < 4) throw new Error(`Stand lijkt onvolledig (${stand.length} teams) – niets bijgewerkt.`);
 if (programma.length + uitslagen.length < (oud.programma.length + oud.uitslagen.length) - 10)
