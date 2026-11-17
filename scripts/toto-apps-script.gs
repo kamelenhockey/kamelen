@@ -1,10 +1,10 @@
 /**
  * Kamelen – opslag voor de toto en de stemming "kameel en ezel van de dag".
- * Voorspellingen komen in het tabblad "Voorspellingen", stemmen in "Stemmen".
- * Zolang een wedstrijd nog niet begonnen is (toto) of de stemming nog loopt,
- * worden alleen de namen teruggegeven, zodat niemand kan afkijken.
+ * Tabbladen: "Voorspellingen", "Stemmen" en "Gesloten" (welke stemmingen de beheerder heeft gesloten).
+ * Scores en stemmen blijven verborgen tot de aftrap (toto) of tot de beheerder de stemming sluit.
  */
-const TEAMCODE = "VUL-HIER-JULLIE-CODE-IN";
+const TEAMCODE = "VUL-HIER-JULLIE-CODE-IN";        // voor iedereen in het team
+const BEHEERCODE = "VUL-HIER-JOUW-BEHEERCODE-IN";  // alleen voor jou: stemmingen sluiten
 
 function tab_(naam, kop) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -14,37 +14,55 @@ function tab_(naam, kop) {
 }
 const voorspTab_ = () => tab_("Voorspellingen", ["Tijdstempel", "Naam", "Doelpunten Kamelen", "Doelpunten tegenstander", "Wedstrijd", "Aftrap"]);
 const stemTab_ = () => tab_("Stemmen", ["Tijdstempel", "Stemmer", "Kameel", "Ezel", "Wedstrijd", "Sluit"]);
+const sluitTab_ = () => tab_("Gesloten", ["Tijdstempel", "Wedstrijd", "Status"]);
 function json_(obj) { return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON); }
-const codeOk_ = d => String(d.code || "").trim().toLowerCase() === TEAMCODE.toLowerCase();
+const gelijk_ = (a, b) => String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
 const naam_ = n => String(n || "").trim().slice(0, 40);
+
+/* Laatste status per wedstrijd: "dicht" of "open" */
+function gesloten_() {
+  const st = {};
+  sluitTab_().getDataRange().getValues().slice(1).forEach(r => { st[r[1]] = r[2]; });
+  return Object.keys(st).filter(k => st[k] === "dicht");
+}
 
 function doGet() {
   const nu = new Date();
+  const dicht = gesloten_();
   const voorspellingen = voorspTab_().getDataRange().getValues().slice(1).map(r => {
     const open = r[5] && new Date(r[5]) > nu;
     return { tijd: r[0], naam: r[1], voor: open ? null : r[2], tegen: open ? null : r[3], wedstrijd: r[4], aftrap: r[5] };
   });
   const stemmen = stemTab_().getDataRange().getValues().slice(1).map(r => {
-    const open = r[5] && new Date(r[5]) > nu;
-    return { tijd: r[0], stemmer: r[1], kameel: open ? null : r[2], ezel: open ? null : r[3], wedstrijd: r[4], sluit: r[5] };
+    const zichtbaar = dicht.indexOf(r[4]) >= 0;
+    return { tijd: r[0], stemmer: r[1], kameel: zichtbaar ? r[2] : null, ezel: zichtbaar ? r[3] : null, wedstrijd: r[4] };
   });
-  return json_({ ok: true, voorspellingen, stemmen });
+  return json_({ ok: true, voorspellingen, stemmen, gesloten: dicht });
 }
 
 function doPost(e) {
   try {
     const d = JSON.parse(e.postData.contents || "{}");
-    if (!codeOk_(d)) return json_({ ok: false, fout: "code" });
     const lock = LockService.getScriptLock(); lock.waitLock(10000);
     try {
+      /* Beheer: alleen met de beheercode */
+      if (d.type === "beheer") {
+        if (!gelijk_(d.beheercode, BEHEERCODE)) return json_({ ok: false, fout: "beheercode" });
+        if (d.actie === "check") return json_({ ok: true });
+        const w = String(d.wedstrijd || "").slice(0, 120);
+        if (!w || (d.actie !== "sluit" && d.actie !== "heropen")) return json_({ ok: false, fout: "invoer" });
+        sluitTab_().appendRow([new Date(), w, d.actie === "sluit" ? "dicht" : "open"]);
+        return json_({ ok: true });
+      }
+      if (!gelijk_(d.code, TEAMCODE)) return json_({ ok: false, fout: "code" });
       if (d.type === "stem") {
-        const stemmer = naam_(d.stemmer), kameel = naam_(d.kameel), ezel = naam_(d.ezel);
-        const opent = new Date(d.opent), sluit = new Date(d.sluit), nu = new Date();
-        if (!stemmer || !kameel || !ezel) return json_({ ok: false, fout: "invoer" });
+        const stemmer = naam_(d.stemmer), kameel = naam_(d.kameel), ezel = naam_(d.ezel), w = String(d.wedstrijd || "").slice(0, 120);
+        if (!stemmer || !kameel || !ezel || !w) return json_({ ok: false, fout: "invoer" });
         if (stemmer === kameel || stemmer === ezel) return json_({ ok: false, fout: "zelf" });
-        if (isNaN(opent) || isNaN(sluit) || nu < opent) return json_({ ok: false, fout: "nog niet" });
-        if (nu > sluit) return json_({ ok: false, fout: "gesloten" });
-        stemTab_().appendRow([nu, stemmer, kameel, ezel, String(d.wedstrijd || "").slice(0, 120), sluit.toISOString()]);
+        const opent = new Date(d.opent);
+        if (isNaN(opent) || new Date() < opent) return json_({ ok: false, fout: "nog niet" });
+        if (gesloten_().indexOf(w) >= 0) return json_({ ok: false, fout: "gesloten" });
+        stemTab_().appendRow([new Date(), stemmer, kameel, ezel, w, ""]);
         return json_({ ok: true });
       }
       const naam = naam_(d.naam), voor = Number(d.voor), tegen = Number(d.tegen), aftrap = new Date(d.aftrap);
