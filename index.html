@@ -623,6 +623,40 @@ body.pong-actief .tabbar{display:none}
 .kz-n{font-size:.78rem;color:var(--muted)}
 @media (max-width:900px){ .kz-win{margin-left:0} }
 
+/* ---------- Statistieken ---------- */
+.stats{display:grid;gap:var(--gap)}
+.stat-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));background:var(--ink);color:#fff;border-radius:var(--r);overflow:hidden}
+.stat-strip > div{padding:14px 16px}
+.stat-strip > div + div{border-left:1px solid rgba(255,255,255,.12)}
+.stat-strip .k{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.stat-strip .v{font-family:var(--font-display);font-weight:800;font-size:1.6rem}
+.stat-h{font-size:1.3rem;font-weight:800;margin:6px 0 -6px}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;display:grid;gap:4px;align-content:start}
+.fact .k{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.fact .big{font-family:var(--font-display);font-weight:800;font-size:2rem;line-height:1.05}
+.fact .t{font-size:.88rem;color:var(--ink-2)}
+.fact.win .big{color:var(--win)}
+.fact.loss .big{color:var(--loss)}
+.fact.accent{background:var(--orange-soft);border-color:#f3c98f}
+.fact.beer{background:#fdf3dc;border-color:#f3dfb0}
+table.opk td{padding:7px 8px}
+.bar-td{width:18%}
+.obar{display:block;height:8px;border-radius:4px;background:var(--line);overflow:hidden;min-width:60px}
+.obar i{display:block;height:100%;background:var(--ink)}
+.obar.t i{background:var(--sky-deep, #8cbdd6)}
+.stat-two{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
+.wbars{display:grid;gap:6px}
+.wbar{display:grid;grid-template-columns:5.2rem 1fr 1.4rem;gap:10px;align-items:center;font-size:.86rem}
+.wbar.reden{grid-template-columns:11rem 1fr}
+.wbar .d{color:var(--muted);font-weight:600}
+.wbar .track{position:relative;height:22px;background:var(--bg);border-radius:6px;overflow:hidden}
+.wbar .track i{position:absolute;inset:0 auto 0 0;background:var(--sky);border-radius:6px}
+.wbar.reden .track i{background:#f6cf9f}
+.wbar .track b{position:relative;padding-left:8px;line-height:22px;font-variant-numeric:tabular-nums}
+@media (max-width:900px){ .stat-two{grid-template-columns:1fr} .stat-strip{grid-template-columns:repeat(3,1fr)} .stat-strip > div:nth-child(4){border-left:0} .stat-strip > div:nth-child(n+4){border-top:1px solid rgba(255,255,255,.12)} }
+@media (max-width:560px){ .bar-td{display:none} .wbar.reden{grid-template-columns:8.5rem 1fr} }
+
 footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 
 @media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
@@ -687,6 +721,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
     <li><a href="#topscorers" data-view-link="topscorers">Topscorers</a></li>
     <li><a href="#liters" data-view-link="liters">Literklassement</a></li>
     <li><a href="#spelers" data-view-link="spelers">Spelers</a></li>
+    <li><a href="#statistieken" data-view-link="statistieken">Statistieken</a></li>
     <li class="nav-sep" aria-hidden="true"></li>
     <li><a href="#toto" data-view-link="toto">Toto</a></li>
     <li><a href="#stemmen" data-view-link="stemmen">Kameel &amp; ezel</a></li>
@@ -782,6 +817,18 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
       <p>Voorspel vóór elke wedstrijd de uitslag. Precies goed levert 3 punten op, de juiste winnaar of een gelijkspel 1 punt.</p>
     </header>
     <section class="card"><div id="toto"></div></section>
+  </div>
+</div>
+
+<!-- ================= STATISTIEKEN ================= -->
+<div id="view-statistieken" class="view" hidden>
+  <div class="wrap page page-wide">
+    <header class="page-head">
+      <div class="eyebrow">Cijfers</div>
+      <h1>Statistieken</h1>
+      <p>Alles wat je wilt weten over de Kamelen: resultaten, opkomst, doelpunten en liters. Wordt vanzelf bijgewerkt.</p>
+    </header>
+    <div id="stats" class="stats"></div>
   </div>
 </div>
 
@@ -1006,6 +1053,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
   <a href="#topscorers" data-view-link="topscorers">Topscorers</a>
   <a href="#liters" data-view-link="liters">Literklassement</a>
   <a href="#spelers" data-view-link="spelers">Spelers</a>
+  <a href="#statistieken" data-view-link="statistieken">Statistieken</a>
   <a href="#stemmen" data-view-link="stemmen">Kameel &amp; ezel</a>
   <a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a>
   <a href="#mex" data-view-link="mex">Mex</a>
@@ -1767,7 +1815,7 @@ document.querySelectorAll("[data-dice]").forEach(el => {
 });
 
 /* ---------- Pagina's: home, regels, mex ---------- */
-const VIEWS = ["spelers", "toto", "stemmen", "voorspeller", "regels", "mex", "pong"];
+const VIEWS = ["spelers", "statistieken", "toto", "stemmen", "voorspeller", "regels", "mex", "pong"];
 const HOME_PAGES = ["home", "wedstrijden", "stand", "topscorers", "liters"];
 /* Oude links (#programma, #uitslagen, #seizoen, #wedstrijd) blijven werken */
 const PAGE_OF = { "": "home", home: "home", wedstrijd: "home", programma: "wedstrijden", uitslagen: "wedstrijden", wedstrijden: "wedstrijden", stand: "stand", seizoen: "stand", topscorers: "topscorers", liters: "liters" };
@@ -1814,7 +1862,7 @@ Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("ops
     (DATA.doelpunten || []).forEach(w => w.goals.forEach(g => { g.wie = canon(g.wie); }));
     if (!comp.programma && !DATA.liters) throw new Error("geen gegevens");
     if (DATA.competitie) document.getElementById("league").textContent = DATA.competitie;
-    renderStats(); renderNext(); renderProgram(); renderResults(); renderStandings(); renderTopscorers(); renderLiters(); initPredictor(); renderSeason(); renderPlayers(); initAgenda(); window.renderMex?.(); window.renderToto?.(); renderDash(); confettiNaWinst(); DATA.litersBasis = DATA.liters; window.renderStemmen?.();
+    renderStats(); renderNext(); renderProgram(); renderResults(); renderStandings(); renderTopscorers(); renderLiters(); initPredictor(); renderSeason(); renderPlayers(); initAgenda(); window.renderMex?.(); window.renderToto?.(); renderDash(); confettiNaWinst(); DATA.litersBasis = DATA.liters; window.renderStemmen?.().then(() => window.renderStats?.());
     const f = x => { const d = new Date(x); return isNaN(d) ? "onbekend" : d.toLocaleString("nl-NL",{dateStyle:"long",timeStyle:"short",timeZone:"Europe/Amsterdam"}); };
     document.getElementById("foot").textContent = `Competitie: laatste wijziging ${f(DATA.competitieBijgewerkt)} (bron hockey.nl) · Literklassement en topscorers: ${live ? "live uit de spreadsheet" : "bijgewerkt " + f(DATA.bijgewerkt)}`;
   })
@@ -1851,6 +1899,15 @@ window.kamelenApi = (vers) => {
 <script src="mex.js"></script>
 <script src="toto.js"></script>
 <script src="pong.js"></script>
+<script>
+window.STATS_CONFIG = {
+  wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
+  trainingen: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1779048914&single=true&output=csv",
+  /* Tellen in de eerste seizoenshelft niet mee */
+  uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
+};
+</script>
 <script src="stemmen.js"></script>
+<script src="statistieken.js"></script>
 </body>
 </html>
