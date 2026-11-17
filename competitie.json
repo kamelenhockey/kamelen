@@ -4,16 +4,6 @@
  "hockeyNlUrl": "https://www.hockey.nl/match-center#/team/21368|182976/program",
  "programma": [
   {
-   "datum": "2026-11-17",
-   "thuis": "GCHC H13",
-   "tijd": "19:00",
-   "uit": "Eemsmond H1",
-   "wedstrijdId": "2105958",
-   "veld": "Veld 2 (Semiveld)",
-   "accommodatie": "Paddepoel",
-   "adres": "Blauwborgje 26 9747AC Groningen"
-  },
-  {
    "datum": "2026-11-22",
    "thuis": "GHBS H13",
    "tijd": "09:00",
@@ -115,7 +105,11 @@
    "datum": "2027-03-07",
    "thuis": "GCHC H13",
    "tijd": null,
-   "uit": "Sneek H1"
+   "uit": "Sneek H1",
+   "wedstrijdId": "2105982",
+   "veld": null,
+   "accommodatie": "Paddepoel",
+   "adres": "Blauwborgje 26 9747AC Groningen"
   },
   {
    "datum": "2027-03-07",
@@ -900,5 +894,5 @@
  "puntenAftrek": {
   "GCHC H13": 3
  },
- "competitieBijgewerkt": "2026-11-17T14:44:13.911Z"
+ "competitieBijgewerkt": "2026-11-17T18:05:45.075Z"
 }
