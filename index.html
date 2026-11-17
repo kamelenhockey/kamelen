@@ -79,6 +79,14 @@ nav.bar a:hover{color:#fff;border-bottom-color:var(--orange)}
 .md-venue .k{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55)}
 .md-venue .v{font-weight:700;font-size:1.05rem;line-height:1.35}
 .md-venue a{color:#ffd29a;font-weight:500;font-size:.9rem}
+.wx{display:flex;align-items:center;gap:16px;margin-top:16px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+.wx svg{width:44px;height:44px;flex:none}
+.wx .t{font-family:var(--font-display);font-weight:800;font-size:1.9rem;line-height:1}
+.wx .d{font-weight:700}
+.wx .s{font-size:.85rem;color:rgba(255,255,255,.7)}
+.wx .facts-wx{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:3px;font-size:.85rem;color:rgba(255,255,255,.85)}
+.wx .facts-wx b{color:#fff}
+.wx.wet{border-color:rgba(127,179,207,.6);background:rgba(127,179,207,.12)}
 .md-squad-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
 .md-squad-head h3{font-size:1.05rem;font-weight:800}
 .md-squad-head span{font-size:.85rem;color:rgba(255,255,255,.6);font-weight:600}
@@ -718,7 +726,9 @@ function renderNext(){
       <div class="md-teams"><div class="md-team ${home?"ours":""}">${teamLink(m.thuis)}</div><div class="md-vs">VS</div><div class="md-team ${home?"":"ours"}">${teamLink(m.uit)}</div></div>
       <div class="md-meta"><span class="tag">${fmtDay(m.datum)}</span><span class="tag">${m.tijd ? esc(m.tijd) : "tijd n.n.b."}</span><span class="tag">${home ? "Thuis" : "Uit"}</span>${m.tijd ? `<span class="tag hot num" id="countdown"></span>` : ""}</div>
       ${m.veld || m.accommodatie ? `<div class="md-venue"><div><div class="k">Veld</div><div class="v">${esc(m.veld || "n.n.b.")}</div></div>
-        <div><div class="k">Locatie</div><div class="v">${esc(m.accommodatie || "")}${m.adres ? `<br><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(m.adres)}" target="_blank" rel="noopener">${esc(m.adres)}</a>` : ""}</div></div></div>` : ""}`;
+        <div><div class="k">Locatie</div><div class="v">${esc(m.accommodatie || "")}${m.adres ? `<br><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(m.adres)}" target="_blank" rel="noopener">${esc(m.adres)}</a>` : ""}</div></div></div>` : ""}
+      <div id="md-weather"></div>`;
+    renderWeather(m);
     const cd = document.getElementById("countdown");
     if (cd){
       const tick = () => {
@@ -736,6 +746,54 @@ function renderNext(){
   document.getElementById("lineup").innerHTML = valid
     ? `<ol class="squad">${l.map(p => `<li>${esc(p)}</li>`).join("")}</ol>`
     : `<div class="md-empty">De selectie wordt bekendgemaakt vóór de wedstrijd.</div>`;
+}
+
+
+/* ---------- Weer op wedstrijddag (Open-Meteo, gratis, zonder sleutel) ---------- */
+const WX_ICON = {
+  zon:`<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="9" fill="#f6bd45"/><g stroke="#f6bd45" stroke-width="3" stroke-linecap="round"><path d="M24 5v6M24 37v6M5 24h6M37 24h6M10.6 10.6l4.2 4.2M33.2 33.2l4.2 4.2M10.6 37.4l4.2-4.2M33.2 14.8l4.2-4.2"/></g></svg>`,
+  half:`<svg viewBox="0 0 48 48"><circle cx="18" cy="17" r="8" fill="#f6bd45"/><path d="M15 38h20a8 8 0 0 0 0-16 11 11 0 0 0-21 3 6.5 6.5 0 0 0 1 13z" fill="#e9edf0"/></svg>`,
+  wolk:`<svg viewBox="0 0 48 48"><path d="M13 36h22a9 9 0 0 0 0-18 12 12 0 0 0-23 3 7.5 7.5 0 0 0 1 15z" fill="#c9d3da"/></svg>`,
+  mist:`<svg viewBox="0 0 48 48"><g stroke="#c9d3da" stroke-width="3.5" stroke-linecap="round"><path d="M8 18h32M5 25h38M10 32h28"/></g></svg>`,
+  regen:`<svg viewBox="0 0 48 48"><path d="M13 28h22a9 9 0 0 0 0-18 12 12 0 0 0-23 3 7.5 7.5 0 0 0 1 15z" fill="#c9d3da"/><g stroke="#7fb3cf" stroke-width="3" stroke-linecap="round"><path d="M16 33l-2 6M25 33l-2 6M34 33l-2 6"/></g></svg>`,
+  sneeuw:`<svg viewBox="0 0 48 48"><path d="M13 28h22a9 9 0 0 0 0-18 12 12 0 0 0-23 3 7.5 7.5 0 0 0 1 15z" fill="#c9d3da"/><g fill="#fff"><circle cx="16" cy="36" r="2.5"/><circle cx="24" cy="40" r="2.5"/><circle cx="32" cy="36" r="2.5"/></g></svg>`,
+  onweer:`<svg viewBox="0 0 48 48"><path d="M13 28h22a9 9 0 0 0 0-18 12 12 0 0 0-23 3 7.5 7.5 0 0 0 1 15z" fill="#9aa6ae"/><path d="M25 28l-6 10h6l-3 8 9-12h-6l3-6z" fill="#f6bd45"/></svg>`
+};
+function wxInfo(code){
+  if (code === 0) return ["zon","Zonnig"];
+  if (code <= 2) return ["half","Half bewolkt"];
+  if (code === 3) return ["wolk","Bewolkt"];
+  if (code === 45 || code === 48) return ["mist","Mist"];
+  if (code >= 51 && code <= 57) return ["regen","Motregen"];
+  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return ["regen", code >= 65 || code === 82 ? "Flinke regen" : "Regen"];
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86) return ["sneeuw","Sneeuw"];
+  if (code >= 95) return ["onweer","Onweer"];
+  return ["wolk","Bewolkt"];
+}
+const beaufort = kmh => [1,6,12,20,29,39,50,62,75,89,103,118].findIndex(x => kmh < x) === -1 ? 12 : [1,6,12,20,29,39,50,62,75,89,103,118].findIndex(x => kmh < x);
+async function renderWeather(m){
+  const box = document.getElementById("md-weather"); if (!box) return;
+  try {
+    const plaats = (m.adres || "").match(/\d{4}\s?[A-Z]{2}\s+(.+)$/)?.[1]?.trim();
+    if (!plaats) return;
+    const start = toDate(m.datum, m.tijd || "14:00");
+    const dagen = (start - Date.now()) / 864e5;
+    if (dagen > 15 || dagen < -0.2) return;
+    const geo = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(plaats)}&count=1&language=nl&countryCode=NL`).then(r => r.json());
+    const loc = geo.results?.[0]; if (!loc) return;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m&timezone=Europe%2FAmsterdam&start_date=${m.datum}&end_date=${m.datum}`;
+    const w = await fetch(url).then(r => r.json());
+    const uur = start.getHours();
+    const i = w.hourly?.time?.findIndex(t => Number(t.slice(11,13)) === uur);
+    if (i == null || i < 0) return;
+    const h = k => w.hourly[k][i];
+    const [icon, txt] = wxInfo(h("weather_code"));
+    const kans = h("precipitation_probability"), mm = h("precipitation"), wind = Math.round(h("wind_speed_10m"));
+    box.innerHTML = `<div class="wx ${icon === "regen" || icon === "onweer" ? "wet" : ""}">${WX_ICON[icon]}
+      <div class="t num">${Math.round(h("temperature_2m"))}°</div>
+      <div><div class="d">${txt} <span class="s">· om ${m.tijd || "14:00"} in ${esc(loc.name)}</span></div>
+        <div class="facts-wx"><span>Voelt als <b>${Math.round(h("apparent_temperature"))}°</b></span><span>Kans op regen <b>${kans ?? "–"}%</b>${mm ? ` (${String(mm).replace(".", ",")} mm)` : ""}</span><span>Wind <b>${beaufort(wind)} Bft</b> (${wind} km/u)</span></div></div></div>`;
+  } catch { /* geen weer beschikbaar: niets tonen */ }
 }
 
 /* ---------- Programma & uitslagen ---------- */
