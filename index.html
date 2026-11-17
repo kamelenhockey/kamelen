@@ -257,6 +257,9 @@ table.fines td,table.fines th{white-space:normal}
 .info-box{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;border-radius:var(--r-sm);background:var(--sky-soft);font-size:.92rem}
 .steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .steps li{position:relative;padding-left:22px}
+.sub-steps{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px}
+.sub-steps li{padding-left:18px!important}
+.sub-steps li::before{background:var(--sky)!important;border-radius:50%!important}
 .steps li::before{content:"";position:absolute;left:4px;top:.6em;width:7px;height:7px;border-radius:2px;background:var(--orange)}
 /* dobbelstenen */
 .die{display:inline-block;width:38px;height:38px;vertical-align:middle}
@@ -474,18 +477,16 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
         <li><span data-dice="6,5"></span><b>65</b><span>dan 64, 63 … 43, 42, 41</span></li>
         <li class="low"><span data-dice="3,2"></span><b>32</b><span>De laagste worp</span></li>
       </ol>
-      <div class="info-box"><span data-dice="3,1" class="inline-dice"></span><b>31 is "onzichtbaar"</b>: je mag 1 slok uitdelen aan een tegenstander.</div>
+      <div class="info-box"><span data-dice="3,1" class="inline-dice"></span><span><b>31 is "onzichtbaar"</b>: de worp telt niet mee. Je houdt evenveel worpen over én je mag 1 slok uitdelen aan een tegenstander.</span></div>
     </section>
 
     <section class="card">
       <h2 class="rule-h"><span class="rn">3</span>Je beurt</h2>
       <ul class="steps">
-        <li><b>Maximaal 3 worpen.</b> Je mag stoppen wanneer je wilt; je laatste worp telt.</li>
+        <li><b>Je gooit altijd 3 keer.</b> Je laatste worp telt. Eerder stoppen mag alleen in deze gevallen:<ul class="sub-steps"><li>je gooit zelf <b>mex (21)</b> of <b>32</b>: je beurt is meteen klaar;</li><li>de <b>starter</b> gooide mex in 1 of 2 worpen: dan mag iedereen in die ronde maar zoveel keer gooien.</li></ul></li><li><b>31 telt niet als worp.</b> Gooi je 31, dan heb je nog net zoveel worpen over als ervoor.</li>
         <li><b>Ligt er een 1 of een 2?</b> Die steen moet je één keer laten liggen en je gooit alleen de andere opnieuw.
           <div class="seq"><span data-dice="4,2"></span><span class="arrow">→ 2 blijft liggen →</span><span data-dice="6,2" data-keep="2"></span><span class="arrow">→ beide weer oppakken</span></div></li>
-        <li><b>Mex (21) of 32?</b> Dan is je beurt meteen klaar.</li>
-        <li><b>Gooit de starter mex</b> in 1, 2 of 3 worpen, dan mag iedereen in die ronde maximaal zoveel keer gooien.</li>
-        <li>Een ronde is klaar als iedereen één beurt heeft gehad.</li>
+                <li>Een ronde is klaar als iedereen één beurt heeft gehad.</li>
       </ul>
     </section>
 
@@ -493,7 +494,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
       <h2 class="rule-h"><span class="rn">4</span>Verliezen en straf</h2>
       <ul class="steps">
         <li>De <b>laagste worp</b> van de ronde verliest.</li>
-        <li><b>Gelijk laagste?</b> Dan battelen: iedereen gooit één steen. <b>Hoogste verliest.</b></li>
+        <li><b>Twee mensen gelijk laagst?</b> Dan battelen: allebei gooien ze één steen. <b>Hoogste verliest.</b></li><li><b>Drie of meer mensen gelijk laagst?</b> Dan spelen zij samen een <b>verliezerspotje</b> mex. De verliezer daarvan krijgt de straf van het hele potje <b>plus</b> de straf van het verliezerspotje.</li>
         <li><b>Straf:</b> een <b>halve bak</b>, plus een halve bak extra voor <b>elke mex</b> in die ronde.</li>
         <li><b>Hulp:</b> medespelers mogen meedrinken, maar samen hooguit de helft van de straf (afgerond op halve bakken).</li>
         <li>De verliezer begint de volgende ronde.</li>
