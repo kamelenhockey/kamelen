@@ -412,6 +412,88 @@ td.delta{color:var(--muted);font-size:.8rem}
 .prow{display:grid;grid-template-columns:5.4rem minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 4px;border-top:1px solid var(--line);font-size:.92rem}
 .prow .d{color:var(--muted);font-size:.82rem;font-weight:600}
 
+/* ---------- Mex spelen ---------- */
+.mx-card{border-color:#f3c98f}
+.mx-setup p{margin:0 0 10px;color:var(--ink-2)}
+.mx-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;margin-bottom:10px}
+.mx-chip{display:inline-flex;align-items:center;gap:6px;background:var(--orange-soft);border:1px solid #f3c98f;border-radius:999px;padding:4px 6px 4px 10px;font-weight:600}
+.mx-chip b{font-size:.72rem;color:var(--orange-ink)}
+.mx-chip button{all:unset;cursor:pointer;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#fff;font-weight:700}
+.mx-hint{color:var(--muted);font-size:.85rem}
+.mx-add{display:flex;gap:8px;margin-bottom:10px}
+.mx-add input{flex:1;min-width:0;font:inherit;border:1px solid var(--line);border-radius:999px;padding:7px 14px}
+.mx-roster{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:14px}
+.mx-pick{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.85rem;font-weight:600}
+.mx-pick:hover{background:var(--bg)}
+.mx-start{display:flex;gap:8px;flex-wrap:wrap}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.mx-top{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:14px}
+.mx-top .k{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mx-top .v{font-weight:700}
+.mx-top small{color:var(--muted)}
+.mx-board{background:var(--ink);color:#fff;border-radius:16px;padding:22px 18px;text-align:center}
+.mx-board .k{font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange)}
+.mx-name{font-family:var(--font-display);font-weight:800;font-size:2.2rem;line-height:1.05;margin:2px 0 8px}
+.mx-pips{display:flex;justify-content:center;align-items:center;gap:6px;font-size:.8rem;color:rgba(255,255,255,.6)}
+.mx-pips i{width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,.5)}
+.mx-pips i.used{background:var(--orange);border-color:var(--orange)}
+.mx-pips span{margin-left:6px}
+.mx-dice{display:flex;justify-content:center;gap:18px;margin:22px 0 8px}
+.mx-die .die{width:86px;height:86px}
+.mx-die.small .die{width:26px;height:26px}
+.mx-die.kept .die rect{fill:var(--orange-soft);stroke:var(--orange)}
+.mx-die.idle{opacity:.35}
+.mx-dice.rolling .mx-die{animation:shake .12s linear infinite}
+@keyframes shake{0%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}100%{transform:rotate(-8deg)}}
+.mx-value{font-family:var(--font-display);font-size:2.4rem;font-weight:800;min-height:2.6rem;color:var(--orange)}
+.mx-lock{display:inline-flex;align-items:center;gap:8px;font-size:.85rem;color:rgba(255,255,255,.75);margin-top:4px}
+.mx-msgs{margin:10px auto 0;max-width:46ch;display:grid;gap:6px}
+.mx-msgs p{margin:0;background:rgba(255,255,255,.08);border-radius:10px;padding:8px 12px;font-size:.92rem}
+.mx-extra{margin-top:10px}
+.mx-extra select{font:inherit;border-radius:999px;padding:5px 10px;border:0}
+.mx-buttons{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:16px}
+.mx-big{font-size:1.05rem;padding:12px 28px;background:var(--orange);color:var(--ink)}
+.mx-big:hover{background:#ffa53d}
+.mx-board .btn.ghost{color:#fff;border-color:rgba(255,255,255,.3)}
+.mx-board .btn.ghost.on{background:#fff;color:var(--ink)}
+.mx-list{list-style:none;margin:18px 0 0;padding:0;text-align:left;border-top:1px solid rgba(255,255,255,.12)}
+.mx-list li{display:flex;justify-content:space-between;padding:7px 4px;border-bottom:1px solid rgba(255,255,255,.08);font-size:.92rem;color:rgba(255,255,255,.8)}
+.mx-list li.now{color:#fff;font-weight:700}
+.mx-list li.now span:first-child::before{content:"▸ ";color:var(--orange)}
+.mx-sub{color:rgba(255,255,255,.75);margin:6px 0 0}
+.mx-battle{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.mx-battle > div{background:rgba(255,255,255,.06);border-radius:12px;padding:14px}
+.mx-battle .nm{font-weight:800;font-size:1.1rem;margin-bottom:10px}
+.mx-penalty{font-family:var(--font-display);font-weight:800;font-size:2.6rem;color:var(--beer)}
+.mx-score{margin-top:16px}
+.mx-score table{font-size:.9rem}
+@media (max-width:560px){ .mx-top{grid-template-columns:1fr 1fr} .mx-actions{grid-column:1/-1} .mx-die .die{width:72px;height:72px} }
+
+/* ---------- Toto ---------- */
+.tt-next{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;background:var(--ink);color:#fff;border-radius:14px;padding:18px 20px}
+.tt-next .k{font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange)}
+.tt-match{font-family:var(--font-display);font-weight:800;font-size:1.5rem;margin:2px 0}
+.tt-match .team-link{color:#fff}
+.tt-match .team-link.ours{color:var(--orange)}
+.tt-when{font-size:.88rem;color:rgba(255,255,255,.7)}
+.tt-voted{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:12px 0 22px}
+.tt-voted .k{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.tt-chip{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.84rem;font-weight:600}
+.tt-hint{font-size:.8rem;color:var(--muted);margin-left:4px}
+.tt-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px}
+.tt-grid tr.lead td{background:var(--orange-soft)}
+.tt-played{padding:10px 0}
+.tt-played + .tt-played{border-top:1px solid var(--line)}
+.tt-ph{display:grid;grid-template-columns:4.6rem minmax(0,1fr) 3.2rem;gap:10px;align-items:center;font-size:.94rem}
+.tt-ph .d{font-size:.78rem;color:var(--muted);font-weight:600}
+.tt-preds{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0 calc(4.6rem + 10px)}
+.tt-pred{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.84rem}
+.tt-pred small{font-weight:800;color:var(--win)}
+.tt-pred.p3{background:#dcf1e4;border-color:#b5dfc4}
+.tt-pred.p1{background:#fdf3dc;border-color:#f3dfb0}
+.tt-pred.p0{color:var(--muted)}
+@media (max-width:900px){ .tt-grid{grid-template-columns:1fr} .tt-preds{margin-left:0} }
+
 footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 
 @media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
@@ -478,6 +560,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
     <li><a href="#liters">Literklassement</a></li>
     <li class="nav-sep" aria-hidden="true"></li>
     <li><a href="#spelers" data-view-link="spelers">Spelers</a></li>
+    <li><a href="#toto" data-view-link="toto">Toto</a></li>
     <li><a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a></li>
     <li><a href="#regels" data-view-link="regels">Kamelen-regels</a></li>
     <li><a href="#mex" data-view-link="mex">Mex</a></li>
@@ -558,6 +641,18 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
   </div>
 </div>
 
+<!-- ================= TOTO ================= -->
+<div id="view-toto" class="view" hidden>
+  <div class="wrap page page-wide">
+    <header class="page-head">
+      <div class="eyebrow">Wie voorspelt het best?</div>
+      <h1>Kamelen-toto</h1>
+      <p>Voorspel vóór elke wedstrijd de uitslag. Precies goed levert 3 punten op, de juiste winnaar of een gelijkspel 1 punt.</p>
+    </header>
+    <section class="card"><div id="toto"></div></section>
+  </div>
+</div>
+
 <!-- ================= VOORSPELLER ================= -->
 <div id="view-voorspeller" class="view" hidden>
   <div class="wrap page page-wide">
@@ -632,6 +727,11 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
       <h1>Mex</h1>
       <p>Twee dobbelstenen, maximaal drie worpen per beurt. Doel: <b>niet</b> de laagste worp van de ronde hebben.</p>
     </header>
+
+    <section class="card mx-card" aria-labelledby="h-mexspel">
+      <div class="card-head"><div><h2 id="h-mexspel">Mex spelen</h2><p>Gooi met je telefoon. De app houdt de regels, de 100-man en de straf voor je bij.</p></div></div>
+      <div id="mex-game"></div>
+    </section>
 
     <section class="card">
       <h2 class="rule-h"><span class="rn">1</span>Zo lees je een worp</h2>
@@ -1388,7 +1488,7 @@ document.querySelectorAll("[data-dice]").forEach(el => {
 });
 
 /* ---------- Pagina's: home, regels, mex ---------- */
-const VIEWS = ["spelers", "voorspeller", "regels", "mex"];
+const VIEWS = ["spelers", "toto", "voorspeller", "regels", "mex"];
 function showView(){
   const h = location.hash.replace("#", "");
   const view = VIEWS.includes(h) ? h : "home";
@@ -1420,7 +1520,7 @@ Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("ops
     (DATA.doelpunten || []).forEach(w => w.goals.forEach(g => { g.wie = canon(g.wie); }));
     if (!comp.programma && !DATA.liters) throw new Error("geen gegevens");
     if (DATA.competitie) document.getElementById("league").textContent = DATA.competitie;
-    renderStats(); renderNext(); renderProgram(); renderResults(); renderStandings(); renderTopscorers(); renderLiters(); initPredictor(); renderSeason(); renderPlayers(); initAgenda();
+    renderStats(); renderNext(); renderProgram(); renderResults(); renderStandings(); renderTopscorers(); renderLiters(); initPredictor(); renderSeason(); renderPlayers(); initAgenda(); window.renderMex?.(); window.renderToto?.();
     const f = x => { const d = new Date(x); return isNaN(d) ? "onbekend" : d.toLocaleString("nl-NL",{dateStyle:"long",timeStyle:"short",timeZone:"Europe/Amsterdam"}); };
     document.getElementById("foot").textContent = `Competitie: laatste wijziging ${f(DATA.competitieBijgewerkt)} (bron hockey.nl) · Literklassement en topscorers: ${live ? "live uit de spreadsheet" : "bijgewerkt " + f(DATA.bijgewerkt)}`;
   })
@@ -1430,5 +1530,11 @@ Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("ops
 /* ---------- App: offline bewaren ---------- */
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
+<script>
+/* Toto-instellingen: link naar het Google-formulier en de gepubliceerde CSV van de antwoorden */
+window.TOTO_CONFIG = { form: "", csv: "" };
+</script>
+<script src="mex.js"></script>
+<script src="toto.js"></script>
 </body>
 </html>
