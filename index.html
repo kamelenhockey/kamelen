@@ -551,6 +551,27 @@ nav.bar a[aria-current="page"]{color:#fff;border-bottom-color:var(--orange)}
 .tt-submit{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .tt-status{font-weight:600;color:var(--ink-2)}
 
+/* ---------- Pong teams ---------- */
+.pong-intro{display:grid;gap:16px;justify-items:start}
+.pong-demo{display:flex;gap:10px}
+.pong-demo span{width:34px;height:34px;border-radius:50%;background:var(--kleur);box-shadow:0 0 0 5px color-mix(in srgb,var(--kleur) 30%,transparent)}
+.pong-veld{position:fixed;inset:0;z-index:100;background:#0f2638;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overflow:hidden}
+.pong-tekst{position:absolute;left:0;right:0;top:calc(18px + env(safe-area-inset-top));text-align:center;color:rgba(255,255,255,.8);font-family:var(--font-display);font-weight:800;font-size:1.2rem;padding:0 60px;pointer-events:none}
+.pong-sluit{all:unset;cursor:pointer;position:absolute;top:calc(10px + env(safe-area-inset-top));right:12px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.12);color:#fff;font-size:1.6rem;font-weight:700;z-index:2}
+.pong-bol{position:absolute;left:0;top:0;width:120px;height:120px;pointer-events:none;--kleur:#ffffff}
+.pong-bol::before{content:"";position:absolute;inset:22px;border-radius:50%;background:var(--kleur);opacity:.9;animation:pongpuls 1s ease-in-out infinite;transition:background .3s,inset .3s}
+.pong-bol svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.pong-bol .ring{fill:none;stroke:rgba(255,255,255,.85);stroke-width:6;stroke-linecap:round;stroke-dasharray:339.3;stroke-dashoffset:339.3}
+.pong-bol.telt .ring{animation:pongring 3s linear forwards}
+.pong-bol.team::before{inset:6px;opacity:1;animation:none;box-shadow:0 0 40px 10px color-mix(in srgb,var(--kleur) 55%,transparent)}
+.pong-bol.team .ring{display:none}
+.pong-bol.los{opacity:.55}
+.pong-label{position:absolute;left:50%;top:-30px;transform:translateX(-50%);white-space:nowrap;color:#fff;font-weight:800;font-family:var(--font-display);font-size:1.05rem;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+@keyframes pongpuls{0%,100%{transform:scale(.92)}50%{transform:scale(1.04)}}
+@keyframes pongring{to{stroke-dashoffset:0}}
+body.pong-actief{overflow:hidden}
+body.pong-actief .tabbar{display:none}
+
 footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 
 @media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
@@ -620,6 +641,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
     <li><a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a></li>
     <li><a href="#regels" data-view-link="regels">Kamelen-regels</a></li>
     <li><a href="#mex" data-view-link="mex">Mex</a></li>
+    <li><a href="#pong" data-view-link="pong">Pong teams</a></li>
   </ul>
 </nav>
 
@@ -734,6 +756,27 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
         <div id="pred-table"></div>
       </section>
     </div>
+  </div>
+</div>
+
+<!-- ================= PONG TEAMS ================= -->
+<div id="view-pong" class="view" hidden>
+  <div class="wrap page">
+    <header class="page-head">
+      <div class="eyebrow">Beerpong</div>
+      <h1>Pong teams</h1>
+      <p>Laat het lot de teams kiezen. Iedereen legt één vinger op het scherm. Blijven alle vingers 3 seconden stil liggen, dan verdeelt de app jullie willekeurig in twee teams.</p>
+    </header>
+    <section class="card pong-intro">
+      <div class="pong-demo" aria-hidden="true"><span style="--kleur:#b9d8e8"></span><span style="--kleur:#f08c1c"></span><span style="--kleur:#b9d8e8"></span><span style="--kleur:#f08c1c"></span></div>
+      <ul class="steps">
+        <li>Leg de telefoon plat op tafel.</li>
+        <li>Iedereen legt <b>één vinger</b> op het scherm (2 tot 8 spelers).</li>
+        <li>Niet bewegen: na <b>3 seconden</b> kleurt elke vinger <b style="color:#3f87ad">lichtblauw (team 1)</b> of <b style="color:var(--orange-ink)">oranje (team 2)</b>.</li>
+        <li>Komt er een vinger bij of gaat er een weg, dan begint het aftellen opnieuw.</li>
+      </ul>
+      <button type="button" class="btn mx-big" id="pong-open">Open het speelveld</button>
+    </section>
   </div>
 </div>
 
@@ -885,9 +928,14 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
   <a href="#spelers" data-view-link="spelers">Spelers</a>
   <a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a>
   <a href="#mex" data-view-link="mex">Mex</a>
+  <a href="#pong" data-view-link="pong">Pong teams</a>
   <a href="#regels" data-view-link="regels">Kamelen-regels</a>
 </div>
 <canvas id="confetti" aria-hidden="true"></canvas>
+<div class="pong-veld" id="pong-veld" hidden>
+  <div class="pong-tekst" aria-live="polite">Leg allemaal één vinger op het scherm</div>
+  <button type="button" class="pong-sluit" aria-label="Speelveld sluiten">×</button>
+</div>
 
 <dialog class="team" id="teamDialog" aria-labelledby="dlg-title">
   <div class="dlg">
@@ -1633,7 +1681,7 @@ document.querySelectorAll("[data-dice]").forEach(el => {
 });
 
 /* ---------- Pagina's: home, regels, mex ---------- */
-const VIEWS = ["spelers", "toto", "voorspeller", "regels", "mex"];
+const VIEWS = ["spelers", "toto", "voorspeller", "regels", "mex", "pong"];
 const HOME_PAGES = ["home", "wedstrijden", "stand", "topscorers", "liters"];
 /* Oude links (#programma, #uitslagen, #seizoen, #wedstrijd) blijven werken */
 const PAGE_OF = { "": "home", home: "home", wedstrijd: "home", programma: "wedstrijden", uitslagen: "wedstrijden", wedstrijden: "wedstrijden", stand: "stand", seizoen: "stand", topscorers: "topscorers", liters: "liters" };
@@ -1700,5 +1748,6 @@ window.TOTO_CONFIG = {
 </script>
 <script src="mex.js"></script>
 <script src="toto.js"></script>
+<script src="pong.js"></script>
 </body>
 </html>
