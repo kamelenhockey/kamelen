@@ -1,0 +1,28 @@
+{
+ "toelichting": "Selectie van de Kamelen. 'naam' wordt overal op de site getoond; 'ook' zijn andere namen of bijnamen die in de sheets of opstelling voorkomen. Namen die hier niet staan, worden als invaller getoond.",
+ "spelers": [
+  {"naam": "Mini", "ook": ["Maarten"]},
+  {"naam": "Jesse", "ook": []},
+  {"naam": "Casper", "ook": []},
+  {"naam": "Jon", "ook": []},
+  {"naam": "Philip", "ook": ["Phil"]},
+  {"naam": "Tutu", "ook": ["Wouter"]},
+  {"naam": "Thijn", "ook": []},
+  {"naam": "Ali", "ook": ["Klaplong"]},
+  {"naam": "Tijmen", "ook": ["Thijmen"]},
+  {"naam": "Julius", "ook": ["Juul"]},
+  {"naam": "Ids", "ook": []},
+  {"naam": "Snack", "ook": ["Hector"]},
+  {"naam": "Nick", "ook": []},
+  {"naam": "Dirk", "ook": []},
+  {"naam": "David", "ook": []},
+  {"naam": "Boudewijn", "ook": ["Boudwijn"]},
+  {"naam": "Malcolm", "ook": []},
+  {"naam": "Harm", "ook": []},
+  {"naam": "Karnemelk", "ook": []},
+  {"naam": "Marijn", "ook": []}
+ ],
+ "invallers": [
+  {"naam": "Corné", "ook": ["Corne"]}
+ ]
+}

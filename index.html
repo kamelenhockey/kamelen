@@ -41,6 +41,7 @@ h1,h2,h3{margin:0;font-family:var(--font-display);text-wrap:balance}
 .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
 .num{font-variant-numeric:tabular-nums}
 
+
 /* ---------- Kop ---------- */
 .hero{background:linear-gradient(180deg,#c6e0ee 0%,var(--sky) 100%);border-bottom:1px solid #a9cbdd}
 .hero .wrap{display:grid;grid-template-columns:auto 1fr auto;gap:28px;align-items:end;padding-top:28px;padding-bottom:26px}
@@ -392,6 +393,8 @@ td.delta{color:var(--muted);font-size:.8rem}
 .player .top-row{display:flex;align-items:center;gap:12px}
 .avatar{width:42px;height:42px;border-radius:12px;background:var(--sky);display:grid;place-items:center;font-family:var(--font-display);font-weight:800;font-size:1.05rem;color:var(--ink);flex:none}
 .player .nm{font-family:var(--font-display);font-weight:800;font-size:1.15rem;line-height:1.1}
+.players-sub{grid-column:1/-1;font-size:1.2rem;font-weight:800;margin:14px 0 0}
+.avatar.inv{background:var(--line)}
 .player .sel{font-size:.72rem;font-weight:700;color:var(--orange-ink)}
 .pstats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);padding-top:10px}
 .pstats > div + div{border-left:1px solid var(--line);padding-left:12px}
@@ -721,6 +724,15 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;
 const empty = (title, text, url) => `<div class="empty"><strong>${esc(title)}</strong>${esc(text)}${url ? ` <a href="${esc(url)}">Bekijk op hockey.nl</a>.` : ""}</div>`;
 let DATA = {};
 
+/* ---------- Spelerslijst: bijnamen naar één naam ---------- */
+let CANON = new Map(), ROSTER = new Set(), INVALLERS = new Set();
+function initRoster(r){
+  CANON = new Map(); ROSTER = new Set(); INVALLERS = new Set();
+  const add = (list, set) => (list || []).forEach(p => { set.add(p.naam); [p.naam, ...(p.ook || [])].forEach(n => CANON.set(n.trim().toLowerCase(), p.naam)); });
+  add(r.spelers, ROSTER); add(r.invallers, INVALLERS);
+}
+const canon = n => { n = String(n || "").trim(); if (!n) return ""; return CANON.get(n.toLowerCase()) || (DATA.naamCorrecties || {})[n] || n; };
+
 /* ---------- Hulpfuncties ---------- */
 function toDate(datum, tijd){
   const [y,m,d] = String(datum).split("-").map(Number);
@@ -822,7 +834,7 @@ function renderNext(){
   const valid = l.length && (!DATA.opstellingWedstrijd || !m || DATA.opstellingWedstrijd === m.datum);
   document.getElementById("squad-count").textContent = valid ? `${l.length} spelers` : "";
   document.getElementById("lineup").innerHTML = valid
-    ? `<ol class="squad">${l.map(p => `<li>${esc(p)}</li>`).join("")}</ol>`
+    ? `<ol class="squad">${l.map(p => `<li>${esc(canon(p))}${ROSTER.size && !ROSTER.has(canon(p)) ? ` <small style="color:rgba(255,255,255,.5);font-weight:500">invaller</small>` : ""}</li>`).join("")}</ol>`
     : `<div class="md-empty">De selectie wordt bekendgemaakt vóór de wedstrijd.</div>`;
 }
 
@@ -990,8 +1002,7 @@ function parseAmount(raw){
 function buildRanking(rows, fixes){
   const people = new Map();
   for (const r of rows){
-    let naam = String(r.naam || "").trim(); if (!naam) continue;
-    naam = fixes[naam] || naam;
+    let naam = canon(r.naam); if (!naam) continue;
     const a = parseAmount(r.hoeveel), done = /gedaan/i.test(r.status || "");
     const p = people.get(naam) || {naam, liters:0, open:0, stil:0, extra:0, feiten:[]};
     p.liters += a.liters; p.stil += a.stil; p.extra += a.extra; if (!done) p.open += a.liters;
@@ -1083,7 +1094,7 @@ function leesDoelpunten(rows){
   for (const r of rows.slice(kop + 1)){
     const w = parseWedstrijd(r[0]); if (!w) continue;
     const goals = [];
-    for (let i = 1; i < r.length; i += 2){ const wie = (r[i]||"").trim(); if (wie) goals.push({ wie, soort: soortVan(r[i+1]) }); }
+    for (let i = 1; i < r.length; i += 2){ const wie = canon(r[i]); if (wie) goals.push({ wie, soort: soortVan(r[i+1]) }); }
     lijst.push({ ...w, goals });
   }
   return lijst;
@@ -1308,33 +1319,35 @@ function renderSeason(){
 
 /* ---------- Spelers ---------- */
 function playerData(){
-  const fixes = DATA.naamCorrecties || {};
-  const fix = n => { n = String(n||"").trim(); return fixes[n] || n; };
   const P = new Map();
-  const get = n => { n = fix(n); if (!n) return null; if (!P.has(n)) P.set(n, {naam:n, goals:[], liters:null}); return P.get(n); };
+  const get = n => { n = canon(n); if (!n) return null; if (!P.has(n)) P.set(n, {naam:n, goals:[], liters:null}); return P.get(n); };
+  for (const n of ROSTER) get(n);
   for (const w of DATA.doelpunten || []){ const m = zoekWedstrijd(w); for (const g of w.goals){ const p = get(g.wie); if (p) p.goals.push({ ...g, match:m, label:w.label }); } }
-  for (const r of buildRanking(DATA.liters || [], fixes)){ const p = get(r.naam); if (p) p.liters = r; }
+  for (const r of buildRanking(DATA.liters || [], {})){ const p = get(r.naam); if (p) p.liters = r; }
   for (const n of DATA.opstelling || []) get(n);
-  const sel = new Set((DATA.opstelling || []).map(fix));
-  return [...P.values()].map(p => ({...p, sel: sel.has(p.naam)})).sort((a,b) => b.goals.length - a.goals.length || (b.liters?.liters||0) - (a.liters?.liters||0) || a.naam.localeCompare(b.naam));
+  const sel = new Set((DATA.opstelling || []).map(canon));
+  return [...P.values()].map(p => ({...p, sel: sel.has(p.naam), invaller: ROSTER.size > 0 && !ROSTER.has(p.naam)}))
+    .sort((a,b) => b.goals.length - a.goals.length || (b.liters?.liters||0) - (a.liters?.liters||0) || a.naam.localeCompare(b.naam));
+}
+function playerCard(p){
+  const initials = p.naam.split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase();
+  return `<button type="button" class="player" data-player="${esc(p.naam)}">
+    <div class="top-row"><span class="avatar${p.invaller ? " inv" : ""}">${esc(initials)}</span><div><div class="nm">${esc(p.naam)}</div>${p.sel ? `<div class="sel">In de selectie</div>` : ""}</div></div>
+    <div class="pstats"><div><div class="k">Doelpunten</div><div class="v">${p.goals.length}</div><span class="balls">${p.goals.map(g => `<span class="ball ${ballCls(g.soort)}"></span>`).join("")}</span></div>
+      <div><div class="k">Liters</div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}<small> L</small></div>${p.liters && p.liters.open > 0 ? `<span class="pill open">${fmtL(p.liters.open)} L open</span>` : p.liters ? `<span class="pill done">alles gedaan</span>` : ""}</div></div>
+  </button>`;
 }
 function renderPlayers(){
   const box = document.getElementById("players"); if (!box) return;
-  const list = playerData();
-  box.innerHTML = list.map(p => {
-    const initials = p.naam.split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase();
-    return `<button type="button" class="player" data-player="${esc(p.naam)}">
-      <div class="top-row"><span class="avatar">${esc(initials)}</span><div><div class="nm">${esc(p.naam)}</div>${p.sel ? `<div class="sel">In de selectie</div>` : ""}</div></div>
-      <div class="pstats"><div><div class="k">Doelpunten</div><div class="v">${p.goals.length}</div><span class="balls">${p.goals.map(g => `<span class="ball ${ballCls(g.soort)}"></span>`).join("")}</span></div>
-        <div><div class="k">Liters</div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}<small> L</small></div>${p.liters && p.liters.open > 0 ? `<span class="pill open">${fmtL(p.liters.open)} L open</span>` : p.liters ? `<span class="pill done">alles gedaan</span>` : ""}</div></div>
-    </button>`;
-  }).join("");
+  const list = playerData(), vast = list.filter(p => !p.invaller), inv = list.filter(p => p.invaller);
+  box.innerHTML = vast.map(playerCard).join("") +
+    (inv.length ? `<h2 class="players-sub">Invallers</h2>` + inv.map(playerCard).join("") : "");
 }
 function openPlayer(naam){
   const p = playerData().find(x => x.naam === naam); if (!p) return;
   document.getElementById("dlg-head").classList.add("ours-team");
   document.getElementById("dlg-title").textContent = p.naam;
-  document.getElementById("dlg-sub").textContent = p.sel ? "Kameel · in de selectie" : "Kameel";
+  document.getElementById("dlg-sub").textContent = (p.invaller ? "Invaller" : "Kameel") + (p.sel ? " · in de selectie" : "");
   const sc = p.goals.filter(g => g.soort === "sc").length, sb = p.goals.filter(g => g.soort === "sb").length, veld = p.goals.length - sc - sb;
   const goalsHtml = p.goals.length ? p.goals.slice().sort((a,b) => (b.match?.datum||"").localeCompare(a.match?.datum||"")).map(g => {
     const m = g.match, opp = m ? (isUs(m.thuis) ? m.uit : m.thuis) : g.label;
@@ -1389,9 +1402,11 @@ const loadLitersLive = () => fetchText(LITERS_CSV).then(t => {
 });
 const loadDoelpunten = () => fetchText(DOELPUNTEN_CSV).catch(() => fetchText("doelpunten.csv")).then(t => leesDoelpunten(parseCsv(t))).catch(() => []);
 
-Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("opstelling.json"), loadLitersLive().catch(() => null), loadDoelpunten()])
-  .then(([comp, lit, ops, live, doelpunten]) => {
+Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("opstelling.json"), loadLitersLive().catch(() => null), loadDoelpunten(), loadJson("spelers.json")])
+  .then(([comp, lit, ops, live, doelpunten, roster]) => {
+    initRoster(roster);
     DATA = { ...comp, ...lit, ...(live ? {liters: live} : {}), opstelling: ops.spelers || [], opstellingWedstrijd: ops.wedstrijd || null, doelpunten };
+    (DATA.doelpunten || []).forEach(w => w.goals.forEach(g => { g.wie = canon(g.wie); }));
     if (!comp.programma && !DATA.liters) throw new Error("geen gegevens");
     if (DATA.competitie) document.getElementById("league").textContent = DATA.competitie;
     renderStats(); renderNext(); renderProgram(); renderResults(); renderStandings(); renderTopscorers(); renderLiters(); initPredictor(); renderSeason(); renderPlayers(); initAgenda();
