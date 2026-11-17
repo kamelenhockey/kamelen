@@ -354,6 +354,54 @@ td.delta{color:var(--muted);font-size:.8rem}
 @media (max-width:900px){ .pred-grid{grid-template-columns:1fr} .pred-table-card{position:static} }
 @media (max-width:560px){ .pred-summary{grid-template-columns:1fr} .pred-summary > div + div{border-left:0;border-top:1px solid rgba(255,255,255,.12)} }
 
+/* ---------- Agenda ---------- */
+.cal{position:relative;margin:-6px 0 8px}
+.cal summary{list-style:none}
+.cal summary::-webkit-details-marker{display:none}
+.cal-menu{position:absolute;z-index:5;top:calc(100% + 6px);left:0;width:min(320px,90vw);background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 40px -18px rgba(31,23,18,.35);padding:14px;display:grid;gap:8px}
+.cal-menu p{margin:0 0 4px;font-size:.85rem;color:var(--muted)}
+.cal-menu .btn{justify-content:center}
+.tag-btn{cursor:pointer;color:#fff;font-family:inherit}
+.tag-btn:hover{background:rgba(255,255,255,.16)}
+
+/* ---------- Seizoensgrafiek ---------- */
+.cmp{font-size:.85rem;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
+.cmp select{font:inherit;font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:#fff}
+.chart-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.84rem;font-weight:600;margin-bottom:6px}
+.chart-legend span{display:inline-flex;align-items:center;gap:6px}
+.chart-legend i{display:inline-block;width:18px;height:3px;border-radius:2px}
+.chart-wrap{position:relative}
+#chart{width:100%;height:auto;display:block;overflow:visible}
+#chart .grid{stroke:var(--line);stroke-width:1}
+#chart .axis{fill:var(--muted);font-size:11px;font-family:var(--font-body)}
+#chart .other{fill:none;stroke:#dfe5e9;stroke-width:1.5}
+#chart .ser{fill:none;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+#chart .dot{stroke:#fff;stroke-width:2}
+#chart .lbl{font-size:12px;font-weight:700;font-family:var(--font-body);fill:var(--ink)}
+#chart .cross{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.chart-tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;border-radius:8px;padding:8px 10px;font-size:.82rem;line-height:1.4;white-space:nowrap;transform:translate(-50%,-100%);margin-top:-10px}
+.chart-tip i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.chart-table{margin-top:10px;font-size:.85rem}
+.chart-table summary{cursor:pointer;color:var(--muted);font-weight:600}
+
+/* ---------- Spelers ---------- */
+.players{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.player{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px;transition:border-color .15s,transform .15s}
+.player:hover{border-color:#f3c98f;transform:translateY(-1px)}
+.player:focus-visible{outline:2px solid var(--orange)}
+.player .top-row{display:flex;align-items:center;gap:12px}
+.avatar{width:42px;height:42px;border-radius:12px;background:var(--sky);display:grid;place-items:center;font-family:var(--font-display);font-weight:800;font-size:1.05rem;color:var(--ink);flex:none}
+.player .nm{font-family:var(--font-display);font-weight:800;font-size:1.15rem;line-height:1.1}
+.player .sel{font-size:.72rem;font-weight:700;color:var(--orange-ink)}
+.pstats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);padding-top:10px}
+.pstats > div + div{border-left:1px solid var(--line);padding-left:12px}
+.pstats .k{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pstats .v{font-family:var(--font-display);font-weight:800;font-size:1.35rem}
+.pstats .v small{font-family:var(--font-body);font-size:.75rem;color:var(--muted);font-weight:600}
+.psec{margin-top:16px}
+.prow{display:grid;grid-template-columns:5.4rem minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 4px;border-top:1px solid var(--line);font-size:.92rem}
+.prow .d{color:var(--muted);font-size:.82rem;font-weight:600}
+
 footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 
 @media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
@@ -419,6 +467,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
     <li><a href="#topscorers">Topscorers</a></li>
     <li><a href="#liters">Literklassement</a></li>
     <li class="nav-sep" aria-hidden="true"></li>
+    <li><a href="#spelers" data-view-link="spelers">Spelers</a></li>
     <li><a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a></li>
     <li><a href="#regels" data-view-link="regels">Kamelen-regels</a></li>
     <li><a href="#mex" data-view-link="mex">Mex</a></li>
@@ -439,6 +488,15 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 <main class="wrap">
   <section class="card" id="programma" aria-labelledby="h-programma">
     <div class="card-head"><div><h2 id="h-programma">Programma</h2><p>Klik op een team voor alle wedstrijden</p></div><div id="prog-toggle"></div></div>
+    <details class="cal">
+      <summary class="btn sm ghost">Zet in je agenda</summary>
+      <div class="cal-menu">
+        <p>Abonneer je op de Kamelen-agenda. Wijzigingen in tijd of veld komen er vanzelf in.</p>
+        <a class="btn sm" id="cal-webcal" href="#">iPhone / Mac / Outlook</a>
+        <a class="btn sm" id="cal-google" href="#" target="_blank" rel="noopener">Google Agenda</a>
+        <a class="btn sm ghost" href="kamelen.ics" download>Bestand downloaden</a>
+      </div>
+    </details>
     <div id="program"></div>
   </section>
 
@@ -450,6 +508,14 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
   <section class="card wide" id="stand" aria-labelledby="h-stand">
     <div class="card-head"><div><h2 id="h-stand">Stand</h2><p id="stand-sub"></p></div><a class="btn" href="#voorspeller">Voorspel de stand →</a></div>
     <div id="standings"></div>
+  </section>
+
+  <section class="card wide" id="seizoen" aria-labelledby="h-seizoen">
+    <div class="card-head"><div><h2 id="h-seizoen">Seizoensverloop</h2><p>Positie in de stand na elke speeldag</p></div>
+      <label class="cmp">Vergelijk met <select id="cmp-team"></select></label></div>
+    <div class="chart-legend" id="chart-legend"></div>
+    <div class="chart-wrap" id="chart-wrap"><svg id="chart" role="img" aria-labelledby="h-seizoen"></svg><div class="chart-tip" id="chart-tip" hidden></div></div>
+    <details class="chart-table"><summary>Toon als tabel</summary><div id="chart-table" class="tablewrap"></div></details>
   </section>
 
   <section class="card wide" id="topscorers" aria-labelledby="h-topscorers">
@@ -468,6 +534,18 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
     <div class="legend"><span><span class="g" style="--d:100%;--o:0%"><i class="d"></i></span>Gedaan</span><span><span class="g" style="--d:0%;--o:100%"><i class="o"></i></span>Nog open</span><span>1 glas = 1 liter · stille meter = 3,25 L</span></div>
   </section>
 </main>
+</div>
+
+<!-- ================= SPELERS ================= -->
+<div id="view-spelers" class="view" hidden>
+  <div class="wrap page page-wide">
+    <header class="page-head">
+      <div class="eyebrow">Selectie</div>
+      <h1>Spelers</h1>
+      <p>Doelpunten en liters per speler. Klik op een speler voor alle details.</p>
+    </header>
+    <div class="players" id="players"></div>
+  </div>
 </div>
 
 <!-- ================= VOORSPELLER ================= -->
@@ -724,7 +802,7 @@ function renderNext(){
     box.innerHTML = `
       <div class="md-label">${label}</div>
       <div class="md-teams"><div class="md-team ${home?"ours":""}">${teamLink(m.thuis)}</div><div class="md-vs">VS</div><div class="md-team ${home?"":"ours"}">${teamLink(m.uit)}</div></div>
-      <div class="md-meta"><span class="tag">${fmtDay(m.datum)}</span><span class="tag">${m.tijd ? esc(m.tijd) : "tijd n.n.b."}</span><span class="tag">${home ? "Thuis" : "Uit"}</span>${m.tijd ? `<span class="tag hot num" id="countdown"></span>` : ""}</div>
+      <div class="md-meta"><span class="tag">${fmtDay(m.datum)}</span><span class="tag">${m.tijd ? esc(m.tijd) : "tijd n.n.b."}</span><span class="tag">${home ? "Thuis" : "Uit"}</span>${m.tijd ? `<span class="tag hot num" id="countdown"></span>` : ""}<button type="button" class="tag tag-btn" id="add-next">+ Agenda</button></div>
       ${m.veld || m.accommodatie ? `<div class="md-venue"><div><div class="k">Veld</div><div class="v">${esc(m.veld || "n.n.b.")}</div></div>
         <div><div class="k">Locatie</div><div class="v">${esc(m.accommodatie || "")}${m.adres ? `<br><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(m.adres)}" target="_blank" rel="noopener">${esc(m.adres)}</a>` : ""}</div></div></div>` : ""}
       <div id="md-weather"></div>`;
@@ -890,7 +968,13 @@ function openTeam(team){
 }
 document.addEventListener("click", e => {
   const btn = e.target.closest("[data-team]");
-  if (btn){ e.preventDefault(); openTeam(btn.dataset.team); return; }
+  if (btn){ e.preventDefault(); document.getElementById("dlg-head").classList.remove("ours-team"); openTeam(btn.dataset.team); return; }
+  const pl = e.target.closest("[data-player]");
+  if (pl){ e.preventDefault(); openPlayer(pl.dataset.player); return; }
+  if (e.target.id === "add-next"){
+    const m = (DATA.programma || []).find(x => isUs(x.thuis + x.uit) && toDate(x.datum, x.tijd || "23:00").getTime() + 2*3600e3 > Date.now());
+    if (m) downloadNextIcs(m); return;
+  }
   if (e.target.closest("[data-close]") || e.target === dlg) dlg.close();
 });
 
@@ -1057,7 +1141,7 @@ function predictedTable(){
     H.gs++; U.gs++; H.dv += a; H.dt += b; U.dv += b; U.dt += a;
     if (a > b){ H.pt += 3; H.w++; U.v++; } else if (a < b){ U.pt += 3; U.w++; H.v++; } else { H.pt++; U.pt++; H.g++; U.g++; }
   }
-  const rows = Object.values(by).sort((x,y) => y.pt - x.pt || (y.dv-y.dt) - (x.dv-x.dt) || y.dv - x.dv || x.team.localeCompare(y.team));
+  const rows = Object.values(by).sort((x,y) => y.pt - x.pt || x.gs - y.gs || (y.dv-y.dt) - (x.dv-x.dt) || y.dv - x.dv || x.team.localeCompare(y.team));
   rows.forEach((r,i) => r.nieuw = i + 1);
   return { rows, n };
 }
@@ -1074,7 +1158,7 @@ function renderPredTable(){
         <td class="r hide-sm">${r.w}</td><td class="r hide-sm">${r.g}</td><td class="r hide-sm">${r.v}</td>
         <td class="r ${ds>0?"gd-pos":ds<0?"gd-neg":""}">${ds>0?"+":""}${ds}</td><td class="r pts">${r.pt}${aftrek[r.team]?"<sup>*</sup>":""}</td></tr>`; }).join("")}
     </tbody></table></div>
-    <p class="note">Volgorde: punten, dan doelsaldo, dan doelpunten voor.${Object.keys(aftrek).length ? " * inclusief puntenaftrek." : ""}</p>`;
+    <p class="note">Volgorde zoals hockey.nl: punten, dan minder gespeelde wedstrijden, dan doelsaldo, dan doelpunten voor.${Object.keys(aftrek).length ? " * inclusief puntenaftrek." : ""}</p>`;
   const us = rows.find(r => isUs(r.team));
   if (us){
     const d = us.positie - us.nieuw;
@@ -1124,6 +1208,152 @@ function initPredictor(){
   renderPredTable();
 }
 
+
+/* ---------- Agenda ---------- */
+function initAgenda(){
+  const base = new URL("kamelen.ics", location.href);
+  const webcal = "webcal://" + base.host + base.pathname;
+  const w = document.getElementById("cal-webcal"), g = document.getElementById("cal-google");
+  if (w) w.href = webcal;
+  if (g) g.href = "https://calendar.google.com/calendar/r?cid=" + encodeURIComponent(webcal);
+}
+function downloadNextIcs(m){
+  const pad = n => String(n).padStart(2, "0");
+  const utc = d => `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`;
+  const t = s => String(s||"").replace(/\\/g,"\\\\").replace(/;/g,"\;").replace(/,/g,"\\,").replace(/\n/g,"\\n");
+  const lines = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Kamelen//NL","BEGIN:VEVENT",`UID:${m.datum}-${(m.thuis+m.uit).replace(/[^A-Za-z0-9]/g,"")}@kamelenhockey.github.io`,`DTSTAMP:${utc(new Date())}`];
+  if (m.tijd){ const st = toDate(m.datum, m.tijd); lines.push(`DTSTART:${utc(st)}`, `DTEND:${utc(new Date(st.getTime()+105*60e3))}`); }
+  else { const d = m.datum.replace(/-/g,""); const n = toDate(m.datum); n.setDate(n.getDate()+1); lines.push(`DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${n.getFullYear()}${pad(n.getMonth()+1)}${pad(n.getDate())}`); }
+  lines.push(`SUMMARY:${t(`${m.thuis} – ${m.uit}`)}`);
+  const loc = [m.accommodatie, m.adres].filter(Boolean).join(", "); if (loc) lines.push(`LOCATION:${t(loc)}`);
+  if (m.veld) lines.push(`DESCRIPTION:${t("Veld: " + m.veld)}`);
+  lines.push("END:VEVENT","END:VCALENDAR");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([lines.join("\r\n")], {type:"text/calendar"}));
+  a.download = `kamelen-${m.datum}.ics`; document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ---------- Seizoensverloop ---------- */
+const C_US = "#d06a00", C_CMP = "#1f6fb2";
+function seasonPositions(){
+  const res = [...(DATA.uitslagen || [])].sort((a,b) => a.datum.localeCompare(b.datum));
+  const teams = (DATA.stand || []).map(t => t.team);
+  const aftrek = DATA.puntenAftrek || {};
+  const dates = [...new Set(res.map(m => m.datum))];
+  const st = Object.fromEntries(teams.map(t => [t, {pt:-(aftrek[t]||0), dv:0, dt:0, gs:0}]));
+  const out = [];
+  let i = 0;
+  for (const d of dates){
+    while (i < res.length && res[i].datum === d){
+      const m = res[i++]; const [a,b] = m.score.split("-").map(Number);
+      const H = st[m.thuis], U = st[m.uit]; if (!H || !U || isNaN(a) || isNaN(b)) continue;
+      H.dv += a; H.dt += b; U.dv += b; U.dt += a; H.gs++; U.gs++;
+      if (a > b) H.pt += 3; else if (a < b) U.pt += 3; else { H.pt++; U.pt++; }
+    }
+    const order = [...teams].sort((x,y) => st[y].pt - st[x].pt || st[x].gs - st[y].gs || (st[y].dv-st[y].dt) - (st[x].dv-st[x].dt) || st[y].dv - st[x].dv || x.localeCompare(y));
+    out.push({ datum: d, pos: Object.fromEntries(order.map((t,k) => [t, k+1])), pt: Object.fromEntries(teams.map(t => [t, st[t].pt])) });
+  }
+  return { rounds: out, teams };
+}
+function renderSeason(){
+  const svg = document.getElementById("chart"); if (!svg) return;
+  const { rounds, teams } = seasonPositions();
+  if (rounds.length < 2){ document.getElementById("seizoen").hidden = true; return; }
+  const us = teams.find(isUs);
+  const sel = document.getElementById("cmp-team");
+  if (!sel.options.length){
+    sel.innerHTML = `<option value="">Niemand</option>` + teams.filter(t => t !== us).map(t => `<option>${esc(t)}</option>`).join("");
+    sel.value = (DATA.stand || [])[0]?.team !== us ? (DATA.stand || [])[0]?.team : "";
+    sel.addEventListener("change", renderSeason);
+  }
+  const cmp = sel.value;
+  const N = teams.length, W = 760, H = 320, L = 34, R = 56, T = 12, B = 30;
+  const x = i => L + i * (W - L - R) / (rounds.length - 1);
+  const y = p => T + (p - 1) * (H - T - B) / (N - 1);
+  const path = t => rounds.map((r,i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(r.pos[t]).toFixed(1)}`).join("");
+  const fmtD = d => toDate(d).toLocaleDateString("nl-NL", {day:"numeric", month:"short"});
+  const step = Math.ceil(rounds.length / 8);
+  let g = "";
+  for (let p = 1; p <= N; p++) g += `<line class="grid" x1="${L}" x2="${W-R}" y1="${y(p)}" y2="${y(p)}"/>` + ((p === 1 || p % 2 === 0 || p === N) ? `<text class="axis" x="${L-10}" y="${y(p)+4}" text-anchor="end">${p}</text>` : "");
+  rounds.forEach((r,i) => { if (i % step === 0 || i === rounds.length - 1) g += `<text class="axis" x="${x(i)}" y="${H-8}" text-anchor="middle">${fmtD(r.datum)}</text>`; });
+  for (const t of teams) if (t !== us && t !== cmp) g += `<path class="other" d="${path(t)}"/>`;
+  const last = rounds.length - 1;
+  const series = [[cmp, C_CMP], [us, C_US]].filter(([t]) => t);
+  for (const [t, c] of series){
+    g += `<path class="ser" stroke="${c}" d="${path(t)}"/>`;
+    g += `<circle class="dot" cx="${x(last)}" cy="${y(rounds[last].pos[t])}" r="5" fill="${c}"/>`;
+    g += `<text class="lbl" x="${x(last)+10}" y="${y(rounds[last].pos[t])+4}">${rounds[last].pos[t]}e</text>`;
+  }
+  g += `<line class="cross" id="cross" y1="${T}" y2="${H-B}" visibility="hidden"/><g id="hover-dots"></g>`;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML = g;
+  document.getElementById("chart-legend").innerHTML = series.slice().reverse().map(([t,c]) => `<span><i style="background:${c}"></i>${esc(t)}</span>`).join("") + `<span style="color:var(--muted);font-weight:500"><i style="background:#dfe5e9"></i>overige teams</span>`;
+  /* Hover: dichtstbijzijnde speeldag */
+  const tip = document.getElementById("chart-tip"), cross = document.getElementById("cross"), hd = document.getElementById("hover-dots");
+  svg.onpointermove = e => {
+    const rect = svg.getBoundingClientRect(), sx = (e.clientX - rect.left) * W / rect.width;
+    const i = Math.max(0, Math.min(last, Math.round((sx - L) / ((W - L - R) / last))));
+    const r = rounds[i];
+    cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility", "visible");
+    hd.innerHTML = series.map(([t,c]) => `<circle class="dot" cx="${x(i)}" cy="${y(r.pos[t])}" r="5" fill="${c}"/>`).join("");
+    tip.hidden = false;
+    tip.style.left = (x(i) / W * rect.width) + "px";
+    tip.style.top = (y(Math.min(...series.map(([t]) => r.pos[t]))) / H * rect.height) + "px";
+    tip.innerHTML = `<b>${fmtDay(r.datum, {weekday:"short", day:"numeric", month:"short"})}</b><br>` + series.slice().reverse().map(([t,c]) => `<i style="background:${c}"></i>${esc(t)}: ${r.pos[t]}e · ${r.pt[t]} pt`).join("<br>");
+  };
+  svg.onpointerleave = () => { tip.hidden = true; cross.setAttribute("visibility", "hidden"); hd.innerHTML = ""; };
+  document.getElementById("chart-table").innerHTML = `<table><thead><tr><th>Speeldag</th>${series.slice().reverse().map(([t]) => `<th class="r">${esc(t)}</th>`).join("")}</tr></thead><tbody>${rounds.map(r => `<tr><td>${fmtDay(r.datum,{day:"numeric",month:"short"})}</td>${series.slice().reverse().map(([t]) => `<td class="r">${r.pos[t]}e (${r.pt[t]} pt)</td>`).join("")}</tr>`).join("")}</tbody></table>
+    ${(DATA.puntenAftrek||{})[us] ? `<p class="note">De puntenaftrek is vanaf het begin meegeteld.</p>` : ""}`;
+}
+
+/* ---------- Spelers ---------- */
+function playerData(){
+  const fixes = DATA.naamCorrecties || {};
+  const fix = n => { n = String(n||"").trim(); return fixes[n] || n; };
+  const P = new Map();
+  const get = n => { n = fix(n); if (!n) return null; if (!P.has(n)) P.set(n, {naam:n, goals:[], liters:null}); return P.get(n); };
+  for (const w of DATA.doelpunten || []){ const m = zoekWedstrijd(w); for (const g of w.goals){ const p = get(g.wie); if (p) p.goals.push({ ...g, match:m, label:w.label }); } }
+  for (const r of buildRanking(DATA.liters || [], fixes)){ const p = get(r.naam); if (p) p.liters = r; }
+  for (const n of DATA.opstelling || []) get(n);
+  const sel = new Set((DATA.opstelling || []).map(fix));
+  return [...P.values()].map(p => ({...p, sel: sel.has(p.naam)})).sort((a,b) => b.goals.length - a.goals.length || (b.liters?.liters||0) - (a.liters?.liters||0) || a.naam.localeCompare(b.naam));
+}
+function renderPlayers(){
+  const box = document.getElementById("players"); if (!box) return;
+  const list = playerData();
+  box.innerHTML = list.map(p => {
+    const initials = p.naam.split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase();
+    return `<button type="button" class="player" data-player="${esc(p.naam)}">
+      <div class="top-row"><span class="avatar">${esc(initials)}</span><div><div class="nm">${esc(p.naam)}</div>${p.sel ? `<div class="sel">In de selectie</div>` : ""}</div></div>
+      <div class="pstats"><div><div class="k">Doelpunten</div><div class="v">${p.goals.length}</div><span class="balls">${p.goals.map(g => `<span class="ball ${ballCls(g.soort)}"></span>`).join("")}</span></div>
+        <div><div class="k">Liters</div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}<small> L</small></div>${p.liters && p.liters.open > 0 ? `<span class="pill open">${fmtL(p.liters.open)} L open</span>` : p.liters ? `<span class="pill done">alles gedaan</span>` : ""}</div></div>
+    </button>`;
+  }).join("");
+}
+function openPlayer(naam){
+  const p = playerData().find(x => x.naam === naam); if (!p) return;
+  document.getElementById("dlg-head").classList.add("ours-team");
+  document.getElementById("dlg-title").textContent = p.naam;
+  document.getElementById("dlg-sub").textContent = p.sel ? "Kameel · in de selectie" : "Kameel";
+  const sc = p.goals.filter(g => g.soort === "sc").length, sb = p.goals.filter(g => g.soort === "sb").length, veld = p.goals.length - sc - sb;
+  const goalsHtml = p.goals.length ? p.goals.slice().sort((a,b) => (b.match?.datum||"").localeCompare(a.match?.datum||"")).map(g => {
+    const m = g.match, opp = m ? (isUs(m.thuis) ? m.uit : m.thuis) : g.label;
+    return `<div class="prow"><span class="d">${m ? fmtShort(m.datum) : ""}</span><span>${m ? `${isUs(m.thuis) ? "thuis" : "uit"} tegen ${teamLink(opp)}` : esc(opp)}</span><span><span class="ball ${ballCls(g.soort)}" style="display:inline-block;vertical-align:-1px;margin-right:6px"></span>${SOORT_NAAM[g.soort]}</span></div>`;
+  }).join("") : `<div class="empty">Nog geen doelpunten.</div>`;
+  const litHtml = p.liters ? p.liters.feiten.map(f => `<div class="prow"><span class="d">${esc(f.datum)}</span><span>${esc(f.reden)}</span><span class="pill ${f.done?"done":"open"}">${esc(f.hoeveel)}${f.done?" · gedaan":""}</span></div>`).join("") : `<div class="empty">Een voorbeeldige Kameel: nog geen boetes.</div>`;
+  document.getElementById("dlg-body").innerHTML = `
+    <div class="dlg-stats num" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+      <div><div class="v">${p.goals.length}</div><div class="k">Goals</div></div>
+      <div><div class="v">${veld}</div><div class="k">Veld</div></div>
+      <div><div class="v">${sc}</div><div class="k">SC</div></div>
+      <div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}</div><div class="k">Liters</div></div>
+    </div>
+    <div class="psec"><h3 class="sub-h">Doelpunten</h3>${goalsHtml}</div>
+    <div class="psec"><h3 class="sub-h">Literboetes${p.liters && p.liters.open > 0 ? ` · ${fmtL(p.liters.open)} L open` : ""}</h3>${litHtml}</div>`;
+  document.getElementById("dlg-body").scrollTop = 0;
+  if (!dlg.open){ try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } }
+}
+
 /* ---------- Dobbelstenen (SVG) ---------- */
 const PIPS = {1:[[50,50]],2:[[28,28],[72,72]],3:[[28,28],[50,50],[72,72]],4:[[28,28],[72,28],[28,72],[72,72]],5:[[28,28],[72,28],[50,50],[28,72],[72,72]],6:[[28,26],[72,26],[28,50],[72,50],[28,74],[72,74]]};
 const dieSvg = (n, keep) => `<svg class="die${keep ? " keep" : ""}" viewBox="0 0 100 100" role="img" aria-label="${n}"><rect x="5" y="5" width="90" height="90" rx="18"/>${PIPS[n].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="9"/>`).join("")}</svg>`;
@@ -1134,7 +1364,7 @@ document.querySelectorAll("[data-dice]").forEach(el => {
 });
 
 /* ---------- Pagina's: home, regels, mex ---------- */
-const VIEWS = ["voorspeller", "regels", "mex"];
+const VIEWS = ["spelers", "voorspeller", "regels", "mex"];
 function showView(){
   const h = location.hash.replace("#", "");
   const view = VIEWS.includes(h) ? h : "home";
@@ -1164,7 +1394,7 @@ Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("ops
     DATA = { ...comp, ...lit, ...(live ? {liters: live} : {}), opstelling: ops.spelers || [], opstellingWedstrijd: ops.wedstrijd || null, doelpunten };
     if (!comp.programma && !DATA.liters) throw new Error("geen gegevens");
     if (DATA.competitie) document.getElementById("league").textContent = DATA.competitie;
-    renderStats(); renderNext(); renderProgram(); renderResults(); renderStandings(); renderTopscorers(); renderLiters(); initPredictor();
+    renderStats(); renderNext(); renderProgram(); renderResults(); renderStandings(); renderTopscorers(); renderLiters(); initPredictor(); renderSeason(); renderPlayers(); initAgenda();
     const f = x => { const d = new Date(x); return isNaN(d) ? "onbekend" : d.toLocaleString("nl-NL",{dateStyle:"long",timeStyle:"short",timeZone:"Europe/Amsterdam"}); };
     document.getElementById("foot").textContent = `Competitie: laatste wijziging ${f(DATA.competitieBijgewerkt)} (bron hockey.nl) · Literklassement en topscorers: ${live ? "live uit de spreadsheet" : "bijgewerkt " + f(DATA.bijgewerkt)}`;
   })

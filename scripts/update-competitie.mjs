@@ -1,7 +1,7 @@
 // Leest programma, uitslagen en stand van hockey.nl en schrijft competitie.json.
 import { chromium } from "playwright";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { parseProgramma, parseUitslagen, parseStand, berekenAftrek, seizoenStartjaar } from "./parse.mjs";
+import { parseProgramma, parseUitslagen, parseStand, berekenAftrek, seizoenStartjaar, maakIcs } from "./parse.mjs";
 
 const TEAM = "21368|182976";
 const BASIS = `https://www.hockey.nl/match-center#/team/${TEAM}`;
@@ -115,4 +115,5 @@ if (zonderTijd(nieuw) === zonderTijd(oud)) {
   process.exit(0);
 }
 await writeFile("competitie.json", JSON.stringify(nieuw, null, 1) + "\n");
+await writeFile("kamelen.ics", maakIcs(programma, /gchc/i, nieuw.competitieBijgewerkt));
 console.log(`Programma: ${programma.length}, uitslagen: ${uitslagen.length}, stand: ${stand.length} teams (per ${standPer}).`);
