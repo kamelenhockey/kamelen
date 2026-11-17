@@ -838,7 +838,13 @@ function initRoster(r){
   const add = (list, set) => (list || []).forEach(p => { set.add(p.naam); [p.naam, ...(p.ook || [])].forEach(n => CANON.set(n.trim().toLowerCase(), p.naam)); });
   add(r.spelers, ROSTER); add(r.invallers, INVALLERS);
 }
-const canon = n => { n = String(n || "").trim(); if (!n) return ""; return CANON.get(n.toLowerCase()) || (DATA.naamCorrecties || {})[n] || n; };
+const canon = n => {
+  n = String(n || "").trim(); if (!n) return "";
+  const hit = CANON.get(n.toLowerCase()); if (hit) return hit;
+  /* "Mini / Maarten" of "Julius (Juul)": probeer elk deel */
+  for (const deel of n.split(/\s*[\/()|,]\s*/).filter(Boolean)){ const h = CANON.get(deel.toLowerCase()); if (h) return h; }
+  return (DATA.naamCorrecties || {})[n] || n;
+};
 
 /* ---------- Hulpfuncties ---------- */
 function toDate(datum, tijd){
