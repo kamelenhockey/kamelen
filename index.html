@@ -233,6 +233,68 @@ dialog.team::backdrop{background:rgba(31,23,18,.45);backdrop-filter:blur(2px)}
 .h2h > div{flex:1 1 180px;border:1px solid #f6cf9f;background:var(--orange-soft);border-radius:var(--r-sm);padding:10px 12px;font-size:.9rem}
 .h2h .k{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange-ink)}
 
+/* ---------- Regelpagina's ---------- */
+.nav-sep{width:1px;background:rgba(255,255,255,.18);margin:10px 6px}
+nav.bar a[aria-current="page"]{color:#fff;border-bottom-color:var(--orange)}
+.page{display:grid;gap:var(--gap);padding-top:28px;padding-bottom:48px;max-width:860px}
+.page-head{padding:6px 2px 4px}
+.page-head h1{font-size:clamp(2.2rem,5vw,3.2rem);font-weight:800;letter-spacing:-.03em;line-height:1;margin:4px 0 10px}
+.page-head p{color:var(--ink-2);margin:0;max-width:60ch}
+.page .card p{margin:0 0 10px;max-width:68ch}
+.rule-h{display:flex;align-items:center;gap:12px;font-size:1.25rem;font-weight:800;margin-bottom:14px}
+.rn{width:30px;height:30px;border-radius:8px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:.9rem;flex:none}
+.rule-note{color:var(--muted);font-size:.9rem;margin-top:12px!important}
+.deadlines{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.deadlines > div{padding:14px 18px}
+.deadlines > div + div{border-left:1px solid var(--line)}
+.deadlines .k{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.deadlines .v{font-size:1.15rem}
+.deadlines b{font-family:var(--font-display);font-size:1.5rem}
+table.fines{font-size:.95rem}
+table.fines td,table.fines th{white-space:normal}
+.fine{display:inline-block;padding:2px 10px;border-radius:999px;background:#fdf0d4;color:#7a4f05;font-weight:700;font-size:.85rem;white-space:nowrap}
+.fine.big{background:var(--ink);color:#fff}
+.info-box{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;border-radius:var(--r-sm);background:var(--sky-soft);font-size:.92rem}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.steps li{position:relative;padding-left:22px}
+.steps li::before{content:"";position:absolute;left:4px;top:.6em;width:7px;height:7px;border-radius:2px;background:var(--orange)}
+/* dobbelstenen */
+.die{display:inline-block;width:38px;height:38px;vertical-align:middle}
+.die rect{fill:#fff;stroke:var(--ink);stroke-width:2.5}
+.die circle{fill:var(--ink)}
+.die.keep rect{fill:var(--orange-soft);stroke:var(--orange)}
+.die.keep circle{fill:var(--orange-ink)}
+.dice{display:inline-flex;gap:5px;vertical-align:middle}
+.mini .die,.inline-dice .die{width:24px;height:24px}
+.mini{display:inline-flex;vertical-align:middle;margin:0 2px}
+.dice-examples{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:6px}
+.ex{border:1px solid var(--line);border-radius:var(--r-sm);padding:14px;text-align:center}
+.ex .eq{margin-top:8px;font-size:1rem}
+.ex .eq b{font-family:var(--font-display);font-size:1.6rem}
+.ex .eq small{display:block;color:var(--muted);font-size:.78rem}
+.ladder{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.ladder li{display:grid;grid-template-columns:96px 120px 1fr;align-items:center;gap:14px;padding:10px 16px}
+.ladder li + li{border-top:1px solid var(--line)}
+.ladder b{font-family:var(--font-display);font-size:1.2rem}
+.ladder span:last-child{color:var(--muted);font-size:.9rem}
+.ladder li.top{background:#e7f4ec}.ladder li.top b{color:var(--win)}
+.ladder li.low{background:#fbe9e6}.ladder li.low b{color:var(--loss)}
+.seq{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:8px}
+.seq .arrow{font-size:.82rem;color:var(--muted);font-weight:600}
+.hundred{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.hundred p{margin:0!important;font-size:1.05rem}
+.house{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:10px}
+.house > div{border:1px solid var(--line);border-radius:var(--r-sm);padding:14px}
+.house .k{font-family:var(--font-display);font-weight:800;font-size:1.05rem}
+.house .seq{gap:12px}.house .seq .dice{gap:3px}.house .seq .die{width:26px;height:26px}
+.house p{font-size:.9rem;margin:10px 0 0!important}
+@media (max-width:700px){
+  .dice-examples{grid-template-columns:1fr 1fr}
+  .house{grid-template-columns:1fr}
+  .ladder li{grid-template-columns:86px 1fr;row-gap:2px}
+  .ladder span:last-child{grid-column:2}
+}
+
 footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 
 @media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
@@ -293,9 +355,13 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
     <li><a href="#stand">Stand</a></li>
     <li><a href="#topscorers">Topscorers</a></li>
     <li><a href="#liters">Literklassement</a></li>
+    <li class="nav-sep" aria-hidden="true"></li>
+    <li><a href="#regels" data-view-link="regels">Kamelen-regels</a></li>
+    <li><a href="#mex" data-view-link="mex">Mex</a></li>
   </ul>
 </nav>
 
+<div id="view-home">
 <section class="matchday" id="wedstrijd" aria-label="Volgende wedstrijd">
   <div class="wrap">
     <div id="next"></div>
@@ -338,6 +404,134 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
     <div class="legend"><span><i style="background:var(--beer)"></i>Gedaan</span><span><i style="background:repeating-linear-gradient(-45deg,var(--orange) 0 3px,#ffcf98 3px 6px)"></i>Nog open</span><span>Stille meter = 13 × 0,25 L = 3,25 L</span></div>
   </section>
 </main>
+</div>
+
+<!-- ================= KAMELEN-REGELS ================= -->
+<div id="view-regels" class="view" hidden>
+  <div class="wrap page">
+    <header class="page-head">
+      <div class="eyebrow">Huisregels</div>
+      <h1>Kamelen-regels</h1>
+      <p>Afmelden, boetes en hoe je ze betaalt. Boetes worden bijgehouden in het <a href="#liters">literklassement</a>.</p>
+    </header>
+
+    <section class="card">
+      <h2 class="rule-h"><span class="rn">1</span>Op tijd afmelden</h2>
+      <div class="deadlines">
+        <div><div class="k">Training</div><div class="v">uiterlijk <b>woensdag</b></div></div>
+        <div><div class="k">Wedstrijd</div><div class="v">uiterlijk <b>vrijdag</b></div></div>
+      </div>
+      <p class="rule-note">Kun je niet? Meld je dan vóór deze dag af. Later afmelden telt als te laat.</p>
+    </section>
+
+    <section class="card">
+      <h2 class="rule-h"><span class="rn">2</span>Boetes</h2>
+      <div class="tablewrap"><table class="fines">
+        <thead><tr><th>Wat</th><th>Training</th><th>Wedstrijd</th></tr></thead>
+        <tbody>
+          <tr><td>Te laat afgemeld</td><td><span class="fine">1 liter</span></td><td><span class="fine">2 liter</span></td></tr>
+          <tr><td>Niet komen opdagen</td><td><span class="fine">2 liter</span></td><td><span class="fine big">Stille meter</span></td></tr>
+          <tr><td>Afgemeld omdat je brak bent</td><td colspan="2">Geen geldige reden, dus ook <span class="fine">1 liter</span></td></tr>
+          <tr><td>Teampas kwijt (door de feuten)</td><td colspan="2"><span class="fine">1 liter</span> voor <b>elke</b> feut</td></tr>
+        </tbody>
+      </table></div>
+      <div class="info-box"><b>Stille meter</b> = 13 biertjes van 0,25 L (3,25 L), in stilte opgedronken.</div>
+    </section>
+
+    <section class="card">
+      <h2 class="rule-h"><span class="rn">3</span>Boete betalen</h2>
+      <p>Je betaalt je boete met je <b>persoonlijke pas</b> of via de <b>WBW</b>. Zodra het betaald is, komt er "gedaan" achter in de sheet en kleurt het in het literklassement van open naar gedaan.</p>
+    </section>
+  </div>
+</div>
+
+<!-- ================= MEX ================= -->
+<div id="view-mex" class="view" hidden>
+  <div class="wrap page">
+    <header class="page-head">
+      <div class="eyebrow">Drankspel</div>
+      <h1>Mex</h1>
+      <p>Twee dobbelstenen, maximaal drie worpen per beurt. Doel: <b>niet</b> de laagste worp van de ronde hebben.</p>
+    </header>
+
+    <section class="card">
+      <h2 class="rule-h"><span class="rn">1</span>Zo lees je een worp</h2>
+      <p>Je gooit altijd met twee dobbelstenen tegelijk. De hoogste steen is het eerste cijfer, de laagste het tweede.</p>
+      <div class="dice-examples">
+        <div class="ex"><span data-dice="6,4"></span><div class="eq">= <b>64</b></div></div>
+        <div class="ex"><span data-dice="3,2"></span><div class="eq">= <b>32</b></div></div>
+        <div class="ex"><span data-dice="4,4"></span><div class="eq">= <b>400</b><small>dubbel = honderdtal</small></div></div>
+        <div class="ex"><span data-dice="1,1"></span><div class="eq">= <b>100</b><small>de "100-man"</small></div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="rule-h"><span class="rn">2</span>Van hoog naar laag</h2>
+      <ol class="ladder">
+        <li class="top"><span data-dice="2,1"></span><b>21 · Mex</b><span>De hoogste worp</span></li>
+        <li><span data-dice="6,6"></span><b>600</b><span>dan 500, 400, 300, 200</span></li>
+        <li><span data-dice="1,1"></span><b>100</b><span>laagste dubbel</span></li>
+        <li><span data-dice="6,5"></span><b>65</b><span>dan 64, 63 … 43, 42, 41</span></li>
+        <li class="low"><span data-dice="3,2"></span><b>32</b><span>De laagste worp</span></li>
+      </ol>
+      <div class="info-box"><span data-dice="3,1" class="inline-dice"></span><b>31 is "onzichtbaar"</b>: je mag 1 slok uitdelen aan een tegenstander.</div>
+    </section>
+
+    <section class="card">
+      <h2 class="rule-h"><span class="rn">3</span>Je beurt</h2>
+      <ul class="steps">
+        <li><b>Maximaal 3 worpen.</b> Je mag stoppen wanneer je wilt; je laatste worp telt.</li>
+        <li><b>Ligt er een 1 of een 2?</b> Die steen moet je één keer laten liggen en je gooit alleen de andere opnieuw.
+          <div class="seq"><span data-dice="4,2"></span><span class="arrow">→ 2 blijft liggen →</span><span data-dice="6,2" data-keep="2"></span><span class="arrow">→ beide weer oppakken</span></div></li>
+        <li><b>Mex (21) of 32?</b> Dan is je beurt meteen klaar.</li>
+        <li><b>Gooit de starter mex</b> in 1, 2 of 3 worpen, dan mag iedereen in die ronde maximaal zoveel keer gooien.</li>
+        <li>Een ronde is klaar als iedereen één beurt heeft gehad.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="rule-h"><span class="rn">4</span>Verliezen en straf</h2>
+      <ul class="steps">
+        <li>De <b>laagste worp</b> van de ronde verliest.</li>
+        <li><b>Gelijk laagste?</b> Dan battelen: iedereen gooit één steen. <b>Hoogste verliest.</b></li>
+        <li><b>Straf:</b> een <b>halve bak</b>, plus een halve bak extra voor <b>elke mex</b> in die ronde.</li>
+        <li><b>Hulp:</b> medespelers mogen meedrinken, maar samen hooguit de helft van de straf (afgerond op halve bakken).</li>
+        <li>De verliezer begint de volgende ronde.</li>
+      </ul>
+      <div class="tablewrap"><table class="fines">
+        <thead><tr><th>Mexen in de ronde</th><th>Straf verliezer</th><th>Max. hulp van anderen</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>½ bak</td><td>—</td></tr>
+          <tr><td>1</td><td>1 bak</td><td>½ bak</td></tr>
+          <tr><td>2</td><td>1½ bak</td><td>½ bak</td></tr>
+          <tr><td>3</td><td>2 bakken</td><td>1 bak</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="card">
+      <h2 class="rule-h"><span class="rn">5</span>De 100-man</h2>
+      <div class="hundred"><span data-dice="1,1"></span><p>Gooi je <b>100</b>, dan word jij de 100-man.</p></div>
+      <ul class="steps">
+        <li><b>Iemand anders gooit een honderdtal</b> (200 t/m 600)? De 100-man drinkt zoveel slokken. <span class="mini" data-dice="3,3"></span> 300 = 3 slokken.</li>
+        <li><b>De 100-man gooit zelf een honderdtal?</b> Dan mag hij die slokken uitdelen.</li>
+        <li><b>De 100-man gooit zelf weer 100?</b> Dan mag hij iemand "meenemen" als extra 100-man. Die drinkt altijd mee, maar de twee regels hierboven gelden niet voor hem.</li>
+        <li><b>Weggaan als 100-man?</b> Vraag het iedereen. Wil er nog één iemand door, dan blijf je. Ga je toch, dan krijg je een <b>stille meter</b>.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="rule-h"><span class="rn">6</span>Huis</h2>
+      <p>Bij "huis" drink je <b>al het bier op tafel</b> op (behalve de pitchers). Er zijn drie manieren:</p>
+      <div class="house">
+        <div><div class="k">Huis gecalled</div><div class="seq"><span data-dice="5,4"></span><span data-dice="5,4"></span><span data-dice="5,4"></span></div><p>Een medespeler roept "huis" vóór je derde worp, en je gooit drie keer <b>precies hetzelfde</b>. Jij drinkt.</p></div>
+        <div><div class="k">Drie keer 9</div><div class="seq"><span data-dice="5,4"></span><span data-dice="6,3"></span><span data-dice="5,4"></span></div><p>Drie worpen in je beurt die samen <b>9 ogen</b> hebben (5+4 of 6+3). Jij drinkt.</p></div>
+        <div><div class="k">Drie keer 31</div><div class="seq"><span data-dice="3,1"></span><span data-dice="3,1"></span><span data-dice="3,1"></span></div><p>Je gooit drie keer achter elkaar <b>31</b>. Dan mag jij een huis <b>uitdelen</b>.</p></div>
+      </div>
+    </section>
+  </div>
+</div>
+
 <footer class="wrap" id="foot"></footer>
 
 <dialog class="team" id="teamDialog" aria-labelledby="dlg-title">
@@ -682,6 +876,30 @@ function renderTopscorers(){
       ${ons !== null && ons !== w.goals.length ? `<div class="ts-warn">${w.goals.length} van de ${ons} doelpunten ingevuld</div>` : ""}</div>`;
   }).join("");
 }
+
+
+/* ---------- Dobbelstenen (SVG) ---------- */
+const PIPS = {1:[[50,50]],2:[[28,28],[72,72]],3:[[28,28],[50,50],[72,72]],4:[[28,28],[72,28],[28,72],[72,72]],5:[[28,28],[72,28],[50,50],[28,72],[72,72]],6:[[28,26],[72,26],[28,50],[72,50],[28,74],[72,74]]};
+const dieSvg = (n, keep) => `<svg class="die${keep ? " keep" : ""}" viewBox="0 0 100 100" role="img" aria-label="${n}"><rect x="5" y="5" width="90" height="90" rx="18"/>${PIPS[n].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="9"/>`).join("")}</svg>`;
+document.querySelectorAll("[data-dice]").forEach(el => {
+  const keep = Number(el.dataset.keep || 0);
+  el.classList.add("dice");
+  el.innerHTML = el.dataset.dice.split(",").map(Number).map(n => dieSvg(n, n === keep)).join("");
+});
+
+/* ---------- Pagina's: home, regels, mex ---------- */
+const VIEWS = ["regels", "mex"];
+function showView(){
+  const h = location.hash.replace("#", "");
+  const view = VIEWS.includes(h) ? h : "home";
+  document.getElementById("view-home").hidden = view !== "home";
+  for (const v of VIEWS) document.getElementById(`view-${v}`).hidden = view !== v;
+  document.querySelectorAll("[data-view-link]").forEach(a => a.dataset.viewLink === view ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
+  if (view !== "home") window.scrollTo(0, 0);
+  else if (h) document.getElementById(h)?.scrollIntoView();
+}
+window.addEventListener("hashchange", showView);
+showView();
 
 /* ---------- Gegevens laden ---------- */
 const LITERS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=224456486&single=true&output=csv";
