@@ -586,6 +586,36 @@ nav.bar a[aria-current="page"]{color:#fff;border-bottom-color:var(--orange)}
 body.pong-actief{overflow:hidden}
 body.pong-actief .tabbar{display:none}
 
+/* ---------- Kameel & ezel ---------- */
+.kz-banner-wrap{grid-column:1/-1}
+.kz-banner-wrap:empty{display:none}
+.kz-banner{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;background:var(--orange);color:var(--ink);border-radius:var(--r);padding:14px 18px;text-decoration:none}
+.kz-banner > span:first-child{font-size:1.8rem}
+.kz-banner small{color:rgba(22,54,80,.8);font-weight:600}
+.kz-banner.done{background:var(--orange-soft);border:1px solid #f3c98f}
+.kz-go{font-weight:800}
+.kz-open{display:grid;gap:14px}
+.kz-head{background:var(--ink);color:#fff;border-radius:14px;padding:16px 20px}
+.kz-head .k{font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange)}
+.kz-match{font-family:var(--font-display);font-weight:800;font-size:1.45rem}
+.kz-match .team-link{color:#fff}.kz-match .team-link.ours{color:var(--orange)}
+.kz-when{font-size:.85rem;color:rgba(255,255,255,.7)}
+#kz-form{display:grid;gap:16px;border:1px solid var(--line);border-radius:14px;padding:16px}
+.kz-sec h3{font-size:1.15rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.kz-sec p{margin:2px 0 10px;color:var(--muted);font-size:.9rem}
+.kz-grid{display:flex;flex-wrap:wrap;gap:6px}
+.kz-chip{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-weight:600;font-size:.9rem;background:#fff}
+.kz-chip:hover{background:var(--bg)}
+.kz-chip:focus-visible{outline:2px solid var(--orange)}
+[data-veld="kameel"] .kz-chip.on{background:var(--orange);border-color:var(--orange);color:var(--ink)}
+[data-veld="ezel"] .kz-chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.kz-win{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 0 calc(4.6rem + 10px)}
+.kz-badge{border-radius:999px;padding:3px 11px;font-weight:700;font-size:.86rem}
+.kz-badge.kameel{background:var(--orange-soft);border:1px solid #f3c98f}
+.kz-badge.ezel{background:var(--sky-soft);border:1px solid #c9dfeb}
+.kz-n{font-size:.78rem;color:var(--muted)}
+@media (max-width:900px){ .kz-win{margin-left:0} }
+
 footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 
 @media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
@@ -652,6 +682,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
     <li><a href="#spelers" data-view-link="spelers">Spelers</a></li>
     <li class="nav-sep" aria-hidden="true"></li>
     <li><a href="#toto" data-view-link="toto">Toto</a></li>
+    <li><a href="#stemmen" data-view-link="stemmen">Kameel &amp; ezel</a></li>
     <li><a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a></li>
     <li><a href="#regels" data-view-link="regels">Kamelen-regels</a></li>
     <li><a href="#mex" data-view-link="mex">Mex</a></li>
@@ -671,6 +702,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 </section>
 
 <main class="wrap">
+  <div id="kz-banner" data-page="home" class="kz-banner-wrap"></div>
   <section class="dash" id="dash" data-page="home" aria-label="Overzicht"></section>
   <section class="card" id="programma" data-page="wedstrijden" aria-labelledby="h-programma">
     <div class="card-head"><div><h2 id="h-programma">Programma</h2><p>Klik op een team voor alle wedstrijden</p></div><div id="prog-toggle"></div></div>
@@ -743,6 +775,18 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
       <p>Voorspel vóór elke wedstrijd de uitslag. Precies goed levert 3 punten op, de juiste winnaar of een gelijkspel 1 punt.</p>
     </header>
     <section class="card"><div id="toto"></div></section>
+  </div>
+</div>
+
+<!-- ================= KAMEEL & EZEL ================= -->
+<div id="view-stemmen" class="view" hidden>
+  <div class="wrap page page-wide">
+    <header class="page-head">
+      <div class="eyebrow">Na elke wedstrijd</div>
+      <h1>Kameel &amp; ezel van de dag</h1>
+      <p>Stem na de wedstrijd op de kameel van de dag (de beste of leukste) en de ezel van de dag. De ezel moet een liter trekken. Wie aan het einde van het seizoen het vaakst kameel van de dag was, wint een prijs.</p>
+    </header>
+    <section class="card"><div id="stemmen"></div></section>
   </div>
 </div>
 
@@ -831,7 +875,18 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
     </section>
 
     <section class="card">
-      <h2 class="rule-h"><span class="rn">3</span>Boete betalen</h2>
+      <h2 class="rule-h"><span class="rn">3</span>Kameel en ezel van de dag</h2>
+      <ul class="steps">
+        <li>Na elke wedstrijd stemt iedereen in de app op de <b>kameel van de dag</b> (de beste of leukste Kameel) en de <b>ezel van de dag</b>.</li>
+        <li>Stemmen kan vanaf ruim een uur na de aftrap tot <b>24 uur</b> na de aftrap. Op jezelf stemmen mag niet; je laatste stem telt.</li>
+        <li>De <b>ezel van de dag</b> moet <span class="fine">1 liter</span> trekken. Die komt vanzelf in het literklassement.</li>
+        <li>Gelijke stand? Dan delen ze de titel, en bij de ezel trekken ze allebei een liter.</li>
+        <li>Wie aan het einde van het seizoen het vaakst <b>kameel van de dag</b> is geweest, wint een <b>prijs</b>.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2 class="rule-h"><span class="rn">4</span>Boete betalen</h2>
       <p>Je betaalt je boete met je <b>persoonlijke pas</b> of via de <b>WBW</b>. Zodra het betaald is, komt er "gedaan" achter in de sheet en kleurt het in het literklassement van open naar gedaan.</p>
     </section>
   </div>
@@ -944,6 +999,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
   <a href="#topscorers" data-view-link="topscorers">Topscorers</a>
   <a href="#liters" data-view-link="liters">Literklassement</a>
   <a href="#spelers" data-view-link="spelers">Spelers</a>
+  <a href="#stemmen" data-view-link="stemmen">Kameel &amp; ezel</a>
   <a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a>
   <a href="#mex" data-view-link="mex">Mex</a>
   <a href="#pong" data-view-link="pong">Pong teams</a>
@@ -1704,7 +1760,7 @@ document.querySelectorAll("[data-dice]").forEach(el => {
 });
 
 /* ---------- Pagina's: home, regels, mex ---------- */
-const VIEWS = ["spelers", "toto", "voorspeller", "regels", "mex", "pong"];
+const VIEWS = ["spelers", "toto", "stemmen", "voorspeller", "regels", "mex", "pong"];
 const HOME_PAGES = ["home", "wedstrijden", "stand", "topscorers", "liters"];
 /* Oude links (#programma, #uitslagen, #seizoen, #wedstrijd) blijven werken */
 const PAGE_OF = { "": "home", home: "home", wedstrijd: "home", programma: "wedstrijden", uitslagen: "wedstrijden", wedstrijden: "wedstrijden", stand: "stand", seizoen: "stand", topscorers: "topscorers", liters: "liters" };
@@ -1751,7 +1807,7 @@ Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("ops
     (DATA.doelpunten || []).forEach(w => w.goals.forEach(g => { g.wie = canon(g.wie); }));
     if (!comp.programma && !DATA.liters) throw new Error("geen gegevens");
     if (DATA.competitie) document.getElementById("league").textContent = DATA.competitie;
-    renderStats(); renderNext(); renderProgram(); renderResults(); renderStandings(); renderTopscorers(); renderLiters(); initPredictor(); renderSeason(); renderPlayers(); initAgenda(); window.renderMex?.(); window.renderToto?.(); renderDash(); confettiNaWinst();
+    renderStats(); renderNext(); renderProgram(); renderResults(); renderStandings(); renderTopscorers(); renderLiters(); initPredictor(); renderSeason(); renderPlayers(); initAgenda(); window.renderMex?.(); window.renderToto?.(); renderDash(); confettiNaWinst(); DATA.litersBasis = DATA.liters; window.renderStemmen?.();
     const f = x => { const d = new Date(x); return isNaN(d) ? "onbekend" : d.toLocaleString("nl-NL",{dateStyle:"long",timeStyle:"short",timeZone:"Europe/Amsterdam"}); };
     document.getElementById("foot").textContent = `Competitie: laatste wijziging ${f(DATA.competitieBijgewerkt)} (bron hockey.nl) · Literklassement en topscorers: ${live ? "live uit de spreadsheet" : "bijgewerkt " + f(DATA.bijgewerkt)}`;
   })
@@ -1777,9 +1833,17 @@ window.TOTO_CONFIG = {
   form: "https://docs.google.com/forms/d/e/1FAIpQLSd0MoRKGN7U_xdim-PoeB3guQjU1UcHcUKLICAt-X_1RrFRDg/viewform",
   csv: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWb-e6CJxfZblU3eZdDwDu_RT0AQQK536xoumOq2_NqyejB-K2H3CAfxf5UrlpWKW1i_XbvMUfQBpj/pub?gid=857837356&single=true&output=csv"
 };
+/* Eén keer ophalen uit de opslag, gedeeld door toto en stemmen */
+let _api = null;
+window.kamelenApi = (vers) => {
+  if (!window.TOTO_CONFIG?.api) return Promise.resolve({});
+  if (!_api || vers) _api = fetch(window.TOTO_CONFIG.api + (vers ? "?t=" + Date.now() : ""), { cache: "no-store" }).then(r => r.json()).catch(() => ({}));
+  return _api;
+};
 </script>
 <script src="mex.js"></script>
 <script src="toto.js"></script>
 <script src="pong.js"></script>
+<script src="stemmen.js"></script>
 </body>
 </html>

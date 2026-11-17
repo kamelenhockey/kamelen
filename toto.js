@@ -157,7 +157,7 @@
       }
       e.naam = naam; e.code = code; e.voorsp = { ...(e.voorsp || {}), [sleutel(m)]: { voor, tegen } }; bewaarEigen(e);
       st.textContent = "Opgeslagen!";
-      setTimeout(() => window.renderToto(), 600);
+      setTimeout(() => { window.kamelenApi(true); window.renderToto(); }, 600);
     } catch {
       st.textContent = "Geen verbinding. Probeer het zo nog eens.";
       knop.disabled = false;
@@ -172,7 +172,7 @@
   window.renderToto = async function () {
     const lijst = [];
     if (CFG.csv) { try { const t = await fetch(CFG.csv, { cache: "no-store" }).then(r => r.ok ? r.text() : ""); lijst.push(...leesReacties(parseCsv(t))); } catch {} }
-    if (CFG.api) { try { const j = await fetch(CFG.api, { cache: "no-store" }).then(r => r.json()); lijst.push(...vanApi(j)); } catch {} }
+    if (CFG.api) { try { const j = await window.kamelenApi(); lijst.push(...vanApi(j)); } catch {} }
     render(lijst);
   };
 })();
