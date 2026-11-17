@@ -2,8 +2,11 @@ name: Competitie bijwerken
 
 on:
   schedule:
-    # Elke zondag 21:00 UTC = 22:00 Nederlandse wintertijd (23:00 zomertijd)
-    - cron: "0 21 * * 0"
+    # Tijden in UTC (Nederland = UTC+1 in de winter, UTC+2 in de zomer).
+    # Za en zo (wedstrijddagen): elk half uur van ca. 09:00 tot 00:00 NL-tijd
+    - cron: "15,45 8-22 * * 0,6"
+    # Overige dagen (inhaalwedstrijden, programmawijzigingen): elk uur van ca. 08:00 tot 00:00 NL-tijd
+    - cron: "15 7-22 * * 1-5"
   workflow_dispatch: {}
   # Ook draaien als het script of deze workflow wordt aangepast
   push:

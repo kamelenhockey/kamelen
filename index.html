@@ -493,16 +493,35 @@ function renderLiters(data){
   }));
 }
 
-/* Drie bestanden: competitie (zondag automatisch), liters (donderdag automatisch), opstelling (handmatig) */
+/* Literklassement live uit de gepubliceerde spreadsheet; lukt dat niet, dan liters.json (door GitHub bijgehouden) */
+const LITERS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=224456486&single=true&output=csv";
+function parseCsv(t){
+  const rows=[];let row=[],f="",q=false;
+  for(let i=0;i<t.length;i++){const c=t[i];
+    if(q){ if(c==='"'&&t[i+1]==='"'){f+='"';i++;} else if(c==='"') q=false; else f+=c; }
+    else if(c==='"') q=true; else if(c===","){row.push(f);f="";}
+    else if(c==="\n"||c==="\r"){ if(c==="\r"&&t[i+1]==="\n") i++; row.push(f);rows.push(row);row=[];f=""; }
+    else f+=c; }
+  if(f!==""||row.length){row.push(f);rows.push(row);}
+  return rows;
+}
+async function loadLitersLive(){
+  const r = await fetch(LITERS_CSV, {cache:"no-store"});
+  if (!r.ok) throw new Error(r.status);
+  const rows = parseCsv(await r.text()).slice(1).filter(x => (x[0]||"").trim());
+  if (!rows.length) throw new Error("leeg");
+  return { liters: rows.map(x => ({naam:x[0]||"",datum:x[1]||"",reden:x[2]||"",hoeveel:x[3]||"",status:x[4]||""})), live: true };
+}
 const load = f => fetch(f, {cache:"no-store"}).then(r => r.ok ? r.json() : {}).catch(() => ({}));
-Promise.all([load("competitie.json"), load("liters.json"), load("opstelling.json")])
-  .then(([comp, lit, ops]) => {
-    const data = { ...comp, ...lit, opstelling: ops.spelers || [], opstellingWedstrijd: ops.wedstrijd || null };
-    if (!comp.programma && !lit.liters) throw new Error("geen gegevens");
+Promise.all([load("competitie.json"), load("liters.json"), load("opstelling.json"), loadLitersLive().catch(() => null)])
+  .then(([comp, lit, ops, live]) => {
+    const data = { ...comp, ...lit, ...(live ? {liters: live.liters} : {}), opstelling: ops.spelers || [], opstellingWedstrijd: ops.wedstrijd || null };
+    if (!comp.programma && !data.liters) throw new Error("geen gegevens");
     if (data.competitie) document.getElementById("league").textContent = data.competitie;
     renderStats(data); renderNext(data); renderProgram(data); renderResults(data); renderStandings(data); renderLiters(data);
     const f = x => { const d = new Date(x); return isNaN(d) ? "onbekend" : d.toLocaleString("nl-NL",{dateStyle:"long",timeStyle:"short",timeZone:"Europe/Amsterdam"}); };
-    document.getElementById("foot").textContent = `Competitie bijgewerkt: ${f(data.competitieBijgewerkt)} · Literklassement bijgewerkt: ${f(data.bijgewerkt)}`;
+    document.getElementById("foot").textContent =
+      `Competitie: laatste wijziging ${f(data.competitieBijgewerkt)} (bron hockey.nl) · Literklassement: ${live ? "live uit de spreadsheet" : "bijgewerkt " + f(data.bijgewerkt)}`;
   })
   .catch(() => {
     document.querySelector("main").insertAdjacentHTML("afterbegin",

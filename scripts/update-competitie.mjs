@@ -82,5 +82,10 @@ const nieuw = {
   puntenAftrek: berekenAftrek(stand, uitslagen),
   competitieBijgewerkt: new Date().toISOString(),
 };
+const zonderTijd = o => JSON.stringify({ ...o, competitieBijgewerkt: null });
+if (zonderTijd(nieuw) === zonderTijd(oud)) {
+  console.log("Geen wijzigingen op hockey.nl.");
+  process.exit(0);
+}
 await writeFile("competitie.json", JSON.stringify(nieuw, null, 1) + "\n");
 console.log(`Programma: ${programma.length}, uitslagen: ${uitslagen.length}, stand: ${stand.length} teams (per ${standPer}).`);

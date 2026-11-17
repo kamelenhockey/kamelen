@@ -2,8 +2,9 @@ name: Literklassement bijwerken
 
 on:
   schedule:
-    # Elke donderdag 20:00 UTC = 21:00 Nederlandse wintertijd (22:00 zomertijd)
-    - cron: "0 20 * * 4"
+    # Reservekopie van het literklassement (de site leest de spreadsheet ook live).
+    # Elke dag 20:00 UTC = 21:00 NL-wintertijd
+    - cron: "0 20 * * *"
   workflow_dispatch: {}
   # Ook draaien als het script of deze workflow wordt aangepast
   push:
