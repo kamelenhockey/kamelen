@@ -1,0 +1,33 @@
+name: Literklassement bijwerken
+
+on:
+  schedule:
+    # Elke donderdag 20:00 UTC = 21:00 Nederlandse wintertijd (22:00 zomertijd)
+    - cron: "0 20 * * 4"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/update-liters.mjs
+        env:
+          LITERS_CSV_URL: ${{ vars.LITERS_CSV_URL }}
+      - name: Wijzigingen opslaan
+        run: |
+          git config user.name "kamelen-bot"
+          git config user.email "kamelen-bot@users.noreply.github.com"
+          git add liters.json
+          git diff --staged --quiet || (git commit -m "Literklassement bijgewerkt" && git pull --rebase && git push)

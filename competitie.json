@@ -1,0 +1,892 @@
+{
+ "competitie": "Heren Reserve 1e klasse – Poule A (Noord-Oost Nederland)",
+ "onsTeam": "GCHC H13",
+ "hockeyNlUrl": "https://www.hockey.nl/match-center#/team/21368|182976/program",
+ "programma": [
+  {
+   "datum": "2026-11-17",
+   "thuis": "GCHC H13",
+   "tijd": "19:00",
+   "uit": "Eemsmond H1"
+  },
+  {
+   "datum": "2026-11-22",
+   "thuis": "GHBS H13",
+   "tijd": "09:00",
+   "uit": "GCHC H13"
+  },
+  {
+   "datum": "2026-11-22",
+   "thuis": "Leeuwarden H2-O",
+   "tijd": "12:45",
+   "uit": "Emmen H1"
+  },
+  {
+   "datum": "2026-11-22",
+   "thuis": "Eemsmond H1",
+   "tijd": "13:00",
+   "uit": "Sneek H1"
+  },
+  {
+   "datum": "2026-11-22",
+   "thuis": "HCSO H1",
+   "tijd": "13:00",
+   "uit": "GHBS H12"
+  },
+  {
+   "datum": "2026-11-22",
+   "thuis": "GHBS H11",
+   "tijd": "14:45",
+   "uit": "Daring H1"
+  },
+  {
+   "datum": "2026-11-22",
+   "thuis": "Gron.Studs H7",
+   "tijd": "17:15",
+   "uit": "GHBS H14"
+  },
+  {
+   "datum": "2026-11-29",
+   "thuis": "GHBS H14",
+   "tijd": "10:45",
+   "uit": "GHBS H11"
+  },
+  {
+   "datum": "2026-11-29",
+   "thuis": "GHBS H12",
+   "tijd": "12:45",
+   "uit": "Gron.Studs H7"
+  },
+  {
+   "datum": "2026-11-29",
+   "thuis": "Daring H1",
+   "tijd": "13:00",
+   "uit": "Eemsmond H1"
+  },
+  {
+   "datum": "2026-11-29",
+   "thuis": "Sneek H1",
+   "tijd": "14:00",
+   "uit": "GHBS H13"
+  },
+  {
+   "datum": "2026-11-29",
+   "thuis": "Emmen H1",
+   "tijd": "14:45",
+   "uit": "HCSO H1"
+  },
+  {
+   "datum": "2026-11-29",
+   "thuis": "GCHC H13",
+   "tijd": "15:30",
+   "uit": "Leeuwarden H2-O"
+  },
+  {
+   "datum": "2027-02-28",
+   "thuis": "Daring H1",
+   "tijd": null,
+   "uit": "Gron.Studs H7"
+  },
+  {
+   "datum": "2027-03-07",
+   "thuis": "Daring H1",
+   "tijd": null,
+   "uit": "GHBS H13"
+  },
+  {
+   "datum": "2027-03-07",
+   "thuis": "GHBS H12",
+   "tijd": null,
+   "uit": "GHBS H11"
+  },
+  {
+   "datum": "2027-03-07",
+   "thuis": "GCHC H13",
+   "tijd": null,
+   "uit": "Sneek H1"
+  },
+  {
+   "datum": "2027-03-07",
+   "thuis": "GHBS H14",
+   "tijd": null,
+   "uit": "Eemsmond H1"
+  },
+  {
+   "datum": "2027-03-07",
+   "thuis": "Leeuwarden H2-O",
+   "tijd": "12:30",
+   "uit": "HCSO H1"
+  },
+  {
+   "datum": "2027-03-07",
+   "thuis": "Emmen H1",
+   "tijd": "14:45",
+   "uit": "Gron.Studs H7"
+  },
+  {
+   "datum": "2027-03-14",
+   "thuis": "Sneek H1",
+   "tijd": null,
+   "uit": "Daring H1"
+  },
+  {
+   "datum": "2027-03-14",
+   "thuis": "HCSO H1",
+   "tijd": null,
+   "uit": "GCHC H13"
+  },
+  {
+   "datum": "2027-03-14",
+   "thuis": "Gron.Studs H7",
+   "tijd": null,
+   "uit": "Leeuwarden H2-O"
+  },
+  {
+   "datum": "2027-03-14",
+   "thuis": "GHBS H11",
+   "tijd": null,
+   "uit": "Emmen H1"
+  },
+  {
+   "datum": "2027-03-14",
+   "thuis": "GHBS H13",
+   "tijd": null,
+   "uit": "GHBS H14"
+  },
+  {
+   "datum": "2027-03-14",
+   "thuis": "Eemsmond H1",
+   "tijd": "15:00",
+   "uit": "GHBS H12"
+  },
+  {
+   "datum": "2027-03-21",
+   "thuis": "HCSO H1",
+   "tijd": null,
+   "uit": "Gron.Studs H7"
+  },
+  {
+   "datum": "2027-03-21",
+   "thuis": "GHBS H12",
+   "tijd": null,
+   "uit": "GHBS H13"
+  },
+  {
+   "datum": "2027-03-21",
+   "thuis": "GCHC H13",
+   "tijd": null,
+   "uit": "Daring H1"
+  },
+  {
+   "datum": "2027-03-21",
+   "thuis": "GHBS H14",
+   "tijd": null,
+   "uit": "Sneek H1"
+  },
+  {
+   "datum": "2027-03-21",
+   "thuis": "Leeuwarden H2-O",
+   "tijd": "12:45",
+   "uit": "GHBS H11"
+  },
+  {
+   "datum": "2027-03-21",
+   "thuis": "Emmen H1",
+   "tijd": "14:45",
+   "uit": "Eemsmond H1"
+  },
+  {
+   "datum": "2027-04-04",
+   "thuis": "Sneek H1",
+   "tijd": null,
+   "uit": "GHBS H12"
+  },
+  {
+   "datum": "2027-04-04",
+   "thuis": "Daring H1",
+   "tijd": null,
+   "uit": "GHBS H14"
+  },
+  {
+   "datum": "2027-04-04",
+   "thuis": "Gron.Studs H7",
+   "tijd": null,
+   "uit": "GCHC H13"
+  },
+  {
+   "datum": "2027-04-04",
+   "thuis": "GHBS H11",
+   "tijd": null,
+   "uit": "HCSO H1"
+  },
+  {
+   "datum": "2027-04-04",
+   "thuis": "GHBS H13",
+   "tijd": null,
+   "uit": "Emmen H1"
+  },
+  {
+   "datum": "2027-04-04",
+   "thuis": "Eemsmond H1",
+   "tijd": "15:00",
+   "uit": "Leeuwarden H2-O"
+  },
+  {
+   "datum": "2027-04-11",
+   "thuis": "HCSO H1",
+   "tijd": null,
+   "uit": "Eemsmond H1"
+  },
+  {
+   "datum": "2027-04-11",
+   "thuis": "Gron.Studs H7",
+   "tijd": null,
+   "uit": "GHBS H11"
+  },
+  {
+   "datum": "2027-04-11",
+   "thuis": "GHBS H12",
+   "tijd": null,
+   "uit": "Daring H1"
+  },
+  {
+   "datum": "2027-04-11",
+   "thuis": "GCHC H13",
+   "tijd": null,
+   "uit": "GHBS H14"
+  },
+  {
+   "datum": "2027-04-11",
+   "thuis": "Leeuwarden H2-O",
+   "tijd": "12:45",
+   "uit": "GHBS H13"
+  },
+  {
+   "datum": "2027-04-11",
+   "thuis": "Emmen H1",
+   "tijd": "14:45",
+   "uit": "Sneek H1"
+  },
+  {
+   "datum": "2027-04-18",
+   "thuis": "Daring H1",
+   "tijd": null,
+   "uit": "Emmen H1"
+  },
+  {
+   "datum": "2027-04-18",
+   "thuis": "Sneek H1",
+   "tijd": null,
+   "uit": "Leeuwarden H2-O"
+  },
+  {
+   "datum": "2027-04-18",
+   "thuis": "GHBS H11",
+   "tijd": null,
+   "uit": "GCHC H13"
+  },
+  {
+   "datum": "2027-04-18",
+   "thuis": "GHBS H13",
+   "tijd": null,
+   "uit": "HCSO H1"
+  },
+  {
+   "datum": "2027-04-18",
+   "thuis": "GHBS H14",
+   "tijd": null,
+   "uit": "GHBS H12"
+  },
+  {
+   "datum": "2027-04-18",
+   "thuis": "Eemsmond H1",
+   "tijd": "15:00",
+   "uit": "Gron.Studs H7"
+  },
+  {
+   "datum": "2027-05-09",
+   "thuis": "HCSO H1",
+   "tijd": null,
+   "uit": "Sneek H1"
+  },
+  {
+   "datum": "2027-05-09",
+   "thuis": "Gron.Studs H7",
+   "tijd": null,
+   "uit": "GHBS H13"
+  },
+  {
+   "datum": "2027-05-09",
+   "thuis": "GHBS H11",
+   "tijd": null,
+   "uit": "Eemsmond H1"
+  },
+  {
+   "datum": "2027-05-09",
+   "thuis": "GCHC H13",
+   "tijd": null,
+   "uit": "GHBS H12"
+  },
+  {
+   "datum": "2027-05-09",
+   "thuis": "Leeuwarden H2-O",
+   "tijd": "12:45",
+   "uit": "Daring H1"
+  },
+  {
+   "datum": "2027-05-09",
+   "thuis": "Emmen H1",
+   "tijd": "14:45",
+   "uit": "GHBS H14"
+  },
+  {
+   "datum": "2027-05-23",
+   "thuis": "Daring H1",
+   "tijd": null,
+   "uit": "HCSO H1"
+  },
+  {
+   "datum": "2027-05-23",
+   "thuis": "Sneek H1",
+   "tijd": null,
+   "uit": "Gron.Studs H7"
+  },
+  {
+   "datum": "2027-05-23",
+   "thuis": "GHBS H12",
+   "tijd": null,
+   "uit": "Emmen H1"
+  },
+  {
+   "datum": "2027-05-23",
+   "thuis": "GHBS H13",
+   "tijd": null,
+   "uit": "GHBS H11"
+  },
+  {
+   "datum": "2027-05-23",
+   "thuis": "GHBS H14",
+   "tijd": null,
+   "uit": "Leeuwarden H2-O"
+  },
+  {
+   "datum": "2027-05-23",
+   "thuis": "Eemsmond H1",
+   "tijd": "15:00",
+   "uit": "GCHC H13"
+  },
+  {
+   "datum": "2027-05-30",
+   "thuis": "HCSO H1",
+   "tijd": null,
+   "uit": "GHBS H14"
+  },
+  {
+   "datum": "2027-05-30",
+   "thuis": "Gron.Studs H7",
+   "tijd": null,
+   "uit": "Daring H1"
+  },
+  {
+   "datum": "2027-05-30",
+   "thuis": "GHBS H11",
+   "tijd": null,
+   "uit": "Sneek H1"
+  },
+  {
+   "datum": "2027-05-30",
+   "thuis": "GCHC H13",
+   "tijd": null,
+   "uit": "Emmen H1"
+  },
+  {
+   "datum": "2027-05-30",
+   "thuis": "Leeuwarden H2-O",
+   "tijd": "12:45",
+   "uit": "GHBS H12"
+  },
+  {
+   "datum": "2027-05-30",
+   "thuis": "Eemsmond H1",
+   "tijd": "15:00",
+   "uit": "GHBS H13"
+  },
+  {
+   "datum": "2027-06-06",
+   "thuis": "Sneek H1",
+   "tijd": null,
+   "uit": "Eemsmond H1"
+  },
+  {
+   "datum": "2027-06-06",
+   "thuis": "Daring H1",
+   "tijd": null,
+   "uit": "GHBS H11"
+  },
+  {
+   "datum": "2027-06-06",
+   "thuis": "GHBS H12",
+   "tijd": null,
+   "uit": "HCSO H1"
+  },
+  {
+   "datum": "2027-06-06",
+   "thuis": "GCHC H13",
+   "tijd": null,
+   "uit": "GHBS H13"
+  },
+  {
+   "datum": "2027-06-06",
+   "thuis": "GHBS H14",
+   "tijd": null,
+   "uit": "Gron.Studs H7"
+  },
+  {
+   "datum": "2027-06-06",
+   "thuis": "Emmen H1",
+   "tijd": "14:45",
+   "uit": "Leeuwarden H2-O"
+  },
+  {
+   "datum": "2027-06-13",
+   "thuis": "HCSO H1",
+   "tijd": null,
+   "uit": "Emmen H1"
+  },
+  {
+   "datum": "2027-06-13",
+   "thuis": "Gron.Studs H7",
+   "tijd": null,
+   "uit": "GHBS H12"
+  },
+  {
+   "datum": "2027-06-13",
+   "thuis": "GHBS H11",
+   "tijd": null,
+   "uit": "GHBS H14"
+  },
+  {
+   "datum": "2027-06-13",
+   "thuis": "GHBS H13",
+   "tijd": null,
+   "uit": "Sneek H1"
+  },
+  {
+   "datum": "2027-06-13",
+   "thuis": "Leeuwarden H2-O",
+   "tijd": "14:30",
+   "uit": "GCHC H13"
+  },
+  {
+   "datum": "2027-06-13",
+   "thuis": "Eemsmond H1",
+   "tijd": "15:00",
+   "uit": "Daring H1"
+  }
+ ],
+ "uitslagen": [
+  {
+   "datum": "2026-11-15",
+   "thuis": "Emmen H1",
+   "score": "2-3",
+   "uit": "GCHC H13"
+  },
+  {
+   "datum": "2026-11-15",
+   "thuis": "GHBS H14",
+   "score": "4-3",
+   "uit": "HCSO H1"
+  },
+  {
+   "datum": "2026-11-15",
+   "thuis": "Sneek H1",
+   "score": "4-3",
+   "uit": "GHBS H11"
+  },
+  {
+   "datum": "2026-11-15",
+   "thuis": "GHBS H12",
+   "score": "4-1",
+   "uit": "Leeuwarden H2-O"
+  },
+  {
+   "datum": "2026-11-15",
+   "thuis": "GHBS H13",
+   "score": "3-0",
+   "uit": "Eemsmond H1"
+  },
+  {
+   "datum": "2026-11-08",
+   "thuis": "GHBS H11",
+   "score": "4-1",
+   "uit": "GHBS H13"
+  },
+  {
+   "datum": "2026-11-08",
+   "thuis": "HCSO H1",
+   "score": "12-0",
+   "uit": "Daring H1"
+  },
+  {
+   "datum": "2026-11-08",
+   "thuis": "Leeuwarden H2-O",
+   "score": "3-2",
+   "uit": "GHBS H14"
+  },
+  {
+   "datum": "2026-11-08",
+   "thuis": "Emmen H1",
+   "score": "2-2",
+   "uit": "GHBS H12"
+  },
+  {
+   "datum": "2026-11-08",
+   "thuis": "Gron.Studs H7",
+   "score": "2-2",
+   "uit": "Sneek H1"
+  },
+  {
+   "datum": "2026-11-01",
+   "thuis": "GHBS H14",
+   "score": "6-0",
+   "uit": "Emmen H1"
+  },
+  {
+   "datum": "2026-11-01",
+   "thuis": "GHBS H13",
+   "score": "5-0",
+   "uit": "Gron.Studs H7"
+  },
+  {
+   "datum": "2026-11-01",
+   "thuis": "Eemsmond H1",
+   "score": "4-7",
+   "uit": "GHBS H11"
+  },
+  {
+   "datum": "2026-11-01",
+   "thuis": "Sneek H1",
+   "score": "3-2",
+   "uit": "HCSO H1"
+  },
+  {
+   "datum": "2026-11-01",
+   "thuis": "Daring H1",
+   "score": "1-3",
+   "uit": "Leeuwarden H2-O"
+  },
+  {
+   "datum": "2026-11-01",
+   "thuis": "GHBS H12",
+   "score": "0-3",
+   "uit": "GCHC H13"
+  },
+  {
+   "datum": "2026-10-25",
+   "thuis": "Gron.Studs H7",
+   "score": "3-2",
+   "uit": "Eemsmond H1"
+  },
+  {
+   "datum": "2026-10-25",
+   "thuis": "GHBS H12",
+   "score": "3-6",
+   "uit": "GHBS H14"
+  },
+  {
+   "datum": "2026-10-25",
+   "thuis": "GCHC H13",
+   "score": "3-1",
+   "uit": "GHBS H11"
+  },
+  {
+   "datum": "2026-10-25",
+   "thuis": "Leeuwarden H2-O",
+   "score": "1-3",
+   "uit": "Sneek H1"
+  },
+  {
+   "datum": "2026-10-25",
+   "thuis": "HCSO H1",
+   "score": "5-2",
+   "uit": "GHBS H13"
+  },
+  {
+   "datum": "2026-10-25",
+   "thuis": "Emmen H1",
+   "score": "1-0",
+   "uit": "Daring H1"
+  },
+  {
+   "datum": "2026-10-18",
+   "thuis": "Daring H1",
+   "score": "1-6",
+   "uit": "GCHC H13"
+  },
+  {
+   "datum": "2026-10-18",
+   "thuis": "Leeuwarden H2-O",
+   "score": "2-1",
+   "uit": "Eemsmond H1"
+  },
+  {
+   "datum": "2026-10-04",
+   "thuis": "GHBS H13",
+   "score": "2-2",
+   "uit": "Leeuwarden H2-O"
+  },
+  {
+   "datum": "2026-10-04",
+   "thuis": "Daring H1",
+   "score": "2-5",
+   "uit": "GHBS H12"
+  },
+  {
+   "datum": "2026-10-04",
+   "thuis": "GHBS H14",
+   "score": "3-2",
+   "uit": "GCHC H13"
+  },
+  {
+   "datum": "2026-10-04",
+   "thuis": "Eemsmond H1",
+   "score": "2-6",
+   "uit": "HCSO H1"
+  },
+  {
+   "datum": "2026-10-04",
+   "thuis": "Sneek H1",
+   "score": "3-2",
+   "uit": "Emmen H1"
+  },
+  {
+   "datum": "2026-10-04",
+   "thuis": "GHBS H11",
+   "score": "4-1",
+   "uit": "Gron.Studs H7"
+  },
+  {
+   "datum": "2026-09-27",
+   "thuis": "GCHC H13",
+   "score": "1-1",
+   "uit": "Gron.Studs H7"
+  },
+  {
+   "datum": "2026-09-27",
+   "thuis": "Emmen H1",
+   "score": "6-0",
+   "uit": "GHBS H13"
+  },
+  {
+   "datum": "2026-09-27",
+   "thuis": "GHBS H12",
+   "score": "1-2",
+   "uit": "Sneek H1"
+  },
+  {
+   "datum": "2026-09-27",
+   "thuis": "HCSO H1",
+   "score": "3-3",
+   "uit": "GHBS H11"
+  },
+  {
+   "datum": "2026-09-27",
+   "thuis": "GHBS H14",
+   "score": "4-2",
+   "uit": "Daring H1"
+  },
+  {
+   "datum": "2026-09-20",
+   "thuis": "Gron.Studs H7",
+   "score": "2-1",
+   "uit": "HCSO H1"
+  },
+  {
+   "datum": "2026-09-20",
+   "thuis": "Sneek H1",
+   "score": "4-2",
+   "uit": "GHBS H14"
+  },
+  {
+   "datum": "2026-09-20",
+   "thuis": "Eemsmond H1",
+   "score": "3-9",
+   "uit": "Emmen H1"
+  },
+  {
+   "datum": "2026-09-20",
+   "thuis": "GHBS H13",
+   "score": "2-1",
+   "uit": "GHBS H12"
+  },
+  {
+   "datum": "2026-09-20",
+   "thuis": "GHBS H11",
+   "score": "1-1",
+   "uit": "Leeuwarden H2-O"
+  },
+  {
+   "datum": "2026-09-13",
+   "thuis": "GHBS H12",
+   "score": "8-1",
+   "uit": "Eemsmond H1"
+  },
+  {
+   "datum": "2026-09-13",
+   "thuis": "GHBS H14",
+   "score": "1-3",
+   "uit": "GHBS H13"
+  },
+  {
+   "datum": "2026-09-13",
+   "thuis": "Leeuwarden H2-O",
+   "score": "3-1",
+   "uit": "Gron.Studs H7"
+  },
+  {
+   "datum": "2026-09-13",
+   "thuis": "Emmen H1",
+   "score": "0-4",
+   "uit": "GHBS H11"
+  },
+  {
+   "datum": "2026-09-13",
+   "thuis": "Daring H1",
+   "score": "1-5",
+   "uit": "Sneek H1"
+  },
+  {
+   "datum": "2026-09-13",
+   "thuis": "GCHC H13",
+   "score": "1-8",
+   "uit": "HCSO H1"
+  },
+  {
+   "datum": "2026-09-06",
+   "thuis": "Gron.Studs H7",
+   "score": "1-3",
+   "uit": "Emmen H1"
+  },
+  {
+   "datum": "2026-09-06",
+   "thuis": "GHBS H13",
+   "score": "1-2",
+   "uit": "Daring H1"
+  },
+  {
+   "datum": "2026-09-06",
+   "thuis": "GHBS H11",
+   "score": "3-5",
+   "uit": "GHBS H12"
+  },
+  {
+   "datum": "2026-09-06",
+   "thuis": "Eemsmond H1",
+   "score": "2-6",
+   "uit": "GHBS H14"
+  },
+  {
+   "datum": "2026-09-06",
+   "thuis": "HCSO H1",
+   "score": "8-2",
+   "uit": "Leeuwarden H2-O"
+  },
+  {
+   "datum": "2026-09-06",
+   "thuis": "Sneek H1",
+   "score": "0-1",
+   "uit": "GCHC H13"
+  }
+ ],
+ "stand": [
+  {
+   "positie": 1,
+   "team": "Sneek H1",
+   "gespeeld": 9,
+   "punten": 22,
+   "doelsaldo": 11
+  },
+  {
+   "positie": 2,
+   "team": "GHBS H14",
+   "gespeeld": 9,
+   "punten": 18,
+   "doelsaldo": 12
+  },
+  {
+   "positie": 3,
+   "team": "HCSO H1",
+   "gespeeld": 9,
+   "punten": 16,
+   "doelsaldo": 29
+  },
+  {
+   "positie": 4,
+   "team": "GHBS H11",
+   "gespeeld": 9,
+   "punten": 14,
+   "doelsaldo": 8
+  },
+  {
+   "positie": 5,
+   "team": "Leeuwarden H2-O",
+   "gespeeld": 9,
+   "punten": 14,
+   "doelsaldo": -5
+  },
+  {
+   "positie": 6,
+   "team": "GCHC H13",
+   "gespeeld": 8,
+   "punten": 13,
+   "doelsaldo": 4
+  },
+  {
+   "positie": 7,
+   "team": "GHBS H12",
+   "gespeeld": 9,
+   "punten": 13,
+   "doelsaldo": 7
+  },
+  {
+   "positie": 8,
+   "team": "Emmen H1",
+   "gespeeld": 9,
+   "punten": 13,
+   "doelsaldo": 3
+  },
+  {
+   "positie": 9,
+   "team": "GHBS H13",
+   "gespeeld": 9,
+   "punten": 13,
+   "doelsaldo": -2
+  },
+  {
+   "positie": 10,
+   "team": "Gron.Studs H7",
+   "gespeeld": 8,
+   "punten": 8,
+   "doelsaldo": -10
+  },
+  {
+   "positie": 11,
+   "team": "Daring H1",
+   "gespeeld": 8,
+   "punten": 3,
+   "doelsaldo": -28
+  },
+  {
+   "positie": 12,
+   "team": "Eemsmond H1",
+   "gespeeld": 8,
+   "punten": 0,
+   "doelsaldo": -29
+  }
+ ],
+ "standPer": "15-11-2026",
+ "puntenAftrek": {
+  "GCHC H13": 3
+ },
+ "competitieBijgewerkt": "2026-11-17T13:50:00+01:00"
+}

@@ -1,0 +1,33 @@
+name: Competitie bijwerken
+
+on:
+  schedule:
+    # Elke zondag 21:00 UTC = 22:00 Nederlandse wintertijd (23:00 zomertijd)
+    - cron: "0 21 * * 0"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/update-competitie.mjs
+      - name: Wijzigingen opslaan
+        run: |
+          git config user.name "kamelen-bot"
+          git config user.email "kamelen-bot@users.noreply.github.com"
+          git add competitie.json
+          git diff --staged --quiet || (git commit -m "Competitie bijgewerkt" && git pull --rebase && git push)
