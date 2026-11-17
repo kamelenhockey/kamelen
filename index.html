@@ -1327,7 +1327,11 @@ function playerData(){
   for (const n of DATA.opstelling || []) get(n);
   const sel = new Set((DATA.opstelling || []).map(canon));
   return [...P.values()].map(p => ({...p, sel: sel.has(p.naam), invaller: ROSTER.size > 0 && !ROSTER.has(p.naam)}))
-    .sort((a,b) => b.goals.length - a.goals.length || (b.liters?.liters||0) - (a.liters?.liters||0) || a.naam.localeCompare(b.naam));
+    .sort((a,b) => {
+      /* Volgorde van spelers.json; invallers daarna op naam */
+      const order = [...ROSTER], ia = order.indexOf(a.naam), ib = order.indexOf(b.naam);
+      return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || a.naam.localeCompare(b.naam);
+    });
 }
 function playerCard(p){
   const initials = p.naam.split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase();
