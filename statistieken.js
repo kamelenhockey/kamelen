@@ -197,6 +197,10 @@
     box.innerHTML = `<div class="empty">Statistieken laden…</div>`;
     const lees = u => fetch(u, { cache: "no-store" }).then(r => r.ok ? r.text() : "").then(t => leesAfwezigheid(parseCsv(t))).catch(() => ({ sessies: [], invallers: [] }));
     const [wed, tr] = await Promise.all([lees(CFG.wedstrijden), lees(CFG.trainingen)]);
+    /* Alleen speeldagen waarop de Kamelen echt speelden (geen vrije speelronde) */
+    const speeldagen = new Set([...(DATA.uitslagen || []), ...(DATA.programma || [])].filter(m => isUs(m.thuis + m.uit)).map(m => m.datum));
+    wed.sessies = wed.sessies.filter(x => speeldagen.has(x.datum));
+    wed.invallers = wed.invallers.filter(x => speeldagen.has(x.datum));
     render(bereken(wed, tr));
   };
 })();
