@@ -1736,7 +1736,16 @@ Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("ops
     document.querySelector("main").insertAdjacentHTML("afterbegin", `<div class="card wide">${empty("De gegevens konden niet worden geladen", "Ververs de pagina om het opnieuw te proberen.")}</div>`);
   });
 /* ---------- App: offline bewaren ---------- */
-if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+if ("serviceWorker" in navigator) window.addEventListener("load", () => {
+  navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(reg => {
+    reg.update().catch(() => {});
+    /* Nieuwe versie geïnstalleerd: één keer herladen zodat je hem meteen ziet */
+    reg.addEventListener("updatefound", () => {
+      const nw = reg.installing;
+      nw?.addEventListener("statechange", () => { if (nw.state === "activated" && navigator.serviceWorker.controller && !sessionStorage.getItem("kamelen-herladen")) { sessionStorage.setItem("kamelen-herladen", "1"); location.reload(); } });
+    });
+  }).catch(() => {});
+});
 </script>
 <script>
 /* Toto-instellingen: link naar het Google-formulier en de gepubliceerde CSV van de antwoorden */
