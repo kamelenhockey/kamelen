@@ -7,6 +7,14 @@ const TEAM = "21368|182976";
 const BASIS = `https://www.hockey.nl/match-center#/team/${TEAM}`;
 
 async function leesTekst(page, tab, moetBevatten) {
+  // Max. 3 pogingen: het Match Center laadt soms traag
+  for (let poging = 1; ; poging++) {
+    try { return await leesTekstEenmaal(page, tab, moetBevatten); }
+    catch (e) { if (poging >= 3) throw e; console.log(`${tab}: poging ${poging} mislukt, opnieuw...`); await page.waitForTimeout(5000); }
+  }
+}
+
+async function leesTekstEenmaal(page, tab, moetBevatten) {
   await page.goto("about:blank");
   await page.goto(`${BASIS}/${tab}`, { waitUntil: "domcontentloaded" });
   await page.waitForFunction((woord) => {
