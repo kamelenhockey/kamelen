@@ -1,4 +1,4 @@
-name: Literklassement bijwerken
+name: Literklassement en doelpunten bijwerken
 
 on:
   schedule:
@@ -30,9 +30,12 @@ jobs:
       - run: node scripts/update-liters.mjs
         env:
           LITERS_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=224456486&single=true&output=csv"
+      - name: Doelpunten (reservekopie)
+        run: curl -fsSL "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9drQ8p4-okcLNq1_VMu-Hs50ffbdlPNfxF7hxUHGFDwTMtgA1Rf57k4xNIyS004_SVIWv2UMZGHBw/pub?gid=0&single=true&output=csv" -o doelpunten.csv || true
       - name: Wijzigingen opslaan
         run: |
           git config user.name "kamelen-bot"
           git config user.email "kamelen-bot@users.noreply.github.com"
           git add liters.json
+          [ -f doelpunten.csv ] && git add doelpunten.csv || true
           git diff --staged --quiet || (git commit -m "Literklassement bijgewerkt" && git pull --rebase && git push)
