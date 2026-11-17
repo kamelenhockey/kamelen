@@ -30,8 +30,10 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: node scripts/update-competitie.mjs
       - name: Wijzigingen opslaan
+        if: always()
         run: |
           git config user.name "kamelen-bot"
           git config user.email "kamelen-bot@users.noreply.github.com"
           git add competitie.json
+          [ -d debug ] && git add -f debug || true
           git diff --staged --quiet || (git commit -m "Competitie bijgewerkt" && git pull --rebase && git push)

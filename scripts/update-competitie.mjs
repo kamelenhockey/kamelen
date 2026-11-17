@@ -1,6 +1,6 @@
 // Leest programma, uitslagen en stand van hockey.nl en schrijft competitie.json.
 import { chromium } from "playwright";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { parseProgramma, parseUitslagen, parseStand, berekenAftrek, seizoenStartjaar } from "./parse.mjs";
 
 const TEAM = "21368|182976";
@@ -19,12 +19,41 @@ async function leesTekst(page, tab, moetBevatten) {
   return page.evaluate(() => [...document.querySelector("match-center").shadowRoot.children].map(c => c.innerText || "").join("\n"));
 }
 
+const log = [];
+async function debugOpslaan(page, fout) {
+  try {
+    await mkdir("debug", { recursive: true });
+    let tekst = "";
+    if (page) {
+      tekst = await page.evaluate(() => {
+        const mc = document.querySelector("match-center");
+        const sh = mc && mc.shadowRoot ? [...mc.shadowRoot.children].map(c => c.innerText || "").join("\n") : "(geen match-center/shadowRoot)";
+        return `URL: ${location.href}\nTITEL: ${document.title}\n--- BODY ---\n${document.body.innerText.slice(0, 3000)}\n--- MATCH CENTER ---\n${sh.slice(0, 3000)}`;
+      }).catch(e => `evaluate faalde: ${e}`);
+      await page.screenshot({ path: "debug/competitie.png", fullPage: false }).catch(() => {});
+    }
+    await writeFile("debug/competitie-log.txt", `${new Date().toISOString()}\nFOUT: ${fout?.stack || fout}\n\n${log.join("\n")}\n\n${tekst}\n`);
+  } catch {}
+}
+
 const browser = await chromium.launch();
-const page = await browser.newPage({ locale: "nl-NL", timezoneId: "Europe/Amsterdam", viewport: { width: 560, height: 3000 } });
+const page = await browser.newPage({
+  locale: "nl-NL", timezoneId: "Europe/Amsterdam", viewport: { width: 560, height: 3000 },
+  userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+});
+page.on("response", r => { if (r.status() >= 400) log.push(`HTTP ${r.status()} ${r.url().slice(0, 150)}`); });
+page.on("console", m => { if (m.type() === "error") log.push(`console: ${m.text().slice(0, 200)}`); });
 const startjaar = seizoenStartjaar();
-const programmaTekst = await leesTekst(page, "program", "Personaliseer weergave");
-const uitslagenTekst = await leesTekst(page, "results", "Personaliseer weergave");
-const overzichtTekst = await leesTekst(page, "overview", "Stand per");
+let programmaTekst, uitslagenTekst, overzichtTekst;
+try {
+  programmaTekst = await leesTekst(page, "program", "Personaliseer weergave");
+  uitslagenTekst = await leesTekst(page, "results", "Personaliseer weergave");
+  overzichtTekst = await leesTekst(page, "overview", "Stand per");
+} catch (e) {
+  await debugOpslaan(page, e);
+  await browser.close();
+  console.error(e); process.exit(1);
+}
 await browser.close();
 
 const programma = parseProgramma(programmaTekst, startjaar);
