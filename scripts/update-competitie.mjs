@@ -52,9 +52,11 @@ const page = await browser.newPage({
 page.on("response", r => { if (r.status() >= 400) log.push(`HTTP ${r.status()} ${r.url().slice(0, 150)}`); });
 page.on("console", m => { if (m.type() === "error") log.push(`console: ${m.text().slice(0, 200)}`); });
 const startjaar = seizoenStartjaar();
-let programmaTekst, uitslagenTekst, overzichtTekst;
+let programmaTekst, uitslagenTekst, overzichtTekst, wedstrijdLinks = [];
 try {
   programmaTekst = await leesTekst(page, "program", "Personaliseer weergave");
+  wedstrijdLinks = await page.evaluate(() => [...document.querySelector("match-center").shadowRoot.querySelectorAll('a[href^="#/match/"]')]
+    .map(a => ({ id: a.getAttribute("href").split("/").pop(), tekst: a.innerText || "" })));
   uitslagenTekst = await leesTekst(page, "results", "Personaliseer weergave");
   overzichtTekst = await leesTekst(page, "overview", "Stand per");
 } catch (e) {
@@ -62,9 +64,34 @@ try {
   await browser.close();
   console.error(e); process.exit(1);
 }
+// Veld en adres van onze eerstvolgende 3 wedstrijden (staan op de wedstrijdpagina)
+const ONS = /gchc/i;
+const progVoorlopig = parseProgramma(programmaTekst, startjaar);
+const details = {};
+const onze = progVoorlopig.filter(w => ONS.test(w.thuis + w.uit)).slice(0, 3);
+for (const w of onze) {
+  const link = wedstrijdLinks.find(l => l.tekst.includes(w.thuis) && l.tekst.includes(w.uit) && !Object.values(details).some(d => d.id === l.id));
+  if (!link) continue;
+  try {
+    await page.goto("about:blank");
+    await page.goto(`https://www.hockey.nl/match-center#/match/${link.id}`, { waitUntil: "domcontentloaded" });
+    await page.waitForFunction(() => {
+      const mc = document.querySelector("match-center");
+      return mc && mc.shadowRoot && [...mc.shadowRoot.children].map(c => c.innerText || "").join("\n").includes("Wedstrijdinfo");
+    }, null, { timeout: 30000 });
+    await page.waitForTimeout(1500);
+    const t = await page.evaluate(() => [...document.querySelector("match-center").shadowRoot.children].map(c => c.innerText || "").join("\n"));
+    const regels = t.split("\n").map(r => r.trim()).filter(Boolean);
+    const na = k => { const i = regels.indexOf(k); return i >= 0 ? regels[i + 1] : null; };
+    details[`${w.datum}|${w.thuis}|${w.uit}`] = { id: link.id, veld: na("Veld"), accommodatie: na("Accommodatie"), adres: na("Adres") };
+  } catch (e) { console.log(`Details ${w.thuis}-${w.uit} niet gelukt: ${e.message}`); }
+}
 await browser.close();
 
-const programma = parseProgramma(programmaTekst, startjaar);
+const programma = parseProgramma(programmaTekst, startjaar).map(w => {
+  const d = details[`${w.datum}|${w.thuis}|${w.uit}`];
+  return d ? { ...w, wedstrijdId: d.id, veld: d.veld, accommodatie: d.accommodatie, adres: d.adres } : w;
+});
 const uitslagen = parseUitslagen(uitslagenTekst, startjaar);
 const { stand, standPer } = parseStand(overzichtTekst);
 

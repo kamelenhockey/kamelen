@@ -75,6 +75,10 @@ nav.bar a:hover{color:#fff;border-bottom-color:var(--orange)}
 .md-meta{display:flex;flex-wrap:wrap;gap:8px}
 .tag{display:inline-flex;align-items:center;padding:4px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);font-weight:600;font-size:.86rem}
 .tag.hot{background:var(--orange);border-color:var(--orange);color:var(--ink)}
+.md-venue{display:grid;grid-template-columns:auto 1fr;gap:10px 28px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12)}
+.md-venue .k{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.md-venue .v{font-weight:700;font-size:1.05rem;line-height:1.35}
+.md-venue a{color:#ffd29a;font-weight:500;font-size:.9rem}
 .md-squad-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
 .md-squad-head h3{font-size:1.05rem;font-weight:800}
 .md-squad-head span{font-size:.85rem;color:rgba(255,255,255,.6);font-weight:600}
@@ -110,6 +114,7 @@ main.wrap{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--g
 .list{max-height:430px;overflow-y:auto;margin:0 -6px;padding:0 6px}
 .day{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:12px 0 4px;position:sticky;top:0;background:var(--surface);z-index:1}
 .fx{display:grid;grid-template-columns:3.2rem minmax(0,1fr) 1.2rem minmax(0,1fr);align-items:center;gap:8px;padding:8px 8px;border-radius:8px;font-size:.94rem}
+.fx-venue{font-size:.78rem;color:var(--muted);padding:0 8px 6px calc(3.2rem + 16px);margin-top:-4px}
 .fx .t{color:var(--muted);font-weight:600;font-size:.85rem}
 .fx .h{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fx .a{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -433,7 +438,9 @@ function renderNext(){
     box.innerHTML = `
       <div class="md-label">${label}</div>
       <div class="md-teams"><div class="md-team ${home?"ours":""}">${teamLink(m.thuis)}</div><div class="md-vs">VS</div><div class="md-team ${home?"":"ours"}">${teamLink(m.uit)}</div></div>
-      <div class="md-meta"><span class="tag">${fmtDay(m.datum)}</span><span class="tag">${m.tijd ? esc(m.tijd) : "tijd n.n.b."}</span><span class="tag">${home ? "Thuis" : "Uit"}</span>${m.tijd ? `<span class="tag hot num" id="countdown"></span>` : ""}</div>`;
+      <div class="md-meta"><span class="tag">${fmtDay(m.datum)}</span><span class="tag">${m.tijd ? esc(m.tijd) : "tijd n.n.b."}</span><span class="tag">${home ? "Thuis" : "Uit"}</span>${m.tijd ? `<span class="tag hot num" id="countdown"></span>` : ""}</div>
+      ${m.veld || m.accommodatie ? `<div class="md-venue"><div><div class="k">Veld</div><div class="v">${esc(m.veld || "n.n.b.")}</div></div>
+        <div><div class="k">Locatie</div><div class="v">${esc(m.accommodatie || "")}${m.adres ? `<br><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(m.adres)}" target="_blank" rel="noopener">${esc(m.adres)}</a>` : ""}</div></div></div>` : ""}`;
     const cd = document.getElementById("countdown");
     if (cd){
       const tick = () => {
@@ -462,7 +469,7 @@ function renderProgram(){
   segToggle(document.getElementById("prog-toggle"), "Kamelen", "Hele poule", only => {
     const list = only ? all.filter(m => isUs(m.thuis + m.uit)) : all;
     document.getElementById("prog-list").innerHTML = groupByDate(list).map(([d, ms]) => `<div class="day">${fmtDay(d)}</div>` +
-      ms.map(m => `<div class="fx ${isUs(m.thuis+m.uit)?"us":""}"><span class="t num">${m.tijd ? esc(m.tijd) : "n.n.b."}</span><span class="h">${teamLink(m.thuis)}</span><span class="sep">–</span><span class="a">${teamLink(m.uit)}</span></div>`).join("")).join("");
+      ms.map(m => `<div class="fx ${isUs(m.thuis+m.uit)?"us":""}"><span class="t num">${m.tijd ? esc(m.tijd) : "n.n.b."}</span><span class="h">${teamLink(m.thuis)}</span><span class="sep">–</span><span class="a">${teamLink(m.uit)}</span></div>${m.veld ? `<div class="fx-venue">${esc(m.veld)}${m.accommodatie ? ` · ${esc(m.accommodatie)}` : ""}</div>` : ""}`).join("")).join("");
   });
 }
 function renderResults(){
