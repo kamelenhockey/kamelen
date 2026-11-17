@@ -569,6 +569,15 @@ nav.bar a[aria-current="page"]{color:#fff;border-bottom-color:var(--orange)}
 .pong-label{position:absolute;left:50%;top:-30px;transform:translateX(-50%);white-space:nowrap;color:#fff;font-weight:800;font-family:var(--font-display);font-size:1.05rem;text-shadow:0 2px 8px rgba(0,0,0,.5)}
 @keyframes pongpuls{0%,100%{transform:scale(.92)}50%{transform:scale(1.04)}}
 @keyframes pongring{to{stroke-dashoffset:0}}
+.pong-keuze{display:flex;flex-wrap:wrap;gap:10px}
+.pong-alt{background:var(--sky);color:var(--ink)}
+.pong-alt:hover{background:#a5cde2}
+.pong-balk{position:absolute;left:0;right:0;bottom:calc(22px + env(safe-area-inset-bottom));display:flex;justify-content:center;z-index:2}
+.pong-balk .btn{min-width:180px;justify-content:center}
+.pong-bol.vast::before{animation:none;transform:none}
+.pong-bol.vast .ring{display:none}
+.pong-bol.vast .pong-label{top:50%;transform:translate(-50%,-50%);color:#0f2638;text-shadow:none;font-size:1.4rem}
+.pong-bol.vast.team .pong-label{top:-30px;transform:translateX(-50%);color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.5);font-size:1.05rem}
 body.pong-actief{overflow:hidden}
 body.pong-actief .tabbar{display:none}
 
@@ -775,7 +784,11 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
         <li>Niet bewegen: na <b>3 seconden</b> kleurt elke vinger <b style="color:#3f87ad">lichtblauw (team 1)</b> of <b style="color:var(--orange-ink)">oranje (team 2)</b>.</li>
         <li>Komt er een vinger bij of gaat er een weg, dan begint het aftellen opnieuw.</li>
       </ul>
-      <button type="button" class="btn mx-big" id="pong-open">Open het speelveld</button>
+      <div class="pong-keuze">
+        <button type="button" class="btn mx-big" id="pong-open">Vingers tegelijk</button>
+        <button type="button" class="btn mx-big pong-alt" id="pong-open-tik">Om de beurt tikken</button>
+      </div>
+      <p class="note">Een iPhone herkent maximaal 5 vingers tegelijk. Met meer spelers op een iPhone kies je <b>Om de beurt tikken</b>: iedereen tikt één keer op het scherm (tik nog eens op je bolletje om het weg te halen) en daarna tik je op <b>Verdeel</b>.</p>
     </section>
   </div>
 </div>
@@ -935,6 +948,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 <div class="pong-veld" id="pong-veld" hidden>
   <div class="pong-tekst" aria-live="polite">Leg allemaal één vinger op het scherm</div>
   <button type="button" class="pong-sluit" aria-label="Speelveld sluiten">×</button>
+  <div class="pong-balk" hidden><button type="button" class="btn mx-big" data-pong="verdeel" disabled>Verdeel</button></div>
 </div>
 
 <dialog class="team" id="teamDialog" aria-labelledby="dlg-title">
