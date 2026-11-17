@@ -96,6 +96,11 @@ nav.bar a:hover{color:#fff;border-bottom-color:var(--orange)}
 .wx .facts-wx{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:3px;font-size:.85rem;color:rgba(255,255,255,.85)}
 .wx .facts-wx b{color:#fff}
 .wx.wet{border-color:rgba(127,179,207,.6);background:rgba(127,179,207,.12)}
+.cd{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:16px;max-width:420px}
+.cd > div{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:10px 6px;text-align:center}
+.cd .v{display:block;font-family:var(--font-display);font-weight:800;font-size:1.9rem;line-height:1;color:var(--orange)}
+.cd .l{display:block;margin-top:4px;font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.65)}
+.cd-live{grid-column:1/-1;background:var(--orange);color:var(--ink);border-radius:12px;padding:12px;font-weight:800;text-align:center}
 .md-squad-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px}
 .md-squad-head h3{font-size:1.05rem;font-weight:800}
 .md-squad-head span{font-size:.85rem;color:rgba(255,255,255,.6);font-weight:600}
@@ -1064,20 +1069,24 @@ function renderNext(){
     box.innerHTML = `
       <div class="md-label">${label}</div>
       <div class="md-teams"><div class="md-team ${home?"ours":""}">${teamLink(m.thuis)}</div><div class="md-vs">VS</div><div class="md-team ${home?"":"ours"}">${teamLink(m.uit)}</div></div>
-      <div class="md-meta"><span class="tag">${fmtDay(m.datum)}</span><span class="tag">${m.tijd ? esc(m.tijd) : "tijd n.n.b."}</span><span class="tag">${home ? "Thuis" : "Uit"}</span>${m.tijd ? `<span class="tag hot num" id="countdown"></span>` : ""}<button type="button" class="tag tag-btn" id="add-next">+ Agenda</button></div>
+      <div class="md-meta"><span class="tag">${fmtDay(m.datum)}</span><span class="tag">${m.tijd ? esc(m.tijd) : "tijd n.n.b."}</span><span class="tag">${home ? "Thuis" : "Uit"}</span><button type="button" class="tag tag-btn" id="add-next">+ Agenda</button></div>
+      ${m.tijd ? `<div class="cd" id="countdown" role="timer" aria-live="off"></div>` : ""}
       ${m.veld || m.accommodatie ? `<div class="md-venue"><div><div class="k">Veld</div><div class="v">${esc(m.veld || "n.n.b.")}</div></div>
         <div><div class="k">Locatie</div><div class="v">${esc(m.accommodatie || "")}${m.adres ? `<br><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(m.adres)}" target="_blank" rel="noopener">${esc(m.adres)}</a>` : ""}</div></div></div>` : ""}
       <div id="md-weather"></div>`;
     renderWeather(m);
     const cd = document.getElementById("countdown");
     if (cd){
+      const twee = n => String(n).padStart(2, "0");
       const tick = () => {
         const diff = start.getTime() - Date.now();
-        if (diff <= 0){ cd.textContent = diff > -2*3600e3 ? "Bezig" : "Gespeeld"; return; }
-        const h = Math.floor(diff/3600e3), mi = Math.floor(diff%3600e3/60e3), d = Math.floor(h/24);
-        cd.textContent = d >= 1 ? `Nog ${d} d ${h%24} u` : `Nog ${h} u ${mi} min`;
+        if (diff <= 0){ cd.innerHTML = `<div class="cd-live">${diff > -2*3600e3 ? "De wedstrijd is bezig!" : "Gespeeld"}</div>`; clearInterval(countdownTimer); return; }
+        const s = Math.floor(diff / 1000);
+        const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), mi = Math.floor(s % 3600 / 60), se = s % 60;
+        cd.innerHTML = [[d, d === 1 ? "dag" : "dagen"], [twee(h), "uur"], [twee(mi), "min"], [twee(se), "sec"]]
+          .map(([v, l]) => `<div><span class="v num">${v}</span><span class="l">${l}</span></div>`).join("");
       };
-      tick(); clearInterval(countdownTimer); countdownTimer = setInterval(tick, 30e3);
+      tick(); clearInterval(countdownTimer); countdownTimer = setInterval(tick, 1000);
     }
   }
   const l = DATA.opstelling || [];
