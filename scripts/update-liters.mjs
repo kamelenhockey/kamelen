@@ -3,7 +3,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { parseCsv } from "./parse.mjs";
 
 const url = process.env.LITERS_CSV_URL;
-if (!url) throw new Error("LITERS_CSV_URL ontbreekt (zet hem bij Settings → Secrets and variables → Actions → Variables).");
+if (!url) throw new Error("LITERS_CSV_URL ontbreekt in .github/workflows/liters.yml.");
 
 const res = await fetch(url, { redirect: "follow" });
 if (!res.ok) throw new Error(`Spreadsheet niet bereikbaar (HTTP ${res.status}).`);

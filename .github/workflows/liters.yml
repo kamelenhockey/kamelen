@@ -5,6 +5,10 @@ on:
     # Elke donderdag 20:00 UTC = 21:00 Nederlandse wintertijd (22:00 zomertijd)
     - cron: "0 20 * * 4"
   workflow_dispatch: {}
+  # Ook draaien als het script of deze workflow wordt aangepast
+  push:
+    branches: [main]
+    paths: ["scripts/update-liters.mjs", "scripts/parse.mjs", ".github/workflows/liters.yml"]
 
 permissions:
   contents: write
@@ -24,7 +28,7 @@ jobs:
           node-version: 20
       - run: node scripts/update-liters.mjs
         env:
-          LITERS_CSV_URL: ${{ vars.LITERS_CSV_URL }}
+          LITERS_CSV_URL: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=224456486&single=true&output=csv"
       - name: Wijzigingen opslaan
         run: |
           git config user.name "kamelen-bot"

@@ -5,6 +5,10 @@ on:
     # Elke zondag 21:00 UTC = 22:00 Nederlandse wintertijd (23:00 zomertijd)
     - cron: "0 21 * * 0"
   workflow_dispatch: {}
+  # Ook draaien als het script of deze workflow wordt aangepast
+  push:
+    branches: [main]
+    paths: ["scripts/update-competitie.mjs", "scripts/parse.mjs", ".github/workflows/competitie.yml"]
 
 permissions:
   contents: write
