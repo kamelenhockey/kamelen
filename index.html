@@ -23,7 +23,7 @@ html.op-slot #slot{display:grid;place-items:center;min-height:100vh;min-height:1
 .slot-kaart button{width:100%;margin-top:10px;font-family:"DM Sans",system-ui,sans-serif;font-weight:700;font-size:1rem;padding:12px;border:0;border-radius:12px;background:#163650;color:#fff;cursor:pointer}
 .slot-fout{min-height:1.4em;margin-top:10px;color:#b3261e;font-family:"DM Sans",system-ui,sans-serif;font-size:.9rem}
 </style>
-<meta name="description" content="Teamsite van GCHC H13, de Kamelen: programma, uitslagen, stand, topscorers en het literklassement.">
+<meta name="description" content="Teamsite van GCHC H13, de Kamelen: programma, uitslagen, stand, topscorers en het Liter-incassobureau.">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -929,11 +929,11 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
     <li><a href="#wedstrijden" data-view-link="wedstrijden">Wedstrijden</a></li>
     <li><a href="#stand" data-view-link="stand">Stand</a></li>
     <li><a href="#topscorers" data-view-link="topscorers">Topscorers</a></li>
-    <li><a href="#liters" data-view-link="liters">Literklassement</a></li>
+    <li><a href="#liters" data-view-link="liters">Liter-incassobureau</a></li>
     <li><a href="#spelers" data-view-link="spelers">Spelers</a></li>
     <li><a href="#statistieken" data-view-link="statistieken">Statistieken</a></li>
     <li class="nav-sep" aria-hidden="true"></li>
-    <li><a href="#toto" data-view-link="toto">Toto</a></li>
+    <li><a href="#toto" data-view-link="toto">Kamelen-Scorito</a></li>
     <li><a href="#stemmen" data-view-link="stemmen">Kameel &amp; ezel</a></li>
     <li class="nav-more"><button type="button" id="nav-more-btn" aria-expanded="false" aria-controls="nav-more-menu">Meer <span aria-hidden="true">▾</span></button>
       <div class="nav-more-menu" id="nav-more-menu" hidden>
@@ -1006,7 +1006,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   </section>
 
   <section class="card wide" id="liters" data-page="liters" aria-labelledby="h-liters">
-    <div class="card-head"><div><h2 id="h-liters">Literklassement</h2><p>Klik op een naam voor de feiten</p></div></div>
+    <div class="card-head"><div><h2 id="h-liters">Liter-incassobureau</h2><p>Klik op een naam voor de feiten</p></div></div>
     <div id="tap" class="tap"></div>
     <div id="podium" class="podium"></div>
     <ol id="rank" class="rank"></ol>
@@ -1032,7 +1032,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <div class="wrap page page-wide">
     <header class="page-head">
       <div class="eyebrow">Wie voorspelt het best?</div>
-      <h1>Kamelen-toto</h1>
+      <h1>Kamelen-Scorito</h1>
       <p>Voorspel vóór elke wedstrijd de uitslag. Precies goed levert 3 punten op, de juiste winnaar of een gelijkspel 1 punt.</p>
     </header>
     <section class="card"><div id="toto"></div></section>
@@ -1154,7 +1154,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
     <header class="page-head">
       <div class="eyebrow">Huisregels</div>
       <h1>Kamelen-regels</h1>
-      <p>Afmelden, boetes en hoe je ze betaalt. Boetes worden bijgehouden in het <a href="#liters">literklassement</a>.</p>
+      <p>Afmelden, boetes en hoe je ze betaalt. Boetes worden bijgehouden in het <a href="#liters">Liter-incassobureau</a>.</p>
     </header>
 
     <section class="card">
@@ -1185,7 +1185,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
       <ul class="steps">
         <li>Na elke wedstrijd stemt iedereen in de app op de <b>kameel van de dag</b> (de beste of leukste Kameel) en de <b>ezel van de dag</b>.</li>
         <li>Stemmen kan vanaf ruim een uur na de aftrap, totdat de <b>beheerder</b> de stemming sluit. Dan wordt de uitslag bekend. Op jezelf stemmen mag niet; je laatste stem telt.</li>
-        <li>De <b>ezel van de dag</b> moet <span class="fine">1 liter</span> trekken. Die komt vanzelf in het literklassement.</li>
+        <li>De <b>ezel van de dag</b> moet <span class="fine">1 liter</span> trekken. Die komt vanzelf bij het Liter-incassobureau.</li>
         <li>Gelijke stand? Dan delen ze de titel, en bij de ezel trekken ze allebei een liter.</li>
         <li>Wie aan het einde van het seizoen het vaakst <b>kameel van de dag</b> is geweest, wint een <b>prijs</b>.</li>
       </ul>
@@ -1298,13 +1298,13 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <a href="#home" data-view-link="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg><span>Home</span></a>
   <a href="#wedstrijden" data-view-link="wedstrijden"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>Wedstrijden</span></a>
   <a href="#stand" data-view-link="stand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span>Stand</span></a>
-  <a href="#toto" data-view-link="toto"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4l2.4 4.6-2.4 3.4-2.4-3.4zM4.6 10l4.8.6M19.4 10l-4.8.6M7 18.5l3-3.5M17 18.5l-3-3.5"/></svg><span>Toto</span></a>
+  <a href="#toto" data-view-link="toto"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4l2.4 4.6-2.4 3.4-2.4-3.4zM4.6 10l4.8.6M19.4 10l-4.8.6M7 18.5l3-3.5M17 18.5l-3-3.5"/></svg><span>Scorito</span></a>
   <button type="button" id="more-btn" aria-expanded="false" aria-controls="more-sheet"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>Meer</span></button>
 </nav>
 <div class="more-sheet" id="more-sheet" hidden>
   <div class="ms-h">Competitie</div>
   <a href="#topscorers" data-view-link="topscorers">Topscorers</a>
-  <a href="#liters" data-view-link="liters">Literklassement</a>
+  <a href="#liters" data-view-link="liters">Liter-incassobureau</a>
   <a href="#statistieken" data-view-link="statistieken">Statistieken</a>
   <a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a>
   <div class="ms-h">Team</div>
@@ -2092,7 +2092,7 @@ function openPlayer(naam){
   if (tl && tl.length){
     const plek = tp.stand.findIndex(x => x.naam === p.naam) + 1, st = tp.stand[plek - 1];
     const beste = [...tl].sort((a, b) => b.pts - a.pts || a.verschil - b.verschil)[0];
-    totoHtml = `<div class="psec"><h3 class="sub-h">Toto</h3>
+    totoHtml = `<div class="psec"><h3 class="sub-h">Kamelen-Scorito</h3>
       <div class="dlg-stats num" style="grid-template-columns:repeat(3,minmax(0,1fr))">
         <div><div class="v">${st ? st.punten : 0}</div><div class="k">Punten</div></div>
         <div><div class="v">${plek ? plek + "e" : "–"}</div><div class="k">Plek</div></div>
@@ -2158,14 +2158,14 @@ function badgesHtml(p, o, kameel, ezel, tp){
     ["🛢️", "Biervat", "Tien liter of meer aan boetes", !!(p.liters && p.liters.liters >= 10)],
     ["🤫", "Stille meter", "Een stille meter moeten trekken", !!(p.liters && p.liters.stil > 0)],
     ["💸", "Wanbetaler", "Drie liter of meer nog open", !!(p.liters && p.liters.open >= 3)],
-    ["🍺", "Literkoning", "Bovenaan het literklassement", litPlek === 0],
+    ["🍺", "Literkoning", "Bovenaan bij het Liter-incassobureau", litPlek === 0],
     ["🐪", "Kameel van de dag", "Minstens één keer gekozen", kameel >= 1],
     ["🐫", "Dubbele bult", "Twee keer of vaker kameel van de dag", kameel >= 2],
     ["🫏", "Ezel van de dag", "Ook dat is een prestatie", ezel >= 1],
     ["🥕", "Vaste ezel", "Twee keer of vaker ezel van de dag", ezel >= 2],
-    ["🔮", "Orakel", "Een uitslag precies goed voorspeld in de toto", !!(st && st.exact >= 1)],
-    ["🧠", "Totokoning", "Bovenaan het totoklassement", !!(st && totoTop && st.naam === totoTop.naam && st.punten > 0)],
-    ["📝", "Trouwe voorspeller", "Vijf wedstrijden voorspeld in de toto", !!(st && st.aantal >= 5)],
+    ["🔮", "Orakel", "Een uitslag precies goed voorspeld in de Kamelen-Scorito", !!(st && st.exact >= 1)],
+    ["🧠", "Scorito-koning", "Bovenaan in de Kamelen-Scorito", !!(st && totoTop && st.naam === totoTop.naam && st.punten > 0)],
+    ["📝", "Trouwe voorspeller", "Vijf wedstrijden voorspeld in de Kamelen-Scorito", !!(st && st.aantal >= 5)],
     ["⏰", "Laatkomer", "Te laat op training", !!(o && o.laat >= 1)],
     ["🎂", "Jarig op wedstrijddag", "Verjaardag valt op een speeldag dit seizoen", !!(p.verjaardag && wedstrijddagen.has(p.verjaardag))],
     ["🌱", "Groentje", "Eerste seizoen bij de Kamelen", !!(p.sinds && p.sinds >= seizoen)],
@@ -2371,7 +2371,7 @@ Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("ops
     /* Na het ophalen van de stemmen (ezel-liters) de statistieken nog eens bijwerken */
     Promise.resolve(veilig(() => window.renderStemmen?.())).catch(() => {}).finally(() => veilig(() => window.renderStatistieken?.()));
     const f = x => { const d = new Date(x); return isNaN(d) ? "onbekend" : d.toLocaleString("nl-NL",{dateStyle:"long",timeStyle:"short",timeZone:"Europe/Amsterdam"}); };
-    document.getElementById("foot").textContent = `Competitie: laatste wijziging ${f(DATA.competitieBijgewerkt)} (bron hockey.nl) · Literklassement en topscorers: ${live ? "live uit de spreadsheet" : "bijgewerkt " + f(DATA.bijgewerkt)}`;
+    document.getElementById("foot").textContent = `Competitie: laatste wijziging ${f(DATA.competitieBijgewerkt)} (bron hockey.nl) · Liter-incassobureau en topscorers: ${live ? "live uit de spreadsheet" : "bijgewerkt " + f(DATA.bijgewerkt)}`;
   })
   .catch(() => {
     document.querySelector("main").insertAdjacentHTML("afterbegin", `<div class="card wide">${empty("De gegevens konden niet worden geladen", "Ververs de pagina om het opnieuw te proberen.")}</div>`);
@@ -2404,9 +2404,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795483300"></script>
-<script src="toto.js?v=1795483300"></script>
-<script src="pong.js?v=1795483300"></script>
+<script src="mex.js?v=1795483400"></script>
+<script src="toto.js?v=1795483400"></script>
+<script src="pong.js?v=1795483400"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2415,11 +2415,11 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795483300"></script>
-<script src="statistieken.js?v=1795483300"></script>
-<script src="rad.js?v=1795483300"></script>
-<script src="fotos.js?v=1795483300"></script>
-<script src="quotes.js?v=1795483300"></script>
-<script src="push.js?v=1795483300"></script>
+<script src="stemmen.js?v=1795483400"></script>
+<script src="statistieken.js?v=1795483400"></script>
+<script src="rad.js?v=1795483400"></script>
+<script src="fotos.js?v=1795483400"></script>
+<script src="quotes.js?v=1795483400"></script>
+<script src="push.js?v=1795483400"></script>
 </body>
 </html>

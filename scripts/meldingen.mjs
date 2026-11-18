@@ -86,7 +86,7 @@ for (const m of programma) {
   const vanaf = uurAftrap < 12 ? aftrap({ datum: plusDagen(m.datum, -1), tijd: "20:00" }) : new Date(af - 3 * uur);
   if (nu >= vanaf && nu < af) {
     const aantal = new Set((api.voorspellingen || []).filter(v => v.wedstrijd === `${m.thuis} – ${m.uit}` && new Date(v.aftrap).getTime() === af.getTime()).map(v => String(v.naam).toLowerCase())).size;
-    meld(`toto-${m.datum}`, "Nog niet voorspeld? 🔮", `De toto voor ${isUs(m.thuis) ? "thuis" : "uit"} tegen ${tegen(m)} sluit om ${m.tijd}${uurAftrap < 12 ? " morgenochtend" : ""}. ${aantal ? `Al ${aantal} ${aantal === 1 ? "voorspelling" : "voorspellingen"} binnen.` : "Nog niemand heeft voorspeld!"}`, SITE + "#toto");
+    meld(`toto-${m.datum}`, "Nog niet voorspeld? 🔮", `De Kamelen-Scorito voor ${isUs(m.thuis) ? "thuis" : "uit"} tegen ${tegen(m)} sluit om ${m.tijd}${uurAftrap < 12 ? " morgenochtend" : ""}. ${aantal ? `Al ${aantal} ${aantal === 1 ? "voorspelling" : "voorspellingen"} binnen.` : "Nog niemand heeft voorspeld!"}`, SITE + "#toto");
   }
 }
 

@@ -74,7 +74,7 @@
 
   function render(reacties) {
     if (!CFG.api && (!CFG.csv || !CFG.form)) {
-      box.innerHTML = `<div class="empty"><strong>De toto gaat binnenkort open</strong>Zodra het formulier klaarstaat, kun je hier je voorspelling doen.</div>`;
+      box.innerHTML = `<div class="empty"><strong>De Kamelen-Scorito gaat binnenkort open</strong>Zodra het formulier klaarstaat, kun je hier je voorspelling doen.</div>`;
       return;
     }
     const { perMatch, stand, ws } = verwerk(reacties);
