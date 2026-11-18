@@ -250,11 +250,12 @@ td.form{display:flex;gap:3px}
 .pill.loser{background:#fde3e1;color:#a3271b}
 .pill.open{background:#ffe6c8;color:#8a4708}
 .pill.done{background:#dcf1e4;color:#22663f}
-.facts{list-style:none;margin:0 0 12px 3rem;padding:6px 0 0 16px;border-left:2px solid #f3dfb8;display:grid;gap:6px;font-size:.88rem}
-.facts[hidden]{display:none}
-.facts li{display:grid;grid-template-columns:8.5rem 1fr auto;gap:10px;align-items:center;position:relative}
-.facts li::before{content:"";position:absolute;left:-22px;top:.45em;width:10px;height:10px;border-radius:50%;background:var(--beer);border:2px solid #fff}
-.facts .d{color:var(--muted);font-weight:600}
+.lit-feiten{list-style:none;margin:0 0 12px 3rem;padding:6px 0 0 16px;border-left:2px solid #f3dfb8;display:grid;gap:6px;font-size:.88rem}
+.lit-feiten[hidden]{display:none}
+.lit-feiten li{display:grid;grid-template-columns:8.5rem 1fr auto;gap:10px;align-items:center;position:relative}
+.lit-feiten li::before{content:"";position:absolute;left:-22px;top:.45em;width:10px;height:10px;border-radius:50%;background:var(--beer);border:2px solid #fff}
+.lit-feiten .d{color:var(--muted);font-weight:600}
+.lit-feiten .pill{white-space:nowrap;justify-self:end}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.78rem;color:var(--muted);margin-top:14px;align-items:center}
 .legend > span{display:inline-flex;align-items:center}
 
@@ -992,9 +993,9 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
   .rank .amt{white-space:nowrap}
   .pod .amt small{display:none}
   .rank .glasses{grid-column:2/4;grid-row:2}
-  .facts{margin-left:1rem}
-  .facts li{grid-template-columns:1fr auto}
-  .facts .d{grid-column:1/-1}
+  .lit-feiten{margin-left:1rem}
+  .lit-feiten li{grid-template-columns:1fr auto}
+  .lit-feiten .d{grid-column:1/-1}
   .dlg-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
   .dlg-stats > div:nth-child(4){border-left:0}
   .dlg-stats > div:nth-child(n+4){border-top:1px solid var(--line)}
@@ -1899,7 +1900,7 @@ function renderLiters(){
         ${glassesHtml(p.liters - p.open, p.open, p.stil)}
         <span class="amt"><b>${fmtL(p.liters)}</b> L<small>${p.feiten.length} ${p.feiten.length===1?"feit":"feiten"}</small></span>
       </button>
-      <ul class="facts" id="${id}" hidden>${p.feiten.map(f => `<li><span class="d">${esc(f.datum)}</span><span>${esc(f.reden)}</span><span class="pill ${f.done?"done":"open"}">${esc(f.hoeveel)}${f.done?" · gedaan":""}</span></li>`).join("")}</ul></li>`;
+      <ul class="lit-feiten" id="${id}" hidden>${p.feiten.map(f => `<li><span class="d">${esc(f.datum)}</span><span>${esc(f.reden)}</span><span class="pill ${f.done?"done":"open"}">${esc(f.hoeveel)}${f.done?" · gedaan":""}</span></li>`).join("")}</ul></li>`;
   }).join("");
   document.querySelectorAll(".rank button").forEach(b => b.addEventListener("click", () => {
     const el = document.getElementById(b.getAttribute("aria-controls")), isOpen = b.getAttribute("aria-expanded") === "true";
@@ -2646,9 +2647,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795485700"></script>
-<script src="toto.js?v=1795485700"></script>
-<script src="pong.js?v=1795485700"></script>
+<script src="mex.js?v=1795485800"></script>
+<script src="toto.js?v=1795485800"></script>
+<script src="pong.js?v=1795485800"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2657,12 +2658,12 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795485700"></script>
-<script src="statistieken.js?v=1795485700"></script>
-<script src="race.js?v=1795485700"></script>
-<script src="rad.js?v=1795485700"></script>
-<script src="fotos.js?v=1795485700"></script>
-<script src="quotes.js?v=1795485700"></script>
-<script src="push.js?v=1795485700"></script>
+<script src="stemmen.js?v=1795485800"></script>
+<script src="statistieken.js?v=1795485800"></script>
+<script src="race.js?v=1795485800"></script>
+<script src="rad.js?v=1795485800"></script>
+<script src="fotos.js?v=1795485800"></script>
+<script src="quotes.js?v=1795485800"></script>
+<script src="push.js?v=1795485800"></script>
 </body>
 </html>
