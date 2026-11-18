@@ -701,7 +701,8 @@ body.pong-actief .tabbar{display:none}
 @keyframes rcVal{0%,100%{transform:translateY(-50%) scaleX(-1)}40%{transform:translateY(-40%) scaleX(-1) rotate(25deg)}}
 .rc-finish{position:absolute;right:0;top:0;bottom:0;width:8px;background:repeating-linear-gradient(0deg,#163650 0 6px,#fff 6px 12px);border-radius:2px}
 .rc-feed{min-height:5.5rem;margin:12px 2px 0}
-.rc-feed p{margin:0 0 4px;font-size:.95rem;animation:land .35s ease-out}
+.rc-feed p{margin:0 0 4px;font-size:.95rem;animation:rcIn .3s ease-out}
+@keyframes rcIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .rc-feed p:first-child{font-weight:700;font-size:1.05rem}
 .rc-feed p:not(:first-child){color:var(--muted)}
 .rc-res{margin-top:12px;border-top:1px solid var(--line);padding-top:14px}
@@ -2501,9 +2502,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795484400"></script>
-<script src="toto.js?v=1795484400"></script>
-<script src="pong.js?v=1795484400"></script>
+<script src="mex.js?v=1795484500"></script>
+<script src="toto.js?v=1795484500"></script>
+<script src="pong.js?v=1795484500"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2512,12 +2513,12 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795484400"></script>
-<script src="statistieken.js?v=1795484400"></script>
-<script src="race.js?v=1795484400"></script>
-<script src="rad.js?v=1795484400"></script>
-<script src="fotos.js?v=1795484400"></script>
-<script src="quotes.js?v=1795484400"></script>
-<script src="push.js?v=1795484400"></script>
+<script src="stemmen.js?v=1795484500"></script>
+<script src="statistieken.js?v=1795484500"></script>
+<script src="race.js?v=1795484500"></script>
+<script src="rad.js?v=1795484500"></script>
+<script src="fotos.js?v=1795484500"></script>
+<script src="quotes.js?v=1795484500"></script>
+<script src="push.js?v=1795484500"></script>
 </body>
 </html>
