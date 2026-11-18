@@ -14,19 +14,36 @@
   const telt = (naam, datum) => !UITSLUITEN.some(u => u.namen.includes(naam) && datum <= u.tot);
 
   const MAAND = { jan: 1, januari: 1, feb: 2, februari: 2, mrt: 3, maart: 3, apr: 4, april: 4, mei: 5, jun: 6, juni: 6, jul: 7, juli: 7, aug: 8, augustus: 8, sep: 9, sept: 9, september: 9, okt: 10, oktober: 10, nov: 11, november: 11, dec: 12, december: 12 };
-  function kopDatum(t) {
+  /* Seizoen loopt van juli t/m juni; startjaar volgt uit de huidige datum */
+  const SEIZOEN = (() => { const d = new Date(); return d.getMonth() + 1 >= 7 ? d.getFullYear() : d.getFullYear() - 1; })();
+  function kopDag(t) {
     const m = String(t || "").trim().toLowerCase().match(/^(\d{1,2})[\s-]+([a-z]+)/);
     if (!m || !MAAND[m[2]]) return null;
-    const maand = MAAND[m[2]], jaar = maand >= 7 ? 2026 : 2027;
-    return `${jaar}-${String(maand).padStart(2, "0")}-${String(m[1]).padStart(2, "0")}`;
+    return { maand: MAAND[m[2]], dag: +m[1] };
+  }
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  function kopDatum(k, opDonderdag) {
+    const d = new Date(k.maand >= 7 ? SEIZOEN : SEIZOEN + 1, k.maand - 1, k.dag, 12);
+    /* Trainingen zijn altijd op donderdag: verschuif naar de donderdag van die week */
+    if (opDonderdag) { const wd = d.getDay() || 7; d.setDate(d.getDate() + 4 - wd); }
+    return iso(d);
   }
   const vandaag = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 
   /* Afwezigheidsblad omzetten naar sessies */
-  function leesAfwezigheid(rows) {
+  function leesAfwezigheid(rows, opDonderdag) {
     if (!rows.length) return { sessies: [], invallers: [] };
-    const kop = rows[0], cols = [];
-    kop.forEach((h, i) => { const d = kopDatum(h); if (d && i > 0) cols.push({ i, datum: d }); });
+    const kop = rows[0];
+    /* Kolommen in volgorde; springt de datum terug (bv. van 27 nov naar 3 sep), dan begint daar
+       een nieuw seizoen. Alleen het laatste (huidige) seizoen telt. */
+    let blok = [], vorige = -1;
+    kop.forEach((h, i) => {
+      const k = i > 0 && kopDag(h); if (!k) return;
+      const sleutel = ((k.maand + 5) % 12) * 100 + k.dag;
+      if (sleutel < vorige) blok = [];
+      vorige = sleutel; blok.push({ i, datum: kopDatum(k, opDonderdag) });
+    });
+    const cols = blok;
     const totaalRij = rows.find(r => /totaal aanwezig/i.test(r[0] || ""));
     const spelers = [], invallers = [];
     let inSpelers = true;
@@ -195,8 +212,8 @@
   window.renderStatistieken = async function () {
     if (!CFG.wedstrijden || !CFG.trainingen) { box.innerHTML = `<div class="empty">Statistieken zijn nog niet ingesteld.</div>`; return; }
     box.innerHTML = `<div class="empty">Statistieken laden…</div>`;
-    const lees = u => fetch(u, { cache: "no-store" }).then(r => r.ok ? r.text() : "").then(t => leesAfwezigheid(parseCsv(t))).catch(() => ({ sessies: [], invallers: [] }));
-    const [wed, tr] = await Promise.all([lees(CFG.wedstrijden), lees(CFG.trainingen)]);
+    const lees = (u, don) => fetch(u, { cache: "no-store" }).then(r => r.ok ? r.text() : "").then(t => leesAfwezigheid(parseCsv(t), don)).catch(() => ({ sessies: [], invallers: [] }));
+    const [wed, tr] = await Promise.all([lees(CFG.wedstrijden, false), lees(CFG.trainingen, true)]);
     /* Alleen speeldagen waarop de Kamelen echt speelden (geen vrije speelronde) */
     const speeldagen = new Set([...(DATA.uitslagen || []), ...(DATA.programma || [])].filter(m => isUs(m.thuis + m.uit)).map(m => m.datum));
     wed.sessies = wed.sessies.filter(x => speeldagen.has(x.datum));
