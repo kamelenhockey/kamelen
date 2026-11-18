@@ -10,7 +10,7 @@
   const eigen = () => { try { return JSON.parse(localStorage.getItem(LS) || "{}"); } catch { return {}; } };
   const bewaar = o => { try { localStorage.setItem(LS, JSON.stringify(o)); } catch {} };
   const beheercode = () => { try { return localStorage.getItem(BLS) || ""; } catch { return ""; } };
-  const url = (id, w) => `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w${w}`;
+  const url = (id, w) => `https://lh3.googleusercontent.com/d/${encodeURIComponent(id)}=w${w}`;
   const datum = t => { const d = new Date(t); return isNaN(d) ? "" : d.toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" }); };
   let FOTOS = [];
 
