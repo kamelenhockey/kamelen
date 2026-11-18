@@ -361,13 +361,50 @@
         ${lijstHtml ? `<div class="tablewrap"><table><thead><tr><th class="r">#</th><th>Kameel</th><th class="r" title="Goud">🥇</th><th class="r" title="Zilver">🥈</th><th class="r" title="Brons">🥉</th><th class="r">Punten</th></tr></thead><tbody>${lijstHtml}</tbody></table></div>` : `<div class="empty">Nog geen badges verdiend.</div>`}</section>`;
     } catch (e) { console.error(e); }
 
+    /* ---------- Hall of Fame: eeuwige ranglijst over alle seizoenen ---------- */
+    const hof = window.KAMELEN_HOF;
+    if (hof === undefined) {
+      window.KAMELEN_HOF = null;
+      fetch("halloffame.json", { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({}))
+        .then(j => { window.KAMELEN_HOF = j || {}; window.renderStatsExtra?.(); });
+    }
+    const nu = new Date(), jaar = nu.getMonth() >= 7 ? nu.getFullYear() : nu.getFullYear() - 1;
+    const ditSeizoen = `${jaar}/${String(jaar + 1).slice(2)}`;
+    const huidig = { seizoen: ditSeizoen, doelpunten: {}, liters: {}, kamelen: {}, ezels: {} };
+    (DATA.doelpunten || []).forEach(w => w.goals.forEach(g => { huidig.doelpunten[g.wie] = (huidig.doelpunten[g.wie] || 0) + 1; }));
+    buildRanking(DATA.liters || [], {}).forEach(p => { if (p.liters) huidig.liters[p.naam] = p.liters; });
+    kz.forEach(r => { r.kamelen.forEach(n => huidig.kamelen[n] = (huidig.kamelen[n] || 0) + 1); r.ezels.forEach(n => huidig.ezels[n] = (huidig.ezels[n] || 0) + 1); });
+    const archief = ((hof && hof.seizoenen) || []).filter(x => x.seizoen !== ditSeizoen);
+    const seizoenen = [...archief, huidig];
+    const optel = soort => {
+      const t = new Map();
+      seizoenen.forEach(sz => Object.entries(sz[soort] || {}).forEach(([n, v]) => {
+        const naam = typeof canon === "function" ? canon(n) : n, x = t.get(naam) || { naam, tot: 0, sz: 0 };
+        x.tot += Number(v) || 0; x.sz++; t.set(naam, x);
+      }));
+      return [...t.values()].filter(x => x.tot > 0).sort((a, b) => b.tot - a.tot || a.naam.localeCompare(b.naam));
+    };
+    const kampioen = (sz, soort) => { const e = Object.entries(sz[soort] || {}).filter(([, v]) => v > 0); if (!e.length) return "–"; const m = Math.max(...e.map(([, v]) => v)); return e.filter(([, v]) => v === m).map(([n]) => esc(n)).join(" & ") + ` <small>(${String(m).replace(".", ",")})</small>`; };
+    const hofLijst = (titel, ic, l, eenheid) => `<section class="card hof-kaart"><h3>${ic} ${titel}</h3>${l.length ? `<ol class="hof-lijst">${l.slice(0, 5).map((x, i) => `<li class="${i === 0 ? "hof-een" : ""}${x.naam === ik ? " ik" : ""}"><span class="hof-plek">${["🥇", "🥈", "🥉"][i] || `${i + 1}.`}</span><span class="hof-nm">${esc(x.naam)}</span><b>${String(Math.round(x.tot * 100) / 100).replace(".", ",")}</b><small>${eenheid}</small></li>`).join("")}</ol>` : `<p class="muted">Nog leeg.</p>`}</section>`;
+    const hofHtml = `
+      <h2 class="stat-h">Hall of Fame</h2>
+      <p class="hof-intro">De eeuwige ranglijst van de Kamelen, over ${seizoenen.length === 1 ? "het eerste vastgelegde seizoen" : `${seizoenen.length} seizoenen`} (${seizoenen.map(x => x.seizoen).join(", ")}). Elk nieuw seizoen telt erbij op.</p>
+      <div class="hof-grid">
+        ${hofLijst("All-time topscorers", "⚽", optel("doelpunten"), "goals")}
+        ${hofLijst("Meeste liters in de boetepot", "🍺", optel("liters"), "L")}
+        ${hofLijst("Meeste ezel-titels", "🫏", optel("ezels"), "×")}
+        ${hofLijst("Meeste kameel-titels", "🐪", optel("kamelen"), "×")}
+      </div>
+      ${seizoenen.length > 1 ? `<section class="card"><div class="card-head"><div><h2>Kampioenen per seizoen</h2></div></div><div class="tablewrap"><table><thead><tr><th>Seizoen</th><th>Topscorer</th><th>Literloser</th><th>Ezel van het seizoen</th></tr></thead><tbody>${[...seizoenen].reverse().map(sz => `<tr><td>${esc(sz.seizoen)}${sz === huidig ? " <small>(loopt)</small>" : ""}</td><td>${kampioen(sz, "doelpunten")}</td><td>${kampioen(sz, "liters")}</td><td>${kampioen(sz, "ezels")}</td></tr>`).join("")}</tbody></table></div></section>` : ""}`;
+
     extra.innerHTML = `
       <h2 class="stat-h">Badges</h2>
       ${bHtml}
       <h2 class="stat-h">Kameel &amp; ezel van de dag</h2>
       ${kf.length ? `<div class="facts">${kf.join("")}</div>` : `<div class="card empty">Zodra de eerste stemming gesloten is, staan hier de kameel- en ezelstatistieken.</div>`}
       <h2 class="stat-h">Kamelen-Scorito</h2>
-      ${sf.length ? `<div class="facts">${sf.join("")}</div>` : `<div class="card empty">Na de eerste wedstrijd met voorspellingen verschijnen hier de Scorito-statistieken.</div>`}`;
+      ${sf.length ? `<div class="facts">${sf.join("")}</div>` : `<div class="card empty">Na de eerste wedstrijd met voorspellingen verschijnen hier de Scorito-statistieken.</div>`}
+      ${hofHtml}`;
 
     /* Jouw seizoen */
     if (!ik) { pers.innerHTML = ""; return; }

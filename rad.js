@@ -31,7 +31,7 @@
   const totaal = VAKKEN.reduce((s, v) => s + (v.gewicht || 1), 0);
   let hoek = 0; VAKKEN.forEach(v => { v.van = hoek; hoek += (v.gewicht || 1) / totaal * 360; v.tot = hoek; });
 
-  let draai = 0, bezig = false, verdubbelaar = 0, geschiedenis = [];
+  let draai = 0, vorigeDraai = 0, bezig = false, verdubbelaar = 0, geschiedenis = [];
 
   const pt = (r, a) => { const rad = (a - 90) * Math.PI / 180; return [200 + r * Math.cos(rad), 200 + r * Math.sin(rad)]; };
   function vakPad(v) {
@@ -81,18 +81,92 @@
     /* Het wiel draait zo dat 'doel' bovenaan bij de pijl stopt */
     const rest = ((360 - doel) - (draai % 360) + 720) % 360;
     draai += 360 * (5 + Math.floor(Math.random() * 3)) + rest;
-    const wiel = document.getElementById("rad-wiel");
+    const wiel = document.getElementById("rad-wiel"), pijl = box.querySelector(".rad-pijl");
     const snel = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    wiel.style.transition = snel ? "none" : "transform 5.2s cubic-bezier(.12,.75,.12,1)";
-    wiel.style.transform = `rotate(${draai}deg)`;
-    setTimeout(() => klaar(vak), snel ? 50 : 5300);
+    geluidAan();
+    wiel.style.transition = "none";
+    if (snel) { wiel.style.transform = `rotate(${draai}deg)`; return setTimeout(() => klaar(vak), 50); }
+    /* Zelf animeren, zodat we elk pinnetje horen tikken als het langs de pijl gaat */
+    const start = performance.now(), afstand = draai - vorigeDraai, DUUR = 5200;
+    const randen = VAKKEN.map(v => v.van);
+    let vorigeHoek = vorigeDraai;
+    const stap = t => {
+      const p = Math.min(1, (t - start) / DUUR), e = 1 - Math.pow(1 - p, 3.4);
+      const hoek = vorigeDraai + afstand * e;
+      wiel.style.transform = `rotate(${hoek}deg)`;
+      /* Onder de pijl staat de plek (360 - hoek); tel de vakgrenzen die er sinds het vorige beeld langs kwamen */
+      const a0 = vorigeHoek, a1 = hoek;
+      let tikken = 0;
+      for (const r of randen) { const g = 360 - r; tikken += Math.floor((a1 - g) / 360) - Math.floor((a0 - g) / 360); }
+      if (tikken > 0) { tik(Math.min(1, (1 - p) * 1.4 + .25)); if (pijl) { pijl.classList.remove("tik"); void pijl.offsetWidth; pijl.classList.add("tik"); } }
+      vorigeHoek = hoek;
+      if (p < 1) requestAnimationFrame(stap);
+      else { vorigeDraai = draai; setTimeout(() => klaar(vak), 150); }
+    };
+    requestAnimationFrame(stap);
+  }
+
+  /* ---------- Geluid: het klik-klik-klik van een echt rad ---------- */
+  let ctx = null, ruis = null;
+  function geluidAan() {
+    try {
+      if (!ctx) {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const n = Math.floor(ctx.sampleRate * .03); ruis = ctx.createBuffer(1, n, ctx.sampleRate);
+        const d = ruis.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 6);
+      }
+      if (ctx.state === "suspended") ctx.resume();
+    } catch { ctx = null; }
+  }
+  function tik(sterkte) {
+    if (!ctx) return;
+    try {
+      const nu = ctx.currentTime;
+      /* plastic klepje tegen een pin: korte ruisklik plus een houtachtige tok */
+      const bron = ctx.createBufferSource(); bron.buffer = ruis; bron.playbackRate.value = .9 + Math.random() * .25;
+      const filter = ctx.createBiquadFilter(); filter.type = "bandpass"; filter.frequency.value = 2600 + Math.random() * 600; filter.Q.value = 1.4;
+      const g1 = ctx.createGain(); g1.gain.value = .55 * sterkte;
+      bron.connect(filter).connect(g1).connect(ctx.destination); bron.start(nu);
+      const osc = ctx.createOscillator(); osc.type = "triangle"; osc.frequency.setValueAtTime(1150, nu); osc.frequency.exponentialRampToValueAtTime(420, nu + .03);
+      const g2 = ctx.createGain(); g2.gain.setValueAtTime(.18 * sterkte, nu); g2.gain.exponentialRampToValueAtTime(.0001, nu + .045);
+      osc.connect(g2).connect(ctx.destination); osc.start(nu); osc.stop(nu + .05);
+    } catch {}
+  }
+  /* Een bel-achtige 'tadaa' voor de speciale vakken */
+  function alarm() {
+    if (!ctx) return;
+    try {
+      const nu = ctx.currentTime;
+      [0, .12, .24].forEach((t, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain(); o.type = "square";
+        o.frequency.value = [523, 659, 784][i];
+        g.gain.setValueAtTime(.0001, nu + t); g.gain.exponentialRampToValueAtTime(.12, nu + t + .01); g.gain.exponentialRampToValueAtTime(.0001, nu + t + (i === 2 ? .5 : .11));
+        o.connect(g).connect(ctx.destination); o.start(nu + t); o.stop(nu + t + .55);
+      });
+    } catch {}
+  }
+  /* Trillen: Android via vibrate, iPhone via het schakelaar-trucje (iOS 18 geeft dan een tik) */
+  let schakel = null;
+  function tril(patroon) {
+    try { if (navigator.vibrate && navigator.vibrate(patroon)) return; } catch {}
+    try {
+      if (!schakel) {
+        schakel = document.createElement("label"); schakel.setAttribute("aria-hidden", "true");
+        schakel.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none";
+        schakel.innerHTML = `<input type="checkbox" switch tabindex="-1">`; document.body.appendChild(schakel);
+      }
+      let t = 0; patroon.forEach((d, i) => { if (i % 2 === 0) { const n = Math.max(1, Math.round(d / 70)); for (let k = 0; k < n; k++) setTimeout(() => schakel.click(), t + k * 70); } t += d; });
+    } catch {}
   }
 
   function klaar(vak) {
     bezig = false;
     const uit = document.getElementById("rad-uitslag"), knop = document.getElementById("rad-draai");
     knop.disabled = false;
-    try { navigator.vibrate?.(vak.huis || vak.klein ? [80, 60, 80, 60, 200] : 60); } catch {}
+    if (vak.huis || vak.klein) {
+      tril([200, 80, 200, 80, 450]); alarm();
+      const w = document.getElementById("rad-wrap"); w.classList.remove("trillen"); void w.offsetWidth; w.classList.add("trillen");
+    }
     let tekst;
     if (vak.opnieuw) {
       if (vak.dubbel) verdubbelaar++;
