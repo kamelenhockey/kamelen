@@ -1720,7 +1720,7 @@ function playerData(){
 function playerCard(p){
   const initials = p.naam.split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase();
   return `<button type="button" class="player" data-player="${esc(p.naam)}">
-    <div class="top-row"><span class="avatar${p.invaller ? " inv" : ""}">${esc(initials)}</span><div><div class="nm">${esc(p.naam)}</div>${p.sel ? `<div class="sel">In de selectie</div>` : ""}${p.ingevallen ? `<div class="sel" style="color:var(--muted)">${p.ingevallen.length}× ingevallen</div>` : ""}${!p.invaller && (p.sinds || p.verjaardag) ? `<div class="sel" style="color:var(--muted)">${p.sinds ? `Kameel sinds ${p.sinds}` : ""}${p.sinds && p.verjaardag ? " · " : ""}${p.verjaardag ? `🎂 ${fmtVerjaardag(p.verjaardag)}` : ""}</div>` : ""}</div></div>
+    <div class="top-row"><span class="avatar${p.invaller ? " inv" : ""}">${esc(initials)}</span><div><div class="nm">${esc(p.naam)}</div>${p.sel ? `<div class="sel">In de selectie</div>` : ""}${p.ingevallen ? `<div class="sel" style="color:var(--muted)">${p.ingevallen.length}× ingevallen</div>` : ""}</div></div>
     <div class="pstats"><div><div class="k">Doelpunten</div><div class="v">${p.goals.length}</div><span class="balls">${p.goals.map(g => `<span class="ball ${ballCls(g.soort)}"></span>`).join("")}</span></div>
       <div><div class="k">Liters</div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}<small> L</small></div>${p.liters && p.liters.open > 0 ? `<span class="pill open">${fmtL(p.liters.open)} L open</span>` : p.liters ? `<span class="pill done">alles gedaan</span>` : ""}</div></div>
   </button>`;
@@ -1943,9 +1943,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795480700"></script>
-<script src="toto.js?v=1795480700"></script>
-<script src="pong.js?v=1795480700"></script>
+<script src="mex.js?v=1795480800"></script>
+<script src="toto.js?v=1795480800"></script>
+<script src="pong.js?v=1795480800"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -1954,7 +1954,7 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795480700"></script>
-<script src="statistieken.js?v=1795480700"></script>
+<script src="stemmen.js?v=1795480800"></script>
+<script src="statistieken.js?v=1795480800"></script>
 </body>
 </html>
