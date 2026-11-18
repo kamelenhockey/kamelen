@@ -9,6 +9,10 @@ on:
     workflows: ["Competitie bijwerken"]
     types: [completed]
   workflow_dispatch: {}
+  # Testmelding of aangepast script
+  push:
+    branches: [main]
+    paths: ["testmelding.json", "scripts/meldingen.mjs", ".github/workflows/meldingen.yml"]
 
 permissions:
   contents: write

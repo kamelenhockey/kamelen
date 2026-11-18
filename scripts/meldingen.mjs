@@ -84,12 +84,15 @@ if (nl.uur >= 9) for (const p of roster.spelers || []) {
   if (p.verjaardag && p.verjaardag === nl.datum.slice(5)) meld(`jarig-${p.naam}-${nl.datum.slice(0, 4)}`, `🎉 ${p.naam} is vandaag jarig!`, "Vergeet niet te feliciteren. Wie trakteert er op een rondje?", SITE + "#spelers");
 }
 
+/* Testmelding: zet een nieuwe "id" in testmelding.json om een test te versturen */
+const test = lees("testmelding.json", null);
+if (test && test.id && !status.verzonden[`test-${test.id}`]) te.push({ id: `test-${test.id}`, title: test.title || "Test", body: test.body || "", url: SITE, test: true });
+
 /* Eerste keer: alles wat nu al zou gelden als verstuurd markeren (geen stortvloed oude meldingen) */
 if (eersteKeer) {
-  te.forEach(x => status.verzonden[x.id] = nu.toISOString());
-  fs.writeFileSync(STATUS, JSON.stringify(status, null, 1) + "\n");
-  console.log("Eerste keer: status aangemaakt, niets verstuurd.", te.map(x => x.id));
-  process.exit(0);
+  te.filter(x => !x.test).forEach(x => status.verzonden[x.id] = nu.toISOString());
+  console.log("Eerste keer: oude meldingen overgeslagen.", te.filter(x => !x.test).map(x => x.id));
+  te.splice(0, te.length, ...te.filter(x => x.test));
 }
 if (!te.length) { console.log("Niets te melden."); process.exit(0); }
 
