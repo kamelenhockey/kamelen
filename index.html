@@ -2776,7 +2776,10 @@ const loadLitersLive = () => fetchText(LITERS_CSV).then(t => {
 });
 const loadDoelpunten = () => fetchText(DOELPUNTEN_CSV).catch(() => fetchText("doelpunten.csv")).then(t => leesDoelpunten(parseCsv(t))).catch(() => []);
 
-Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("opstelling.json"), loadLitersLive().catch(() => null), loadDoelpunten(), loadJson("spelers.json")])
+/* stil = op de achtergrond bijwerken: geen spellen of formulieren resetten, geen foutmelding */
+function laadGegevens(stil){
+const y = window.scrollY, pagina = document.body.dataset.page;
+return Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("opstelling.json"), loadLitersLive().catch(() => null), loadDoelpunten(), loadJson("spelers.json")])
   .then(([comp, lit, ops, live, doelpunten, roster]) => {
     initRoster(roster);
     DATA = { aftrekMoment: { "GCHC H13": "2026-10-18" }, ...comp, ...lit, ...(live ? {liters: live} : {}), opstelling: ops.spelers || [], opstellingWedstrijd: ops.wedstrijd || null, doelpunten };
@@ -2785,20 +2788,27 @@ Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("ops
     if (DATA.competitie) document.getElementById("league").textContent = DATA.competitie;
     /* Elk onderdeel apart: als er één faalt, werkt de rest gewoon door */
     const veilig = f => { try { const r = f(); if (r && r.catch) r.catch(e => console.error(e)); return r; } catch (e) { console.error(e); } };
-    [renderStats, renderNext, renderProgram, renderResults, renderStandings, renderTopscorers, renderLiters, initPredictor, renderSeason, renderPlayers, initAgenda, () => window.renderMex?.(), () => window.renderRace?.(), () => window.renderToto?.(), renderDash, renderJarig, confettiNaWinst].forEach(veilig);
+    const formBezig = v => pagina === v && bezigMetIets(true);
+    (stil
+      ? [renderStats, renderNext, renderProgram, renderResults, renderStandings, renderTopscorers, renderLiters, renderSeason, renderPlayers, () => formBezig("toto") || window.renderToto?.(), renderDash, renderJarig]
+      : [renderStats, renderNext, renderProgram, renderResults, renderStandings, renderTopscorers, renderLiters, initPredictor, renderSeason, renderPlayers, initAgenda, () => window.renderMex?.(), () => window.renderRace?.(), () => window.renderToto?.(), renderDash, renderJarig, confettiNaWinst]).forEach(veilig);
     DATA.litersBasis = DATA.liters;
     veilig(() => window.renderStatistieken?.());
-    veilig(() => window.renderFotos?.()); veilig(() => window.renderQuotes?.());
+    if (!formBezig("fotos")) veilig(() => window.renderFotos?.());
+    if (!formBezig("quotes")) veilig(() => window.renderQuotes?.());
     veilig(() => window.kamelenApi().then(j => { if (j && j.profielfotos) zetProfielfotos(j.profielfotos); }));
     /* Na het ophalen van de stemmen (ezel-liters) de statistieken nog eens bijwerken */
-    Promise.resolve(veilig(() => window.renderStemmen?.())).catch(() => {}).finally(() => veilig(() => window.renderStatistieken?.()));
+    Promise.resolve(formBezig("stemmen") ? null : veilig(() => window.renderStemmen?.())).catch(() => {}).finally(() => veilig(() => window.renderStatistieken?.()));
     const f = x => { const d = new Date(x); return isNaN(d) ? "onbekend" : d.toLocaleString("nl-NL",{dateStyle:"long",timeStyle:"short",timeZone:"Europe/Amsterdam"}); };
-    herstelScroll();
+    if (stil) window.scrollTo(0, y); else herstelScroll();
     document.getElementById("foot").textContent = `Competitie: laatste wijziging ${f(DATA.competitieBijgewerkt)} (bron hockey.nl) · Liter-incassobureau en topscorers: ${live ? "live uit de spreadsheet" : "bijgewerkt " + f(DATA.bijgewerkt)}`;
   })
   .catch(() => {
+    if (stil) return;
     document.querySelector("main").insertAdjacentHTML("afterbegin", `<div class="card wide">${empty("De gegevens konden niet worden geladen", "Ververs de pagina om het opnieuw te proberen.")}</div>`);
   });
+}
+laadGegevens(false);
 /* ---------- Altijd de nieuwste versie: verversen ---------- */
 /* Na herladen: terug naar dezelfde plek op de pagina */
 function herstelScroll(){
@@ -2814,35 +2824,50 @@ document.addEventListener("click", e => {
 }, true);
 document.addEventListener("change", e => { if (e.target.matches('input[type="file"]')) _nietHerladenTot = Date.now() + 60000; }, true);
 /* Is er iets bezig dat je kwijt zou raken? Dan niet vanzelf herladen. */
-function bezigMetIets(){
+function bezigMetIets(alleenFormulier){
   if (Date.now() < _nietHerladenTot) return true;
-  if (document.querySelector("dialog[open]")) return true;
+  if (!alleenFormulier && document.querySelector("dialog[open]")) return true;
+  if (document.querySelector(".kz-chip.on:not([disabled])") && document.body.dataset.page === "stemmen") return true;
   return [...document.querySelectorAll("input, textarea")].some(i =>
     i.type !== "hidden" && i.type !== "file" && i.type !== "checkbox" && i.type !== "radio" && i.offsetParent && i.value !== i.defaultValue);
 }
-function verversNu(){
-  ["ververs-knop", "trek-ververs"].forEach(id => document.getElementById(id)?.classList.add("draait"));
+/* Herladen (alleen als er echt een nieuwe versie van de app klaarstaat) */
+function herlaadPagina(){
   try { sessionStorage.setItem("kamelen-scroll", JSON.stringify({ hash: location.hash, y: window.scrollY, t: Date.now() })); } catch {}
+  location.reload();
+}
+let _updateKlaar = false, _stilBezig = null, _laatstBijgewerkt = Date.now();
+/* Op de achtergrond de nieuwste gegevens ophalen en alles bijwerken, zonder te herladen */
+function stilVerversen(){
+  if (_stilBezig) return _stilBezig;
+  window.kamelenApi?.(true);
+  _stilBezig = laadGegevens(true).catch(() => {}).finally(() => { _stilBezig = null; _laatstBijgewerkt = Date.now(); });
+  return _stilBezig;
+}
+/* Verversknop en naar beneden trekken */
+async function verversNu(){
+  const knoppen = ["ververs-knop", "trek-ververs"].map(id => document.getElementById(id));
+  knoppen.forEach(k => k?.classList.add("draait"));
   const reg = window._kamelenReg;
-  Promise.race([reg ? reg.update().catch(() => {}) : Promise.resolve(), new Promise(r => setTimeout(r, 1500))]).finally(() => location.reload());
+  await Promise.race([reg ? reg.update().catch(() => {}) : null, new Promise(r => setTimeout(r, 1500))]);
+  if (_updateKlaar || (reg && (reg.waiting || reg.installing))) return herlaadPagina();
+  await Promise.all([stilVerversen(), new Promise(r => setTimeout(r, 500))]);
+  knoppen.forEach(k => k?.classList.remove("draait"));
+  const tr = document.getElementById("trek-ververs");
+  if (tr) { tr.style.transition = "transform .25s, opacity .25s"; tr.style.opacity = 0; tr.style.transform = "translateY(-60px)"; setTimeout(() => tr.style.transition = "", 260); }
 }
 window.verversNu = verversNu;
-function toonVerversToast(tekst){
-  if (document.querySelector(".ververs-toast")) return;
-  const d = document.createElement("div"); d.className = "ververs-toast"; d.setAttribute("role", "status");
-  d.innerHTML = `<span>${tekst}</span><button type="button">Verversen</button><button type="button" class="vt-x" aria-label="Sluiten">✕</button>`;
-  d.querySelector("button").onclick = verversNu; d.querySelector(".vt-x").onclick = () => d.remove(); document.body.appendChild(d);
-}
 document.getElementById("ververs-knop").addEventListener("click", verversNu);
-/* Terug in de app na een tijdje weg te zijn geweest: vanzelf de nieuwste stand ophalen */
+/* Terug in de app: stil de nieuwste stand ophalen. Een nieuwe app-versie wordt geladen zodra je de app wegklikt, dan zie je er niks van. */
 let _wegSinds = 0;
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) { _wegSinds = Date.now(); return; }
-  window._kamelenReg?.update().catch(() => {});
-  if (_wegSinds && Date.now() - _wegSinds > 45000) {
-    if (bezigMetIets()) toonVerversToast("Er kan nieuws zijn sinds je weg was.");
-    else verversNu();
+  if (document.hidden) {
+    _wegSinds = Date.now();
+    if (_updateKlaar && !bezigMetIets()) herlaadPagina();
+    return;
   }
+  window._kamelenReg?.update().catch(() => {});
+  if (_wegSinds && Date.now() - _wegSinds > 30000) stilVerversen();
   _wegSinds = 0;
 });
 /* Naar beneden trekken bovenaan de pagina = verversen (zoals in andere apps) */
@@ -2871,13 +2896,12 @@ if ("serviceWorker" in navigator) window.addEventListener("load", () => {
   navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(reg => {
     window._kamelenReg = reg;
     reg.update().catch(() => {});
-    /* Nieuwe versie van de app: meteen gebruiken (of even vragen als je ergens mee bezig bent) */
+    /* Nieuwe versie van de app: klaarzetten, niet zichtbaar herladen */
     reg.addEventListener("updatefound", () => {
       const nw = reg.installing;
       nw?.addEventListener("statechange", () => {
         if (nw.state !== "activated" || !navigator.serviceWorker.controller) return;
-        if (bezigMetIets()) toonVerversToast("Er is een nieuwe versie van de app.");
-        else verversNu();
+        _updateKlaar = true;   // wordt geladen zodra je de app wegklikt, of met de verversknop
       });
     });
   }).catch(() => {});
@@ -2899,9 +2923,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795487100"></script>
-<script src="toto.js?v=1795487100"></script>
-<script src="pong.js?v=1795487100"></script>
+<script src="mex.js?v=1795487200"></script>
+<script src="toto.js?v=1795487200"></script>
+<script src="pong.js?v=1795487200"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2910,12 +2934,12 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795487100"></script>
-<script src="statistieken.js?v=1795487100"></script>
-<script src="race.js?v=1795487100"></script>
-<script src="rad.js?v=1795487100"></script>
-<script src="fotos.js?v=1795487100"></script>
-<script src="quotes.js?v=1795487100"></script>
-<script src="push.js?v=1795487100"></script>
+<script src="stemmen.js?v=1795487200"></script>
+<script src="statistieken.js?v=1795487200"></script>
+<script src="race.js?v=1795487200"></script>
+<script src="rad.js?v=1795487200"></script>
+<script src="fotos.js?v=1795487200"></script>
+<script src="quotes.js?v=1795487200"></script>
+<script src="push.js?v=1795487200"></script>
 </body>
 </html>
