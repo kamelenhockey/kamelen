@@ -196,7 +196,7 @@
         const r = await fetch(CFG.api, { method: "POST", body: JSON.stringify({ type: "stem", code, stemmer, kameel, ezel, wedstrijd: sleutel(m), opent: opent(m).toISOString() }) });
         const res = await r.json();
         if (!res.ok) {
-          st.textContent = { code: "Je inlogcode klopt niet meer. Log opnieuw in.", zelf: "Op jezelf stemmen mag niet.", gesloten: "De stemming is al gesloten.", "nog niet": "De stemming is nog niet open." }[res.fout] || "Opslaan lukte niet. Is het script al bijgewerkt?";
+          st.textContent = { code: "Je inlogcode klopt niet meer. Log opnieuw in.", coach: "Op een coach stemmen kan niet.", zelf: "Op jezelf stemmen mag niet.", gesloten: "De stemming is al gesloten.", "nog niet": "De stemming is nog niet open." }[res.fout] || "Opslaan lukte niet. Is het script al bijgewerkt?";
           if (res.fout === "code") { delete e.code; bewaar(e); }
           knop.disabled = false; return;
         }

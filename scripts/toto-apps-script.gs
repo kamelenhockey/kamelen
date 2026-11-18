@@ -8,6 +8,10 @@
 const SPELERCODES = {
   // "KameelMini1234": "Mini",
 };
+/* Coaches: mogen alles (stemmen, toto, foto's, quotes), maar je kunt niet op hen stemmen als kameel of ezel */
+const COACHCODES = {
+  // "CoachNaam": "Naam",
+};
 const BEHEERCODE = "VUL-HIER-JOUW-BEHEERCODE-IN";  // alleen voor jou: stemmingen sluiten
 const PUSHCODE = "VUL-HIER-DE-PUSHCODE-IN";        // geheim voor de meldingen-robot (GitHub)
 
@@ -47,6 +51,7 @@ const naam_ = n => String(n || "").trim().slice(0, 40);
 function speler_(code) {
   const c = String(code || "").trim().toLowerCase();
   for (const k in SPELERCODES) if (k.toLowerCase() === c) return SPELERCODES[k];
+  for (const k in COACHCODES) if (k.toLowerCase() === c) return COACHCODES[k];
   return "";
 }
 
@@ -145,6 +150,8 @@ function doPost(e) {
         const stemmer = ik, kameel = naam_(d.kameel), ezel = naam_(d.ezel), w = String(d.wedstrijd || "").slice(0, 120);
         if (!stemmer || !kameel || !ezel || !w) return json_({ ok: false, fout: "invoer" });
         if (stemmer === kameel || stemmer === ezel) return json_({ ok: false, fout: "zelf" });
+        const coaches = Object.keys(COACHCODES).map(k => COACHCODES[k]);
+        if (coaches.indexOf(kameel) >= 0 || coaches.indexOf(ezel) >= 0) return json_({ ok: false, fout: "coach" });
         const opent = new Date(d.opent);
         if (isNaN(opent) || new Date() < opent) return json_({ ok: false, fout: "nog niet" });
         if (gesloten_().indexOf(w) >= 0) return json_({ ok: false, fout: "gesloten" });

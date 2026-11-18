@@ -2309,6 +2309,23 @@ document.getElementById("nav-more-btn").addEventListener("click", e => {
   const m = document.getElementById("nav-more-menu"); m.hidden = !m.hidden; e.currentTarget.setAttribute("aria-expanded", String(!m.hidden));
 });
 document.addEventListener("click", e => { const m = document.getElementById("nav-more-menu"); if (m && !m.hidden && !e.target.closest(".nav-more")) { m.hidden = true; document.getElementById("nav-more-btn").setAttribute("aria-expanded", "false"); } });
+/* Overal "Kamelen" laten zien in plaats van "GCHC H13". Alleen de weergave verandert: de gegevens
+   (en dus opgeslagen stemmen en voorspellingen) houden de officiële naam van hockey.nl. */
+(function(){
+  const OUD = /GCHC H13/g, NIEUW = "Kamelen";
+  const tekst = root => {
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    for (let n = w.nextNode(); n; n = w.nextNode()) if (n.nodeValue.includes("GCHC H13")) n.nodeValue = n.nodeValue.replace(OUD, NIEUW);
+    if (root.querySelectorAll) root.querySelectorAll("[title*='GCHC H13'],[aria-label*='GCHC H13'],[alt*='GCHC H13']").forEach(el => {
+      ["title", "aria-label", "alt"].forEach(a => { const v = el.getAttribute(a); if (v && v.includes("GCHC H13")) el.setAttribute(a, v.replace(OUD, NIEUW)); });
+    });
+  };
+  tekst(document.body);
+  new MutationObserver(lijst => { for (const m of lijst) {
+    if (m.type === "characterData") { if (m.target.nodeValue.includes("GCHC H13")) m.target.nodeValue = m.target.nodeValue.replace(OUD, NIEUW); }
+    else m.addedNodes.forEach(n => { if (n.nodeType === 3) { if (n.nodeValue.includes("GCHC H13")) n.nodeValue = n.nodeValue.replace(OUD, NIEUW); } else if (n.nodeType === 1) tekst(n); });
+  } }).observe(document.body, { childList: true, subtree: true, characterData: true });
+})();
 /* Uitloggen */
 document.querySelectorAll("[data-uitloggen]").forEach(a => {
   if (window.IK) a.textContent = `Uitloggen (${window.IK.naam})`;
@@ -2387,9 +2404,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795483200"></script>
-<script src="toto.js?v=1795483200"></script>
-<script src="pong.js?v=1795483200"></script>
+<script src="mex.js?v=1795483300"></script>
+<script src="toto.js?v=1795483300"></script>
+<script src="pong.js?v=1795483300"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2398,11 +2415,11 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795483200"></script>
-<script src="statistieken.js?v=1795483200"></script>
-<script src="rad.js?v=1795483200"></script>
-<script src="fotos.js?v=1795483200"></script>
-<script src="quotes.js?v=1795483200"></script>
-<script src="push.js?v=1795483200"></script>
+<script src="stemmen.js?v=1795483300"></script>
+<script src="statistieken.js?v=1795483300"></script>
+<script src="rad.js?v=1795483300"></script>
+<script src="fotos.js?v=1795483300"></script>
+<script src="quotes.js?v=1795483300"></script>
+<script src="push.js?v=1795483300"></script>
 </body>
 </html>

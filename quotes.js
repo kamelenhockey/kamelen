@@ -9,7 +9,8 @@
   const eigen = () => { try { return JSON.parse(localStorage.getItem(LS) || "{}"); } catch { return {}; } };
   const bewaar = o => { try { localStorage.setItem(LS, JSON.stringify(o)); } catch {} };
   const beheercode = () => { try { return localStorage.getItem(BLS) || ""; } catch { return ""; } };
-  const namen = () => typeof ROSTER !== "undefined" ? [...ROSTER] : [];
+  const COACHES = ["Marie", "Toryll", "Lucia"];
+  const namen = () => [...(typeof ROSTER !== "undefined" ? [...ROSTER] : []), ...COACHES];
   const datum = t => { const d = new Date(t); return isNaN(d) ? "" : d.toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" }); };
   let QUOTES = [], filter = "";
 
