@@ -124,8 +124,12 @@
   /* ---------- 3. De race ---------- */
   function renderBaan() {
     box.innerHTML = `
-      <div class="rc-baan" id="rc-baan">${S.kamelen.map((k, i) => `
-        <div class="rc-lane"><span class="rc-lnaam">${esc(k)}</span><div class="rc-zand"><span class="rc-kameel" id="rc-k${i}" style="left:0%"><span class="rc-kroon" aria-hidden="true">👑</span><span class="rc-lijf">🐪</span><span class="rc-stof" aria-hidden="true"></span></span><span class="rc-finish"></span></div></div>`).join("")}
+      <div class="rc-baan" id="rc-baan">
+        <div class="rc-lucht" aria-hidden="true"><span class="rc-zon"></span><span class="rc-wolk w1">☁️</span><span class="rc-wolk w2">☁️</span><span class="rc-cactus c1">🌵</span><span class="rc-cactus c2">🌵</span><span class="rc-cactus c3">🌴</span></div>
+        ${S.kamelen.map((k, i) => `
+        <div class="rc-lane"><span class="rc-lnaam">${esc(k)}</span><div class="rc-zand"><span class="rc-start" aria-hidden="true"></span>
+          <span class="rc-kameel" id="rc-k${i}"><span class="rc-kroon" aria-hidden="true">👑</span><span class="rc-plek" aria-hidden="true"></span><span class="rc-sprong"><span class="rc-lijf">🐪</span></span><span class="rc-stof" aria-hidden="true"></span></span>
+          <span class="rc-finish"></span></div></div>`).join("")}
         <div class="rc-aftel" id="rc-aftel" aria-live="assertive"></div></div>
       <div class="rc-feed" id="rc-feed" aria-live="polite"></div>
       <div class="rc-knoppen" id="rc-afbreken"><button type="button" class="btn sm ghost" data-rc="afbreken">Race afbreken</button></div>
@@ -133,62 +137,103 @@
   }
 
   let loper = null, teller = null;
-  function stopTimers() { clearInterval(loper); clearTimeout(teller); loper = teller = null; }
+  function stopTimers() { cancelAnimationFrame(loper); clearTimeout(teller); loper = teller = null; }
+
+  /* De race draait op requestAnimationFrame: elke frame een klein stapje, dus vloeiend.
+     Gebeurtenissen geven geen sprong maar een duw die in ~0,7 s wordt verwerkt. */
   function race() {
     stopTimers();
     S.fase = "race"; bewaar(); render();
     document.getElementById("rc-baan")?.scrollIntoView({ behavior: "smooth", block: "center" });
-    const pos = S.kamelen.map(() => 0), snel = S.kamelen.map(() => 1.2 + Math.random() * .6);
+    const N = S.kamelen.length;
+    const pos = Array(N).fill(0), duw = Array(N).fill(0);
+    const basis = S.kamelen.map(() => 6.2 + Math.random() * 1.2);            // meter per seconde
+    const fase = S.kamelen.map(() => [Math.random() * 6, Math.random() * 6]);   // voor golvende snelheid
     const feed = document.getElementById("rc-feed"), baan = document.getElementById("rc-baan"), aftel = document.getElementById("rc-aftel");
     const els = S.kamelen.map((_, i) => document.getElementById("rc-k" + i));
-    const zet = () => {
-      const voor = Math.max(...pos);
-      els.forEach((el, i) => { if (!el) return; const p = Math.min(pos[i], BAAN) / BAAN; el.style.left = `calc(${p * 100}% - ${p * 2.4}rem)`; el.classList.toggle("leider", pos[i] === voor && voor > 4); });
-    };
-    const melding = (t, soort = "") => { const p = document.createElement("p"); p.textContent = t; if (soort) p.className = soort; feed.prepend(p); while (feed.children.length > 4) feed.lastChild.remove(); };
+    let breedte = 0;
+    const meet = () => { const z = baan.querySelector(".rc-zand"), k = els[0]; breedte = z && k ? z.clientWidth - k.offsetWidth - 6 : 300; };
+    meet(); addEventListener("resize", meet);
     const rustig = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    /* Aftellen: 3, 2, 1, start! */
-    const tellen = ["3", "2", "1", "Start!"];
-    let k = 0;
-    const tel = () => {
-      if (rustig || k >= tellen.length) { aftel.textContent = ""; aftel.className = "rc-aftel"; return lopen(); }
-      aftel.textContent = tellen[k]; aftel.className = "rc-aftel toon" + (k === 3 ? " go" : "");
-      try { navigator.vibrate?.(k === 3 ? 120 : 30); } catch {}
-      k++; teller = setTimeout(tel, 650);
+
+    const melding = (t, soort = "") => { const p = document.createElement("p"); p.textContent = t; if (soort) p.className = soort; feed.prepend(p); while (feed.children.length > 4) feed.lastChild.remove(); };
+    const ballon = (i, d) => {
+      const el = els[i]; if (!el) return;
+      const b = document.createElement("span"); b.className = "rc-pop " + (d > 0 ? "plus" : "min");
+      b.textContent = (d > 0 ? "+" : "−") + Math.abs(d) + "m " + (d > 0 ? "⚡" : "💥"); el.appendChild(b);
+      setTimeout(() => b.remove(), 1100);
+      el.classList.remove("hop", "val"); void el.offsetWidth; el.classList.add(d > 0 ? "hop" : "val");
     };
+    const teken = () => {
+      const rang = pos.map((p, i) => [p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => i);
+      els.forEach((el, i) => {
+        if (!el) return;
+        const x = Math.min(pos[i], BAAN) / BAAN * breedte;
+        el.style.transform = `translate3d(${x.toFixed(1)}px,-50%,0)`;
+        const plek = rang.indexOf(i) + 1;
+        el.classList.toggle("leider", plek === 1 && pos[i] > 3);
+        const pl = el.querySelector(".rc-plek"); if (pl) pl.textContent = pos[i] > 3 ? plek : "";
+      });
+    };
+
+    /* Aftellen */
+    const tellen = ["3", "2", "1", "Start!"]; let k = 0;
+    const tel = () => {
+      if (rustig || k >= tellen.length) { aftel.className = "rc-aftel"; aftel.textContent = ""; return lopen(); }
+      aftel.textContent = tellen[k]; aftel.className = "rc-aftel"; void aftel.offsetWidth; aftel.className = "rc-aftel toon" + (k === 3 ? " go" : "");
+      if (k === 3) baan.classList.add("open");
+      try { navigator.vibrate?.(k === 3 ? 120 : 30); } catch {}
+      k++; teller = setTimeout(tel, 700);
+    };
+
     const lopen = () => {
       baan.classList.add("rent");
       melding("En ze zijn vertrokken!", "groot");
-      let tik = 0, laatsteLeider = -1, finale = false; window.__rcLaatste = 0;
-      const t = loper = setInterval(() => {
-        tik++;
-        S.kamelen.forEach((_, i) => { pos[i] += (snel[i] + Math.random() * 1.1) * .55 * (rustig ? 20 : 1); });
-        /* Hoe verder in de race, hoe vaker iets gebeurt (eerst elke 9 tikken, op het eind elke 4) en hoe groter */
-        const voortgang = Math.min(1, Math.max(...pos) / BAAN), elke = Math.round(9 - voortgang * 5);
-        if (tik - (window.__rcLaatste || 0) >= elke) {
-          window.__rcLaatste = tik;
-          const i = r(S.kamelen.length), [tekst, basis] = kiesGebeurtenis(voortgang);
-          const d = Math.round(basis * (1 + voortgang * .8));
-          pos[i] = Math.max(0, pos[i] + d); melding(tekst(S.kamelen[i]), (d > 0 ? "plus" : "min") + (Math.abs(d) >= 7 ? " mega" : ""));
-          const el = els[i]; if (el) { el.classList.remove("hop", "val"); void el.offsetWidth; el.classList.add(d > 0 ? "hop" : "val"); }
+      let vorige = performance.now(), tijd = 0, volgendEvent = 1.1, laatsteLeider = -1, finale = false, slowmo = false, klaar = false;
+      const frame = nu => {
+        let dt = Math.min(.05, (nu - vorige) / 1000); vorige = nu;
+        if (rustig) dt *= 6;
+        const voor = Math.max(...pos), voortgang = Math.min(1, voor / BAAN);
+        /* Fotofinish in slow motion: koploper bijna binnen en de nummer twee zit er vlak achter */
+        const sorted = [...pos].sort((a, b) => b - a);
+        const spannend = voor > BAAN * .9 && sorted[0] - sorted[1] < 4;
+        if (spannend !== slowmo) { slowmo = spannend; baan.classList.toggle("slowmo", slowmo); if (slowmo) melding("Fotofinish! Het is nek aan nek!", "groot"); }
+        const sdt = slowmo ? dt * .35 : dt;
+        tijd += sdt;
+        for (let i = 0; i < N; i++) {
+          const golf = 1 + .18 * Math.sin(tijd * 2.1 + fase[i][0]) + .1 * Math.sin(tijd * 5.3 + fase[i][1]);
+          const stap = Math.sign(duw[i]) * Math.min(Math.abs(duw[i]), 9 * sdt);    // duw wordt geleidelijk verwerkt
+          duw[i] -= stap;
+          pos[i] = Math.max(0, pos[i] + basis[i] * golf * sdt + stap);
         }
-        const voor = Math.max(...pos), leider = pos.indexOf(voor);
-        if (leider !== laatsteLeider && tik > 15 && tik % 3 === 0) { laatsteLeider = leider; if (tik > 20) melding(`${S.kamelen[leider]} neemt de leiding!`, "leiding"); }
-        if (!finale && voor > BAAN * .82) { finale = true; baan.classList.add("finale"); melding("De laatste meters! Wie pakt het?", "groot"); }
-        zet();
-        if (voor >= BAAN) {
-          clearInterval(t);
-          baan.classList.remove("rent", "finale"); baan.classList.add("flits");
+        /* Gebeurtenissen: hoe verder, hoe vaker en hoe groter */
+        if (tijd >= volgendEvent) {
+          volgendEvent = tijd + (1.15 - voortgang * .6) * (.8 + Math.random() * .4);
+          const i = r(N), [tekst, b] = kiesGebeurtenis(voortgang), d = Math.round(b * (1 + voortgang * .8));
+          duw[i] += d; ballon(i, d);
+          melding(tekst(S.kamelen[i]), (d > 0 ? "plus" : "min") + (Math.abs(d) >= 7 ? " mega" : ""));
+        }
+        const leider = pos.indexOf(voor);
+        if (leider !== laatsteLeider && tijd > 2.5) { if (laatsteLeider >= 0) melding(`${S.kamelen[leider]} neemt de leiding!`, "leiding"); laatsteLeider = leider; }
+        if (!finale && voortgang > .8) { finale = true; baan.classList.add("finale"); melding("De laatste meters! Wie pakt het?", "groot"); }
+        teken();
+        if (voor >= BAAN && !klaar) {
+          klaar = true; loper = null;
+          removeEventListener("resize", meet);
+          baan.classList.remove("rent", "finale", "slowmo"); baan.classList.add("flits");
           const volgorde = pos.map((p, i) => [p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => S.kamelen[i]);
-          const wi = S.kamelen.indexOf(volgorde[0]); els[wi]?.classList.add("winnaar");
-          document.getElementById("rc-afbreken")?.remove();
+          els[S.kamelen.indexOf(volgorde[0])]?.classList.add("winnaar");
           melding(`FINISH! ${volgorde[0]} wint!`, "groot");
+          document.getElementById("rc-afbreken")?.remove();
           try { window.schietConfetti?.(); } catch {}
-          setTimeout(() => afrekenen(volgorde), 900);
+          setTimeout(() => afrekenen(volgorde), 1100);
+          return;
         }
-      }, 120);
+        loper = requestAnimationFrame(frame);
+      };
+      loper = requestAnimationFrame(frame);
     };
-    tel();
+    teken(); tel();
   }
 
   /* ---------- 4. Afrekenen ---------- */
