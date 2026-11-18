@@ -137,8 +137,8 @@
     if (Bt.worpen[x] && Bt.worpen[y]) return;
     Bt.worpen[x] = d6(); Bt.worpen[y] = d6();
     {
-      if (Bt.worpen[x] === Bt.worpen[y]) { Bt.gelijk = true; setTimeout(() => { Bt.worpen = {}; Bt.gelijk = false; save(); render(); }, 1300); }
-      else { const verliezer = Bt.worpen[x] > Bt.worpen[y] ? x : y; setTimeout(() => verloren(verliezer, Bt.straf), 900); }
+      if (Bt.worpen[x] === Bt.worpen[y]) { Bt.gelijk = true; setTimeout(() => { Bt.worpen = {}; Bt.gelijk = false; save(); render(); }, 1800); }
+      else { const verliezer = Bt.worpen[x] > Bt.worpen[y] ? x : y; setTimeout(() => verloren(verliezer, Bt.straf), 1800); }
     }
     save(); render();
   }
