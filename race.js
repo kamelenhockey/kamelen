@@ -1,18 +1,19 @@
 /* =========================================================
-   De Grote Kamelen-gokken: een kamelenrace om op te wedden.
+   Kamelen-racen: een kamelenrace om op te wedden, met slokken als inzet.
    - Kies welke kamelen meedoen (vernoemd naar spelers) en wie er gokt.
-   - Iedereen heeft kamelen-munten (start: 10). Zet in op een kameel.
+   - Iedereen zet zoveel slokken in als hij wil op één kameel (geen maximum).
    - De race: willekeurige gebeurtenissen bepalen wie wint.
-   - Uitbetaling: de pot gaat naar wie op de winnaar inzette (naar verhouding).
-     Wie verloor, drinkt evenveel slokken als hij aan munten kwijt is.
-     De speler naar wie de winnende kameel vernoemd is, mag slokken uitdelen.
+   - Gewonnen: je mag je inzet × het aantal kamelen uitdelen (de odds).
+     Verloren: je drinkt je inzet zelf.
    Alles staat alleen op dit apparaat (een telefoon gaat rond).
    ========================================================= */
 (function () {
   const box = document.getElementById("race"); if (!box) return;
-  const LS = "kamelen-race", START = 10, BAAN = 100;
+  const LS = "kamelen-race", BAAN = 100;
   const laad = () => { try { return JSON.parse(localStorage.getItem(LS)) || null; } catch { return null; } };
-  let S = laad() || { kamelen: [], gokkers: [], munten: {}, inzet: {}, fase: "setup", log: [], uitslag: null, races: 0 };
+  let S = laad() || {};
+  S = { kamelen: [], gokkers: [], inzet: {}, fase: "setup", uitslag: null, races: 0, tel: {}, ...S };
+  S.tel = S.tel || {};   // per gokker: { gedronken, uitgedeeld } deze avond
   const bewaar = () => { try { localStorage.setItem(LS, JSON.stringify(S)); } catch {} };
   const namen = () => typeof ROSTER !== "undefined" ? [...ROSTER] : [];
   const r = n => Math.floor(Math.random() * n);
@@ -46,7 +47,7 @@
     box.innerHTML = `
       <div class="rc-stap"><h3>1. Welke kamelen racen er?</h3><p class="muted">Kies 3 tot 8 kamelen. Ze zijn vernoemd naar spelers.</p>
         <div class="kz-grid">${chips(S.kamelen, "kamelen")}</div></div>
-      <div class="rc-stap"><h3>2. Wie gokt er mee?</h3><p class="muted">Iedereen begint met ${START} kamelen-munten.</p>
+      <div class="rc-stap"><h3>2. Wie gokt er mee?</h3><p class="muted">Je zet slokken in, zoveel als je durft.</p>
         <div class="kz-grid">${chips(S.gokkers, "gokkers")}</div></div>
       <div class="rc-knoppen"><button type="button" class="btn" data-rc="naar-inzet" ${S.kamelen.length >= 3 && S.gokkers.length >= 1 ? "" : "disabled"}>Naar de inzetten</button>
         <span class="muted">${S.kamelen.length} kamelen, ${S.gokkers.length} gokkers</span></div>
@@ -55,23 +56,26 @@
 
   /* ---------- 2. Inzetten ---------- */
   function renderInzet() {
+    const n = S.kamelen.length;
     box.innerHTML = `
-      <div class="rc-stap"><h3>Plaats je inzet</h3><p class="muted">Kies per gokker een kameel en hoeveel munten je inzet. Geef de telefoon door!</p>
+      <div class="rc-stap"><h3>Plaats je inzet</h3><p class="muted">Kies een kameel en zet zoveel slokken in als je wilt. Wint je kameel, dan mag je je inzet × ${n} uitdelen. Verliest hij, dan drink je je inzet zelf. Geef de telefoon door!</p>
       <div class="rc-inzet">${S.gokkers.map(g => {
-        const z = S.inzet[g] || {}, max = S.munten[g] ?? START;
-        return `<div class="rc-gok"><div class="rc-gnaam">${esc(g)} <small>${max} munten</small></div>
+        const z = S.inzet[g] || {}, m = z.m || 1;
+        return `<div class="rc-gok"><div class="rc-gnaam">${esc(g)}</div>
           <div class="rc-keuze">${S.kamelen.map(k => `<button type="button" class="rc-k ${z.op === k ? "on" : ""}" data-op="${esc(k)}" data-g="${esc(g)}">🐪 ${esc(k)}</button>`).join("")}</div>
-          <div class="rc-stake"><button type="button" class="btn sm ghost" data-st="-1" data-g="${esc(g)}" ${!(z.m > 1) ? "disabled" : ""}>−</button><b>${z.m || 1}</b> <span>munt${(z.m || 1) === 1 ? "" : "en"}</span><button type="button" class="btn sm ghost" data-st="1" data-g="${esc(g)}" ${(z.m || 1) >= max ? "disabled" : ""}>+</button></div></div>`;
+          <div class="rc-stake"><button type="button" class="btn sm ghost" data-st="-1" data-g="${esc(g)}" ${m <= 1 ? "disabled" : ""}>−</button><b>${m}</b> <span>${m === 1 ? "slok" : "slokken"}</span><button type="button" class="btn sm ghost" data-st="1" data-g="${esc(g)}">+</button><button type="button" class="btn sm ghost" data-st="5" data-g="${esc(g)}">+5</button>
+          <span class="rc-odds">${z.op ? `wint: <b>${m * n}</b> uitdelen · verliest: <b>${m}</b> drinken` : ""}</span></div></div>`;
       }).join("")}</div></div>
       <div class="rc-knoppen"><button type="button" class="btn ghost" data-rc="terug">Terug</button>
-        <button type="button" class="btn" data-rc="start" ${S.gokkers.every(g => S.inzet[g]?.op || (S.munten[g] ?? START) <= 0) ? "" : "disabled"}>Start de race!</button></div>`;
+        <button type="button" class="btn" data-rc="start" ${S.gokkers.every(g => S.inzet[g]?.op) ? "" : "disabled"}>Start de race!</button></div>`;
   }
 
   /* ---------- 3. De race ---------- */
   function renderBaan() {
     box.innerHTML = `
       <div class="rc-baan" id="rc-baan">${S.kamelen.map((k, i) => `
-        <div class="rc-lane"><span class="rc-lnaam">${esc(k)}</span><div class="rc-zand"><span class="rc-kameel" id="rc-k${i}" style="left:0%">🐪</span><span class="rc-finish"></span></div></div>`).join("")}</div>
+        <div class="rc-lane"><span class="rc-lnaam">${esc(k)}</span><div class="rc-zand"><span class="rc-kameel" id="rc-k${i}" style="left:0%"><span class="rc-kroon" aria-hidden="true">👑</span><span class="rc-lijf">🐪</span><span class="rc-stof" aria-hidden="true"></span></span><span class="rc-finish"></span></div></div>`).join("")}
+        <div class="rc-aftel" id="rc-aftel" aria-live="assertive"></div></div>
       <div class="rc-feed" id="rc-feed" aria-live="polite"></div>
       <div id="rc-uitslag"></div>`;
   }
@@ -79,60 +83,79 @@
   function race() {
     S.fase = "race"; bewaar(); render();
     const pos = S.kamelen.map(() => 0), snel = S.kamelen.map(() => 1.2 + Math.random() * .6);
-    const feed = document.getElementById("rc-feed");
-    const zet = () => S.kamelen.forEach((_, i) => { const el = document.getElementById("rc-k" + i); if (el) el.style.left = `calc(${Math.min(pos[i], BAAN) / BAAN * 100}% - ${Math.min(pos[i], BAAN) / BAAN * 2.2}rem)`; });
-    const melding = t => { const p = document.createElement("p"); p.textContent = t; feed.prepend(p); while (feed.children.length > 4) feed.lastChild.remove(); };
-    melding("En ze zijn vertrokken!");
-    const snelheid = matchMedia("(prefers-reduced-motion: reduce)").matches ? 20 : 1;
-    let tik = 0;
-    const t = setInterval(() => {
-      tik++;
-      S.kamelen.forEach((_, i) => { pos[i] += (snel[i] + Math.random() * 1.1) * .55 * snelheid; });
-      if (tik % 9 === 0) {
-        const i = r(S.kamelen.length), [tekst, d] = GEBEURTENISSEN[r(GEBEURTENISSEN.length)];
-        pos[i] = Math.max(0, pos[i] + d); melding(tekst(S.kamelen[i]));
-        const el = document.getElementById("rc-k" + i); if (el) { el.classList.remove("hop", "val"); void el.offsetWidth; el.classList.add(d > 0 ? "hop" : "val"); }
-      }
-      zet();
-      const klaar = pos.map((p, i) => [p, i]).filter(([p]) => p >= BAAN);
-      if (klaar.length) {
-        clearInterval(t);
-        const volgorde = pos.map((p, i) => [p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => S.kamelen[i]);
-        afrekenen(volgorde);
-      }
-    }, 120);
+    const feed = document.getElementById("rc-feed"), baan = document.getElementById("rc-baan"), aftel = document.getElementById("rc-aftel");
+    const els = S.kamelen.map((_, i) => document.getElementById("rc-k" + i));
+    const zet = () => {
+      const voor = Math.max(...pos);
+      els.forEach((el, i) => { if (!el) return; const p = Math.min(pos[i], BAAN) / BAAN; el.style.left = `calc(${p * 100}% - ${p * 2.4}rem)`; el.classList.toggle("leider", pos[i] === voor && voor > 4); });
+    };
+    const melding = (t, soort = "") => { const p = document.createElement("p"); p.textContent = t; if (soort) p.className = soort; feed.prepend(p); while (feed.children.length > 4) feed.lastChild.remove(); };
+    const rustig = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    /* Aftellen: 3, 2, 1, start! */
+    const tellen = ["3", "2", "1", "Start!"];
+    let k = 0;
+    const tel = () => {
+      if (rustig || k >= tellen.length) { aftel.textContent = ""; aftel.className = "rc-aftel"; return lopen(); }
+      aftel.textContent = tellen[k]; aftel.className = "rc-aftel toon" + (k === 3 ? " go" : "");
+      try { navigator.vibrate?.(k === 3 ? 120 : 30); } catch {}
+      k++; setTimeout(tel, 650);
+    };
+    const lopen = () => {
+      baan.classList.add("rent");
+      melding("En ze zijn vertrokken!", "groot");
+      let tik = 0, laatsteLeider = -1, finale = false;
+      const t = setInterval(() => {
+        tik++;
+        S.kamelen.forEach((_, i) => { pos[i] += (snel[i] + Math.random() * 1.1) * .55 * (rustig ? 20 : 1); });
+        if (tik % 9 === 0) {
+          const i = r(S.kamelen.length), [tekst, d] = GEBEURTENISSEN[r(GEBEURTENISSEN.length)];
+          pos[i] = Math.max(0, pos[i] + d); melding(tekst(S.kamelen[i]), d > 0 ? "plus" : "min");
+          const el = els[i]; if (el) { el.classList.remove("hop", "val"); void el.offsetWidth; el.classList.add(d > 0 ? "hop" : "val"); }
+        }
+        const voor = Math.max(...pos), leider = pos.indexOf(voor);
+        if (leider !== laatsteLeider && tik > 15 && tik % 3 === 0) { laatsteLeider = leider; if (tik > 20) melding(`${S.kamelen[leider]} neemt de leiding!`, "leiding"); }
+        if (!finale && voor > BAAN * .82) { finale = true; baan.classList.add("finale"); melding("De laatste meters! Wie pakt het?", "groot"); }
+        zet();
+        if (voor >= BAAN) {
+          clearInterval(t);
+          baan.classList.remove("rent", "finale"); baan.classList.add("flits");
+          const volgorde = pos.map((p, i) => [p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => S.kamelen[i]);
+          const wi = S.kamelen.indexOf(volgorde[0]); els[wi]?.classList.add("winnaar");
+          melding(`FINISH! ${volgorde[0]} wint!`, "groot");
+          try { window.schietConfetti?.(); } catch {}
+          setTimeout(() => afrekenen(volgorde), 900);
+        }
+      }, 120);
+    };
+    tel();
   }
 
   /* ---------- 4. Afrekenen ---------- */
   function afrekenen(volgorde) {
-    const winnaar = volgorde[0];
-    const inzetten = S.gokkers.filter(g => S.inzet[g]?.op).map(g => ({ g, op: S.inzet[g].op, m: S.inzet[g].m || 1 }));
-    const pot = inzetten.reduce((s, x) => s + x.m, 0), opWinnaar = inzetten.filter(x => x.op === winnaar), opW = opWinnaar.reduce((s, x) => s + x.m, 0);
-    const regels = inzetten.map(x => {
-      const oud = S.munten[x.g] ?? START;
-      if (x.op === winnaar) { const winst = Math.round(pot * x.m / opW) - x.m; S.munten[x.g] = oud + winst; return { ...x, winst, slokken: 0 }; }
-      S.munten[x.g] = oud - x.m; return { ...x, winst: -x.m, slokken: x.m };
+    const winnaar = volgorde[0], n = S.kamelen.length;
+    const regels = S.gokkers.filter(g => S.inzet[g]?.op).map(g => {
+      const op = S.inzet[g].op, m = S.inzet[g].m || 1, t = S.tel[g] = S.tel[g] || { gedronken: 0, uitgedeeld: 0 };
+      if (op === winnaar) { t.uitgedeeld += m * n; return { g, op, m, uitdelen: m * n, drinken: 0 }; }
+      t.gedronken += m; return { g, op, m, uitdelen: 0, drinken: m };
     });
-    S.races++; S.fase = "uitslag"; S.uitslag = { volgorde, regels, winnaar, uitdelen: opWinnaar.length ? 0 : pot };
-    S.log.unshift(`Race ${S.races}: ${winnaar} won`); bewaar();
+    S.races++; S.fase = "uitslag"; S.uitslag = { volgorde, regels, winnaar }; bewaar();
     try { navigator.vibrate?.([80, 60, 160]); } catch {}
     const el = document.getElementById("rc-uitslag");
     el.innerHTML = `<div class="rc-res">
       <div class="rc-win">🏆 <b>${esc(winnaar)}</b> wint de race!</div>
-      <ol class="rc-volg">${volgorde.map(k => `<li>${esc(k)}</li>`).join("")}</ol>
-      <table class="rc-tabel"><thead><tr><th>Gokker</th><th>Op</th><th class="r">Munten</th><th class="r">Drinken</th></tr></thead><tbody>
-      ${regels.map(x => `<tr><td>${esc(x.g)}</td><td>🐪 ${esc(x.op)}</td><td class="r ${x.winst > 0 ? "gd-pos" : x.winst < 0 ? "gd-neg" : ""}">${x.winst > 0 ? "+" : ""}${x.winst}</td><td class="r">${x.slokken ? `<b>${x.slokken} ${x.slokken === 1 ? "slok" : "slokken"}</b>` : "–"}</td></tr>`).join("")}</tbody></table>
-      <p class="rc-straf">De echte <b>${esc(winnaar)}</b> mag ${Math.max(3, Math.min(10, pot))} slokken uitdelen aan wie hij wil.
-      ${!opWinnaar.length ? `<br>Niemand gokte op de winnaar: de pot van ${pot} munten is weg en <b>iedereen drinkt 2 slokken</b>.` : ""}</p>
+      <ol class="rc-volg">${volgorde.map((k, i) => `<li>${i === 0 ? "🥇 " : i === 1 ? "🥈 " : i === 2 ? "🥉 " : ""}${esc(k)}</li>`).join("")}</ol>
+      <table class="rc-tabel"><thead><tr><th>Gokker</th><th>Op</th><th class="r">Inzet</th><th class="r">Uitdelen</th><th class="r">Drinken</th></tr></thead><tbody>
+      ${regels.map(x => `<tr><td>${esc(x.g)}</td><td>🐪 ${esc(x.op)}</td><td class="r">${x.m}</td><td class="r">${x.uitdelen ? `<b class="gd-pos">${x.uitdelen}</b>` : "–"}</td><td class="r">${x.drinken ? `<b class="gd-neg">${x.drinken}</b>` : "–"}</td></tr>`).join("")}</tbody></table>
+      <p class="muted">Gewonnen: inzet × ${n} (het aantal kamelen) uitdelen. Verloren: je inzet zelf opdrinken.</p>
       <div class="rc-knoppen"><button type="button" class="btn" data-rc="opnieuw">Nieuwe race</button><button type="button" class="btn ghost" data-rc="setup">Kamelen of gokkers wijzigen</button></div></div>`;
   }
 
   function scorebord() {
-    const rij = Object.entries(S.munten).sort((a, b) => b[1] - a[1]);
+    const rij = Object.entries(S.tel).sort((a, b) => b[1].gedronken - a[1].gedronken);
     if (!rij.length) return "";
-    return `<div class="mx-score"><h3 class="sub-h">Munten deze avond${S.races ? ` · ${S.races} ${S.races === 1 ? "race" : "races"}` : ""}</h3>
-      <table><thead><tr><th>Gokker</th><th class="r">Munten</th></tr></thead><tbody>${rij.map(([n, m]) => `<tr><td>${esc(n)}</td><td class="r">${m}${m <= 0 ? " 💀" : ""}</td></tr>`).join("")}</tbody></table>
-      <button type="button" class="btn sm ghost" data-rc="reset">Nieuwe avond (munten terug naar ${START})</button></div>`;
+    return `<div class="mx-score"><h3 class="sub-h">Deze avond${S.races ? ` · ${S.races} ${S.races === 1 ? "race" : "races"}` : ""}</h3>
+      <table><thead><tr><th>Gokker</th><th class="r">Gedronken</th><th class="r">Uitgedeeld</th></tr></thead><tbody>${rij.map(([n, t]) => `<tr><td>${esc(n)}</td><td class="r">${t.gedronken}</td><td class="r">${t.uitgedeeld}</td></tr>`).join("")}</tbody></table>
+      <button type="button" class="btn sm ghost" data-rc="reset">Nieuwe avond (tellers op 0)</button></div>`;
   }
 
   box.addEventListener("click", e => {
@@ -141,14 +164,14 @@
     const op = e.target.closest("[data-op]");
     if (op) { const g = op.dataset.g; S.inzet[g] = { op: op.dataset.op, m: S.inzet[g]?.m || 1 }; bewaar(); return render(); }
     const st = e.target.closest("[data-st]");
-    if (st) { const g = st.dataset.g, max = S.munten[g] ?? START; const z = S.inzet[g] || { m: 1 }; z.m = Math.max(1, Math.min(max, (z.m || 1) + Number(st.dataset.st))); S.inzet[g] = z; bewaar(); return render(); }
+    if (st) { const g = st.dataset.g, z = S.inzet[g] || { m: 1 }; z.m = Math.max(1, (z.m || 1) + Number(st.dataset.st)); S.inzet[g] = z; bewaar(); return render(); }
     const b = e.target.closest("[data-rc]"); if (!b) return;
     const a = b.dataset.rc;
-    if (a === "naar-inzet") { S.gokkers.forEach(g => { if (S.munten[g] === undefined) S.munten[g] = START; }); S.fase = "inzet"; }
+    if (a === "naar-inzet") S.fase = "inzet";
     if (a === "terug" || a === "setup") S.fase = "setup";
     if (a === "start") return race();
     if (a === "opnieuw") { S.inzet = {}; S.fase = "inzet"; }
-    if (a === "reset") { S.munten = {}; S.races = 0; S.log = []; S.inzet = {}; }
+    if (a === "reset") { S.tel = {}; S.races = 0; S.inzet = {}; }
     bewaar(); render();
   });
 

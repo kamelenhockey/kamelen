@@ -694,11 +694,35 @@ body.pong-actief .tabbar{display:none}
 .rc-lane:last-child{border-bottom:0}
 .rc-lnaam{font-weight:700;font-size:.85rem;color:#5a3d10;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rc-zand{position:relative;height:2.6rem}
-.rc-kameel{position:absolute;top:50%;font-size:2rem;line-height:1;transform:translateY(-50%) scaleX(-1);transition:left .12s linear}
+.rc-baan{position:relative;overflow:hidden}
+.rc-kameel{position:absolute;top:50%;font-size:2rem;line-height:1;transform:translateY(-50%) scaleX(-1);transition:left .12s linear;display:inline-block}
+.rc-lijf{display:inline-block;transform-origin:50% 90%}
+.rc-baan.rent .rc-lijf{animation:rcGalop .32s ease-in-out infinite}
+.rc-lane:nth-child(2n) .rc-lijf{animation-delay:-.11s}.rc-lane:nth-child(3n) .rc-lijf{animation-delay:-.2s}
+@keyframes rcGalop{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-5px) rotate(-6deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(-3px) rotate(5deg)}}
+.rc-stof{position:absolute;right:-.9rem;bottom:0;font-size:.9rem;opacity:0}
+.rc-stof::before{content:"💨"}
+.rc-baan.rent .rc-stof{animation:rcStof .6s linear infinite}
+@keyframes rcStof{0%{opacity:.8;transform:translateX(0) scale(.6)}100%{opacity:0;transform:translateX(14px) scale(1.2)}}
+.rc-kroon{position:absolute;left:50%;top:-1rem;font-size:1rem;transform:translateX(-50%) scaleX(-1);opacity:0;transition:opacity .2s}
+.rc-kameel.leider .rc-kroon{opacity:1}
+.rc-baan.finale{animation:rcSchud .25s linear infinite}
+@keyframes rcSchud{0%,100%{transform:translateX(0)}50%{transform:translateX(1.5px)}}
+.rc-baan.flits::after{content:"";position:absolute;inset:0;background:#fff;animation:rcFlits .5s ease-out forwards;pointer-events:none}
+@keyframes rcFlits{0%{opacity:.9}100%{opacity:0}}
+.rc-kameel.winnaar .rc-lijf{animation:rcWin .6s ease-in-out 3}
+@keyframes rcWin{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.35)}}
+.rc-aftel{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-display);font-size:4.5rem;color:var(--ink);pointer-events:none;opacity:0;text-shadow:0 2px 0 #fff}
+.rc-aftel.toon{animation:rcTel .6s ease-out}
+.rc-aftel.go{color:#2f8a57}
+@keyframes rcTel{0%{opacity:0;transform:scale(1.8)}30%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.8)}}
+.rc-feed p.plus::before{content:"⚡ "}.rc-feed p.min::before{content:"💥 "}.rc-feed p.leiding::before{content:"👑 "}
+.rc-feed p.groot{font-family:var(--font-display);font-size:1.3rem;font-weight:400;color:var(--ink)}
+.rc-odds{margin-left:auto;font-size:.85rem;color:var(--muted)}
 .rc-kameel.hop{animation:rcHop .5s ease-out}
 .rc-kameel.val{animation:rcVal .5s ease-out}
-@keyframes rcHop{0%,100%{transform:translateY(-50%) scaleX(-1)}40%{transform:translateY(-95%) scaleX(-1) rotate(-10deg)}}
-@keyframes rcVal{0%,100%{transform:translateY(-50%) scaleX(-1)}40%{transform:translateY(-40%) scaleX(-1) rotate(25deg)}}
+@keyframes rcHop{0%,100%{transform:translateY(-50%) scaleX(-1)}40%{transform:translateY(-110%) scaleX(-1) rotate(-12deg)}}
+@keyframes rcVal{0%,100%{transform:translateY(-50%) scaleX(-1)}30%{transform:translateY(-40%) scaleX(-1) rotate(70deg)}60%{transform:translateY(-45%) scaleX(-1) rotate(-10deg)}}
 .rc-finish{position:absolute;right:0;top:0;bottom:0;width:8px;background:repeating-linear-gradient(0deg,#163650 0 6px,#fff 6px 12px);border-radius:2px}
 .rc-feed{min-height:5.5rem;margin:12px 2px 0}
 .rc-feed p{margin:0 0 4px;font-size:.95rem;animation:rcIn .3s ease-out}
@@ -710,7 +734,8 @@ body.pong-actief .tabbar{display:none}
 .rc-volg{margin:0 0 12px;padding-left:1.3rem;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 22px}
 .rc-tabel{width:100%;margin-bottom:10px}
 .rc-straf{margin:6px 0 10px}
-@media (prefers-reduced-motion:reduce){.rc-kameel{transition:none}.rc-kameel.hop,.rc-kameel.val{animation:none}}
+.rc-stake{flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){.rc-kameel{transition:none}.rc-kameel.hop,.rc-kameel.val,.rc-lijf,.rc-stof,.rc-baan.finale,.rc-aftel.toon{animation:none!important}}
 
 /* Kamelen-rad */
 .tt-ik{font-weight:700;font-size:1.05rem;padding:10px 0}
@@ -993,7 +1018,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
       <div class="nav-more-menu" id="nav-more-menu" hidden>
         <div class="nm-group"><div class="nm-h">Competitie</div><a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a></div>
         <div class="nm-group"><div class="nm-h">Team</div><a href="#fotos" data-view-link="fotos">Foto's</a><a href="#quotes" data-view-link="quotes">Quotes</a><a href="#regels" data-view-link="regels">Kamelen-regels</a><a href="#push-card" data-push-link>🔔 Meldingen</a></div>
-        <div class="nm-group"><div class="nm-h">Spellen</div><a href="#rad" data-view-link="rad">Kamelen-rad</a><a href="#race" data-view-link="race">Kamelen-gokken</a><a href="#mex" data-view-link="mex">Mex</a><a href="#pong" data-view-link="pong">Pong teams</a></div>
+        <div class="nm-group"><div class="nm-h">Spellen</div><a href="#rad" data-view-link="rad">Kamelen-rad</a><a href="#race" data-view-link="race">Kamelen-racen</a><a href="#mex" data-view-link="mex">Mex</a><a href="#pong" data-view-link="pong">Pong teams</a></div>
         <div class="nm-group"><div class="nm-h">Account</div><a href="#" data-uitloggen>Uitloggen</a></div>
       </div>
     </li>
@@ -1122,8 +1147,8 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
 <div id="view-race" class="view" hidden>
   <div class="wrap page page-wide">
     <header class="page-head">
-      <h1>De Grote Kamelen-gokken</h1>
-      <p>Zet je kamelen-munten in op een kameel en kijk wie als eerste over de finish sprint. Gokte je op een verliezer? Dan drink je evenveel slokken als je munten kwijt bent. De echte naamgever van de winnende kameel mag slokken uitdelen.</p>
+      <h1>Kamelen-racen</h1>
+      <p>Zet slokken in op een kameel, zoveel als je durft, en kijk wie als eerste over de finish sprint. Wint jouw kameel, dan mag je je inzet keer het aantal kamelen uitdelen. Verliest hij, dan drink je je inzet zelf.</p>
     </header>
     <section class="card rc-card"><div id="race"></div></section>
   </div>
@@ -1382,7 +1407,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <a href="#push-card" data-push-link>🔔 Meldingen</a>
   <div class="ms-h">Spellen</div>
   <a href="#rad" data-view-link="rad">Kamelen-rad</a>
-  <a href="#race" data-view-link="race">Kamelen-gokken</a>
+  <a href="#race" data-view-link="race">Kamelen-racen</a>
   <a href="#mex" data-view-link="mex">Mex</a>
   <a href="#pong" data-view-link="pong">Pong teams</a>
   <div class="ms-h">Account</div>
@@ -2502,9 +2527,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795484500"></script>
-<script src="toto.js?v=1795484500"></script>
-<script src="pong.js?v=1795484500"></script>
+<script src="mex.js?v=1795484600"></script>
+<script src="toto.js?v=1795484600"></script>
+<script src="pong.js?v=1795484600"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2513,12 +2538,12 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795484500"></script>
-<script src="statistieken.js?v=1795484500"></script>
-<script src="race.js?v=1795484500"></script>
-<script src="rad.js?v=1795484500"></script>
-<script src="fotos.js?v=1795484500"></script>
-<script src="quotes.js?v=1795484500"></script>
-<script src="push.js?v=1795484500"></script>
+<script src="stemmen.js?v=1795484600"></script>
+<script src="statistieken.js?v=1795484600"></script>
+<script src="race.js?v=1795484600"></script>
+<script src="rad.js?v=1795484600"></script>
+<script src="fotos.js?v=1795484600"></script>
+<script src="quotes.js?v=1795484600"></script>
+<script src="push.js?v=1795484600"></script>
 </body>
 </html>
