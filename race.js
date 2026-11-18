@@ -88,7 +88,7 @@
 
   function render() {
     if (S.fase === "setup") return renderSetup();
-    if (S.fase === "inzet") return renderInzet();
+    if (S.fase === "inzet" || S.fase === "uitslag") return renderInzet();   // na een race: terug naar de inzetten
     renderBaan();
   }
 
@@ -283,6 +283,9 @@
   });
 
   /* Een race die halverwege werd onderbroken (pagina ververst) gaat terug naar de inzetten */
-  window.renderRace = () => { if (S.fase === "race" && !loper && !teller) S.fase = "inzet"; if (S.fase !== "race") render(); };
+  window.renderRace = () => {
+    if ((S.fase === "race" && !loper && !teller) || S.fase === "uitslag") S.fase = "inzet";
+    if (S.fase !== "race") render();
+  };
   window.renderRace();
 })();
