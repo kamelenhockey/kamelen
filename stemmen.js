@@ -170,8 +170,12 @@
       try {
         const res = await beheer(b.dataset.kz, { key: b.dataset.key });
         if (!res.ok) { st.textContent = res.fout === "beheercode" ? "Beheercode klopt niet meer." : "Dat lukte niet. Is het script bijgewerkt?"; b.disabled = false; return; }
-        st.textContent = b.dataset.kz === "sluit" ? "Gesloten – de uitslag is bekend!" : "Weer geopend.";
-        setTimeout(() => window.renderStemmen(true), 600);
+        let extra = "";
+        if (res.ezelliter && res.ezelliter.geboekt.length) extra = ` De ezel-liter voor ${res.ezelliter.geboekt.join(" en ")} staat nu in het Liter-incassobureau.`;
+        else if (res.ezelliter && res.ezelliter.ezels.length) extra = " De ezel-liter stond al in het Liter-incassobureau.";
+        else if (res.ezelliterFout) extra = " Let op: de ezel-liter kon niet in de spreadsheet worden gezet. Zet hem er zelf in.";
+        st.textContent = (b.dataset.kz === "sluit" ? "Gesloten – de uitslag is bekend!" : "Weer geopend.") + extra;
+        setTimeout(() => window.renderStemmen(true), extra ? 4000 : 600);
       } catch { st.textContent = "Geen verbinding."; b.disabled = false; }
     });
     /* Sluiten vraagt een tweede tik ter bevestiging (geen pop-up nodig) */

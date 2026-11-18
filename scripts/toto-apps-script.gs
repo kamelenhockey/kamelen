@@ -93,6 +93,38 @@ function stemGeldig_(stemmer, kameel, ezel, wedstrijd, kaart) {
   return (in_(stemmer) || isCoach_(stemmer)) && in_(kameel) && in_(ezel);
 }
 
+/* Ezel van de dag: bij het sluiten van een stemming komt de ezel-liter vanzelf in het Liter-incassobureau.
+   Daarvoor moet de spreadsheet met het tabblad "Liter incasso bureau" gedeeld zijn met het account van dit script (als bewerker). */
+const LITER_SPREADSHEET = "1KnhrYXSgtc8-4dmv13gDVBqdkMlFhwekNFhM5T-okKk";
+const LITER_TAB = "Liter incasso bureau";
+const MAAND_KORT_ = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
+function ezelsVan_(wedstrijd) {
+  const kaart = aanwezigKaart_(), laatste = {};
+  stemTab_().getDataRange().getValues().slice(1)
+    .filter(r => r[4] === wedstrijd && stemGeldig_(r[1], r[2], r[3], r[4], kaart))
+    .forEach(r => { laatste[String(r[1]).toLowerCase()] = r; });   // laatste stem per persoon telt
+  const tel = {};
+  Object.keys(laatste).forEach(k => { const e = laatste[k][3]; if (e) tel[e] = (tel[e] || 0) + 1; });
+  const max = Math.max(0, ...Object.keys(tel).map(k => tel[k]));
+  return max ? Object.keys(tel).filter(k => tel[k] === max) : [];
+}
+function ezelLiterBoeken_(wedstrijd) {
+  const ezels = ezelsVan_(wedstrijd); if (!ezels.length) return { ezels: [], geboekt: [] };
+  const delen = String(wedstrijd).split("|"), datum = delen[0], tegen = delen.slice(1).find(t => !/gchc h13|kamel/i.test(t)) || "";
+  const reden = "Ezel van de dag (tegen " + tegen + ")";
+  const d = datum.split("-");
+  const wanneer = Number(d[2]) + " " + MAAND_KORT_[Number(d[1]) - 1] + " wedstrijd";
+  const sh = SpreadsheetApp.openById(LITER_SPREADSHEET).getSheetByName(LITER_TAB);
+  const bestaand = sh.getDataRange().getValues().map(r => String(r[0]).trim().toLowerCase() + "|" + String(r[2]).trim().toLowerCase());
+  const geboekt = [];
+  ezels.forEach(n => {
+    if (bestaand.indexOf(n.toLowerCase() + "|" + reden.toLowerCase()) >= 0) return;   // al geboekt
+    sh.appendRow([n, wanneer, reden, "1L", ""]);
+    geboekt.push(n);
+  });
+  return { ezels, geboekt };
+}
+
 function json_(obj) { return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON); }
 const gelijk_ = (a, b) => String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
 const naam_ = n => String(n || "").trim().slice(0, 40);
@@ -155,6 +187,10 @@ function doPost(e) {
         const w = String(d.wedstrijd || "").slice(0, 120);
         if (!w || (d.actie !== "sluit" && d.actie !== "heropen")) return json_({ ok: false, fout: "invoer" });
         sluitTab_().appendRow([new Date(), w, d.actie === "sluit" ? "dicht" : "open"]);
+        if (d.actie === "sluit") {
+          try { return json_({ ok: true, ezelliter: ezelLiterBoeken_(w) }); }
+          catch (x) { return json_({ ok: true, ezelliterFout: String(x) }); }
+        }
         return json_({ ok: true });
       }
       /* Meldingen aan- of uitzetten op een telefoon */
@@ -232,5 +268,7 @@ function machtigen() {
     Logger.log("Afwezigheidsblad: status " + r.getResponseCode() + ", begint met: " + r.getContentText().slice(0, 80));
   } catch (x) { Logger.log("Afwezigheidsblad: FOUT " + x); }
   CacheService.getScriptCache().remove("aanwezig2");
+  try { Logger.log("Liter-incassobureau: " + SpreadsheetApp.openById(LITER_SPREADSHEET).getSheetByName(LITER_TAB).getLastRow() + " regels, schrijven kan."); }
+  catch (x) { Logger.log("Liter-incassobureau: FOUT " + x + " (deel de spreadsheet met dit account als bewerker)"); }
   Logger.log("Meegespeeld: " + JSON.stringify(aanwezigKaart_()));
 }
