@@ -57,7 +57,7 @@
       if (!r.ok) throw new Error(r.fout);
       await laad(true);
       document.getElementById("q-status").textContent = "Quote toegevoegd.";
-    } catch { st.textContent = "Opslaan lukte niet. Is het script al bijgewerkt?"; }
+    } catch (err) { st.textContent = `Opslaan lukte niet (${String(err.message || err).slice(0, 120)}). Ververs de pagina en probeer het opnieuw.`; }
   }
 
   box.addEventListener("click", async e => {
@@ -71,6 +71,7 @@
 
   async function laad(vers) {
     const api = await window.kamelenApi(vers);
+    if (!api || !("quotes" in api)) { box.innerHTML = `<div class="card empty">De quotes konden niet worden geladen. Ververs de pagina (Ctrl+Shift+R).</div>`; return; }
     QUOTES = (api.quotes || []).slice().sort((a, b) => new Date(b.tijd) - new Date(a.tijd));
     window.KAMELEN_QUOTES = QUOTES;
     render();

@@ -78,7 +78,7 @@
         const data = await verklein(f);
         const r = await fetch(CFG.api, { method: "POST", body: JSON.stringify({ type: "foto", code: CFG.teamcode, door, bijschrift, data }) }).then(r => r.json());
         if (r.ok) gelukt++; else throw new Error(r.fout);
-      } catch (err) { st.textContent = `Foto ${i + 1} lukte niet. ${/Drive|toestemming|permission/i.test(String(err)) ? "Het script heeft nog geen toegang tot Drive." : "Probeer het opnieuw."}`; }
+      } catch (err) { st.textContent = `Foto ${i + 1} lukte niet. ${/DriveApp|rechten|permission/i.test(String(err)) ? "Het script heeft nog geen toegang tot Drive (stap 'machtigen')." : `(${String(err.message || err).slice(0, 120)})`}`; }
     }
     if (gelukt) { await laad(true); document.getElementById("foto-status").textContent = `${gelukt} ${gelukt === 1 ? "foto" : "foto's"} toegevoegd.`; }
     else knop.disabled = false;
@@ -120,6 +120,7 @@
 
   async function laad(vers) {
     const api = await window.kamelenApi(vers);
+    if (!api || !("fotos" in api)) { box.innerHTML = `<div class="card empty">De foto's konden niet worden geladen. Ververs de pagina (Ctrl+Shift+R).</div>`; return; }
     FOTOS = (api.fotos || []).slice().sort((a, b) => new Date(b.tijd) - new Date(a.tijd));
     render();
   }
