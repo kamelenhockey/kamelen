@@ -1068,6 +1068,14 @@ body:not([data-page="home"]) .hero-acties{top:50%!important;transform:translateY
 @media (max-height:520px) and (orientation:landscape) and (pointer:coarse){.hero-acties{top:50%!important;transform:translateY(-50%)}}
 @media (max-width:760px){body[data-page="home"] .hero .wrap{padding-top:64px!important}}
 @media (max-width:560px){.hero-acties{top:8px;right:10px}.ververs-knop{width:36px;height:36px}.ik-chip{font-size:.82rem}.hero .ik-chip .avatar{width:28px;height:28px;min-width:28px}}
+.pred-model{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:var(--ink);color:#fff}
+.pmod-tekst{display:grid;gap:2px;min-width:0;flex:1 1 220px}
+.pmod-tekst span{font-size:.82rem;color:rgba(255,255,255,.72)}
+.pmod-knoppen{display:flex;gap:6px;flex-wrap:wrap}
+.pred-model .btn{background:var(--orange);color:var(--ink);border-color:var(--orange)}
+.pred-model .btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.35)}
+.pred-model .btn:disabled{opacity:.5;cursor:default}
+.pm.model.filled input{background:#2c5878;border-color:#2c5878}
 /* Klikbare wedstrijden en de wedstrijd-pop-up */
 .klik[data-match]{cursor:pointer;transition:background .15s}
 .klik[data-match]:hover{background:rgba(22,54,80,.06)}
@@ -1367,6 +1375,10 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
     <div class="pred-grid">
       <section class="card">
         <div class="card-head"><div><h2>Wedstrijden</h2><p id="pred-count"></p></div><div id="pred-toggle"></div></div>
+        <div class="pred-model" id="pred-model">
+          <div class="pmod-tekst"><b>🐪 Kamelen-model</b><span id="pmod-status">Laat het model de uitslagen voorspellen, ronde voor ronde.</span></div>
+          <div class="pmod-knoppen"><button type="button" class="btn sm" id="pmod-ronde">Voorspel door het Kamelen-model</button><button type="button" class="btn sm ghost" id="pmod-alles">Tot het einde</button></div>
+        </div>
         <div class="pred-tools"><span>Snel invullen voor de Kamelen:</span>
           <button type="button" class="btn sm" data-fill="W">Alles winnen</button>
           <button type="button" class="btn sm" data-fill="G">Alles gelijk</button>
@@ -2226,6 +2238,46 @@ try { PRED = JSON.parse(localStorage.getItem(PRED_KEY) || "{}") || {}; } catch {
 const savePred = () => { try { localStorage.setItem(PRED_KEY, JSON.stringify(PRED)); } catch {} };
 const matchKey = m => `${m.datum}|${m.thuis}|${m.uit}`;
 let predOnlyUs = true;
+/* Welke uitslagen het Kamelen-model heeft ingevuld (pas je er zelf een aan, dan is hij van jou) */
+const PRED_MODEL_KEY = "kamelen-voorspelling-model";
+let PRED_MODEL = new Set();
+try { PRED_MODEL = new Set(JSON.parse(localStorage.getItem(PRED_MODEL_KEY) || "[]")); } catch {}
+const savePredModel = () => { try { localStorage.setItem(PRED_MODEL_KEY, JSON.stringify([...PRED_MODEL])); } catch {} };
+const predIngevuld = m => { const p = PRED[matchKey(m)]; return !!p && p[0] !== "" && p[1] !== "" && p[0] != null && p[1] != null; };
+/* Rondes = speeldagen van de hele poule */
+const predRondes = () => groupByDate(DATA.programma || []);
+/* Eén ronde voorspellen. Eerdere (voorspelde of zelf ingevulde) rondes tellen mee als uitslag, zodat vorm en sterkte doorlopen. */
+function modelVoorspelRonde(){
+  const rondes = predRondes();
+  const i = rondes.findIndex(([, ms]) => ms.some(m => !predIngevuld(m)));
+  if (i < 0) return false;
+  const [datum, ms] = rondes[i];
+  const echt = DATA.uitslagen;
+  const extra = (DATA.programma || []).filter(m => m.datum < datum && predIngevuld(m)).map(m => ({ ...m, score: `${PRED[matchKey(m)][0]}-${PRED[matchKey(m)][1]}` }));
+  try {
+    DATA.uitslagen = [...(echt || []), ...extra];
+    for (const m of ms) {
+      if (predIngevuld(m)) continue;
+      const v = voorspelWedstrijd(m.thuis, m.uit); if (!v) continue;
+      PRED[matchKey(m)] = [String(v.uitslag[0]), String(v.uitslag[1])];
+      PRED_MODEL.add(matchKey(m));
+    }
+  } finally { DATA.uitslagen = echt; }
+  return true;
+}
+function renderPredModel(){
+  const st = document.getElementById("pmod-status"); if (!st) return;
+  const rondes = predRondes(), klaar = rondes.filter(([, ms]) => ms.every(predIngevuld)).length;
+  const volgende = rondes.find(([, ms]) => ms.some(m => !predIngevuld(m)));
+  const knop = document.getElementById("pmod-ronde"), alles = document.getElementById("pmod-alles");
+  const nr = volgende ? rondes.indexOf(volgende) + 1 : 0;
+  knop.textContent = !volgende ? "Alle rondes voorspeld" : klaar === 0 && !PRED_MODEL.size ? "Voorspel door het Kamelen-model" : `Voorspel ronde ${nr} (${fmtDay(volgende[0], { day: "numeric", month: "short" })})`;
+  knop.disabled = alles.disabled = !volgende;
+  st.textContent = !rondes.length ? "Er staan geen wedstrijden meer in het programma."
+    : !volgende ? `Alle ${rondes.length} rondes zijn ingevuld${PRED_MODEL.size ? " (uitslagen van het model in blauw)" : ""}. Wis alles om opnieuw te beginnen.`
+    : klaar ? `${klaar} van de ${rondes.length} rondes ingevuld. Elke ronde houdt rekening met de voorspelde uitslagen ervoor.${PRED_MODEL.size ? " Uitslagen van het model staan in blauw; pas ze gerust aan." : ""}`
+    : `Laat het model de uitslagen voorspellen, ronde voor ronde (${rondes.length} rondes te gaan). Het vult steeds de hele poule in.`;
+}
 
 function predictedTable(){
   const base = (DATA.stand || []).map(t => { const x = teamStats(t.team); return { team:t.team, positie:t.positie, gs:t.gespeeld, pt:t.punten, dv:x.dv, dt:x.dt, w:x.w, g:x.g, v:x.v }; });
@@ -2272,7 +2324,7 @@ function renderPredMatches(){
   const list = predOnlyUs ? all.filter(m => isUs(m.thuis + m.uit)) : all;
   document.getElementById("pred-matches").innerHTML = list.length ? groupByDate(list).map(([d, ms]) => `<div class="day">${fmtDay(d)}</div>` + ms.map(m => {
     const k = matchKey(m), p = PRED[k] || ["",""], filled = p[0] !== "" && p[1] !== "" && p[0] != null && p[1] != null;
-    return `<div class="pm ${isUs(m.thuis+m.uit)?"us":""} ${filled?"filled":""}" data-key="${esc(k)}">
+    return `<div class="pm ${isUs(m.thuis+m.uit)?"us":""} ${filled?"filled":""} ${filled && PRED_MODEL.has(k)?"model":""}" data-key="${esc(k)}">
       <span class="h">${teamLink(m.thuis)}</span>
       <span class="inputs"><input type="number" inputmode="numeric" min="0" max="40" aria-label="Doelpunten ${esc(m.thuis)}" value="${esc(p[0] ?? "")}" data-i="0">
         <span>–</span><input type="number" inputmode="numeric" min="0" max="40" aria-label="Doelpunten ${esc(m.uit)}" value="${esc(p[1] ?? "")}" data-i="1"></span>
@@ -2289,7 +2341,8 @@ function initPredictor(){
     const p = PRED[k] || ["",""]; p[Number(inp.dataset.i)] = v; PRED[k] = p;
     if (p[0] === "" && p[1] === "") delete PRED[k];
     row.classList.toggle("filled", p[0] !== "" && p[1] !== "");
-    savePred(); renderPredTable();
+    if (PRED_MODEL.delete(k)) { row.classList.remove("model"); savePredModel(); }
+    savePred(); renderPredTable(); renderPredModel();
   });
   document.querySelector("#view-voorspeller .pred-tools").addEventListener("click", e => {
     const fill = e.target.closest("[data-fill]")?.dataset.fill;
@@ -2298,11 +2351,19 @@ function initPredictor(){
         if (!isUs(m.thuis + m.uit)) continue;
         const home = isUs(m.thuis);
         PRED[matchKey(m)] = fill === "G" ? ["1","1"] : (fill === "W") === home ? ["2","1"] : ["1","2"];
+        PRED_MODEL.delete(matchKey(m));
       }
-    } else if (e.target.id === "pred-reset"){ PRED = {}; }
+    } else if (e.target.id === "pred-reset"){ PRED = {}; PRED_MODEL.clear(); }
     else return;
-    savePred(); renderPredMatches(); renderPredTable();
+    savePred(); savePredModel(); renderPredMatches(); renderPredTable(); renderPredModel();
   });
+  document.getElementById("pred-model").addEventListener("click", e => {
+    const b = e.target.closest("#pmod-ronde, #pmod-alles"); if (!b) return;
+    if (b.id === "pmod-alles") { let n = 0; while (n++ < 60 && modelVoorspelRonde()); }
+    else modelVoorspelRonde();
+    savePred(); savePredModel(); renderPredMatches(); renderPredTable(); renderPredModel();
+  });
+  renderPredModel();
   renderPredTable();
 }
 
@@ -3012,9 +3073,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795487300"></script>
-<script src="toto.js?v=1795487300"></script>
-<script src="pong.js?v=1795487300"></script>
+<script src="mex.js?v=1795487400"></script>
+<script src="toto.js?v=1795487400"></script>
+<script src="pong.js?v=1795487400"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3023,12 +3084,12 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795487300"></script>
-<script src="statistieken.js?v=1795487300"></script>
-<script src="race.js?v=1795487300"></script>
-<script src="rad.js?v=1795487300"></script>
-<script src="fotos.js?v=1795487300"></script>
-<script src="quotes.js?v=1795487300"></script>
-<script src="push.js?v=1795487300"></script>
+<script src="stemmen.js?v=1795487400"></script>
+<script src="statistieken.js?v=1795487400"></script>
+<script src="race.js?v=1795487400"></script>
+<script src="rad.js?v=1795487400"></script>
+<script src="fotos.js?v=1795487400"></script>
+<script src="quotes.js?v=1795487400"></script>
+<script src="push.js?v=1795487400"></script>
 </body>
 </html>
