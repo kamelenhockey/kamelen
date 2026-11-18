@@ -137,12 +137,12 @@
     if (Bt.worpen[x] && Bt.worpen[y]) return;
     Bt.worpen[x] = d6(); Bt.worpen[y] = d6();
     {
-      if (Bt.worpen[x] === Bt.worpen[y]) { Bt.gelijk = true; setTimeout(() => { Bt.worpen = {}; Bt.gelijk = false; save(); render(); }, 1800); }
+      if (Bt.worpen[x] === Bt.worpen[y]) { Bt.gelijk = true; setTimeout(() => { Bt.worpen = {}; Bt.gelijk = false; save(); render(); }, 2800); }
       else {
         const verliezer = Bt.worpen[x] > Bt.worpen[y] ? x : y;
         /* 2 tegen 1 in een battle telt als extra mex: een halve bak extra straf */
         if (Math.max(Bt.worpen[x], Bt.worpen[y]) === 2 && Math.min(Bt.worpen[x], Bt.worpen[y]) === 1) { Bt.straf += 0.5; Bt.mex = true; }
-        setTimeout(() => verloren(verliezer, Bt.straf), Bt.mex ? 2600 : 1800);
+        setTimeout(() => verloren(verliezer, Bt.straf), Bt.mex ? 4200 : 3200);
       }
     }
     save(); render();
@@ -232,16 +232,38 @@
     }, 70);
   }
 
+  /* Battle: de stenen worden echt over tafel gegooid. Ze komen van onderen binnen,
+     stuiteren een paar keer, draaien uit en vallen stil op hun plek. */
   function battleAnimatie(klaar) {
     const el = document.getElementById("mx-battle");
-    if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return klaar();
-    const vakken = el.querySelectorAll(":scope > div");
-    el.classList.add("rolling");
-    let n = 0;
-    const t = setInterval(() => {
-      vakken.forEach(v => { const d = v.querySelector(".mx-die"); if (d) d.outerHTML = steen(d6()); });
-      if (++n >= 12) { clearInterval(t); el.classList.remove("rolling"); klaar(); }
-    }, 70);
+    if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches || !Element.prototype.animate) return klaar();
+    const vakken = [...el.querySelectorAll(":scope > div")];
+    const DUUR = 1500;
+    vakken.forEach((v, i) => {
+      const d = v.querySelector(".mx-die"); if (!d) return;
+      d.classList.remove("idle");
+      const kant = i === 0 ? 1 : -1;                 // linker steen komt van rechtsonder, rechter van linksonder
+      const x = kant * (70 + Math.random() * 40), draai = kant * (900 + Math.random() * 360);
+      d.animate([
+        { transform: `translate(${x}px, 120px) rotate(0deg) scale(.7)`, opacity: 0 },
+        { offset: .12, opacity: 1, transform: `translate(${x * .75}px, -46px) rotate(${draai * .25}deg) scale(1.08)` },
+        { offset: .32, transform: `translate(${x * .45}px, 0) rotate(${draai * .5}deg) scale(1)` },
+        { offset: .5, transform: `translate(${x * .25}px, -20px) rotate(${draai * .7}deg)` },
+        { offset: .68, transform: `translate(${x * .1}px, 0) rotate(${draai * .86}deg)` },
+        { offset: .8, transform: `translate(${x * .04}px, -6px) rotate(${draai * .95}deg)` },
+        { offset: .9, transform: `translate(0, 0) rotate(${draai * .99}deg)` },
+        { transform: `translate(0, 0) rotate(${draai}deg)` }
+      ], { duration: DUUR + i * 120, easing: "cubic-bezier(.25,.7,.35,1)", fill: "forwards" });
+      /* Ogen wisselen tijdens het rollen, steeds langzamer */
+      let t = 0, stap = 55;
+      const wissel = () => {
+        if (t > DUUR - 150) return;
+        const svg = d.querySelector(".die"); if (svg) svg.outerHTML = dieSvg(d6());
+        t += stap; stap *= 1.18; setTimeout(wissel, stap);
+      };
+      wissel();
+    });
+    setTimeout(klaar, DUUR + 160);
   }
 
   /* ---------- Knoppen ---------- */
