@@ -888,6 +888,19 @@ dialog.lightbox::backdrop{background:rgba(10,24,36,.9)}
 .push-row p{margin:4px 0 0;color:var(--muted);font-size:.88rem;max-width:62ch}
 .push-h{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:8px}
 .push-msg{color:var(--ink)!important;font-weight:600}
+.kz-top-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 22px;margin-top:12px}
+.kz-top-grid h4{margin:0 0 6px;font-size:.9rem}
+.kz-top{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.kz-top li{display:grid;grid-template-columns:1.6rem minmax(0,7rem) 1fr 1.6rem;align-items:center;gap:8px;font-size:.92rem}
+.kz-plek{text-align:center}
+.kz-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kz-bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.kz-bar span{display:block;height:100%;background:var(--ink);border-radius:99px}
+.kz-top-grid > div:last-child .kz-bar span{background:#a0603a}
+.kz-top b{text-align:right;font-variant-numeric:tabular-nums}
+.kz-rest{margin-top:6px}.kz-rest summary{cursor:pointer;font-size:.82rem;color:var(--muted)}
+.kz-rest .kz-top{margin-top:6px}
+.kz-anoniem{font-size:.78rem;color:var(--muted);margin:8px 0 0}
 .kz-banner.todo{background:var(--orange);color:var(--ink)}
 .kz-banner.done{background:var(--orange-soft);border:1px solid #f3c98f}
 .kz-go{font-weight:800}
@@ -1523,6 +1536,13 @@ const TEAM_MATCH = /kamel|gchc/i;
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const empty = (title, text, url) => `<div class="empty"><strong>${esc(title)}</strong>${esc(text)}${url ? ` <a href="${esc(url)}">Bekijk op hockey.nl</a>.` : ""}</div>`;
 let DATA = {};
+/* Profielfoto's los van DATA bewaren (en op dit apparaat onthouden), zodat ze na verversen meteen weer zichtbaar zijn */
+let PROFIELFOTOS = (() => { try { return JSON.parse(localStorage.getItem("kamelen-profielfotos") || "{}"); } catch { return {}; } })();
+function zetProfielfotos(obj){
+  PROFIELFOTOS = obj || {};
+  try { localStorage.setItem("kamelen-profielfotos", JSON.stringify(PROFIELFOTOS)); } catch {}
+  try { renderPlayers(); } catch {}
+}
 
 /* ---------- Spelerslijst: bijnamen naar één naam ---------- */
 let CANON = new Map(), ROSTER = new Set(), INVALLERS = new Set(), INFO = new Map();
@@ -2297,7 +2317,7 @@ document.addEventListener("change", async e => {
     });
     const r = await fetch(TOTO_CONFIG.api, { method: "POST", body: JSON.stringify({ type: "profielfoto", code: TOTO_CONFIG.teamcode, data }) }).then(r => r.json());
     if (!r.ok) throw new Error(r.fout === "code" ? "Log opnieuw in." : "Uploaden lukte niet.");
-    DATA.profielfotos = { ...(DATA.profielfotos || {}), [window.IK.naam]: r.id };
+    zetProfielfotos({ ...PROFIELFOTOS, [window.IK.naam]: r.id });
     renderPlayers(); openPlayer(window.IK.naam);
     document.getElementById("pf-status").textContent = "Profielfoto opgeslagen!";
   } catch (err) { st.textContent = err.message || "Uploaden lukte niet."; }
@@ -2317,7 +2337,7 @@ document.addEventListener("click", e => {
 
 /* Avatar: profielfoto als die er is, anders de beginletters */
 function avatarHtml(p, groot){
-  const id = (DATA.profielfotos || {})[p.naam];
+  const id = PROFIELFOTOS[p.naam];
   const ini = p.naam.split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase();
   if (id && groot) return `<button type="button" class="avatar foto groot pf-zoom" data-pf-groot="${esc(id)}" data-pf-naam="${esc(p.naam)}" aria-label="Profielfoto van ${esc(p.naam)} vergroten"><img src="https://lh3.googleusercontent.com/d/${encodeURIComponent(id)}=w400" alt="" referrerpolicy="no-referrer"></button>`;
   return id
@@ -2405,7 +2425,7 @@ function openPlayer(naam){
       <div class="prow"><span class="d">Beste gok</span><span>${esc(beste.gok)} tegen ${esc(tegenVan(beste.m))} (werd ${esc(beste.m.score)})</span><span>${beste.pts ? `+${beste.pts}` : "0 punten"}</span></div></div>`;
   }
   const eigen = window.IK && window.IK.naam === p.naam;
-  const fotoHtml = `<div class="pf-rij">${avatarHtml(p, true)}${eigen ? `<label class="btn sm ghost pf-knop"><input type="file" accept="image/*" hidden id="pf-input">${(DATA.profielfotos || {})[p.naam] ? "Profielfoto wijzigen" : "Profielfoto toevoegen"}</label><span class="pf-status" id="pf-status" role="status"></span>` : ""}</div>`;
+  const fotoHtml = `<div class="pf-rij">${avatarHtml(p, true)}${eigen ? `<label class="btn sm ghost pf-knop"><input type="file" accept="image/*" hidden id="pf-input">${PROFIELFOTOS[p.naam] ? "Profielfoto wijzigen" : "Profielfoto toevoegen"}</label><span class="pf-status" id="pf-status" role="status"></span>` : ""}</div>`;
   document.getElementById("dlg-body").innerHTML = `${fotoHtml}
     <div class="dlg-stats num" style="grid-template-columns:repeat(4,minmax(0,1fr))">
       <div><div class="v">${p.goals.length}</div><div class="k">Goals</div></div>
@@ -2713,6 +2733,7 @@ Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("ops
     DATA.litersBasis = DATA.liters;
     veilig(() => window.renderStatistieken?.());
     veilig(() => window.renderFotos?.()); veilig(() => window.renderQuotes?.());
+    veilig(() => window.kamelenApi().then(j => { if (j && j.profielfotos) zetProfielfotos(j.profielfotos); }));
     /* Na het ophalen van de stemmen (ezel-liters) de statistieken nog eens bijwerken */
     Promise.resolve(veilig(() => window.renderStemmen?.())).catch(() => {}).finally(() => veilig(() => window.renderStatistieken?.()));
     const f = x => { const d = new Date(x); return isNaN(d) ? "onbekend" : d.toLocaleString("nl-NL",{dateStyle:"long",timeStyle:"short",timeZone:"Europe/Amsterdam"}); };
@@ -2749,9 +2770,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795486200"></script>
-<script src="toto.js?v=1795486200"></script>
-<script src="pong.js?v=1795486200"></script>
+<script src="mex.js?v=1795486400"></script>
+<script src="toto.js?v=1795486400"></script>
+<script src="pong.js?v=1795486400"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2760,12 +2781,12 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795486200"></script>
-<script src="statistieken.js?v=1795486200"></script>
-<script src="race.js?v=1795486200"></script>
-<script src="rad.js?v=1795486200"></script>
-<script src="fotos.js?v=1795486200"></script>
-<script src="quotes.js?v=1795486200"></script>
-<script src="push.js?v=1795486200"></script>
+<script src="stemmen.js?v=1795486400"></script>
+<script src="statistieken.js?v=1795486400"></script>
+<script src="race.js?v=1795486400"></script>
+<script src="rad.js?v=1795486400"></script>
+<script src="fotos.js?v=1795486400"></script>
+<script src="quotes.js?v=1795486400"></script>
+<script src="push.js?v=1795486400"></script>
 </body>
 </html>

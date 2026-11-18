@@ -67,6 +67,18 @@
   }
 
   /* ---------- Weergave ---------- */
+  /* Top 3 en aantal stemmen per persoon. Anoniem: nooit wie op wie stemde. */
+  function topDrie(r) {
+    const lijst = map => [...(map || new Map())].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    const kol = (titel, l) => {
+      const max = Math.max(1, ...l.map(([, n]) => n)), medaille = ["🥇", "🥈", "🥉"];
+      const top = l.slice(0, 3), rest = l.slice(3);
+      const rij = ([naam, n], i) => `<li><span class="kz-plek">${i < 3 ? medaille[i] : `${i + 1}.`}</span><span class="kz-nm">${esc(naam)}</span><span class="kz-bar"><span style="width:${Math.round(n / max * 100)}%"></span></span><b>${n}</b></li>`;
+      return `<div><h4>${titel}</h4>${l.length ? `<ol class="kz-top">${top.map(rij).join("")}</ol>${rest.length ? `<details class="kz-rest"><summary>Alle stemmen (${l.length})</summary><ol class="kz-top">${rest.map((x, i) => rij(x, i + 3)).join("")}</ol></details>` : ""}` : `<p class="muted">Geen stemmen</p>`}</div>`;
+    };
+    return `<div class="kz-top-grid">${kol("🐪 Kameel van de dag", lijst(r.k))}${kol("🫏 Ezel van de dag", lijst(r.e))}</div><p class="kz-anoniem">Stemmen zijn anoniem: je ziet alleen hoeveel stemmen iemand kreeg, niet van wie.</p>`;
+  }
+
   function render(res) {
     if (!box) return;
     const nu = Date.now(), m = stemWedstrijd(), e = eigen();
@@ -110,7 +122,7 @@
         ${rij.map((p, i) => `<tr class="${i === 0 && p.kameel ? "lead" : ""}"><td class="r pos">${i + 1}</td><td>${esc(p.naam)}</td><td class="r pts">${p.kameel}</td><td class="r">${p.ezel}</td></tr>`).join("")}</tbody></table>
         <p class="note">Wie aan het einde van het seizoen het vaakst kameel van de dag is geweest, wint een prijs.</p>` : `<div class="empty">Na de eerste stemming staat hier het klassement.</div>`}</div>
       <div><h3 class="sub-h">Per wedstrijd</h3>${gesloten.length ? gesloten.map(r => `<div class="tt-played"><div class="tt-ph"><span class="d">${fmtShort(r.m.datum)}</span><span>${isUs(r.m.thuis) ? "thuis" : "uit"} tegen ${teamLink(tegen(r.m))}</span><span class="score">${esc(r.m.score || "")}</span></div>
-          <div class="kz-win"><span class="kz-badge kameel">🐪 ${r.kamelen.map(esc).join(" & ") || "–"}</span><span class="kz-badge ezel">🫏 ${r.ezels.map(esc).join(" & ") || "–"}</span><span class="kz-n">${r.stemmers.length} stemmen</span></div></div>`).join("")
+          <div class="kz-win"><span class="kz-badge kameel">🐪 ${r.kamelen.map(esc).join(" & ") || "–"}</span><span class="kz-badge ezel">🫏 ${r.ezels.map(esc).join(" & ") || "–"}</span><span class="kz-n">${r.stemmers.length} stemmen</span></div>${topDrie(r)}</div>`).join("")
         : `<div class="empty">Uitslagen van eerdere stemmingen komen hier.</div>`}</div></div>`;
     html += beheerHtml(res);
     box.innerHTML = html;
