@@ -227,7 +227,7 @@
 
       <section class="card">
         <div class="card-head"><div><h2>Opkomst per speler</h2><p>${S.aantalWedLijst} wedstrijden en ${S.aantalTrainingen} trainingen tot nu toe${UITSLUITEN.length ? ` · ${UITSLUITEN.map(u => u.namen.join(", ")).join("; ")} tellen in de eerste seizoenshelft niet mee` : ""}</p></div></div>
-        <div class="tablewrap"><table class="opk"><thead><tr><th>Speler</th><th class="r">Wedstrijden</th><th></th><th class="r">Trainingen</th><th></th><th class="r">Totaal</th></tr></thead>
+        <div class="tablewrap"><table class="opk"><thead><tr><th>Speler</th><th class="r"><span class="lang">Wedstrijden</span><span class="kort">Wedstr.</span></th><th class="bar-td"></th><th class="r"><span class="lang">Trainingen</span><span class="kort">Training</span></th><th class="bar-td"></th><th class="r">Totaal</th></tr></thead>
           <tbody>${S.opkomst.map(opkRij).join("")}</tbody></table></div>
       </section>
 

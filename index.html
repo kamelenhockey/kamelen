@@ -704,7 +704,12 @@ table.opk td{padding:7px 8px}
 .wbar.reden .track i{background:#f6cf9f}
 .wbar .track b{position:relative;padding-left:8px;line-height:22px;font-variant-numeric:tabular-nums}
 @media (max-width:900px){ .stat-two{grid-template-columns:1fr} .stat-strip{grid-template-columns:repeat(3,1fr)} .stat-strip > div:nth-child(4){border-left:0} .stat-strip > div:nth-child(n+4){border-top:1px solid rgba(255,255,255,.12)} }
-@media (max-width:560px){ .bar-td{display:none} .wbar.reden{grid-template-columns:8.5rem 1fr} }
+table.opk .kort{display:none}
+@media (max-width:560px){ .bar-td{display:none} .wbar.reden{grid-template-columns:8.5rem 1fr}
+  table.opk{font-size:.92rem;width:100%}
+  table.opk th,table.opk td{padding:9px 6px}
+  table.opk th:first-child,table.opk td:first-child{padding-left:2px}
+  table.opk .lang{display:none} table.opk .kort{display:inline} }
 
 footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 
@@ -2189,9 +2194,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795481600"></script>
-<script src="toto.js?v=1795481600"></script>
-<script src="pong.js?v=1795481600"></script>
+<script src="mex.js?v=1795481700"></script>
+<script src="toto.js?v=1795481700"></script>
+<script src="pong.js?v=1795481700"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2200,8 +2205,8 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795481600"></script>
-<script src="statistieken.js?v=1795481600"></script>
-<script src="push.js?v=1795481600"></script>
+<script src="stemmen.js?v=1795481700"></script>
+<script src="statistieken.js?v=1795481700"></script>
+<script src="push.js?v=1795481700"></script>
 </body>
 </html>
