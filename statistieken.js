@@ -138,6 +138,27 @@
     S.rustigste = [...tr.sessies].sort((a, b) => cnt(a) - cnt(b))[0];
     S.invallers = wed.invallers;
 
+    /* --- extra weetjes --- */
+    const stand = DATA.stand || [];
+    const aftrek = (DATA.puntenAftrek || {})[team] || 0;
+    if (us && aftrek){
+      const sorteer = l => [...l].sort((a, b) => b.pt - a.pt || a.gs - b.gs || b.ds - a.ds || b.dv - a.dv);
+      const l = stand.map(t => ({ team: t.team, pt: +t.punten + (t.team === team ? aftrek : 0), gs: +t.gespeeld || 0, ds: +t.doelsaldo || 0, dv: 0 }));
+      S.zonderAftrek = { plek: sorteer(l).findIndex(t => t.team === team) + 1, pt: +us.punten + aftrek, aftrek };
+    }
+    const kop = stand[0];
+    if (us && kop && kop.team !== team) S.achterstand = { op: kop.team, pt: kop.punten - us.punten, gs: (+us.gespeeld || 0) - (+kop.gespeeld || 0) };
+    const spannend = per.filter(x => Math.abs(x.voor - x.tegen) <= 1);
+    S.spannend = { n: spannend.length, rec: rec(spannend) };
+    const uitslagTel = new Map(); per.forEach(x => { const k = `${x.voor}-${x.tegen}`; uitslagTel.set(k, (uitslagTel.get(k) || 0) + 1); });
+    S.vaaksteUitslag = [...uitslagTel.entries()].sort((a, b) => b[1] - a[1])[0];
+    const boeteTel = new Map();
+    (DATA.liters || []).forEach(r => { const k = String(r.reden || "").trim(); if (!k || /ezel van de dag/i.test(k)) return; const n = k.toLowerCase(); const b = boeteTel.get(n) || { tekst: k, n: 0 }; b.n++; boeteTel.set(n, b); });
+    S.populairsteBoete = [...boeteTel.values()].sort((a, b) => b.n - a.n)[0];
+    S.laatkomer = [...spelers.values()].filter(x => x.laat).sort((a, b) => b.laat - a.laat)[0];
+    const trCnt = tr.sessies.map(cnt);
+    if (trCnt.length >= 6) S.trainingsTrend = { begin: avg(trCnt.slice(0, 3)), nu: avg(trCnt.slice(-3)) };
+
     /* opkomst bij winst vs verlies (spelers op de lijst bij de wedstrijd) */
     const bijWedstrijd = new Map(wed.sessies.map(s => [s.datum, isNaN(s.totaal) ? cnt(s) : s.totaal]));
     const opk = r => avg(per.filter(x => x.r === r && bijWedstrijd.has(x.m.datum)).map(x => bijWedstrijd.get(x.m.datum)));
@@ -179,6 +200,15 @@
     if (S.trainingsBeesten.length) feiten.push(feit(S.trainingsBeesten.length > 1 ? "Trainingsbeesten" : "Trainingsbeest", S.trainingsBeesten.map(o => esc(o.naam)).join(" & "), `${pct(S.trainingsBeesten[0].tP)} van de trainingen aanwezig${S.trainingsBeesten.length > 1 ? ", allebei even vaak" : ""}`));
     if (!isNaN(S.gemTraining)) feiten.push(feit("Gemiddeld op training", een(S.gemTraining), `spelers per training${S.drukste ? ` · drukst: ${cnt(S.drukste)} (${fmtShort(S.drukste.datum)}), rustigst: ${cnt(S.rustigste)} (${fmtShort(S.rustigste.datum)})` : ""}`));
     if (!isNaN(S.opkW) && !isNaN(S.opkV)) feiten.push(feit("Opkomst doet ertoe", `${een(S.opkW)} vs ${een(S.opkV)}`, `spelers gemiddeld bij winst tegen bij verlies`));
+    if (S.zonderAftrek) feiten.push(feit("Zonder puntenaftrek", `${S.zonderAftrek.plek}e`, `met ${S.zonderAftrek.pt} punten. Die ${S.zonderAftrek.aftrek} punten aftrek doen pijn.`, "loss"));
+    if (S.achterstand) feiten.push(feit("Achterstand op de koploper", `${S.achterstand.pt} pt`, `op ${esc(S.achterstand.op)}${S.achterstand.gs > 0 ? `, die nog ${S.achterstand.gs} ${S.achterstand.gs === 1 ? "wedstrijd" : "wedstrijden"} meer moet spelen` : S.achterstand.gs < 0 ? `, die ${-S.achterstand.gs} ${S.achterstand.gs === -1 ? "wedstrijd" : "wedstrijden"} minder heeft gespeeld` : ""}`));
+    if (S.spannend.n) feiten.push(feit("Nagelbijters", S.spannend.rec, `W-G-V in ${S.spannend.n} ${S.spannend.n === 1 ? "wedstrijd" : "wedstrijden"} met hooguit één doelpunt verschil`));
+    if (S.vaaksteUitslag && S.vaaksteUitslag[1] > 1) feiten.push(feit("Vaakste uitslag", S.vaaksteUitslag[0], `${S.vaaksteUitslag[1]} keer, gezien vanuit de Kamelen`));
+    if (S.per.length) feiten.push(feit("Per wedstrijd", `${een(S.dv / S.per.length)} – ${een(S.dt / S.per.length)}`, `doelpunten voor en tegen gemiddeld`));
+    if (S.populairsteBoete && S.populairsteBoete.n > 1) feiten.push(feit("Populairste boete", esc(S.populairsteBoete.tekst), `al ${S.populairsteBoete.n} keer uitgedeeld`, "beer"));
+    if (S.liters) feiten.push(feit("Kratten-teller", een(S.liters / 7.2), `kratten bier (24 × 0,3 L) aan boetes dit seizoen · ${fmtL(S.liters)} L in totaal`, "beer"));
+    if (S.laatkomer) feiten.push(feit("Laatkomer", esc(S.laatkomer.naam), `${S.laatkomer.laat} keer te laat. Wekker zetten?`));
+    if (S.trainingsTrend) feiten.push(feit("Trainingsvorm", `${een(S.trainingsTrend.begin)} → ${een(S.trainingsTrend.nu)}`, S.trainingsTrend.nu >= S.trainingsTrend.begin ? "spelers gemiddeld: de laatste 3 trainingen drukker dan de eerste 3" : "spelers gemiddeld: de laatste 3 trainingen rustiger dan de eerste 3. Kom op, Kamelen!"));
     if (S.invallers.length) feiten.push(feit("Invallers", S.invallers.length, `keer een invaller nodig gehad · ${[...new Set(S.invallers.map(i => i.naam))].map(esc).join(", ")}`));
 
     const maxR = Math.max(1, ...S.redenen.map(([, n]) => n));
