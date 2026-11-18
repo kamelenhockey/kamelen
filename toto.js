@@ -89,7 +89,7 @@
       }
     }
     DATA.totoProfiel = { stand, perSpeler };
-    window.renderStatsExtra?.();
+    window.renderStatsExtra?.(); try { renderPlayers(); } catch {}
     const nu = Date.now();
     const volgende = ws.find(m => aftrap(m) > nu);
     const gespeeld = ws.filter(m => onsScore(m) && perMatch.get(sleutel(m)).voorsp.size).reverse();

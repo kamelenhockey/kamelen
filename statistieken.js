@@ -211,7 +211,13 @@
     if (S.populairsteBoete && S.populairsteBoete.n > 1) feiten.push(feit("Populairste boete", esc(S.populairsteBoete.tekst), `al ${S.populairsteBoete.n} keer uitgedeeld`, "beer"));
     if (S.liters) feiten.push(feit("Kratten-teller", een(S.liters / 7.2), `kratten bier (24 × 0,3 L) aan boetes dit seizoen · ${fmtL(S.liters)} L in totaal`, "beer"));
     if (S.laatkomer) feiten.push(feit("Laatkomer", esc(S.laatkomer.naam), `${S.laatkomer.laat} keer te laat. Wekker zetten?`));
-    if (S.trainingsTrend) feiten.push(feit("Trainingsvorm", `${een(S.trainingsTrend.begin)} → ${een(S.trainingsTrend.nu)}`, S.trainingsTrend.nu >= S.trainingsTrend.begin ? "spelers gemiddeld: de laatste 3 trainingen drukker dan de eerste 3" : "spelers gemiddeld: de laatste 3 trainingen rustiger dan de eerste 3. Kom op, Kamelen!"));
+    if (S.trainingsTrend) {
+      const b = S.trainingsTrend.begin, n = S.trainingsTrend.nu, verschil = Math.round((n - b) * 10) / 10;
+      const uitleg = verschil > 0 ? `Bij de laatste 3 trainingen kwamen er gemiddeld ${een(n)} spelers, bij de eerste 3 nog ${een(b)}. Het wordt drukker!`
+        : verschil < 0 ? `Bij de laatste 3 trainingen kwamen er gemiddeld ${een(n)} spelers, bij de eerste 3 nog ${een(b)}. Kom op, Kamelen!`
+        : `Bij de eerste 3 en de laatste 3 trainingen kwamen er allebei gemiddeld ${een(n)} spelers. Stabiel!`;
+      feiten.push(feit("Trainingsopkomst", `${een(b)} → ${een(n)}`, uitleg));
+    }
     if (S.invallers.length) feiten.push(feit("Invallers", S.invallers.length, `keer een invaller nodig gehad · ${[...new Set(S.invallers.map(i => i.naam))].map(esc).join(", ")}`));
 
     const maxR = Math.max(1, ...S.redenen.map(([, n]) => n));
@@ -330,7 +336,34 @@
       if (trouw && trouw.aantal > 1) sf.push(feit("Trouwste voorspeller", esc(trouw.naam), `${trouw.aantal} wedstrijden voorspeld`));
     }
 
+    /* Badges van het hele team */
+    let bHtml = `<div class="card empty">Badges laden…</div>`;
+    try {
+      const spelers = playerData().filter(p => !p.invaller);
+      const per = spelers.map(p => { const l = badgeLijst(p); return { naam: p.naam, l, t: badgeTelling(l) }; });
+      const rang = [...per].sort((a, b) => b.t.punten - a.t.punten || b.t.goud - a.t.goud || b.t.aantal - a.t.aantal || a.naam.localeCompare(b.naam));
+      const telBadge = new Map();
+      per.forEach(x => x.l.filter(b => b.ok).forEach(b => telBadge.set(b.naam, { b, n: (telBadge.get(b.naam)?.n || 0) + 1 })));
+      const verdiend = [...telBadge.values()];
+      const totaal = per.reduce((s, x) => s + x.t.aantal, 0), goud = per.reduce((s, x) => s + x.t.goud, 0);
+      const bf = [];
+      if (verdiend.length) {
+        const zeld = Math.min(...verdiend.map(v => v.n)), zeldzaam = verdiend.filter(v => v.n === zeld).sort((a, b) => ({ goud: 0, zilver: 1, brons: 2 })[a.b.tier] - ({ goud: 0, zilver: 1, brons: 2 })[b.b.tier])[0];
+        const wie = per.filter(x => x.l.some(b => b.ok && b.naam === zeldzaam.b.naam)).map(x => esc(x.naam));
+        const vaak = [...verdiend].sort((a, b) => b.n - a.n)[0];
+        bf.push(feit("Badges verdiend", totaal, `door het hele team, waarvan ${goud} goud`));
+        bf.push(feit("Zeldzaamste badge", `${zeldzaam.b.ic} ${esc(zeldzaam.b.naam)}`, `alleen ${wie.join(" & ")}`));
+        bf.push(feit("Meest verdiend", `${vaak.b.ic} ${esc(vaak.b.naam)}`, `${vaak.n} van de ${per.length} Kamelen hebben hem`));
+      }
+      const lijstHtml = rang.filter(x => x.t.aantal).map((x, i) => `<tr${x.naam === ik ? ' class="ik"' : ""}><td class="r pos">${i + 1}</td><td>${esc(x.naam)}</td><td class="r">${x.t.goud}</td><td class="r">${x.t.zilver}</td><td class="r">${x.t.brons}</td><td class="r pts">${x.t.punten}</td></tr>`).join("");
+      bHtml = `${bf.length ? `<div class="facts">${bf.join("")}</div>` : ""}
+        <section class="card"><div class="card-head"><div><h2>Badge-ranglijst</h2><p>Goud telt 3 punten, zilver 2 en brons 1</p></div></div>
+        ${lijstHtml ? `<div class="tablewrap"><table><thead><tr><th class="r">#</th><th>Kameel</th><th class="r" title="Goud">🥇</th><th class="r" title="Zilver">🥈</th><th class="r" title="Brons">🥉</th><th class="r">Punten</th></tr></thead><tbody>${lijstHtml}</tbody></table></div>` : `<div class="empty">Nog geen badges verdiend.</div>`}</section>`;
+    } catch (e) { console.error(e); }
+
     extra.innerHTML = `
+      <h2 class="stat-h">Badges</h2>
+      ${bHtml}
       <h2 class="stat-h">Kameel &amp; ezel van de dag</h2>
       ${kf.length ? `<div class="facts">${kf.join("")}</div>` : `<div class="card empty">Zodra de eerste stemming gesloten is, staan hier de kameel- en ezelstatistieken.</div>`}
       <h2 class="stat-h">Kamelen-Scorito</h2>

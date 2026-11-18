@@ -660,6 +660,15 @@ body.pong-actief .tabbar{display:none}
 .bdg .ic{font-size:1.3rem;line-height:1}
 .bdg b{display:block;font-size:.8rem;line-height:1.2}
 .bdg small{display:block;font-size:.68rem;color:var(--muted);line-height:1.25}
+.bdg{position:relative}
+.bdg .tier{margin-left:auto;font-size:.9rem;align-self:flex-start}
+.bdg.t-goud{background:#fff6d8;border-color:#e6c25a}
+.bdg.t-zilver{background:#f1f4f7;border-color:#b9c4cd}
+.bdg.t-brons{background:#fbefe6;border-color:#d9a57f}
+.bdg.uit{background:var(--bg)!important;border-color:var(--line)!important}
+.bdg-tel{font-family:var(--font-body);font-size:.85rem;font-weight:600;color:var(--muted);margin-left:6px;white-space:nowrap}
+.bdg-kaart{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted);margin:-2px 0 8px;letter-spacing:.02em}
+.bdg-kaart span{margin-left:2px}
 .bdg-meer{margin-top:8px}
 .bdg-meer summary{cursor:pointer;font-weight:700;font-size:.85rem;color:var(--muted);padding:4px 0}
 .bdg-meer .badges{margin-top:6px}
@@ -769,6 +778,7 @@ dialog.lightbox::backdrop{background:rgba(10,24,36,.9)}
 .stat-strip > div + div{border-left:1px solid rgba(255,255,255,.12)}
 .stat-strip .k{font-size:.8rem;font-weight:700;letter-spacing:0;color:rgba(255,255,255,.6)}
 .stat-strip .v{font-family:var(--font-display);font-weight:800;font-size:1.6rem}
+tr.ik td{background:var(--orange-soft);font-weight:700}
 .mijn-seizoen{padding:18px 20px;margin-bottom:6px}
 .mijn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px 18px;margin-top:6px}
 .mijn-grid .k{font-size:.8rem;color:var(--muted)}
@@ -2035,6 +2045,7 @@ function playerCard(p){
   const initials = p.naam.split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase();
   return `<button type="button" class="player" data-player="${esc(p.naam)}">
     <div class="top-row"><span class="avatar${p.invaller ? " inv" : ""}">${esc(initials)}</span><div><div class="nm">${esc(p.naam)}</div>${p.sel ? `<div class="sel">In de selectie</div>` : ""}${p.ingevallen ? `<div class="sel" style="color:var(--muted)">${p.ingevallen.length}× ingevallen</div>` : ""}</div></div>
+    ${p.invaller ? "" : (() => { const t = badgeTelling(badgeLijst(p)); return t.aantal ? `<div class="bdg-kaart" title="${t.aantal} badges: ${t.goud} goud, ${t.zilver} zilver, ${t.brons} brons">${t.goud ? `🥇${t.goud} ` : ""}${t.zilver ? `🥈${t.zilver} ` : ""}${t.brons ? `🥉${t.brons}` : ""}<span>${t.aantal} ${t.aantal === 1 ? "badge" : "badges"}</span></div>` : ""; })()}
     <div class="pstats"><div><div class="k">Doelpunten</div><div class="v">${p.goals.length}</div><span class="balls">${p.goals.map(g => `<span class="ball ${ballCls(g.soort)}"></span>`).join("")}</span></div>
       <div><div class="k">Liters</div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}<small> L</small></div>${p.liters && p.liters.open > 0 ? `<span class="pill open">${fmtL(p.liters.open)} L open</span>` : p.liters ? `<span class="pill done">alles gedaan</span>` : ""}</div></div>
   </button>`;
@@ -2097,7 +2108,7 @@ function openPlayer(naam){
   /* Toto */
   const tp = DATA.totoProfiel, tl = tp?.perSpeler.get(p.naam);
   /* Badges */
-  const badgeHtml = p.invaller ? "" : badgesHtml(p, o, kTitels.length, eTitels.length, tp);
+  const badgeHtml = p.invaller ? "" : badgesHtml(p);
   let totoHtml = "";
   if (tl && tl.length){
     const plek = tp.stand.findIndex(x => x.naam === p.naam) + 1, st = tp.stand[plek - 1];
@@ -2126,76 +2137,103 @@ function openPlayer(naam){
 
 
 /* ---------- Badges op het spelersprofiel ---------- */
-function badgesHtml(p, o, kameel, ezel, tp){
+/* Badges: brons (makkelijk), zilver, goud (moeilijk). Eén plek waar alles berekend wordt. */
+const TIER = { brons: { ic: "🥉", punt: 1, naam: "Brons" }, zilver: { ic: "🥈", punt: 2, naam: "Zilver" }, goud: { ic: "🥇", punt: 3, naam: "Goud" } };
+function badgeLijst(p){
+  const o = (DATA.profielOpkomst || new Map()).get(p.naam);
+  const kz = DATA.kzUitslagen || [], kameel = kz.filter(r => r.kamelen.includes(p.naam)).length, ezel = kz.filter(r => r.ezels.includes(p.naam)).length;
+  const tp = DATA.totoProfiel, st = tp?.stand.find(x => x.naam === p.naam), totoTop = tp?.stand[0], mijnVoorsp = tp?.perSpeler.get(p.naam) || [];
   const perWedstrijd = new Map(); p.goals.forEach(g => { const k = g.match?.datum || g.label; perWedstrijd.set(k, (perWedstrijd.get(k) || 0) + 1); });
   const maxPerWedstrijd = Math.max(0, ...perWedstrijd.values());
-  const sc = p.goals.filter(g => g.soort === "sc").length;
-  let reeks = 0, best = 0; for (const t of DATA.trAanwezig || []){ reeks = t.aanwezig.has(p.naam) ? reeks + 1 : 0; best = Math.max(best, reeks); }
+  const sc = p.goals.filter(g => g.soort === "sc").length, veldGoals = p.goals.filter(g => g.soort !== "sc" && g.soort !== "sb").length;
+  let reeks = 0, best = 0, gemist = 0, maxGemist = 0;
+  for (const t of DATA.trAanwezig || []){ const er = t.aanwezig.has(p.naam); reeks = er ? reeks + 1 : 0; best = Math.max(best, reeks); gemist = er ? 0 : gemist + 1; maxGemist = Math.max(maxGemist, gemist); }
   const lit = buildRanking(DATA.liters || [], {}), litLoser = lit.filter(x => x.open > 0).sort((a, b) => b.open - a.open || b.liters - a.liters)[0];
-  const st = tp?.stand.find(x => x.naam === p.naam);
   const seizoen = (() => { const d = new Date(); return d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1; })();
-  /* Extra gegevens voor badges */
-  const veldGoals = p.goals.filter(g => g.soort !== "sc" && g.soort !== "sb").length;
   const allGoals = new Map(); (DATA.doelpunten || []).forEach(w => w.goals.forEach(g => allGoals.set(g.wie, (allGoals.get(g.wie) || 0) + 1)));
   const maxGoals = Math.max(0, ...allGoals.values());
-  const usTeam = (DATA.stand || []).find(t => isUs(t.team))?.team;
+  const ons = m => isUs(m.thuis) ? m.thuis : m.uit;
   const gespeeld = (DATA.wedAanwezig || []).filter(w => w.aanwezig.has(p.naam)).map(w => (DATA.uitslagen || []).find(x => x.datum === w.datum && isUs(x.thuis + x.uit))).filter(Boolean);
-  const res = gespeeld.map(m => resultFor(m, isUs(m.thuis) ? m.thuis : m.uit));
-  const scoordeInWinst = p.goals.some(g => g.match && resultFor(g.match, isUs(g.match.thuis) ? g.match.thuis : g.match.uit) === "W");
-  let gemist = 0, maxGemist = 0; for (const t of DATA.trAanwezig || []){ gemist = t.aanwezig.has(p.naam) ? 0 : gemist + 1; maxGemist = Math.max(maxGemist, gemist); }
+  const res = gespeeld.map(m => resultFor(m, ons(m)));
+  const score = m => { const [a, b] = String(m.score || "").split("-").map(Number); return isUs(m.thuis) ? [a, b] : [b, a]; };
+  const scoordeIn = f => p.goals.some(g => g.match && f(g.match));
   const wedstrijddagen = new Set([...(DATA.uitslagen || []), ...(DATA.programma || [])].filter(m => isUs(m.thuis + m.uit)).map(m => m.datum.slice(5)));
-  const totoStand = tp?.stand || [], totoTop = totoStand[0];
-  const lijst = [
-    ["⚽", "Eerste doelpunt", "Minstens één keer gescoord", p.goals.length >= 1],
-    ["✌️", "Dubbelslag", "Twee keer gescoord in één wedstrijd", maxPerWedstrijd >= 2],
-    ["🎩", "Hattrick", "Drie keer gescoord in één wedstrijd", maxPerWedstrijd >= 3],
-    ["🧨", "Goalgetter", "Vijf doelpunten dit seizoen", p.goals.length >= 5],
-    ["🔟", "Dubbele cijfers", "Tien doelpunten dit seizoen", p.goals.length >= 10],
-    ["👑", "Topscorer", "Meeste doelpunten van het team", p.goals.length > 0 && p.goals.length === maxGoals],
-    ["🎯", "Strafcornerspecialist", "Twee of meer strafcornerdoelpunten", sc >= 2],
-    ["🏑", "Veldwerker", "Drie doelpunten uit het veld", veldGoals >= 3],
-    ["🏆", "Matchwinner", "Gescoord in een gewonnen wedstrijd", scoordeInWinst],
-    ["🛡️", "IJzeren Kameel", "Geen enkele wedstrijd gemist", !!(o && o.wT && o.wA === o.wT)],
-    ["💯", "Perfecte opkomst", "Elke wedstrijd én elke training aanwezig", !!(o && o.wT && o.tT && o.wA === o.wT && o.tA === o.tT)],
-    ["🏋️", "Trainingsbeest", "90% of meer van de trainingen aanwezig", !!(o && o.tT >= 3 && o.tA / o.tT >= .9)],
-    ["🔥", "Vijf op rij", "Vijf trainingen achter elkaar aanwezig", best >= 5],
-    ["👻", "Spook", "Drie trainingen achter elkaar gemist", maxGemist >= 3],
-    ["🍀", "Geluksbrenger", "Elke wedstrijd met hem erbij gewonnen (minstens drie)", res.length >= 3 && res.every(r => r === "W")],
-    ["🧱", "Onverslaanbaar", "Nog nooit verloren als hij meedeed (minstens drie)", res.length >= 3 && !res.includes("V")],
-    ["😇", "Engeltje", "Nog nooit een literboete", !p.liters],
-    ["🧽", "Schone lei", "Boetes gehad en alles weggewerkt", !!(p.liters && p.liters.liters >= 1 && p.liters.open === 0)],
-    ["🍻", "Dorstig", "Vijf liter of meer aan boetes", !!(p.liters && p.liters.liters >= 5)],
-    ["🛢️", "Biervat", "Tien liter of meer aan boetes", !!(p.liters && p.liters.liters >= 10)],
-    ["🤫", "Stille meter", "Een stille meter moeten trekken", !!(p.liters && p.liters.stil > 0)],
-    ["💸", "Wanbetaler", "Drie liter of meer nog open", !!(p.liters && p.liters.open >= 3)],
-    ["🍺", "Literloser", "De meeste liters nog open", !!(p.liters && p.liters.open > 0 && litLoser && litLoser.naam === p.naam)],
-    ["🐪", "Kameel van de dag", "Minstens één keer gekozen", kameel >= 1],
-    ["🐫", "Dubbele bult", "Twee keer of vaker kameel van de dag", kameel >= 2],
-    ["🫏", "Ezel van de dag", "Ook dat is een prestatie", ezel >= 1],
-    ["🥕", "Vaste ezel", "Twee keer of vaker ezel van de dag", ezel >= 2],
-    ["🔮", "Orakel", "Een uitslag precies goed voorspeld in de Kamelen-Scorito", !!(st && st.exact >= 1)],
-    ["🧠", "Scorito-koning", "Bovenaan in de Kamelen-Scorito", !!(st && totoTop && st.naam === totoTop.naam && st.punten > 0)],
-    ["📝", "Trouwe voorspeller", "Vijf wedstrijden voorspeld in de Kamelen-Scorito", !!(st && st.aantal >= 5)],
-    ["⏰", "Laatkomer", "Te laat op training", !!(o && o.laat >= 1)],
-    ["🎂", "Jarig op wedstrijddag", "Verjaardag valt op een speeldag dit seizoen", !!(p.verjaardag && wedstrijddagen.has(p.verjaardag))],
-    ["🌱", "Groentje", "Eerste seizoen bij de Kamelen", !!(p.sinds && p.sinds >= seizoen)],
-    ["👴", "Veteraan", "Al vijf jaar of langer Kameel", !!(p.sinds && seizoen - p.sinds >= 5)],
-    ["🗿", "Legende", "Al tien jaar of langer Kameel", !!(p.sinds && seizoen - p.sinds >= 10)],
-  ];
-  const ja = lijst.filter(b => b[3]), nee = lijst.filter(b => !b[3]);
-  const chip = ([ic, naam, uitleg, ok]) => `<span class="bdg${ok ? "" : " uit"}" title="${esc(uitleg)}"><span class="ic">${ic}</span><span><b>${esc(naam)}</b><small>${esc(uitleg)}</small></span></span>`;
-  return `<div class="psec"><h3 class="sub-h">Badges · ${ja.length} van ${lijst.length}</h3>
+  const fotos = (DATA.fotos || []).filter(f => f.door === p.naam).length;
+  const qs = window.KAMELEN_QUOTES || [], quotesOver = qs.filter(q => q.wie === p.naam).length, quotesDoor = qs.filter(q => q.door === p.naam).length;
+  const stemKansen = kz.filter(r => (DATA.wedAanwezig || []).some(w => w.datum === r.m.datum && w.aanwezig.has(p.naam)));
+  const L = p.liters;
+  return [
+    ["⚽", "Eerste doelpunt", "Minstens één keer gescoord", p.goals.length >= 1, "brons"],
+    ["🏑", "Veldwerker", "Drie doelpunten uit het veld", veldGoals >= 3, "brons"],
+    ["🏆", "Matchwinner", "Gescoord in een gewonnen wedstrijd", scoordeIn(m => resultFor(m, ons(m)) === "W"), "brons"],
+    ["🏟️", "Thuisheld", "Gescoord in een thuiswedstrijd", scoordeIn(m => isUs(m.thuis)), "brons"],
+    ["🚌", "Uitspecialist", "Gescoord in een uitwedstrijd", scoordeIn(m => !isUs(m.thuis)), "brons"],
+    ["✌️", "Dubbelslag", "Twee keer gescoord in één wedstrijd", maxPerWedstrijd >= 2, "zilver"],
+    ["🧨", "Goalgetter", "Vijf doelpunten dit seizoen", p.goals.length >= 5, "zilver"],
+    ["🎯", "Strafcornerspecialist", "Twee of meer strafcornerdoelpunten", sc >= 2, "zilver"],
+    ["🎩", "Hattrick", "Drie keer gescoord in één wedstrijd", maxPerWedstrijd >= 3, "goud"],
+    ["🔟", "Dubbele cijfers", "Tien doelpunten dit seizoen", p.goals.length >= 10, "goud"],
+    ["👑", "Topscorer", "Meeste doelpunten van het team", p.goals.length > 0 && p.goals.length === maxGoals, "goud"],
+
+    ["🔥", "Vijf op rij", "Vijf trainingen achter elkaar aanwezig", best >= 5, "brons"],
+    ["🧤", "De nul", "Meegespeeld in een wedstrijd zonder tegendoelpunt", gespeeld.some(m => score(m)[1] === 0), "brons"],
+    ["🎉", "Doelpuntenfeest", "Meegespeeld in een wedstrijd met zes of meer Kamelen-doelpunten", gespeeld.some(m => score(m)[0] >= 6), "brons"],
+    ["🧱", "Onverslaanbaar", "Nog nooit verloren als hij meedeed (minstens drie)", res.length >= 3 && !res.includes("V"), "brons"],
+    ["👻", "Spook", "Drie trainingen achter elkaar gemist", maxGemist >= 3, "brons"],
+    ["⏰", "Laatkomer", "Te laat op training", !!(o && o.laat >= 1), "brons"],
+    ["🏋️", "Trainingsbeest", "90% of meer van de trainingen aanwezig", !!(o && o.tT >= 3 && o.tA / o.tT >= .9), "zilver"],
+    ["🔁", "Tien op rij", "Tien trainingen achter elkaar aanwezig", best >= 10, "zilver"],
+    ["📆", "Seizoensganger", "Tien wedstrijden meegespeeld", gespeeld.length >= 10, "zilver"],
+    ["🍀", "Geluksbrenger", "Elke wedstrijd met hem erbij gewonnen (minstens drie)", res.length >= 3 && res.every(r => r === "W"), "zilver"],
+    ["🛡️", "IJzeren Kameel", "Geen enkele wedstrijd gemist", !!(o && o.wT && o.wA === o.wT), "goud"],
+    ["💯", "Perfecte opkomst", "Elke wedstrijd én elke training aanwezig", !!(o && o.wT && o.tT && o.wA === o.wT && o.tA === o.tT), "goud"],
+
+    ["🧽", "Schone lei", "Boetes gehad en alles weggewerkt", !!(L && L.liters >= 1 && L.open === 0), "brons"],
+    ["🍻", "Dorstig", "Vijf liter of meer aan boetes", !!(L && L.liters >= 5), "brons"],
+    ["💸", "Wanbetaler", "Drie liter of meer nog open", !!(L && L.open >= 3), "brons"],
+    ["😇", "Engeltje", "Nog nooit een literboete", !L, "zilver"],
+    ["🛢️", "Biervat", "Tien liter of meer aan boetes", !!(L && L.liters >= 10), "zilver"],
+    ["🤫", "Stille meter", "Een stille meter moeten trekken", !!(L && L.stil > 0), "zilver"],
+    ["🍺", "Literloser", "De meeste liters nog open", !!(L && L.open > 0 && litLoser && litLoser.naam === p.naam), "goud"],
+
+    ["🫏", "Ezel van de dag", "Ook dat is een prestatie", ezel >= 1, "brons"],
+    ["🐪", "Kameel van de dag", "Minstens één keer gekozen", kameel >= 1, "zilver"],
+    ["🥕", "Vaste ezel", "Twee keer of vaker ezel van de dag", ezel >= 2, "zilver"],
+    ["🗳️", "Stemplicht", "Bij elke stemming gestemd waar hij meespeelde (minstens twee)", stemKansen.length >= 2 && stemKansen.every(r => r.stemmers.includes(p.naam)), "zilver"],
+    ["🐫", "Dubbele bult", "Twee keer of vaker kameel van de dag", kameel >= 2, "goud"],
+
+    ["📝", "Trouwe voorspeller", "Vijf wedstrijden voorspeld in de Kamelen-Scorito", !!(st && st.aantal >= 5), "brons"],
+    ["🎲", "Gokker", "Vijf of meer Kamelen-doelpunten voorspeld in één wedstrijd", mijnVoorsp.some(x => x.v >= 5), "brons"],
+    ["🔮", "Orakel", "Een uitslag precies goed voorspeld", !!(st && st.exact >= 1), "zilver"],
+    ["🧙", "Helderziende", "Drie uitslagen precies goed voorspeld", !!(st && st.exact >= 3), "goud"],
+    ["🧠", "Scorito-koning", "Bovenaan in de Kamelen-Scorito", !!(st && totoTop && st.naam === totoTop.naam && st.punten > 0), "goud"],
+
+    ["📸", "Fotograaf", "Drie foto's toegevoegd", fotos >= 3, "brons"],
+    ["🎞️", "Huisfotograaf", "Tien foto's toegevoegd", fotos >= 10, "zilver"],
+    ["✍️", "Notulist", "Vijf quotes toegevoegd", quotesDoor >= 5, "brons"],
+    ["💬", "Quotemachine", "Drie quotes op zijn naam", quotesOver >= 3, "zilver"],
+    ["📜", "Legendarisch", "Tien quotes op zijn naam", quotesOver >= 10, "goud"],
+
+    ["🎂", "Jarig op wedstrijddag", "Verjaardag valt op een speeldag dit seizoen", !!(p.verjaardag && wedstrijddagen.has(p.verjaardag)), "brons"],
+    ["🌱", "Groentje", "Eerste seizoen bij de Kamelen", !!(p.sinds && p.sinds >= seizoen), "brons"],
+    ["👴", "Veteraan", "Al vijf jaar of langer Kameel", !!(p.sinds && seizoen - p.sinds >= 5), "zilver"],
+    ["🗿", "Legende", "Al tien jaar of langer Kameel", !!(p.sinds && seizoen - p.sinds >= 10), "goud"],
+  ].map(([ic, naam, uitleg, ok, tier]) => ({ ic, naam, uitleg, ok: !!ok, tier }));
+}
+function badgeTelling(lijst){
+  const ja = lijst.filter(b => b.ok), t = { goud: 0, zilver: 0, brons: 0 };
+  ja.forEach(b => t[b.tier]++);
+  return { aantal: ja.length, totaal: lijst.length, ...t, punten: t.goud * 3 + t.zilver * 2 + t.brons };
+}
+function badgesHtml(p){
+  const lijst = badgeLijst(p), tel = badgeTelling(lijst);
+  const volg = { goud: 0, zilver: 1, brons: 2 };
+  const ja = lijst.filter(b => b.ok).sort((a, b) => volg[a.tier] - volg[b.tier]), nee = lijst.filter(b => !b.ok).sort((a, b) => volg[a.tier] - volg[b.tier]);
+  const chip = b => `<span class="bdg t-${b.tier}${b.ok ? "" : " uit"}" title="${TIER[b.tier].naam}: ${esc(b.uitleg)}"><span class="ic">${b.ic}</span><span><b>${esc(b.naam)}</b><small>${esc(b.uitleg)}</small></span><span class="tier" aria-label="${TIER[b.tier].naam}">${TIER[b.tier].ic}</span></span>`;
+  return `<div class="psec"><h3 class="sub-h">Badges · ${tel.aantal} van ${tel.totaal} <span class="bdg-tel">🥇 ${tel.goud} 🥈 ${tel.zilver} 🥉 ${tel.brons}</span></h3>
     ${ja.length ? `<div class="badges">${ja.map(chip).join("")}</div>` : `<div class="empty">Nog geen badges verdiend.</div>`}
     ${nee.length ? `<details class="bdg-meer"><summary>Nog te verdienen (${nee.length})</summary><div class="badges">${nee.map(chip).join("")}</div></details>` : ""}</div>`;
 }
-
-/* ---------- Quote van de dag op home ---------- */
-window.renderQuoteHome = function(){
-  const el = document.getElementById("quote-home"), q = window.KAMELEN_QUOTES || [];
-  if (!el) return; if (!q.length) { el.innerHTML = ""; return; }
-  const dag = Math.floor(Date.now() / 864e5), x = q[dag % q.length];
-  el.innerHTML = `<a href="#quotes" class="qh"><div class="qh-k">Quote van de dag</div><blockquote>${esc(x.tekst)}</blockquote><div class="qh-wie">${esc(x.wie)}${x.context ? `, ${esc(x.context)}` : ""}</div></a>`;
-};
 
 /* ---------- Verjaardagen ---------- */
 const MAANDEN = ["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
@@ -2415,9 +2453,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795484200"></script>
-<script src="toto.js?v=1795484200"></script>
-<script src="pong.js?v=1795484200"></script>
+<script src="mex.js?v=1795484300"></script>
+<script src="toto.js?v=1795484300"></script>
+<script src="pong.js?v=1795484300"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2426,11 +2464,11 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795484200"></script>
-<script src="statistieken.js?v=1795484200"></script>
-<script src="rad.js?v=1795484200"></script>
-<script src="fotos.js?v=1795484200"></script>
-<script src="quotes.js?v=1795484200"></script>
-<script src="push.js?v=1795484200"></script>
+<script src="stemmen.js?v=1795484300"></script>
+<script src="statistieken.js?v=1795484300"></script>
+<script src="rad.js?v=1795484300"></script>
+<script src="fotos.js?v=1795484300"></script>
+<script src="quotes.js?v=1795484300"></script>
+<script src="push.js?v=1795484300"></script>
 </body>
 </html>

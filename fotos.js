@@ -122,7 +122,8 @@
     const api = await window.kamelenApi(vers);
     if (!api || !("fotos" in api)) { box.innerHTML = `<div class="card empty">De foto's konden niet worden geladen. Ververs de pagina (Ctrl+Shift+R).</div>`; return; }
     FOTOS = (api.fotos || []).slice().sort((a, b) => new Date(b.tijd) - new Date(a.tijd));
-    render();
+    DATA.fotos = FOTOS;
+    render(); try { renderPlayers(); } catch {}
   }
   window.renderFotos = () => laad(false);
 })();
