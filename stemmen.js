@@ -75,12 +75,12 @@
       const r = res.find(x => sleutel(x.m) === sleutel(m));
       const gestemd = r ? r.stemmers : [];
       const mijn = e.stemmen?.[sleutel(m)];
-      const keuzes = (veld, gekozen) => `<div class="kz-grid" role="radiogroup" data-veld="${veld}">${namen.map(n => `<button type="button" class="kz-chip ${gekozen === n ? "on" : ""}" data-naam="${esc(n)}" role="radio" aria-checked="${gekozen === n}">${esc(n)}</button>`).join("")}</div>`;
+      const keuzes = (veld, gekozen) => `<div class="kz-grid" role="radiogroup" data-veld="${veld}">${namen.filter(n => n !== (window.IK || {}).naam).map(n => `<button type="button" class="kz-chip ${gekozen === n ? "on" : ""}" data-naam="${esc(n)}" role="radio" aria-checked="${gekozen === n}">${esc(n)}</button>`).join("")}</div>`;
       html += `<div class="kz-open">
         <div class="kz-head"><div><div class="k">Stemmen is open</div><div class="kz-match">${teamLink(m.thuis)} ${esc(m.score || "")} ${teamLink(m.uit)}</div><div class="kz-when">${fmtDay(m.datum)}</div></div></div>
         <form id="kz-form" data-key="${esc(sleutel(m))}">
           ${mijn ? `<div class="tt-mine">Jouw stem: kameel <b>${esc(mijn.kameel)}</b>, ezel <b>${esc(mijn.ezel)}</b>. Je kunt hem aanpassen zolang de stemming open is.</div>` : ""}
-          <label class="tt-f"><span>Wie ben jij?</span><select id="kz-stemmer"><option value="">Kies…</option>${namen.map(n => `<option ${e.naam === n ? "selected" : ""}>${esc(n)}</option>`).join("")}</select></label>
+          <input type="hidden" id="kz-stemmer" value="${esc((window.IK || {}).naam || "")}"><p class="kz-ik">Je stemt als <b>${esc((window.IK || {}).naam || "")}</b>. Op jezelf stemmen kan niet.</p>
           <div class="kz-sec"><h3><span class="kz-ic kameel">🐪</span> Kameel van de dag</h3><p>Wie was vandaag de beste of leukste Kameel?</p>${keuzes("kameel", mijn?.kameel)}</div>
           <div class="kz-sec"><h3><span class="kz-ic ezel">🫏</span> Ezel van de dag</h3><p>Wie verdient de ezel? Die moet een liter trekken.</p>${keuzes("ezel", mijn?.ezel)}</div>
           <div class="tt-submit"><button class="btn mx-big" type="submit">${mijn ? "Stem aanpassen" : "Stem uitbrengen"}</button><span class="tt-status" id="kz-status" role="status"></span></div>
@@ -196,7 +196,7 @@
         const r = await fetch(CFG.api, { method: "POST", body: JSON.stringify({ type: "stem", code, stemmer, kameel, ezel, wedstrijd: sleutel(m), opent: opent(m).toISOString() }) });
         const res = await r.json();
         if (!res.ok) {
-          st.textContent = { code: "Die teamcode klopt niet.", zelf: "Op jezelf stemmen mag niet.", gesloten: "De stemming is al gesloten.", "nog niet": "De stemming is nog niet open." }[res.fout] || "Opslaan lukte niet. Is het script al bijgewerkt?";
+          st.textContent = { code: "Je inlogcode klopt niet meer. Log opnieuw in.", zelf: "Op jezelf stemmen mag niet.", gesloten: "De stemming is al gesloten.", "nog niet": "De stemming is nog niet open." }[res.fout] || "Opslaan lukte niet. Is het script al bijgewerkt?";
           if (res.fout === "code") { delete e.code; bewaar(e); }
           knop.disabled = false; return;
         }

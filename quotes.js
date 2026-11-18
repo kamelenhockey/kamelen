@@ -25,7 +25,7 @@
           <label class="tt-f"><span>Wie zei het?</span><select id="q-wie" required><option value="">Kies</option>${namen().map(n => `<option>${esc(n)}</option>`).join("")}<option value="__anders">Iemand anders…</option></select></label>
           <label class="tt-f" id="q-anders-wrap" hidden><span>Naam</span><input id="q-anders" type="text" maxlength="40"></label>
           <label class="tt-f"><span>Wanneer of waarbij? (mag leeg)</span><input id="q-context" type="text" maxlength="200" placeholder="Bijvoorbeeld: in de rust tegen Sneek"></label>
-          <label class="tt-f"><span>Toegevoegd door</span><select id="q-door" required><option value="">Kies je naam</option>${namen().map(n => `<option${n === e.naam ? " selected" : ""}>${esc(n)}</option>`).join("")}</select></label>
+          <div class="tt-f"><span>Toegevoegd door</span><div class="tt-ik">${esc((window.IK || {}).naam || "")}</div><input type="hidden" id="q-door" value="${esc((window.IK || {}).naam || "")}"></div>
         </div>
         <div class="foto-acties"><button class="btn" type="submit">Quote toevoegen</button><span class="tt-status" id="q-status" role="status"></span></div>
       </form>

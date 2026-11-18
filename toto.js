@@ -130,7 +130,7 @@
     return `<form class="tt-form" id="tt-form" data-key="${esc(sleutel(m))}">
       ${al ? `<div class="tt-mine">Jouw voorspelling: <b>Kamelen ${al.voor} – ${al.tegen} ${esc(tegen)}</b>. Je kunt hem tot de aftrap aanpassen.</div>` : ""}
       <div class="tt-fields">
-        <label class="tt-f"><span>Naam</span><select id="tt-naam" required><option value="">Kies…</option>${namen.map(n => `<option ${e.naam === n ? "selected" : ""}>${esc(n)}</option>`).join("")}</select></label>
+        <div class="tt-f"><span>Naam</span><div class="tt-ik">${esc((window.IK || {}).naam || "")}</div><input type="hidden" id="tt-naam" value="${esc((window.IK || {}).naam || "")}"></div>
         <div class="tt-score">
           <label class="tt-f"><span>Kamelen</span><span class="tt-step"><button type="button" data-step="voor" data-d="-1" aria-label="Minder">−</button><input id="tt-voor" type="number" inputmode="numeric" min="0" max="40" value="${al ? al.voor : 0}"><button type="button" data-step="voor" data-d="1" aria-label="Meer">+</button></span></label>
           <span class="tt-dash">–</span>
@@ -161,7 +161,7 @@
       const r = await fetch(CFG.api, { method: "POST", body: JSON.stringify({ code, naam, voor, tegen, wedstrijd: `${m.thuis} – ${m.uit}`, aftrap: aftrap(m).toISOString() }) });
       const res = await r.json();
       if (!res.ok) {
-        st.textContent = res.fout === "code" ? "Die teamcode klopt niet." : res.fout === "te laat" ? "De wedstrijd is al begonnen." : "Opslaan lukte niet, probeer het opnieuw.";
+        st.textContent = res.fout === "code" ? "Je inlogcode klopt niet meer. Log opnieuw in." : res.fout === "te laat" ? "De wedstrijd is al begonnen." : "Opslaan lukte niet, probeer het opnieuw.";
         if (res.fout === "code") { delete e.code; bewaarEigen(e); }
         knop.disabled = false; return;
       }

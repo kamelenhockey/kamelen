@@ -5,7 +5,8 @@
 (function () {
   const box = document.getElementById("rad"); if (!box) return;
   const VAKKEN = [
-    { kort: "Aanvoerdersbak", tekst: "Aanvoerdersbak" },
+    { kort: "Aanvoerdersbak", tekst: "Aanvoerdersbak (ook oud-aanvoerders)" },
+    { kort: "Aanvoerders delen uit", tekst: "Aanvoerders (ook oud-aanvoerders) mogen een bak uitdelen" },
     { kort: "Coachbak", tekst: "Coachbak" },
     { kort: "Feutenbak", tekst: "Feutenbak" },
     { kort: "Verdedigersbak", tekst: "Verdedigersbak" },

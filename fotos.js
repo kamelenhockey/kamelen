@@ -26,7 +26,7 @@
       <form class="card foto-form" id="foto-form">
         <h2 class="sub-h">Foto's toevoegen</h2>
         <div class="foto-velden">
-          <label class="tt-f"><span>Jouw naam</span><select id="foto-door" required>${namenOpties(e.naam)}</select></label>
+          <div class="tt-f"><span>Jouw naam</span><div class="tt-ik">${esc((window.IK || {}).naam || "")}</div><input type="hidden" id="foto-door" value="${esc((window.IK || {}).naam || "")}"></div>
           <label class="tt-f"><span>Bijschrift (mag leeg)</span><input id="foto-tekst" type="text" maxlength="200" placeholder="Bijvoorbeeld: derde helft na Daring"></label>
         </div>
         <label class="foto-kies"><input id="foto-bestand" type="file" accept="image/*" multiple hidden><span class="btn">Kies foto's</span><span class="foto-gekozen" id="foto-gekozen">Nog niets gekozen</span></label>

@@ -4,7 +4,10 @@
  * "Push" (telefoons met meldingen), "Fotos" en "Quotes". Foto's komen in de Drive-map "Kamelen foto's".
  * Scores en stemmen blijven verborgen tot de aftrap (toto) of tot de beheerder de stemming sluit.
  */
-const TEAMCODE = "VUL-HIER-JULLIE-CODE-IN";        // voor iedereen in het team
+/* Persoonlijke codes: wie inlogt met een code IS die speler. Namen die de site meestuurt worden genegeerd. */
+const SPELERCODES = {
+  // "KameelMini1234": "Mini",
+};
 const BEHEERCODE = "VUL-HIER-JOUW-BEHEERCODE-IN";  // alleen voor jou: stemmingen sluiten
 const PUSHCODE = "VUL-HIER-DE-PUSHCODE-IN";        // geheim voor de meldingen-robot (GitHub)
 
@@ -41,6 +44,11 @@ function pushRij_(endpoint) {
 function json_(obj) { return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON); }
 const gelijk_ = (a, b) => String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
 const naam_ = n => String(n || "").trim().slice(0, 40);
+function speler_(code) {
+  const c = String(code || "").trim().toLowerCase();
+  for (const k in SPELERCODES) if (k.toLowerCase() === c) return SPELERCODES[k];
+  return "";
+}
 
 /* Laatste status per wedstrijd: "dicht" of "open" */
 function gesloten_() {
@@ -112,7 +120,10 @@ function doPost(e) {
         (d.endpoints || []).forEach(ep => { const rij = pushRij_(ep); if (rij) pushTab_().deleteRow(rij); });
         return json_({ ok: true });
       }
-      if (!gelijk_(d.code, TEAMCODE)) return json_({ ok: false, fout: "code" });
+      /* Inloggen: geeft de naam terug die bij de persoonlijke code hoort */
+      const ik = speler_(d.code);
+      if (d.type === "login") { if (!ik) { Utilities.sleep(800); return json_({ ok: false, fout: "code" }); } return json_({ ok: true, naam: ik }); }
+      if (!ik) return json_({ ok: false, fout: "code" });
       /* Foto toevoegen (de site verkleint hem eerst tot een JPEG van maximaal 1600 pixels) */
       if (d.type === "foto") {
         const data = String(d.data || "");
@@ -120,18 +131,18 @@ function doPost(e) {
         const blob = Utilities.newBlob(Utilities.base64Decode(data), "image/jpeg", "kamelen-" + Date.now() + ".jpg");
         const bestand = fotoMap_().createFile(blob);
         bestand.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        fotoTab_().appendRow([new Date(), bestand.getId(), String(d.bijschrift || "").slice(0, 200), naam_(d.door)]);
+        fotoTab_().appendRow([new Date(), bestand.getId(), String(d.bijschrift || "").slice(0, 200), ik]);
         return json_({ ok: true, id: bestand.getId() });
       }
       /* Quote toevoegen */
       if (d.type === "quote") {
         const wie = naam_(d.wie), tekst = String(d.tekst || "").trim().slice(0, 400);
         if (!wie || !tekst) return json_({ ok: false, fout: "invoer" });
-        quoteTab_().appendRow([new Date(), Utilities.getUuid().slice(0, 8), wie, tekst, String(d.context || "").trim().slice(0, 200), naam_(d.door)]);
+        quoteTab_().appendRow([new Date(), Utilities.getUuid().slice(0, 8), wie, tekst, String(d.context || "").trim().slice(0, 200), ik]);
         return json_({ ok: true });
       }
       if (d.type === "stem") {
-        const stemmer = naam_(d.stemmer), kameel = naam_(d.kameel), ezel = naam_(d.ezel), w = String(d.wedstrijd || "").slice(0, 120);
+        const stemmer = ik, kameel = naam_(d.kameel), ezel = naam_(d.ezel), w = String(d.wedstrijd || "").slice(0, 120);
         if (!stemmer || !kameel || !ezel || !w) return json_({ ok: false, fout: "invoer" });
         if (stemmer === kameel || stemmer === ezel) return json_({ ok: false, fout: "zelf" });
         const opent = new Date(d.opent);
@@ -140,7 +151,7 @@ function doPost(e) {
         stemTab_().appendRow([new Date(), stemmer, kameel, ezel, w, ""]);
         return json_({ ok: true });
       }
-      const naam = naam_(d.naam), voor = Number(d.voor), tegen = Number(d.tegen), aftrap = new Date(d.aftrap);
+      const naam = ik, voor = Number(d.voor), tegen = Number(d.tegen), aftrap = new Date(d.aftrap);
       if (!naam || !Number.isInteger(voor) || !Number.isInteger(tegen) || voor < 0 || tegen < 0 || voor > 40 || tegen > 40) return json_({ ok: false, fout: "invoer" });
       if (isNaN(aftrap) || aftrap <= new Date()) return json_({ ok: false, fout: "te laat" });
       voorspTab_().appendRow([new Date(), naam, voor, tegen, String(d.wedstrijd || "").slice(0, 120), aftrap.toISOString()]);
