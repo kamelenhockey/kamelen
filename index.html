@@ -1092,7 +1092,7 @@ function initRoster(r){
   add(r.spelers, ROSTER); add(r.invallers, INVALLERS);
 }
 const canon = n => {
-  n = String(n || "").trim(); if (!n) return "";
+  n = String(n || "").replace(/\s*\(\s*invaller\s*\)\s*$/i, "").trim(); if (!n) return "";
   const hit = CANON.get(n.toLowerCase()); if (hit) return hit;
   /* "Mini / Maarten" of "Julius (Juul)": probeer elk deel */
   for (const deel of n.split(/\s*[\/()|,]\s*/).filter(Boolean)){ const h = CANON.get(deel.toLowerCase()); if (h) return h; }
@@ -1909,9 +1909,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795480000"></script>
-<script src="toto.js?v=1795480000"></script>
-<script src="pong.js?v=1795480000"></script>
+<script src="mex.js?v=1795480100"></script>
+<script src="toto.js?v=1795480100"></script>
+<script src="pong.js?v=1795480100"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -1920,7 +1920,7 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795480000"></script>
-<script src="statistieken.js?v=1795480000"></script>
+<script src="stemmen.js?v=1795480100"></script>
+<script src="statistieken.js?v=1795480100"></script>
 </body>
 </html>
