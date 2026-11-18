@@ -66,6 +66,26 @@
     [n => `${n} wordt aangesproken door het Liter-incassobureau.`, -4],
   ];
 
+  /* Alleen in de eindsprint (laatste kwart): extra grote boosts en hinders */
+  const EINDSPRINT = [
+    [n => `${n} krijgt een kameel-turbo en vliegt naar de finish!`, 9],
+    [n => `${n} ziet een gratis pitcher achter de finish staan. VOLLE GAS!`, 8],
+    [n => `De hele tribune scandeert "${n}! ${n}!" en hij gaat los!`, 7],
+    [n => `${n} glijdt op een bananenschil en ligt languit in het zand!`, -8],
+    [n => `${n} valt in een kuil die de keeper heeft gegraven!`, -9],
+    [n => `${n} krijgt een rode kaart en moet even terug naar af… bijna.`, -7],
+    [n => `${n} bedenkt zich dat hij nog een liter open heeft en remt af.`, -6],
+  ];
+  /* Kies een gebeurtenis. Hoe dichter bij de finish (voortgang 0..1), hoe vaker een grote. */
+  function kiesGebeurtenis(voortgang) {
+    const pool = voortgang > .75 ? GEBEURTENISSEN.concat(EINDSPRINT) : GEBEURTENISSEN;
+    const macht = voortgang * 3;   // 0 = alles even vaak, 3 = grote gebeurtenissen veel vaker
+    const gewichten = pool.map(([, d]) => Math.pow(Math.abs(d), macht));
+    let x = Math.random() * gewichten.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < pool.length; i++) { x -= gewichten[i]; if (x <= 0) return pool[i]; }
+    return pool[pool.length - 1];
+  }
+
   function render() {
     if (S.fase === "setup") return renderSetup();
     if (S.fase === "inzet") return renderInzet();
@@ -139,13 +159,17 @@
     const lopen = () => {
       baan.classList.add("rent");
       melding("En ze zijn vertrokken!", "groot");
-      let tik = 0, laatsteLeider = -1, finale = false;
+      let tik = 0, laatsteLeider = -1, finale = false; window.__rcLaatste = 0;
       const t = loper = setInterval(() => {
         tik++;
         S.kamelen.forEach((_, i) => { pos[i] += (snel[i] + Math.random() * 1.1) * .55 * (rustig ? 20 : 1); });
-        if (tik % 9 === 0) {
-          const i = r(S.kamelen.length), [tekst, d] = GEBEURTENISSEN[r(GEBEURTENISSEN.length)];
-          pos[i] = Math.max(0, pos[i] + d); melding(tekst(S.kamelen[i]), d > 0 ? "plus" : "min");
+        /* Hoe verder in de race, hoe vaker iets gebeurt (eerst elke 9 tikken, op het eind elke 4) en hoe groter */
+        const voortgang = Math.min(1, Math.max(...pos) / BAAN), elke = Math.round(9 - voortgang * 5);
+        if (tik - (window.__rcLaatste || 0) >= elke) {
+          window.__rcLaatste = tik;
+          const i = r(S.kamelen.length), [tekst, basis] = kiesGebeurtenis(voortgang);
+          const d = Math.round(basis * (1 + voortgang * .8));
+          pos[i] = Math.max(0, pos[i] + d); melding(tekst(S.kamelen[i]), (d > 0 ? "plus" : "min") + (Math.abs(d) >= 7 ? " mega" : ""));
           const el = els[i]; if (el) { el.classList.remove("hop", "val"); void el.offsetWidth; el.classList.add(d > 0 ? "hop" : "val"); }
         }
         const voor = Math.max(...pos), leider = pos.indexOf(voor);
