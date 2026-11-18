@@ -12,6 +12,11 @@ const SPELERCODES = {
 const COACHCODES = {
   // "CoachNaam": "Naam",
 };
+/* Invallers en oud-Kamelen: mogen stemmen (als ze meespeelden), foto's en quotes toevoegen, maar niet meedoen aan de Kamelen-Scorito.
+   De naam moet hetzelfde zijn als in de invaller-rijen van het afwezigheidsblad. */
+const INVALLERCODES = {
+  // "InvallerNaam": "Naam",
+};
 const BEHEERCODE = "VUL-HIER-JOUW-BEHEERCODE-IN";  // alleen voor jou: stemmingen sluiten
 const PUSHCODE = "VUL-HIER-DE-PUSHCODE-IN";        // geheim voor de meldingen-robot (GitHub)
 
@@ -84,6 +89,7 @@ function meegespeeld_(datum, kaart) {
   const k = String(datum || "").slice(5, 10), lijst = (kaart || aanwezigKaart_())[k];
   return lijst && lijst.length ? lijst.map(n => String(n).toLowerCase()) : null;
 }
+const rol_ = code => { const c = String(code || "").trim().toLowerCase(), heeft = o => Object.keys(o).some(k => k.toLowerCase() === c); return heeft(SPELERCODES) ? "speler" : heeft(COACHCODES) ? "coach" : heeft(INVALLERCODES) ? "invaller" : ""; };
 const isCoach_ = n => Object.keys(COACHCODES).some(k => COACHCODES[k] === n);
 /* Telt een stem? Alleen als stemmer meespeelde (of coach is) en kameel en ezel meespeelden */
 function stemGeldig_(stemmer, kameel, ezel, wedstrijd, kaart) {
@@ -132,6 +138,7 @@ function speler_(code) {
   const c = String(code || "").trim().toLowerCase();
   for (const k in SPELERCODES) if (k.toLowerCase() === c) return SPELERCODES[k];
   for (const k in COACHCODES) if (k.toLowerCase() === c) return COACHCODES[k];
+  for (const k in INVALLERCODES) if (k.toLowerCase() === c) return INVALLERCODES[k];
   return "";
 }
 
@@ -213,7 +220,7 @@ function doPost(e) {
       }
       /* Inloggen: geeft de naam terug die bij de persoonlijke code hoort */
       const ik = speler_(d.code);
-      if (d.type === "login") { if (!ik) { Utilities.sleep(800); return json_({ ok: false, fout: "code" }); } return json_({ ok: true, naam: ik }); }
+      if (d.type === "login") { if (!ik) { Utilities.sleep(800); return json_({ ok: false, fout: "code" }); } return json_({ ok: true, naam: ik, rol: rol_(d.code) }); }
       if (!ik) return json_({ ok: false, fout: "code" });
       /* Foto toevoegen (de site verkleint hem eerst tot een JPEG van maximaal 1600 pixels) */
       if (d.type === "foto") {
@@ -249,6 +256,7 @@ function doPost(e) {
         stemTab_().appendRow([new Date(), stemmer, kameel, ezel, w, ""]);
         return json_({ ok: true });
       }
+      if (rol_(d.code) === "invaller") return json_({ ok: false, fout: "invaller" });
       const naam = ik, voor = Number(d.voor), tegen = Number(d.tegen), aftrap = new Date(d.aftrap);
       if (!naam || !Number.isInteger(voor) || !Number.isInteger(tegen) || voor < 0 || tegen < 0 || voor > 40 || tegen > 40) return json_({ ok: false, fout: "invoer" });
       if (isNaN(aftrap) || aftrap <= new Date()) return json_({ ok: false, fout: "te laat" });

@@ -112,7 +112,7 @@ for (const m of ons) {
   const open = aftrap(m).getTime() + 75 * 60e3;
   if (nu < open || nu - open > 24 * uur || (api.gesloten || []).includes(sleutel(m))) continue;
   const mee = kaart[m.datum.slice(5)] || [];
-  const kiezers = mee.length ? [...mee.filter(n => SPELERS.includes(n)), ...COACHES] : [...SPELERS, ...COACHES];
+  const kiezers = mee.length ? [...mee, ...COACHES] : [...SPELERS, ...COACHES];   // ook invallers die meespeelden
   const gestemd = new Set((api.stemmen || []).filter(x => x.wedstrijd === sleutel(m)).map(x => canon(x.stemmer)));
   for (const n of kiezers) {
     if (gestemd.has(n)) continue;
