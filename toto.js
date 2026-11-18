@@ -78,6 +78,17 @@
       return;
     }
     const { perMatch, stand, ws } = verwerk(reacties);
+    /* Voor het spelersprofiel: per speler zijn gespeelde voorspellingen */
+    const perSpeler = new Map();
+    for (const { m, voorsp } of perMatch.values()) {
+      const sc = onsScore(m); if (!sc) continue;
+      for (const [naam, r] of voorsp) {
+        if (r.verborgen || isNaN(r.voor)) continue;
+        const pts = r.voor === sc[0] && r.tegen === sc[1] ? PUNT_EXACT : toto(r.voor, r.tegen) === toto(sc[0], sc[1]) ? PUNT_TOTO : 0;
+        (perSpeler.get(naam) || perSpeler.set(naam, []).get(naam)).push({ m, gok: scoreTekst(r.voor, r.tegen, m), pts, verschil: Math.abs(r.voor - sc[0]) + Math.abs(r.tegen - sc[1]) });
+      }
+    }
+    DATA.totoProfiel = { stand, perSpeler };
     const nu = Date.now();
     const volgende = ws.find(m => aftrap(m) > nu);
     const gespeeld = ws.filter(m => onsScore(m) && perMatch.get(sleutel(m)).voorsp.size).reverse();

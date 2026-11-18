@@ -125,6 +125,9 @@
       spelers.set(p.naam, x);
     }));
     voeg(wed.sessies, "w"); voeg(tr.sessies, "t");
+    /* Voor het spelersprofiel: alleen wie er was (nooit de redenen) */
+    DATA.profielOpkomst = new Map([...spelers.values()].map(x => [x.naam, { ...x }]));
+    DATA.wedAanwezig = wed.sessies.map(se => ({ datum: se.datum, aanwezig: new Set(se.spelers.filter(p => p.aanwezig).map(p => p.naam)) }));
     S.opkomst = [...spelers.values()].map(x => ({ ...x, wP: x.wT ? x.wA / x.wT : 0, tP: x.tT ? x.tA / x.tT : 0, totP: (x.wA + x.tA) / Math.max(1, x.wT + x.tT) }))
       .sort((a, b) => b.totP - a.totP || b.wP - a.wP || a.naam.localeCompare(b.naam));
     S.ijzer = S.opkomst.filter(x => x.wT && x.wA === x.wT).map(x => x.naam);

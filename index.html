@@ -1749,6 +1749,51 @@ function openPlayer(naam){
     const m = [...(DATA.uitslagen || []), ...(DATA.programma || [])].find(w => w.datum === d && isUs(w.thuis + w.uit));
     return `<div class="prow"><span class="d">${fmtShort(d)}</span><span>${m ? `${isUs(m.thuis) ? "thuis" : "uit"} tegen ${teamLink(isUs(m.thuis) ? m.uit : m.thuis)}` : ""}</span><span>${m && m.score ? esc(m.score) : ""}</span></div>`;
   }).join("")}</div>` : "";
+  /* Opkomst + resultaten met en zonder deze speler */
+  let opkHtml = "";
+  const o = (DATA.profielOpkomst || new Map()).get(p.naam);
+  if (o && (o.wT || o.tT)){
+    const us = (DATA.stand || []).find(t => isUs(t.team))?.team;
+    const met = {W:0,G:0,V:0}, zonder = {W:0,G:0,V:0};
+    for (const w of DATA.wedAanwezig || []){
+      const m = (DATA.uitslagen || []).find(x => x.datum === w.datum && isUs(x.thuis + x.uit)); if (!m || !us) continue;
+      const r = resultFor(m, isUs(m.thuis) ? m.thuis : m.uit); if (!(r in met)) continue;
+      (w.aanwezig.has(p.naam) ? met : zonder)[r]++;
+    }
+    const wgv = x => `${x.W}-${x.G}-${x.V}`, n = x => x.W + x.G + x.V, ppw = x => n(x) ? ((x.W * 3 + x.G) / n(x)).toFixed(1).replace(".", ",") : "–";
+    opkHtml = `<div class="psec"><h3 class="sub-h">Opkomst dit seizoen</h3>
+      <div class="dlg-stats num" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+        <div><div class="v">${o.wA}/${o.wT}</div><div class="k">Wedstrijden</div></div>
+        <div><div class="v">${o.tA}/${o.tT}</div><div class="k">Trainingen</div></div>
+        <div><div class="v">${o.laat}</div><div class="k">Te laat</div></div>
+      </div>
+      ${n(met) || n(zonder) ? `<div class="prow"><span class="d">Met ${esc(p.naam)}</span><span>${wgv(met)} (W-G-V)</span><span>${ppw(met)} pt/wedstrijd</span></div>
+      <div class="prow"><span class="d">Zonder</span><span>${n(zonder) ? `${wgv(zonder)} (W-G-V)` : "nog nooit gemist"}</span><span>${n(zonder) ? `${ppw(zonder)} pt/wedstrijd` : ""}</span></div>` : ""}</div>`;
+  }
+  /* Prijzenkast: kameel en ezel van de dag */
+  const kz = DATA.kzUitslagen || [];
+  const kTitels = kz.filter(r => r.kamelen.includes(p.naam)), eTitels = kz.filter(r => r.ezels.includes(p.naam));
+  const tegenVan = m => isUs(m.thuis) ? m.uit : m.thuis;
+  const kzHtml = kz.length ? `<div class="psec"><h3 class="sub-h">Prijzenkast</h3>
+    <div class="dlg-stats num" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+      <div><div class="v">🐪 ${kTitels.length}</div><div class="k">Kameel van de dag</div></div>
+      <div><div class="v">🫏 ${eTitels.length}</div><div class="k">Ezel van de dag</div></div>
+    </div>
+    ${[...kTitels.map(r => ["🐪", r]), ...eTitels.map(r => ["🫏", r])].sort((a, b) => b[1].m.datum.localeCompare(a[1].m.datum)).map(([ic, r]) => `<div class="prow"><span class="d">${fmtShort(r.m.datum)}</span><span>tegen ${esc(tegenVan(r.m))}</span><span>${ic} ${ic === "🐪" ? "kameel" : "ezel"}</span></div>`).join("")}</div>` : "";
+  /* Toto */
+  const tp = DATA.totoProfiel, tl = tp?.perSpeler.get(p.naam);
+  let totoHtml = "";
+  if (tl && tl.length){
+    const plek = tp.stand.findIndex(x => x.naam === p.naam) + 1, st = tp.stand[plek - 1];
+    const beste = [...tl].sort((a, b) => b.pts - a.pts || a.verschil - b.verschil)[0];
+    totoHtml = `<div class="psec"><h3 class="sub-h">Toto</h3>
+      <div class="dlg-stats num" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+        <div><div class="v">${st ? st.punten : 0}</div><div class="k">Punten</div></div>
+        <div><div class="v">${plek ? plek + "e" : "–"}</div><div class="k">Plek</div></div>
+        <div><div class="v">${st ? st.exact : 0}</div><div class="k">Exact goed</div></div>
+      </div>
+      <div class="prow"><span class="d">Beste gok</span><span>${esc(beste.gok)} tegen ${esc(tegenVan(beste.m))} (werd ${esc(beste.m.score)})</span><span>${beste.pts ? `+${beste.pts}` : "0 punten"}</span></div></div>`;
+  }
   document.getElementById("dlg-body").innerHTML = `
     <div class="dlg-stats num" style="grid-template-columns:repeat(4,minmax(0,1fr))">
       <div><div class="v">${p.goals.length}</div><div class="k">Goals</div></div>
@@ -1756,7 +1801,8 @@ function openPlayer(naam){
       <div><div class="v">${sc}</div><div class="k">SC</div></div>
       <div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}</div><div class="k">Liters</div></div>
     </div>
-    ${invHtml}<div class="psec"><h3 class="sub-h">Doelpunten</h3>${goalsHtml}</div>
+    ${invHtml}${opkHtml}<div class="psec"><h3 class="sub-h">Doelpunten</h3>${goalsHtml}</div>
+    ${kzHtml}${totoHtml}
     <div class="psec"><h3 class="sub-h">Literboetes${p.liters && p.liters.open > 0 ? ` · ${fmtL(p.liters.open)} L open` : ""}</h3>${litHtml}</div>`;
   document.getElementById("dlg-body").scrollTop = 0;
   if (!dlg.open){ try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } }
@@ -1943,9 +1989,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795480800"></script>
-<script src="toto.js?v=1795480800"></script>
-<script src="pong.js?v=1795480800"></script>
+<script src="mex.js?v=1795480900"></script>
+<script src="toto.js?v=1795480900"></script>
+<script src="pong.js?v=1795480900"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -1954,7 +2000,7 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795480800"></script>
-<script src="statistieken.js?v=1795480800"></script>
+<script src="stemmen.js?v=1795480900"></script>
+<script src="statistieken.js?v=1795480900"></script>
 </body>
 </html>

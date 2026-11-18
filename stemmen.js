@@ -216,6 +216,7 @@
       stemmen = (j.stemmen || []).map(s => ({ stemmer: canon(s.stemmer), kameel: s.kameel === null ? null : canon(s.kameel), ezel: s.ezel === null ? null : canon(s.ezel), wedstrijdKey: String(s.wedstrijd || "") }));
     } catch {}
     const res = uitslagen(stemmen);
+    DATA.kzUitslagen = res.filter(r => !r.open).map(r => ({ m: r.m, kamelen: r.kamelen, ezels: r.ezels }));
     render(res); renderBanner(res);
     /* Ezel-liters in het literklassement verwerken */
     DATA.litersBasis = DATA.litersBasis || DATA.liters || [];
