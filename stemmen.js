@@ -141,9 +141,16 @@
   /* Startpagina: banner als er gestemd kan worden, en de laatste kameel/ezel */
   function renderBanner(res) {
     const el = document.getElementById("kz-banner"); if (!el) return;
-    const m = stemWedstrijd(), laatste = res.filter(r => !r.open).pop();
-    if (m) el.innerHTML = `<a class="kz-banner" href="#stemmen"><span>🐪🫏</span><span><b>Stem nu op de kameel en ezel van de dag</b><br><small>Na ${esc(m.thuis)} – ${esc(m.uit)} · ${(res.find(x => sleutel(x.m) === sleutel(m))?.stemmers.length) || 0} stemmen tot nu toe</small></span><span class="kz-go">Stemmen</span></a>`;
-    else if (laatste && Date.now() - aftrap(laatste.m) < 5 * 864e5) el.innerHTML = `<a class="kz-banner done" href="#stemmen"><span>🐪</span><span><b>Kameel van de dag: ${laatste.kamelen.map(esc).join(" & ") || "–"}</b><br><small>Ezel van de dag: ${laatste.ezels.map(esc).join(" & ") || "–"} – die trekt een liter</small></span><span class="kz-go">Bekijk uitslag</span></a>`;
+    const m = stemWedstrijd(), laatste = res.filter(r => !r.open).pop(), ik = (window.IK || {}).naam || "";
+    if (m) {
+      const r = res.find(x => sleutel(x.m) === sleutel(m)), aantal = r ? r.stemmers.length : 0;
+      const mee = AANWEZIG.get(m.datum), magStemmen = !mee || !mee.size || mee.has(ik) || COACHES.includes(ik);
+      const gestemd = r && r.stemmers.includes(ik);
+      if (!magStemmen) el.innerHTML = "";
+      else if (!gestemd) el.innerHTML = `<a class="kz-banner todo" href="#stemmen"><span>🐪🫏</span><span><b>Je moet nog stemmen op de kameel en ezel van de dag</b><br><small>Na ${esc(m.thuis)} – ${esc(m.uit)} · ${aantal} ${aantal === 1 ? "stem" : "stemmen"} tot nu toe</small></span><span class="kz-go">Stemmen</span></a>`;
+      else el.innerHTML = `<a class="kz-banner done" href="#stemmen"><span>✅</span><span><b>Je hebt gestemd op de kameel en ezel van de dag</b><br><small>${aantal} ${aantal === 1 ? "stem" : "stemmen"} binnen. De uitslag komt zodra de stemming sluit.</small></span><span class="kz-go">Bekijk</span></a>`;
+    }
+    else if (laatste && Date.now() - aftrap(laatste.m) < 5 * 864e5) el.innerHTML = `<a class="kz-banner done" href="#stemmen"><span>🐪</span><span><b>Kameel van de dag: ${laatste.kamelen.map(esc).join(" & ") || "–"}</b><br><small>Ezel van de dag: ${laatste.ezels.map(esc).join(" & ") || "–"}</small></span><span class="kz-go">Bekijk</span></a>`;
     else el.innerHTML = "";
   }
 

@@ -93,6 +93,17 @@
     const volgende = ws.find(m => aftrap(m) > nu);
     const gespeeld = ws.filter(m => onsScore(m) && perMatch.get(sleutel(m)).voorsp.size).reverse();
 
+    /* Home: herinnering als jij de Kamelen-Scorito voor de volgende wedstrijd nog niet hebt ingevuld (vanaf een week ervoor) */
+    const sb = document.getElementById("scorito-banner"), ik = (window.IK || {}).naam;
+    if (sb) {
+      const v = volgende && perMatch.get(sleutel(volgende)).voorsp;
+      const dagen = volgende ? (aftrap(volgende) - nu) / 864e5 : 99;
+      if (volgende && ik && dagen <= 7 && !v.has(ik)) {
+        const tijd = aftrap(volgende).toLocaleString("nl-NL", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+        sb.innerHTML = `<a class="kz-banner todo" href="#toto"><span>🔮</span><span><b>Je hebt de Kamelen-Scorito nog niet ingevuld</b><br><small>${isUs(volgende.thuis) ? "Thuis" : "Uit"} tegen ${esc(isUs(volgende.thuis) ? volgende.uit : volgende.thuis)} · sluit ${tijd}</small></span><span class="kz-go">Invullen</span></a>`;
+      } else sb.innerHTML = "";
+    }
+
     let html = "";
     if (volgende) {
       const v = perMatch.get(sleutel(volgende)).voorsp;

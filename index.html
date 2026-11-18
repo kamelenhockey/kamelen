@@ -646,7 +646,7 @@ body.pong-actief .tabbar{display:none}
 .kz-banner-wrap{grid-column:1/-1}
 .home-banners{background:var(--sky)}
 .home-banners .wrap{display:grid;gap:10px}
-.home-banners:has(.kz-banner-wrap:empty + .kz-banner-wrap:empty){display:none}
+.home-banners:not(:has(.kz-banner)){display:none}
 .home-banners .wrap:has(.kz-banner){padding-top:2px;padding-bottom:16px}
 .kz-banner-wrap:empty{display:none}
 .kz-banner{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;background:var(--orange);color:var(--ink);border-radius:var(--r);padding:14px 18px;text-decoration:none}
@@ -730,6 +730,7 @@ dialog.lightbox::backdrop{background:rgba(10,24,36,.9)}
 .push-row p{margin:4px 0 0;color:var(--muted);font-size:.88rem;max-width:62ch}
 .push-h{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:8px}
 .push-msg{color:var(--ink)!important;font-weight:600}
+.kz-banner.todo{background:var(--orange);color:var(--ink)}
 .kz-banner.done{background:var(--orange-soft);border:1px solid #f3c98f}
 .kz-go{font-weight:800}
 .kz-open{display:grid;gap:14px}
@@ -951,6 +952,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
 <div class="home-banners" id="home-banners"><div class="wrap">
   <div id="jarig-banner" class="kz-banner-wrap jarig-wrap"></div>
   <div id="kz-banner" class="kz-banner-wrap"></div>
+  <div id="scorito-banner" class="kz-banner-wrap"></div>
 </div></div>
 <section class="matchday" id="wedstrijd" aria-label="Volgende wedstrijd">
   <div class="wrap">
@@ -2408,9 +2410,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795483700"></script>
-<script src="toto.js?v=1795483700"></script>
-<script src="pong.js?v=1795483700"></script>
+<script src="mex.js?v=1795483800"></script>
+<script src="toto.js?v=1795483800"></script>
+<script src="pong.js?v=1795483800"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2419,11 +2421,11 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795483700"></script>
-<script src="statistieken.js?v=1795483700"></script>
-<script src="rad.js?v=1795483700"></script>
-<script src="fotos.js?v=1795483700"></script>
-<script src="quotes.js?v=1795483700"></script>
-<script src="push.js?v=1795483700"></script>
+<script src="stemmen.js?v=1795483800"></script>
+<script src="statistieken.js?v=1795483800"></script>
+<script src="rad.js?v=1795483800"></script>
+<script src="fotos.js?v=1795483800"></script>
+<script src="quotes.js?v=1795483800"></script>
+<script src="push.js?v=1795483800"></script>
 </body>
 </html>
