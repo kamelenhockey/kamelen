@@ -1048,7 +1048,10 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 .ik-chip[disabled]{cursor:default}
 .hero .ik-chip .avatar{width:32px;height:32px;min-width:32px;font-size:.78rem}
 .hero .ik-chip img{width:100%;height:100%;object-fit:cover}
-@media (max-width:760px){.hero .wrap{padding-top:62px!important}}
+/* Op de kleine kop (alle pagina's behalve home) netjes verticaal in het midden */
+body:not([data-page="home"]) .hero-acties{top:50%!important;transform:translateY(-50%)}
+@media (max-height:520px) and (orientation:landscape) and (pointer:coarse){.hero-acties{top:50%!important;transform:translateY(-50%)}}
+@media (max-width:760px){body[data-page="home"] .hero .wrap{padding-top:60px!important}}
 @media (max-width:560px){.hero-acties{top:8px;right:10px}.ververs-knop{width:36px;height:36px}.ik-chip{font-size:.82rem}.hero .ik-chip .avatar{width:28px;height:28px;min-width:28px}}
 /* ---------- Stijl A, indeling 2: sierlijke koppen (DM Serif Display), rustige tekst (DM Sans),
    de volgende wedstrijd als zwevende donkere kaart over de lichtblauwe kop ---------- */
@@ -2881,9 +2884,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795486700"></script>
-<script src="toto.js?v=1795486700"></script>
-<script src="pong.js?v=1795486700"></script>
+<script src="mex.js?v=1795486800"></script>
+<script src="toto.js?v=1795486800"></script>
+<script src="pong.js?v=1795486800"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2892,12 +2895,12 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795486700"></script>
-<script src="statistieken.js?v=1795486700"></script>
-<script src="race.js?v=1795486700"></script>
-<script src="rad.js?v=1795486700"></script>
-<script src="fotos.js?v=1795486700"></script>
-<script src="quotes.js?v=1795486700"></script>
-<script src="push.js?v=1795486700"></script>
+<script src="stemmen.js?v=1795486800"></script>
+<script src="statistieken.js?v=1795486800"></script>
+<script src="race.js?v=1795486800"></script>
+<script src="rad.js?v=1795486800"></script>
+<script src="fotos.js?v=1795486800"></script>
+<script src="quotes.js?v=1795486800"></script>
+<script src="push.js?v=1795486800"></script>
 </body>
 </html>
