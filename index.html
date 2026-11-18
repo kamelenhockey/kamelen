@@ -84,7 +84,12 @@ nav.bar a:hover{color:#fff;border-bottom-color:var(--orange)}
 .md-meta{display:flex;flex-wrap:wrap;gap:8px}
 .tag{display:inline-flex;align-items:center;padding:4px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);font-weight:600;font-size:.86rem}
 .tag.hot{background:var(--orange);border-color:var(--orange);color:var(--ink)}
-.md-opp{margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12)}
+.md-opp{margin-top:4px}
+.md-tabs{display:flex;gap:6px;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12);flex-wrap:wrap}
+.md-tabs button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;font:inherit;font-weight:700;font-size:.85rem;padding:7px 12px;border-radius:999px;cursor:pointer}
+.md-tabs button[aria-selected="true"]{background:var(--orange);border-color:var(--orange);color:var(--ink)}
+.md-pane{padding-top:14px}
+.md-pane .md-venue{margin-top:0;padding-top:0;border-top:0}
 .md-opp-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px}
 .md-opp .k{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55)}
 .md-opp-link{background:none;border:0;padding:0;color:#ffd29a;font:inherit;font-weight:700;cursor:pointer;text-align:left}
@@ -284,6 +289,15 @@ dialog.team::backdrop{background:rgba(22,54,80,.45);backdrop-filter:blur(2px)}
 /* ---------- Regelpagina's ---------- */
 .nav-sep{width:1px;background:rgba(255,255,255,.18);margin:10px 6px}
 nav.bar a[aria-current="page"]{color:#fff;border-bottom-color:var(--orange)}
+nav.bar ul{overflow:visible}
+.nav-more{position:relative}
+.nav-more > button{background:none;border:0;border-bottom:2px solid transparent;color:#e9e3dd;font:inherit;font-weight:600;font-size:.9rem;padding:12px;cursor:pointer;white-space:nowrap}
+.nav-more > button:hover,.nav-more.actief > button{color:#fff;border-bottom-color:var(--orange)}
+.nav-more-menu{position:absolute;right:0;top:100%;min-width:220px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 20px 50px -20px rgba(22,54,80,.5);padding:8px;display:grid;gap:6px;z-index:30}
+.nav-more-menu[hidden]{display:none}
+.nm-h{font-size:.66rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:6px 10px 2px}
+nav.bar .nav-more-menu a{color:var(--ink);border:0;border-radius:8px;padding:8px 10px}
+nav.bar .nav-more-menu a:hover,nav.bar .nav-more-menu a[aria-current="page"]{background:var(--orange-soft);color:var(--ink)}
 .page{display:grid;gap:var(--gap);padding-top:28px;padding-bottom:48px;max-width:860px}
 .page-head{padding:6px 2px 4px}
 .page-head h1{font-size:clamp(2.2rem,5vw,3.2rem);font-weight:800;letter-spacing:-.03em;line-height:1;margin:4px 0 10px}
@@ -540,6 +554,8 @@ nav.bar a[aria-current="page"]{color:#fff;border-bottom-color:var(--orange)}
   .tabbar [aria-current="page"],.tabbar button[aria-expanded="true"]{color:var(--orange)}
   .more-sheet{display:grid;position:fixed;z-index:29;left:10px;right:10px;bottom:calc(72px + env(safe-area-inset-bottom));background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 50px -20px rgba(22,54,80,.5);padding:6px;grid-template-columns:1fr 1fr;gap:4px}
   .more-sheet[hidden]{display:none}
+  .more-sheet .ms-h{grid-column:1/-1;font-size:.66rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:8px 8px 0}
+  .more-sheet{max-height:calc(100vh - 120px);overflow-y:auto}
   .more-sheet a{padding:13px 14px;border-radius:10px;text-decoration:none;color:var(--ink);font-weight:700;background:var(--bg)}
   .more-sheet a[aria-current="page"]{background:var(--orange-soft);color:var(--orange-ink)}
   .dash{grid-template-columns:1fr 1fr}
@@ -598,6 +614,10 @@ body.pong-actief .tabbar{display:none}
 
 /* ---------- Kameel & ezel ---------- */
 .kz-banner-wrap{grid-column:1/-1}
+.home-banners{background:var(--sky)}
+.home-banners .wrap{display:grid;gap:10px}
+.home-banners:has(.kz-banner-wrap:empty + .kz-banner-wrap:empty){display:none}
+.home-banners .wrap:has(.kz-banner){padding-top:2px;padding-bottom:16px}
 .kz-banner-wrap:empty{display:none}
 .kz-banner{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;background:var(--orange);color:var(--ink);border-radius:var(--r);padding:14px 18px;text-decoration:none}
 .kz-banner > span:first-child{font-size:1.8rem}
@@ -610,9 +630,13 @@ body.pong-actief .tabbar{display:none}
 .bdg .ic{font-size:1.3rem;line-height:1}
 .bdg b{display:block;font-size:.8rem;line-height:1.2}
 .bdg small{display:block;font-size:.68rem;color:var(--muted);line-height:1.25}
+.bdg-meer{margin-top:8px}
+.bdg-meer summary{cursor:pointer;font-weight:700;font-size:.85rem;color:var(--muted);padding:4px 0}
+.bdg-meer .badges{margin-top:6px}
 .bdg.uit{background:var(--bg);border-color:var(--line);opacity:.5}
 .bdg.uit .ic{filter:grayscale(1)}
 .push-card{grid-column:1/-1;padding:16px 20px}
+.push-card.compact{padding:10px 16px;font-size:.88rem;font-weight:600;color:var(--muted)}
 .push-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
 .push-row p{margin:4px 0 0;color:var(--muted);font-size:.88rem;max-width:62ch}
 .push-h{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:8px}
@@ -688,7 +712,9 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 @media (max-width:900px){
   .hero .wrap{grid-template-columns:auto 1fr;gap:18px}
   .hero img{width:120px}
-  .statbar{grid-column:1/-1;flex-wrap:wrap}
+  .statbar{display:none!important}
+  .hero img{width:88px}
+  .hero .wrap{padding-top:16px;padding-bottom:16px;gap:14px}
   .matchday .wrap{grid-template-columns:1fr;gap:24px}
   main.wrap{grid-template-columns:1fr}
   .ts-grid{grid-template-columns:1fr}
@@ -750,14 +776,21 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
     <li class="nav-sep" aria-hidden="true"></li>
     <li><a href="#toto" data-view-link="toto">Toto</a></li>
     <li><a href="#stemmen" data-view-link="stemmen">Kameel &amp; ezel</a></li>
-    <li><a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a></li>
-    <li><a href="#regels" data-view-link="regels">Kamelen-regels</a></li>
-    <li><a href="#mex" data-view-link="mex">Mex</a></li>
-    <li><a href="#pong" data-view-link="pong">Pong teams</a></li>
+    <li class="nav-more"><button type="button" id="nav-more-btn" aria-expanded="false" aria-controls="nav-more-menu">Meer <span aria-hidden="true">▾</span></button>
+      <div class="nav-more-menu" id="nav-more-menu" hidden>
+        <div class="nm-group"><div class="nm-h">Competitie</div><a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a></div>
+        <div class="nm-group"><div class="nm-h">Team</div><a href="#regels" data-view-link="regels">Kamelen-regels</a><a href="#push-card" data-push-link>🔔 Meldingen</a></div>
+        <div class="nm-group"><div class="nm-h">Spellen</div><a href="#mex" data-view-link="mex">Mex</a><a href="#pong" data-view-link="pong">Pong teams</a></div>
+      </div>
+    </li>
   </ul>
 </nav>
 
 <div id="view-home">
+<div class="home-banners" id="home-banners"><div class="wrap">
+  <div id="jarig-banner" class="kz-banner-wrap jarig-wrap"></div>
+  <div id="kz-banner" class="kz-banner-wrap"></div>
+</div></div>
 <section class="matchday" id="wedstrijd" aria-label="Volgende wedstrijd">
   <div class="wrap">
     <div id="next"></div>
@@ -769,8 +802,6 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 </section>
 
 <main class="wrap">
-  <div id="jarig-banner" data-page="home" class="kz-banner-wrap jarig-wrap"></div>
-  <div id="kz-banner" data-page="home" class="kz-banner-wrap"></div>
   <section class="dash" id="dash" data-page="home" aria-label="Overzicht"></section>
   <section class="card push-card" id="push-card" data-page="home" aria-label="Meldingen"></section>
   <section class="card" id="programma" data-page="wedstrijden" aria-labelledby="h-programma">
@@ -1077,16 +1108,19 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
   <button type="button" id="more-btn" aria-expanded="false" aria-controls="more-sheet"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>Meer</span></button>
 </nav>
 <div class="more-sheet" id="more-sheet" hidden>
-  <a href="#topscorers" data-view-link="topscorers">Topscorers</a>
-  <a href="#liters" data-view-link="liters">Literklassement</a>
-  <a href="#spelers" data-view-link="spelers">Spelers</a>
-  <a href="#statistieken" data-view-link="statistieken">Statistieken</a>
-  <a href="#stemmen" data-view-link="stemmen">Kameel &amp; ezel</a>
-  <a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a>
-  <a href="#mex" data-view-link="mex">Mex</a>
-  <a href="#pong" data-view-link="pong">Pong teams</a>
-  <a href="#regels" data-view-link="regels">Kamelen-regels</a>
+  <div class="ms-h">Competitie</div>
+  <a href="#topscorers" data-view-link="topscorers">⚽ Topscorers</a>
+  <a href="#liters" data-view-link="liters">🍺 Literklassement</a>
+  <a href="#statistieken" data-view-link="statistieken">📊 Statistieken</a>
+  <a href="#voorspeller" data-view-link="voorspeller">🔮 Voorspeller</a>
+  <div class="ms-h">Team</div>
+  <a href="#spelers" data-view-link="spelers">👥 Spelers</a>
+  <a href="#stemmen" data-view-link="stemmen">🐪 Kameel &amp; ezel</a>
+  <a href="#regels" data-view-link="regels">📜 Kamelen-regels</a>
   <a href="#push-card" data-push-link>🔔 Meldingen</a>
+  <div class="ms-h">Spellen</div>
+  <a href="#mex" data-view-link="mex">🎲 Mex</a>
+  <a href="#pong" data-view-link="pong">🏓 Pong teams</a>
 </div>
 <canvas id="confetti" aria-hidden="true"></canvas>
 <div class="pong-veld" id="pong-veld" hidden>
@@ -1235,10 +1269,19 @@ function renderNext(){
       <div class="md-teams"><div class="md-team ${home?"ours":""}">${teamLink(m.thuis)}</div><div class="md-vs">VS</div><div class="md-team ${home?"":"ours"}">${teamLink(m.uit)}</div></div>
       <div class="md-meta"><span class="tag">${fmtDay(m.datum)}</span><span class="tag">${m.tijd ? esc(m.tijd) : "tijd n.n.b."}</span><span class="tag">${home ? "Thuis" : "Uit"}</span><button type="button" class="tag tag-btn" id="add-next">+ Agenda</button></div>
       ${m.tijd ? `<div class="cd" id="countdown" role="timer" aria-live="off"></div>` : ""}
-      ${m.veld || m.accommodatie ? `<div class="md-venue"><div><div class="k">Veld</div><div class="v">${esc(m.veld || "n.n.b.")}</div></div>
-        <div><div class="k">Locatie</div><div class="v">${esc(m.accommodatie || "")}${m.adres ? `<br><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(m.adres)}" target="_blank" rel="noopener">${esc(m.adres)}</a>` : ""}</div></div></div>` : ""}
-      <div id="md-weather"></div>
-      ${tegenstanderHtml(m)}`;
+      <div class="md-tabs" role="tablist">
+        ${m.veld || m.accommodatie ? `<button type="button" role="tab" data-mdtab="veld">📍 Veld</button>` : ""}
+        <button type="button" role="tab" data-mdtab="weer">🌤️ Weer</button>
+        <button type="button" role="tab" data-mdtab="opp">🆚 Tegenstander</button>
+      </div>
+      ${m.veld || m.accommodatie ? `<div class="md-pane" data-pane="veld"><div class="md-venue"><div><div class="k">Veld</div><div class="v">${esc(m.veld || "n.n.b.")}</div></div>
+        <div><div class="k">Locatie</div><div class="v">${esc(m.accommodatie || "")}${m.adres ? `<br><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(m.adres)}" target="_blank" rel="noopener">${esc(m.adres)}</a>` : ""}</div></div></div></div>` : ""}
+      <div class="md-pane" data-pane="weer"><div id="md-weather"><div class="md-empty">Het weerbericht verschijnt een paar dagen voor de wedstrijd.</div></div></div>
+      <div class="md-pane" data-pane="opp">${tegenstanderHtml(m) || `<div class="md-empty">Nog geen gegevens over de tegenstander.</div>`}</div>`;
+    const tabs = box.querySelectorAll("[data-mdtab]");
+    const kies = id => { tabs.forEach(t => t.setAttribute("aria-selected", String(t.dataset.mdtab === id))); box.querySelectorAll(".md-pane").forEach(p => p.hidden = p.dataset.pane !== id); };
+    tabs.forEach(t => t.addEventListener("click", () => kies(t.dataset.mdtab)));
+    if (tabs.length) kies(tabs[0].dataset.mdtab);
     renderWeather(m);
     const cd = document.getElementById("countdown");
     if (cd){
@@ -1853,8 +1896,8 @@ function openPlayer(naam){
       <div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}</div><div class="k">Liters</div></div>
     </div>
     ${badgeHtml}${invHtml}${opkHtml}<div class="psec"><h3 class="sub-h">Doelpunten</h3>${goalsHtml}</div>
-    ${kzHtml}${totoHtml}
-    <div class="psec"><h3 class="sub-h">Literboetes${p.liters && p.liters.open > 0 ? ` · ${fmtL(p.liters.open)} L open` : ""}</h3>${litHtml}</div>`;
+    <div class="psec"><h3 class="sub-h">Literboetes${p.liters && p.liters.open > 0 ? ` · ${fmtL(p.liters.open)} L open` : ""}</h3>${litHtml}</div>
+    ${kzHtml}${totoHtml}`;
   document.getElementById("dlg-body").scrollTop = 0;
   if (!dlg.open){ try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } }
 }
@@ -1888,8 +1931,10 @@ function badgesHtml(p, o, kameel, ezel, tp){
     ["🌱", "Groentje", "Eerste seizoen bij de Kamelen", !!(p.sinds && p.sinds >= seizoen)],
   ];
   const ja = lijst.filter(b => b[3]), nee = lijst.filter(b => !b[3]);
-  return `<div class="psec"><h3 class="sub-h">Badges · ${ja.length} van ${lijst.length}</h3><div class="badges">${[...ja, ...nee].map(([ic, naam, uitleg, ok]) =>
-    `<span class="bdg${ok ? "" : " uit"}" title="${esc(uitleg)}"><span class="ic">${ic}</span><span><b>${esc(naam)}</b><small>${esc(uitleg)}</small></span></span>`).join("")}</div></div>`;
+  const chip = ([ic, naam, uitleg, ok]) => `<span class="bdg${ok ? "" : " uit"}" title="${esc(uitleg)}"><span class="ic">${ic}</span><span><b>${esc(naam)}</b><small>${esc(uitleg)}</small></span></span>`;
+  return `<div class="psec"><h3 class="sub-h">Badges · ${ja.length} van ${lijst.length}</h3>
+    ${ja.length ? `<div class="badges">${ja.map(chip).join("")}</div>` : `<div class="empty">Nog geen badges verdiend.</div>`}
+    ${nee.length ? `<details class="bdg-meer"><summary>Nog te verdienen (${nee.length})</summary><div class="badges">${nee.map(chip).join("")}</div></details>` : ""}</div>`;
 }
 
 /* ---------- Verjaardagen ---------- */
@@ -1998,6 +2043,9 @@ function showView(){
   document.getElementById("view-home").hidden = !onHome;
   for (const v of VIEWS) document.getElementById(`view-${v}`).hidden = page !== v;
   document.getElementById("wedstrijd").hidden = page !== "home";
+  document.getElementById("home-banners").hidden = page !== "home";
+  document.querySelectorAll(".nav-more").forEach(n => n.classList.toggle("actief", !!n.querySelector('[aria-current="page"]')));
+  const nm = document.getElementById("nav-more-menu"); if (nm){ nm.hidden = true; document.getElementById("nav-more-btn").setAttribute("aria-expanded", "false"); }
   document.querySelectorAll("main [data-page]").forEach(el => { el.hidden = el.dataset.page !== page; });
   document.querySelectorAll("[data-view-link]").forEach(a => a.dataset.viewLink === page ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
   document.getElementById("more-sheet").hidden = true; document.getElementById("more-btn").setAttribute("aria-expanded", "false");
@@ -2006,6 +2054,16 @@ function showView(){
   else if (page !== vorigePagina) window.scrollTo(0, 0);
   vorigePagina = page;
 }
+document.getElementById("nav-more-btn").addEventListener("click", e => {
+  e.stopPropagation();
+  const m = document.getElementById("nav-more-menu"); m.hidden = !m.hidden; e.currentTarget.setAttribute("aria-expanded", String(!m.hidden));
+});
+document.addEventListener("click", e => { const m = document.getElementById("nav-more-menu"); if (m && !m.hidden && !e.target.closest(".nav-more")) { m.hidden = true; document.getElementById("nav-more-btn").setAttribute("aria-expanded", "false"); } });
+/* Meldingen-link: naar home en naar het vakje scrollen */
+document.querySelectorAll("[data-push-link]").forEach(a => a.addEventListener("click", e => {
+  e.preventDefault(); location.hash = "home";
+  setTimeout(() => { showView(); const c = document.getElementById("push-card"); c.hidden = false; c.scrollIntoView({ behavior: "smooth", block: "center" }); }, 30);
+}));
 document.getElementById("more-btn").addEventListener("click", () => {
   const sh = document.getElementById("more-sheet"), open = sh.hidden;
   sh.hidden = !open; document.getElementById("more-btn").setAttribute("aria-expanded", String(open));
@@ -2072,9 +2130,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795481200"></script>
-<script src="toto.js?v=1795481200"></script>
-<script src="pong.js?v=1795481200"></script>
+<script src="mex.js?v=1795481300"></script>
+<script src="toto.js?v=1795481300"></script>
+<script src="pong.js?v=1795481300"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2083,8 +2141,8 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795481200"></script>
-<script src="statistieken.js?v=1795481200"></script>
-<script src="push.js?v=1795481200"></script>
+<script src="stemmen.js?v=1795481300"></script>
+<script src="statistieken.js?v=1795481300"></script>
+<script src="push.js?v=1795481300"></script>
 </body>
 </html>

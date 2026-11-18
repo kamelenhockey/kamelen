@@ -18,8 +18,9 @@
     if (!kan && iOS && !standalone) tekst = `Op je iPhone werkt dit alleen in de app: tik in Safari op <b>Deel</b> → <b>Zet op beginscherm</b>, open de Kamelen-app en zet hier de meldingen aan.`;
     else if (!kan) tekst = "Deze browser ondersteunt geen meldingen. Op een iPhone: zet de site op je beginscherm (iOS 16.4 of nieuwer).";
     else if (Notification.permission === "denied") tekst = "Meldingen zijn geblokkeerd. Zet ze aan bij Instellingen → Meldingen → Kamelen (of in je browserinstellingen).";
-    else if (staat === "aan") { tekst = `Meldingen staan aan op dit apparaat. ${WAT}`; knop = `<button type="button" class="btn sm ghost" data-push="uit">Uitzetten</button>`; }
+    else if (staat === "aan") { box.classList.add("compact"); box.innerHTML = `<div class="push-row"><span>🔔 Meldingen staan aan${melding ? ` · ${melding}` : ""}</span><button type="button" class="btn sm ghost" data-push="uit">Uitzetten</button></div>`; return; }
     else { tekst = `Krijg een seintje bij: ${WAT.charAt(0).toLowerCase() + WAT.slice(1)}`; knop = `<button type="button" class="btn sm" data-push="aan">🔔 Meldingen aanzetten</button>`; }
+    box.classList.remove("compact");
     box.innerHTML = `<div class="push-row"><div><h2 class="push-h">Meldingen${staat === "aan" ? " <span class=\"pill done\">aan</span>" : ""}</h2><p>${tekst}</p>${melding ? `<p class="push-msg">${melding}</p>` : ""}</div>${knop}</div>`;
   }
   async function huidige() { if (!kan) return null; const reg = await navigator.serviceWorker.ready; return reg.pushManager.getSubscription(); }
