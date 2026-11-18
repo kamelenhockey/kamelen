@@ -15,7 +15,7 @@
 <title>GCHC Kamelen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
 <style>
 :root{
   /* Kleuren uit het logo: tegelblauw, kameeloranje, donkerbruin; bier-amber voor de liters */
@@ -32,9 +32,9 @@
   --orange-soft:#fff2e2;
   --beer:#f2b233;
   --win:#2f8a57; --draw:#8b9298; --loss:#c94430;
-  --font-display:"Archivo","Arial Narrow",system-ui,sans-serif;
-  --font-body:"Archivo","Helvetica Neue",Arial,sans-serif;
-  --r:12px; --r-sm:8px;
+  --font-display:"DM Serif Display",Georgia,serif;
+  --font-body:"DM Sans","Helvetica Neue",Arial,sans-serif;
+  --r:16px; --r-sm:10px; --sh:0 1px 2px rgba(22,54,80,.06),0 10px 26px -18px rgba(22,54,80,.4);
   --gap:20px;
   /* Layout: lichtblauwe kop, donkere wedstrijdbalk, daaronder één raster van gelijke kaarten (2 kolommen op desktop) */
   color-scheme:light;
@@ -750,16 +750,34 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
   .ts-scorers,.ts-warn{margin-left:0}
 }
 
-/* ---------- Typografie: Archivo, breed voor koppen (shirtbelettering), smal voor cijfers (scorebord) ---------- */
-h1,h2,h3{font-stretch:115%;font-weight:800;letter-spacing:-.015em}
-.wordmark{font-stretch:125%;font-weight:900;letter-spacing:-.03em}
-.big,.statbar .v,.tile .big,.dlg-stats .v,.fact .big,.cd .v,.md-team{font-stretch:80%;font-weight:800;letter-spacing:-.01em}
-.cd .v{font-stretch:70%}
-nav.bar a,.nav-more > button,.tabbar span{font-stretch:95%}
-.tag,.btn,.pill{border-radius:6px}
-.md-tabs button{border-radius:6px}
-.bdg{border-radius:8px}
-.kz-banner{border-radius:10px}
+/* ---------- Stijl A, indeling 2: sierlijke koppen (DM Serif Display), rustige tekst (DM Sans),
+   de volgende wedstrijd als zwevende donkere kaart over de lichtblauwe kop ---------- */
+h1,h2,h3,.wordmark,.md-team,.big,.v,.cd .v,.statbar .v,.tile .big,.dlg-stats .v,.fact .big{font-weight:400!important;letter-spacing:0}
+h1,h2,h3{font-family:var(--font-display)}
+.wordmark{font-size:clamp(2.6rem,6.5vw,4.6rem);letter-spacing:-.01em;line-height:1}
+.hero{background:linear-gradient(180deg,#d3e7f1 0%,var(--sky) 100%);border-bottom:0}
+/* Zwevende wedstrijdkaart */
+.matchday{background:linear-gradient(180deg,var(--sky) 0 70px,var(--bg) 70px);color:#fff;border-top:0;padding-bottom:6px}
+.matchday .wrap{background:var(--ink);border-radius:20px;box-shadow:0 24px 50px -30px rgba(22,54,80,.7);padding:26px 28px 28px;max-width:1080px}
+@media (max-width:760px){.matchday .wrap{margin:0 12px;padding:20px 18px 22px;border-radius:18px}}
+.md-label{color:var(--orange)}
+.md-team{font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.1rem)}
+.cd > div{border:0;background:rgba(255,255,255,.07)}
+.cd .v{font-family:var(--font-display);font-size:2rem}
+.tag,.btn,.pill{border-radius:8px}
+.md-tabs button{border-radius:8px}
+.home-banners{background:var(--sky)}
+.home-banners + .matchday{background:linear-gradient(180deg,var(--sky) 0 60px,var(--bg) 60px)}
+/* Kaarten en vakjes: zachte schaduw in plaats van harde rand */
+.card,.tile,.fact,.push-card,.kz-banner.jarig{border-color:transparent;box-shadow:var(--sh)}
+.tile .big{font-family:var(--font-display);font-size:1.9rem}
+.fact .big{font-family:var(--font-display)}
+.dlg-stats .v{font-family:var(--font-display);font-size:1.45rem}
+.statbar{box-shadow:var(--sh);border-color:transparent}
+.statbar .v{font-family:var(--font-display)}
+.card-head h2{font-size:1.6rem}
+.bdg{border-radius:10px}
+.kz-banner{border-radius:14px}
 </style>
 </head>
 <body>
@@ -768,7 +786,7 @@ nav.bar a,.nav-more > button,.tabbar span{font-stretch:95%}
     <img src="logo.png" alt="Logo van de Kamelen: een lopende oranje kameel">
     <div>
       <div class="eyebrow">GCHC Heren 13</div>
-      <h1 class="wordmark">KAMELEN</h1>
+      <h1 class="wordmark">Kamelen</h1>
       <p class="league" id="league">Heren Reserve 1e klasse – Poule A</p>
     </div>
     <div class="statbar" id="stats"></div>
@@ -2171,9 +2189,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795481500"></script>
-<script src="toto.js?v=1795481500"></script>
-<script src="pong.js?v=1795481500"></script>
+<script src="mex.js?v=1795481600"></script>
+<script src="toto.js?v=1795481600"></script>
+<script src="pong.js?v=1795481600"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2182,8 +2200,8 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795481500"></script>
-<script src="statistieken.js?v=1795481500"></script>
-<script src="push.js?v=1795481500"></script>
+<script src="stemmen.js?v=1795481600"></script>
+<script src="statistieken.js?v=1795481600"></script>
+<script src="push.js?v=1795481600"></script>
 </body>
 </html>
