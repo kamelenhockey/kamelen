@@ -136,7 +136,6 @@
           <span class="tt-dash">–</span>
           <label class="tt-f"><span>${esc(tegen)}</span><span class="tt-step"><button type="button" data-step="tegen" data-d="-1" aria-label="Minder">−</button><input id="tt-tegen" type="number" inputmode="numeric" min="0" max="40" value="${al ? al.tegen : 0}"><button type="button" data-step="tegen" data-d="1" aria-label="Meer">+</button></span></label>
         </div>
-        ${e.code ? "" : `<label class="tt-f"><span>Teamcode</span><input id="tt-code" type="text" autocomplete="off" placeholder="staat in de teamapp" required></label>`}
       </div>
       <div class="tt-submit"><button class="btn mx-big" type="submit">${al ? "Voorspelling aanpassen" : "Voorspelling opslaan"}</button><span class="tt-status" id="tt-status" role="status"></span></div>
     </form>`;
@@ -154,7 +153,7 @@
     const e = eigen();
     const naam = document.getElementById("tt-naam").value;
     const voor = parseInt(document.getElementById("tt-voor").value, 10), tegen = parseInt(document.getElementById("tt-tegen").value, 10);
-    const code = e.code || document.getElementById("tt-code")?.value.trim();
+    const code = (window.TOTO_CONFIG || {}).teamcode || "";
     if (!naam) { st.textContent = "Kies eerst je naam."; return; }
     if (isNaN(voor) || isNaN(tegen)) { st.textContent = "Vul twee getallen in."; return; }
     knop.disabled = true; st.textContent = "Bezig met opslaan…";

@@ -83,7 +83,6 @@
           <label class="tt-f"><span>Wie ben jij?</span><select id="kz-stemmer"><option value="">Kies…</option>${namen.map(n => `<option ${e.naam === n ? "selected" : ""}>${esc(n)}</option>`).join("")}</select></label>
           <div class="kz-sec"><h3><span class="kz-ic kameel">🐪</span> Kameel van de dag</h3><p>Wie was vandaag de beste of leukste Kameel?</p>${keuzes("kameel", mijn?.kameel)}</div>
           <div class="kz-sec"><h3><span class="kz-ic ezel">🫏</span> Ezel van de dag</h3><p>Wie verdient de ezel? Die moet een liter trekken.</p>${keuzes("ezel", mijn?.ezel)}</div>
-          ${e.code ? "" : `<label class="tt-f"><span>Teamcode</span><input id="kz-code" type="text" autocomplete="off" placeholder="dezelfde als bij de toto"></label>`}
           <div class="tt-submit"><button class="btn mx-big" type="submit">${mijn ? "Stem aanpassen" : "Stem uitbrengen"}</button><span class="tt-status" id="kz-status" role="status"></span></div>
         </form>
         <div class="tt-voted"><span class="k">${gestemd.length} ${gestemd.length === 1 ? "stem" : "stemmen"}</span>${gestemd.map(n => `<span class="tt-chip">${esc(n)}</span>`).join("")}${gestemd.length ? `<span class="tt-hint">De uitslag wordt bekend als de stemming gesloten wordt.</span>` : ""}</div>
@@ -188,7 +187,7 @@
       const stemmer = document.getElementById("kz-stemmer").value;
       const kameel = ev.target.querySelector('[data-veld="kameel"] .on')?.dataset.naam;
       const ezel = ev.target.querySelector('[data-veld="ezel"] .on')?.dataset.naam;
-      const code = e.code || document.getElementById("kz-code")?.value.trim();
+      const code = (window.TOTO_CONFIG || {}).teamcode || "";
       if (!stemmer) return st.textContent = "Kies eerst wie je bent.";
       if (!kameel || !ezel) return st.textContent = "Kies een kameel én een ezel.";
       if (kameel === stemmer || ezel === stemmer) return st.textContent = "Op jezelf stemmen mag niet.";

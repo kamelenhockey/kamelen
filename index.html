@@ -2199,6 +2199,7 @@ if ("serviceWorker" in navigator) window.addEventListener("load", () => {
 <script>
 /* Toto-instellingen: link naar het Google-formulier en de gepubliceerde CSV van de antwoorden */
 window.TOTO_CONFIG = {
+  teamcode: "Kamelenvoorspellen",   // wordt automatisch meegestuurd, niemand hoeft hem in te vullen
   api: "https://script.google.com/macros/s/AKfycbw2n1uosUM9ctU2TH1PO-psv6CtgT_QBpxZVHY9IZgDeubBEMf3LSbv1IiDxAXxD9Bt/exec",   /* opslag voor voorspellingen (Apps Script in de toto-spreadsheet) */
   form: "https://docs.google.com/forms/d/e/1FAIpQLSd0MoRKGN7U_xdim-PoeB3guQjU1UcHcUKLICAt-X_1RrFRDg/viewform",
   csv: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWb-e6CJxfZblU3eZdDwDu_RT0AQQK536xoumOq2_NqyejB-K2H3CAfxf5UrlpWKW1i_XbvMUfQBpj/pub?gid=857837356&single=true&output=csv"
@@ -2211,9 +2212,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795481800"></script>
-<script src="toto.js?v=1795481800"></script>
-<script src="pong.js?v=1795481800"></script>
+<script src="mex.js?v=1795481900"></script>
+<script src="toto.js?v=1795481900"></script>
+<script src="pong.js?v=1795481900"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2222,8 +2223,8 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795481800"></script>
-<script src="statistieken.js?v=1795481800"></script>
-<script src="push.js?v=1795481800"></script>
+<script src="stemmen.js?v=1795481900"></script>
+<script src="statistieken.js?v=1795481900"></script>
+<script src="push.js?v=1795481900"></script>
 </body>
 </html>
