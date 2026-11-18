@@ -12,7 +12,7 @@
   function nieuw() { return { fase: "setup", spelers: [], stats: {}, honderd: { main: null, extra: null }, ronde: null, rondeNr: 0, battle: null, uitslag: null, log: [] }; }
   function load() { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} }
-  const stat = n => (S.stats[n] = S.stats[n] || { verloren: 0, mex: 0, honderd: 0, bakken: 0 });
+  const stat = n => { const x = (S.stats[n] = S.stats[n] || { verloren: 0, mex: 0, honderd: 0, bakken: 0 }); x.slokken ??= 0; return x; };
 
   /* ---------- Worpen waarderen ---------- */
   const d6 = () => 1 + Math.floor(Math.random() * 6);
@@ -100,7 +100,10 @@
     }
     if (!H.main) { B.berichten.push(`<b>${waarde}</b> – nog geen 100-man om te laten drinken.`); return; }
     if (wie === H.main) B.berichten.push(`<b>${waarde}</b> – de 100-man gooit zelf een honderdtal en mag <b>${n} slokken uitdelen</b>.`);
-    else B.berichten.push(`<b>${waarde}</b> – ${esc(H.main)}${H.extra ? ` en ${esc(H.extra)}` : ""} ${H.extra ? "drinken" : "drinkt"} <b>${n} slokken</b>.`);
+    else {
+      stat(H.main).slokken += n; if (H.extra) stat(H.extra).slokken += n;
+      B.berichten.push(`<b>${waarde}</b> – ${esc(H.main)}${H.extra ? ` en ${esc(H.extra)}` : ""} ${H.extra ? "drinken" : "drinkt"} <b>${n} slokken</b>.`);
+    }
   }
 
   function volgende() {
@@ -129,11 +132,11 @@
     S.fase = "einde"; save(); render();
   }
 
-  function battleGooi(wie) {
-    const Bt = S.battle; if (Bt.worpen[wie]) return;
-    Bt.worpen[wie] = d6();
-    const [x, y] = Bt.spelers;
-    if (Bt.worpen[x] && Bt.worpen[y]) {
+  function battleGooi() {
+    const Bt = S.battle, [x, y] = Bt.spelers;
+    if (Bt.worpen[x] && Bt.worpen[y]) return;
+    Bt.worpen[x] = d6(); Bt.worpen[y] = d6();
+    {
       if (Bt.worpen[x] === Bt.worpen[y]) { Bt.gelijk = true; setTimeout(() => { Bt.worpen = {}; Bt.gelijk = false; save(); render(); }, 1300); }
       else { const verliezer = Bt.worpen[x] > Bt.worpen[y] ? x : y; setTimeout(() => verloren(verliezer, Bt.straf), 900); }
     }
@@ -190,7 +193,8 @@
   function renderBattle() {
     const Bt = S.battle;
     return `<div class="mx-board"><div class="mx-turn"><div class="k">Gelijk laagst</div><div class="mx-name">Battle!</div><p class="mx-sub">Allebei één steen. <b>Hoogste verliest.</b></p></div>
-      <div class="mx-battle">${Bt.spelers.map(n => `<div><div class="nm">${esc(n)}</div>${Bt.worpen[n] ? steen(Bt.worpen[n]) : `<button type="button" class="btn" data-mx="battle" data-n="${esc(n)}">Gooi</button>`}</div>`).join("")}</div>
+      <div class="mx-battle" id="mx-battle">${Bt.spelers.map(n => `<div><div class="nm">${esc(n)}</div>${Bt.worpen[n] ? steen(Bt.worpen[n], "land") : steen(1, "idle")}</div>`).join("")}</div>
+      ${Bt.worpen[Bt.spelers[0]] ? (Bt.gelijk ? `<p class="mx-sub">Gelijk! Nog een keer…</p>` : "") : `<div class="mx-battle-go"><button type="button" class="btn" data-mx="battle">Gooi allebei</button></div>`}
       ${Bt.gelijk ? `<div class="mx-msgs"><p>Weer gelijk – opnieuw!</p></div>` : ""}</div>`;
   }
 
@@ -206,8 +210,9 @@
     const rows = Object.entries(S.stats).filter(([n]) => S.spelers.includes(n) || S.stats[n].verloren);
     if (!rows.length) return "";
     rows.sort((a, b) => b[1].verloren - a[1].verloren || b[1].bakken - a[1].bakken || a[0].localeCompare(b[0]));
-    return `<div class="mx-score"><h3 class="sub-h">Scorebord deze avond</h3><table><thead><tr><th>Speler</th><th class="r">Verloren</th><th class="r">Bakken</th><th class="r">Mex</th><th class="r">100-man</th></tr></thead><tbody>
-      ${rows.map(([n, s]) => `<tr><td>${esc(n)}</td><td class="r">${s.verloren}</td><td class="r">${String(s.bakken).replace(".", ",")}</td><td class="r">${s.mex}</td><td class="r">${s.honderd}</td></tr>`).join("")}</tbody></table></div>`;
+    return `<div class="mx-score"><h3 class="sub-h">Scorebord deze avond</h3><table><thead><tr><th>Speler</th><th class="r">Verloren</th><th class="r">Bakken</th><th class="r">Mex</th><th class="r" title="Aantal keer 100 gegooid">100</th><th class="r" title="Slokken gedronken als 100-man">Slokken</th></tr></thead><tbody>
+      ${rows.map(([n, s]) => `<tr><td>${esc(n)}</td><td class="r">${s.verloren}</td><td class="r">${String(s.bakken).replace(".", ",")}</td><td class="r">${s.mex}</td><td class="r">${s.honderd}</td><td class="r">${s.slokken || 0}</td></tr>`).join("")}</tbody></table>
+      <p class="mx-legenda">100: zo vaak 100 gegooid. Slokken: totaal gedronken als (extra) 100-man.</p></div>`;
   }
 
   /* ---------- Animatie ---------- */
@@ -218,8 +223,20 @@
     const t = setInterval(() => {
       const B = S.ronde.huidig;
       el.innerHTML = (B.slot ? steen(B.slot, "kept") : steen(d6())) + steen(d6());
-      if (++n >= 7) { clearInterval(t); el.classList.remove("rolling"); klaar(); }
-    }, 60);
+      if (++n >= 12) { clearInterval(t); el.classList.remove("rolling"); klaar(); }
+    }, 70);
+  }
+
+  function battleAnimatie(klaar) {
+    const el = document.getElementById("mx-battle");
+    if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return klaar();
+    const vakken = el.querySelectorAll(":scope > div");
+    el.classList.add("rolling");
+    let n = 0;
+    const t = setInterval(() => {
+      vakken.forEach(v => { const d = v.querySelector(".mx-die"); if (d) d.outerHTML = steen(d6()); });
+      if (++n >= 12) { clearInterval(t); el.classList.remove("rolling"); klaar(); }
+    }, 70);
   }
 
   /* ---------- Knoppen ---------- */
@@ -234,7 +251,7 @@
     if (a === "gooi") { b.disabled = true; rolAnimatie(gooi); }
     if (a === "huis") { S.ronde.huidig.huis = !S.ronde.huidig.huis; save(); render(); }
     if (a === "volgende") volgende();
-    if (a === "battle") battleGooi(b.dataset.n);
+    if (a === "battle") { b.disabled = true; battleAnimatie(battleGooi); }
     if (a === "nieuwe") { startRonde(S.spelers, S.uitslag.verliezer); save(); render(); }
     if (a === "stop") { S.fase = "setup"; S.ronde = null; S.battle = null; save(); render(); }
   });

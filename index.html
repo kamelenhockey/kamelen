@@ -473,8 +473,15 @@ td.delta{color:var(--muted);font-size:.8rem}
 .mx-die.small .die{width:26px;height:26px}
 .mx-die.kept .die rect{fill:var(--orange-soft);stroke:var(--orange)}
 .mx-die.idle{opacity:.35}
-.mx-dice.rolling .mx-die{animation:shake .12s linear infinite}
-@keyframes shake{0%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}100%{transform:rotate(-8deg)}}
+.mx-dice.rolling .mx-die,.mx-battle.rolling .mx-die{animation:rol .42s cubic-bezier(.3,.6,.4,1) infinite}
+.mx-battle.rolling > div:nth-child(2) .mx-die{animation-delay:-.2s}
+@keyframes rol{0%{transform:translateY(0) rotate(0)}25%{transform:translateY(-16px) rotate(95deg)}50%{transform:translateY(0) rotate(180deg) scale(.94)}75%{transform:translateY(-8px) rotate(275deg)}100%{transform:translateY(0) rotate(360deg)}}
+.mx-die.land{animation:land .35s ease-out}
+@keyframes land{0%{transform:scale(1.18) rotate(-6deg)}60%{transform:scale(.96)}100%{transform:none}}
+.mx-battle-go{text-align:center;margin-top:16px}
+.mx-battle .mx-die .die{width:76px;height:76px}
+.mx-legenda{font-size:.8rem;color:var(--muted);margin:8px 0 0}
+@media (prefers-reduced-motion:reduce){.mx-die,.mx-die.land{animation:none!important}}
 .mx-value{font-family:var(--font-display);font-size:2.4rem;font-weight:800;min-height:2.6rem;color:var(--orange)}
 .mx-lock{display:inline-flex;align-items:center;gap:8px;font-size:.85rem;color:rgba(255,255,255,.75);margin-top:4px}
 .mx-msgs{margin:10px auto 0;max-width:46ch;display:grid;gap:6px}
@@ -2212,9 +2219,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795481900"></script>
-<script src="toto.js?v=1795481900"></script>
-<script src="pong.js?v=1795481900"></script>
+<script src="mex.js?v=1795482000"></script>
+<script src="toto.js?v=1795482000"></script>
+<script src="pong.js?v=1795482000"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2223,8 +2230,8 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795481900"></script>
-<script src="statistieken.js?v=1795481900"></script>
-<script src="push.js?v=1795481900"></script>
+<script src="stemmen.js?v=1795482000"></script>
+<script src="statistieken.js?v=1795482000"></script>
+<script src="push.js?v=1795482000"></script>
 </body>
 </html>
