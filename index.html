@@ -105,6 +105,15 @@ nav.bar a:hover{color:#fff;border-bottom-color:var(--orange)}
 .tag{display:inline-flex;align-items:center;padding:4px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);font-weight:600;font-size:.86rem}
 .tag.hot{background:var(--orange);border-color:var(--orange);color:var(--ink)}
 .md-opp{margin-top:4px}
+.md-model{margin-top:16px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.06)}
+.mm-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.md-model .k{font-size:.8rem;color:rgba(255,255,255,.65)}
+.mm-score{font-size:.95rem}
+.mm-score b{font-family:var(--font-display);font-weight:400;font-size:1.5rem;color:var(--orange);margin:0 4px}
+.mm-balk{display:flex;height:22px;border-radius:8px;overflow:hidden;margin:8px 0 6px;font-size:.72rem;font-weight:700}
+.mm-balk span{display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;min-width:0}
+.mm-balk .w{background:#2f8a57;color:#fff}.mm-balk .g{background:#8c9aa6;color:#fff}.mm-balk .v{background:#c94430;color:#fff}
+.mm-voet{font-size:.75rem;color:rgba(255,255,255,.6)}
 .md-tabs{display:flex;gap:6px;margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12);flex-wrap:wrap}
 .md-tabs button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;font:inherit;font-weight:700;font-size:.85rem;padding:7px 12px;border-radius:999px;cursor:pointer}
 .md-tabs button[aria-selected="true"]{background:var(--orange);border-color:var(--orange);color:var(--ink)}
@@ -1593,6 +1602,73 @@ function renderStats(){
   document.getElementById("stats").innerHTML = cells.join("");
 }
 
+/* ---------- Voorspelmodel: verwachte uitslag ----------
+   Poisson-model zoals bij voetbalvoorspellingen:
+   - aanvals- en verdedigingskracht per team uit doelpunten voor/tegen, gewogen naar recentheid
+     (een wedstrijd van ~2 maanden geleden telt half zo zwaar), met een kleine 'demping' naar het
+     competitiegemiddelde zodat één uitschieter niet alles bepaalt;
+   - thuisvoordeel uit alle uitslagen van de poule;
+   - onderlinge duels tellen een beetje mee.
+   Daaruit volgen verwachte doelpunten per team en per uitslag een kans. */
+function poisson(l, k){ let p = Math.exp(-l); for (let i = 1; i <= k; i++) p *= l / i; return p; }
+function voorspelWedstrijd(thuis, uit, totDatum){
+  const res = (DATA.uitslagen || []).filter(m => /^\d+-\d+$/.test(String(m.score || "")) && (!totDatum || m.datum < totDatum));
+  if (res.length < 6) return null;
+  const ref = totDatum ? new Date(totDatum) : new Date();
+  const gew = m => Math.exp(-Math.max(0, (ref - new Date(m.datum)) / 864e5) / 85);
+  let hG = 0, aG = 0, w = 0;
+  res.forEach(m => { const [a, b] = m.score.split("-").map(Number), g = gew(m); hG += a * g; aG += b * g; w += g; });
+  const H = hG / w, A = aG / w, gem = (H + A) / 2;
+  const kracht = t => {
+    let gf = 0, ga = 0, n = 0;
+    res.forEach(m => { if (m.thuis !== t && m.uit !== t) return; const [a, b] = m.score.split("-").map(Number), g = gew(m), th = m.thuis === t;
+      /* corrigeer voor thuis/uit, zodat een uitduel net zo zwaar telt */
+      gf += g * (th ? a / (H / gem) : b / (A / gem)); ga += g * (th ? b / (A / gem) : a / (H / gem)); n += g; });
+    const k = 2;   // demping: telt als 2 'gemiddelde' wedstrijden extra
+    return { att: (gf + k * gem) / (n + k) / gem, def: (ga + k * gem) / (n + k) / gem };
+  };
+  const kh = kracht(thuis), ku = kracht(uit);
+  let lh = H * kh.att * ku.def, lu = A * ku.att * kh.def;
+  /* onderlinge duels: 15% gewicht */
+  const h2h = res.filter(m => (m.thuis === thuis && m.uit === uit) || (m.thuis === uit && m.uit === thuis));
+  if (h2h.length) {
+    let vh = 0, vu = 0; h2h.forEach(m => { const [a, b] = m.score.split("-").map(Number); if (m.thuis === thuis) { vh += a; vu += b; } else { vh += b; vu += a; } });
+    lh = .85 * lh + .15 * vh / h2h.length; lu = .85 * lu + .15 * vu / h2h.length;
+  }
+  let pW = 0, pG = 0, pV = 0, beste = { W: [0, 0, -1], G: [0, 0, -1], V: [0, 0, -1] };
+  for (let i = 0; i <= 12; i++) for (let j = 0; j <= 12; j++) {
+    const p = poisson(lh, i) * poisson(lu, j), u = i > j ? "W" : i === j ? "G" : "V";
+    if (u === "W") pW += p; else if (u === "G") pG += p; else pV += p;
+    if (p > beste[u][2]) beste[u] = [i, j, p];
+  }
+  const meest = pW >= pG && pW >= pV ? "W" : pV >= pG ? "V" : "G";
+  return { lh, lu, pW, pG, pV, uitslag: beste[meest].slice(0, 2), uitkomst: meest };
+}
+/* Hoe vaak zat het model dit seizoen goed (winst/gelijk/verlies), steeds met alleen de gegevens van vóór die wedstrijd? */
+function modelScore(){
+  let goed = 0, n = 0;
+  (DATA.uitslagen || []).forEach(m => {
+    if (!/^\d+-\d+$/.test(String(m.score || ""))) return;
+    const v = voorspelWedstrijd(m.thuis, m.uit, m.datum); if (!v) return;
+    const [a, b] = m.score.split("-").map(Number), echt = a > b ? "W" : a === b ? "G" : "V";
+    n++; if (v.uitkomst === echt) goed++;
+  });
+  return { goed, n };
+}
+function verwachtingHtml(m){
+  const v = voorspelWedstrijd(m.thuis, m.uit); if (!v) return "";
+  const wijThuis = isUs(m.thuis), pct = x => Math.round(x * 100) + "%";
+  const winst = wijThuis ? v.pW : v.pV, verlies = wijThuis ? v.pV : v.pW;
+  const sc = modelScore();
+  return `<div class="md-model" title="Gebaseerd op doelpunten voor en tegen, vorm (recente wedstrijden tellen zwaarder), thuisvoordeel en onderlinge duels">
+    <div class="mm-top"><span class="k">Verwachte uitslag</span><span class="mm-score">${esc(m.thuis)} <b>${v.uitslag[0]} – ${v.uitslag[1]}</b> ${esc(m.uit)}</span></div>
+    <div class="mm-balk" aria-label="Kansen: winst ${pct(winst)}, gelijk ${pct(v.pG)}, verlies ${pct(verlies)}">
+      <span class="w" style="flex:${winst}">${winst > .12 ? `Winst ${pct(winst)}` : ""}</span><span class="g" style="flex:${v.pG}">${v.pG > .12 ? `Gelijk ${pct(v.pG)}` : ""}</span><span class="v" style="flex:${verlies}">${verlies > .12 ? `Verlies ${pct(verlies)}` : ""}</span>
+    </div>
+    <div class="mm-voet">Verwachte doelpunten ${v.lh.toFixed(1).replace(".", ",")} – ${v.lu.toFixed(1).replace(".", ",")}${sc.n ? ` · het model zat dit seizoen ${sc.goed} van de ${sc.n} keer goed` : ""}</div>
+  </div>`;
+}
+
 /* ---------- Tegenstanderprofiel bij de volgende wedstrijd ---------- */
 function tegenstanderHtml(m){
   const opp = isUs(m.thuis) ? m.uit : m.thuis, zijThuis = m.thuis === opp;
@@ -1635,6 +1711,7 @@ function renderNext(){
       <div class="md-teams"><div class="md-team ${home?"ours":""}">${teamLink(m.thuis)}</div><div class="md-vs">VS</div><div class="md-team ${home?"":"ours"}">${teamLink(m.uit)}</div></div>
       <div class="md-meta"><span class="tag">${fmtDay(m.datum)}</span><span class="tag">${m.tijd ? esc(m.tijd) : "tijd n.n.b."}</span><span class="tag">${home ? "Thuis" : "Uit"}</span><button type="button" class="tag tag-btn" id="add-next">+ Agenda</button></div>
       ${m.tijd ? `<div class="cd" id="countdown" role="timer" aria-live="off"></div>` : ""}
+      ${verwachtingHtml(m)}
       <div class="md-tabs" role="tablist">
         ${m.veld || m.accommodatie ? `<button type="button" role="tab" data-mdtab="veld">Veld</button>` : ""}
         <button type="button" role="tab" data-mdtab="weer">Weer</button>
@@ -2647,9 +2724,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795485800"></script>
-<script src="toto.js?v=1795485800"></script>
-<script src="pong.js?v=1795485800"></script>
+<script src="mex.js?v=1795485900"></script>
+<script src="toto.js?v=1795485900"></script>
+<script src="pong.js?v=1795485900"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2658,12 +2735,12 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795485800"></script>
-<script src="statistieken.js?v=1795485800"></script>
-<script src="race.js?v=1795485800"></script>
-<script src="rad.js?v=1795485800"></script>
-<script src="fotos.js?v=1795485800"></script>
-<script src="quotes.js?v=1795485800"></script>
-<script src="push.js?v=1795485800"></script>
+<script src="stemmen.js?v=1795485900"></script>
+<script src="statistieken.js?v=1795485900"></script>
+<script src="race.js?v=1795485900"></script>
+<script src="rad.js?v=1795485900"></script>
+<script src="fotos.js?v=1795485900"></script>
+<script src="quotes.js?v=1795485900"></script>
+<script src="push.js?v=1795485900"></script>
 </body>
 </html>
