@@ -6,7 +6,7 @@
    Gebruikt uit index.html: DATA, esc, isUs, toDate, fmtShort, canon, ROSTER, resultFor, teamStats, buildRanking, fmtL, parseCsv
    ========================================================= */
 (function () {
-  const box = document.getElementById("stats");
+  const box = document.getElementById("statistieken-box");
   if (!box) return;
   const CFG = window.STATS_CONFIG || {};
   /* Spelers die (een deel van) het seizoen niet meetellen */
