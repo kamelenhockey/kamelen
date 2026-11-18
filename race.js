@@ -108,11 +108,16 @@
         <div class="rc-lane"><span class="rc-lnaam">${esc(k)}</span><div class="rc-zand"><span class="rc-kameel" id="rc-k${i}" style="left:0%"><span class="rc-kroon" aria-hidden="true">👑</span><span class="rc-lijf">🐪</span><span class="rc-stof" aria-hidden="true"></span></span><span class="rc-finish"></span></div></div>`).join("")}
         <div class="rc-aftel" id="rc-aftel" aria-live="assertive"></div></div>
       <div class="rc-feed" id="rc-feed" aria-live="polite"></div>
+      <div class="rc-knoppen" id="rc-afbreken"><button type="button" class="btn sm ghost" data-rc="afbreken">Race afbreken</button></div>
       <div id="rc-uitslag"></div>`;
   }
 
+  let loper = null, teller = null;
+  function stopTimers() { clearInterval(loper); clearTimeout(teller); loper = teller = null; }
   function race() {
+    stopTimers();
     S.fase = "race"; bewaar(); render();
+    document.getElementById("rc-baan")?.scrollIntoView({ behavior: "smooth", block: "center" });
     const pos = S.kamelen.map(() => 0), snel = S.kamelen.map(() => 1.2 + Math.random() * .6);
     const feed = document.getElementById("rc-feed"), baan = document.getElementById("rc-baan"), aftel = document.getElementById("rc-aftel");
     const els = S.kamelen.map((_, i) => document.getElementById("rc-k" + i));
@@ -129,13 +134,13 @@
       if (rustig || k >= tellen.length) { aftel.textContent = ""; aftel.className = "rc-aftel"; return lopen(); }
       aftel.textContent = tellen[k]; aftel.className = "rc-aftel toon" + (k === 3 ? " go" : "");
       try { navigator.vibrate?.(k === 3 ? 120 : 30); } catch {}
-      k++; setTimeout(tel, 650);
+      k++; teller = setTimeout(tel, 650);
     };
     const lopen = () => {
       baan.classList.add("rent");
       melding("En ze zijn vertrokken!", "groot");
       let tik = 0, laatsteLeider = -1, finale = false;
-      const t = setInterval(() => {
+      const t = loper = setInterval(() => {
         tik++;
         S.kamelen.forEach((_, i) => { pos[i] += (snel[i] + Math.random() * 1.1) * .55 * (rustig ? 20 : 1); });
         if (tik % 9 === 0) {
@@ -152,6 +157,7 @@
           baan.classList.remove("rent", "finale"); baan.classList.add("flits");
           const volgorde = pos.map((p, i) => [p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => S.kamelen[i]);
           const wi = S.kamelen.indexOf(volgorde[0]); els[wi]?.classList.add("winnaar");
+          document.getElementById("rc-afbreken")?.remove();
           melding(`FINISH! ${volgorde[0]} wint!`, "groot");
           try { window.schietConfetti?.(); } catch {}
           setTimeout(() => afrekenen(volgorde), 900);
@@ -201,11 +207,13 @@
     if (a === "naar-inzet") S.fase = "inzet";
     if (a === "terug" || a === "setup") S.fase = "setup";
     if (a === "start") return race();
+    if (a === "afbreken") { stopTimers(); S.fase = "inzet"; }
     if (a === "opnieuw") { S.inzet = {}; S.fase = "inzet"; }
     if (a === "reset") { S.tel = {}; S.races = 0; S.inzet = {}; }
     bewaar(); render();
   });
 
-  window.renderRace = () => { if (S.fase === "race") S.fase = "inzet"; render(); };
+  /* Een race die halverwege werd onderbroken (pagina ververst) gaat terug naar de inzetten */
+  window.renderRace = () => { if (S.fase === "race" && !loper && !teller) S.fase = "inzet"; if (S.fase !== "race") render(); };
   window.renderRace();
 })();
