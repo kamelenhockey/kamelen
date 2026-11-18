@@ -664,6 +664,21 @@ body.pong-actief .tabbar{display:none}
 .bdg.uit{background:var(--bg);border-color:var(--line);opacity:.5}
 .bdg.uit .ic{filter:grayscale(1)}
 /* Foto's */
+/* Kamelen-rad */
+.rad-card{padding:22px 18px 26px;text-align:center}
+.rad-wrap{position:relative;width:min(440px,100%);margin:0 auto}
+.rad-svg{display:block;width:100%;height:auto;filter:drop-shadow(0 14px 24px rgba(22,54,80,.25))}
+#rad-wiel{transform-origin:200px 200px;transform-box:view-box}
+.rad-pijl{position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:30px solid var(--ink);filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.rad-uitslag{min-height:5.2rem;margin:18px 0 6px;display:grid;place-items:center;gap:4px}
+.rad-res{font-family:var(--font-display);font-size:clamp(1.8rem,6vw,2.6rem);line-height:1.1;animation:land .45s ease-out}
+.rad-res.huis{color:#c0392b;font-size:clamp(2.6rem,9vw,3.6rem)}
+.rad-uitslag p{margin:0;color:var(--muted)}
+.rad-x{color:var(--orange-ink);font-weight:700}
+.rad-knop{font-size:1.05rem;padding:12px 26px}
+.rad-hist{margin-top:22px;text-align:left;border-top:1px solid var(--line);padding-top:14px}
+.rad-hist ol{margin:6px 0 0;padding-left:1.4rem;color:var(--ink-2)}
+.rad-hist li{padding:2px 0}
 .foto-form,.quote-form{padding:18px 20px;margin-bottom:18px}
 .foto-velden{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:10px 0}
 .foto-kies{display:flex;align-items:center;gap:12px;flex-wrap:wrap;cursor:pointer}
@@ -916,7 +931,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
       <div class="nav-more-menu" id="nav-more-menu" hidden>
         <div class="nm-group"><div class="nm-h">Competitie</div><a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a></div>
         <div class="nm-group"><div class="nm-h">Team</div><a href="#fotos" data-view-link="fotos">Foto's</a><a href="#quotes" data-view-link="quotes">Quotes</a><a href="#regels" data-view-link="regels">Kamelen-regels</a><a href="#push-card" data-push-link>🔔 Meldingen</a></div>
-        <div class="nm-group"><div class="nm-h">Spellen</div><a href="#mex" data-view-link="mex">Mex</a><a href="#pong" data-view-link="pong">Pong teams</a></div>
+        <div class="nm-group"><div class="nm-h">Spellen</div><a href="#rad" data-view-link="rad">Kamelen-rad</a><a href="#mex" data-view-link="mex">Mex</a><a href="#pong" data-view-link="pong">Pong teams</a></div>
       </div>
     </li>
   </ul>
@@ -1036,6 +1051,17 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
       <p>Stem na de wedstrijd op de kameel van de dag (de beste of leukste) en de ezel van de dag. De ezel moet een liter trekken. Wie aan het einde van het seizoen het vaakst kameel van de dag was, wint een prijs.</p>
     </header>
     <section class="card"><div id="stemmen"></div></section>
+  </div>
+</div>
+
+<!-- ================= KAMELEN-RAD ================= -->
+<div id="view-rad" class="view" hidden>
+  <div class="wrap page">
+    <header class="page-head">
+      <h1>Kamelen-rad</h1>
+      <p>Draai aan het rad en ontdek je lot. Het smalle rode vakje is <b>Huis</b>: de kans daarop is een stuk kleiner, maar als het gebeurt…</p>
+    </header>
+    <section class="card rad-card"><div id="rad"></div></section>
   </div>
 </div>
 
@@ -1280,6 +1306,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <a href="#regels" data-view-link="regels">Kamelen-regels</a>
   <a href="#push-card" data-push-link>🔔 Meldingen</a>
   <div class="ms-h">Spellen</div>
+  <a href="#rad" data-view-link="rad">Kamelen-rad</a>
   <a href="#mex" data-view-link="mex">Mex</a>
   <a href="#pong" data-view-link="pong">Pong teams</a>
 </div>
@@ -2242,7 +2269,7 @@ document.querySelectorAll("[data-dice]").forEach(el => {
 });
 
 /* ---------- Pagina's: home, regels, mex ---------- */
-const VIEWS = ["spelers", "statistieken", "toto", "stemmen", "fotos", "quotes", "voorspeller", "regels", "mex", "pong"];
+const VIEWS = ["spelers", "statistieken", "toto", "stemmen", "fotos", "quotes", "rad", "voorspeller", "regels", "mex", "pong"];
 const HOME_PAGES = ["home", "wedstrijden", "stand", "topscorers", "liters"];
 /* Oude links (#programma, #uitslagen, #seizoen, #wedstrijd) blijven werken */
 const PAGE_OF = { "": "home", home: "home", wedstrijd: "home", programma: "wedstrijden", uitslagen: "wedstrijden", wedstrijden: "wedstrijden", stand: "stand", seizoen: "stand", topscorers: "topscorers", liters: "liters" };
@@ -2344,9 +2371,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795482800"></script>
-<script src="toto.js?v=1795482800"></script>
-<script src="pong.js?v=1795482800"></script>
+<script src="mex.js?v=1795482900"></script>
+<script src="toto.js?v=1795482900"></script>
+<script src="pong.js?v=1795482900"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2355,10 +2382,11 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795482800"></script>
-<script src="statistieken.js?v=1795482800"></script>
-<script src="fotos.js?v=1795482800"></script>
-<script src="quotes.js?v=1795482800"></script>
-<script src="push.js?v=1795482800"></script>
+<script src="stemmen.js?v=1795482900"></script>
+<script src="statistieken.js?v=1795482900"></script>
+<script src="rad.js?v=1795482900"></script>
+<script src="fotos.js?v=1795482900"></script>
+<script src="quotes.js?v=1795482900"></script>
+<script src="push.js?v=1795482900"></script>
 </body>
 </html>
