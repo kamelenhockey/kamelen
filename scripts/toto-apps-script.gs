@@ -89,8 +89,8 @@ function meegespeeld_(datum, kaart) {
   const k = String(datum || "").slice(5, 10), lijst = (kaart || aanwezigKaart_())[k];
   return lijst && lijst.length ? lijst.map(n => String(n).toLowerCase()) : null;
 }
-const rol_ = code => { const c = String(code || "").trim().toLowerCase(), heeft = o => Object.keys(o).some(k => k.toLowerCase() === c); return heeft(SPELERCODES) ? "speler" : heeft(COACHCODES) ? "coach" : heeft(INVALLERCODES) || automatischeInvaller_(code) ? "invaller" : ""; };
-const isCoach_ = n => Object.keys(COACHCODES).some(k => COACHCODES[k] === n);
+const rol_ = code => { const c = String(code || "").trim().toLowerCase(), heeft = o => Object.keys(o).some(k => k.toLowerCase() === c); return heeft(SPELERCODES) ? "speler" : heeft(COACHCODES) ? "coach" : heeft(INVALLERCODES) ? "invaller" : (extraCodes_()[c] || {}).rol || (automatischeInvaller_(code) ? "invaller" : ""); };
+const isCoach_ = n => Object.keys(COACHCODES).some(k => COACHCODES[k] === n) || Object.keys(extraCodes_()).some(k => extraCodes_()[k].rol === "coach" && extraCodes_()[k].naam === n);
 /* Telt een stem? Alleen als stemmer meespeelde (of coach is) en kameel en ezel meespeelden */
 function stemGeldig_(stemmer, kameel, ezel, wedstrijd, kaart) {
   const mee = meegespeeld_(String(wedstrijd).split("|")[0], kaart);
@@ -147,6 +147,24 @@ function invallerNamen_() {
   if (namen.length) cache.put("invallers", JSON.stringify(namen), 300);
   return namen;
 }
+/* Extra codes uit het tabblad "Inlogcodes" (in de spreadsheet van het Liter-incassobureau).
+   Kolommen: Code | Naam | Rol (speler, coach of invaller). Claude kan hier codes toevoegen,
+   zonder dat dit script aangepast hoeft te worden. */
+function extraCodes_() {
+  const cache = CacheService.getScriptCache(), oud = cache.get("extracodes");
+  if (oud) return JSON.parse(oud);
+  const lijst = {};
+  try {
+    const sh = SpreadsheetApp.openById(LITER_SPREADSHEET).getSheetByName("Inlogcodes");
+    if (sh) sh.getDataRange().getValues().slice(1).forEach(r => {
+      const code = String(r[0] || "").trim().toLowerCase(), naam = String(r[1] || "").trim();
+      const rol = /coach/i.test(r[2]) ? "coach" : /speler/i.test(r[2]) ? "speler" : "invaller";
+      if (code && naam) lijst[code] = { naam, rol };
+    });
+  } catch (x) { return {}; }
+  cache.put("extracodes", JSON.stringify(lijst), 60);
+  return lijst;
+}
 function automatischeInvaller_(code) {
   const m = String(code || "").trim().match(/^(invaller|oudkameel)(.+)$/i); if (!m) return "";
   const gezocht = zonderAccent_(m[2]);
@@ -157,6 +175,7 @@ function speler_(code) {
   for (const k in SPELERCODES) if (k.toLowerCase() === c) return SPELERCODES[k];
   for (const k in COACHCODES) if (k.toLowerCase() === c) return COACHCODES[k];
   for (const k in INVALLERCODES) if (k.toLowerCase() === c) return INVALLERCODES[k];
+  const extra = extraCodes_()[c]; if (extra) return extra.naam;
   return automatischeInvaller_(code);
 }
 
@@ -294,6 +313,8 @@ function machtigen() {
     Logger.log("Afwezigheidsblad: status " + r.getResponseCode() + ", begint met: " + r.getContentText().slice(0, 80));
   } catch (x) { Logger.log("Afwezigheidsblad: FOUT " + x); }
   CacheService.getScriptCache().remove("aanwezig2");
+  CacheService.getScriptCache().remove("extracodes");
+  Logger.log("Extra inlogcodes: " + JSON.stringify(extraCodes_()));
   try { Logger.log("Liter-incassobureau: " + SpreadsheetApp.openById(LITER_SPREADSHEET).getSheetByName(LITER_TAB).getLastRow() + " regels, schrijven kan."); }
   catch (x) { Logger.log("Liter-incassobureau: FOUT " + x + " (deel de spreadsheet met dit account als bewerker)"); }
   Logger.log("Meegespeeld: " + JSON.stringify(aanwezigKaart_()));
