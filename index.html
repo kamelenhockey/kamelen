@@ -575,7 +575,7 @@ nav.bar a[aria-current="page"]{color:#fff;border-bottom-color:var(--orange)}
 
 /* ---------- Menubalk onderin ---------- */
 .tabbar,.more-sheet{display:none}
-@media (max-width:760px){
+@media (max-width:760px), (max-height:520px) and (orientation:landscape) and (pointer:coarse){
   nav.bar{display:none}
   body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
   .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;z-index:30;left:0;right:0;bottom:0;background:rgba(22,54,80,.97);backdrop-filter:blur(8px);padding:6px 4px calc(6px + env(safe-area-inset-bottom));border-top:1px solid #234b6a}
@@ -585,11 +585,51 @@ nav.bar a[aria-current="page"]{color:#fff;border-bottom-color:var(--orange)}
   .more-sheet{display:grid;position:fixed;z-index:29;left:10px;right:10px;bottom:calc(72px + env(safe-area-inset-bottom));background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 50px -20px rgba(22,54,80,.5);padding:6px;grid-template-columns:1fr 1fr;gap:4px}
   .more-sheet[hidden]{display:none}
   .more-sheet .ms-h{grid-column:1/-1;font-size:.8rem;font-weight:800;letter-spacing:0;color:var(--muted);padding:8px 8px 0}
-  .more-sheet{max-height:calc(100vh - 120px);overflow-y:auto}
+  .more-sheet{max-height:calc(100dvh - 120px);overflow-y:auto;overscroll-behavior:contain}
   .more-sheet a{padding:13px 14px;border-radius:10px;text-decoration:none;color:var(--ink);font-weight:700;background:var(--bg)}
   .more-sheet a[aria-current="page"]{background:var(--orange-soft);color:var(--orange-ink)}
   .dash{grid-template-columns:1fr 1fr}
   .tile .big{font-size:1.5rem}
+}
+
+/* ---------- App-gevoel: scrollen en tikken ---------- */
+html,body{overflow-x:clip}
+html{scroll-padding-top:64px;-webkit-text-size-adjust:100%}
+body{overscroll-behavior-y:none}
+a,button,summary,label,[role="button"]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.tablewrap,.strip,.q-filter{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+body.sheet-open,body:has(dialog[open]){overflow:hidden}
+dialog{overscroll-behavior:contain}
+img{-webkit-user-drag:none}
+@media (max-width:760px){ html{scroll-padding-top:12px} }
+
+/* ---------- Telefoon liggend ---------- */
+@media (max-height:520px) and (orientation:landscape) and (pointer:coarse){
+  .wrap{padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right))}
+  body{padding-bottom:calc(52px + env(safe-area-inset-bottom))}
+  .tabbar{padding:4px max(8px,env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+  .tabbar a,.tabbar button{flex-direction:row!important;justify-content:center;gap:6px!important;font-size:.72rem!important}
+  .tabbar svg{width:20px!important;height:20px!important}
+  .more-sheet{bottom:calc(56px + env(safe-area-inset-bottom));grid-template-columns:repeat(3,1fr);left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right))}
+  .hero .wrap{padding-top:12px;padding-bottom:12px;gap:16px;align-items:center}
+  .hero img{width:72px!important}
+  .wordmark{font-size:2.4rem!important}
+  .hero .eyebrow,.hero p{display:none}
+  .statbar{display:none!important}
+  .home-banners + .matchday,.matchday{background:var(--bg)!important}
+  .matchday .wrap{margin:10px auto 0;padding:16px 20px}
+  .dash{grid-template-columns:repeat(4,1fr)!important}
+  .page-head h1{font-size:2rem}
+  .page-head{margin-bottom:10px}
+  /* Kamelen-racen: hele baan in beeld */
+  .rc-lane{padding:1px 0}
+  .rc-zand{height:2rem}
+  .rc-kameel{font-size:1.5rem}
+  .rc-lnaam{font-size:.78rem}
+  .rc-feed{min-height:3.6rem}
+  .rc-feed p:nth-child(n+3){display:none}
+  .rad-wrap{width:min(300px,70vh)}
+  dialog.team{max-height:94dvh}
 }
 
 /* ---------- Confetti ---------- */
@@ -888,7 +928,7 @@ table.opk .kort{display:none}
 
 footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 
-@media (prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
+
 @media (max-width:900px){
   .hero .wrap{grid-template-columns:auto 1fr;gap:18px}
   .hero img{width:120px}
@@ -2422,10 +2462,10 @@ function showView(){
   const nm = document.getElementById("nav-more-menu"); if (nm){ nm.hidden = true; document.getElementById("nav-more-btn").setAttribute("aria-expanded", "false"); }
   document.querySelectorAll("main [data-page]").forEach(el => { el.hidden = el.dataset.page !== page; });
   document.querySelectorAll("[data-view-link]").forEach(a => a.dataset.viewLink === page ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
-  document.getElementById("more-sheet").hidden = true; document.getElementById("more-btn").setAttribute("aria-expanded", "false");
+  document.getElementById("more-sheet").hidden = true; document.getElementById("more-btn").setAttribute("aria-expanded", "false"); document.body.classList.remove("sheet-open");
   const sub = h && h !== page ? document.getElementById(h) : null;   /* bv. #uitslagen binnen Wedstrijden */
-  if (sub && !sub.hidden) sub.scrollIntoView();
-  else if (page !== vorigePagina) window.scrollTo(0, 0);
+  if (sub && !sub.hidden) sub.scrollIntoView({ behavior: "instant", block: "start" });
+  else if (page !== vorigePagina) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   vorigePagina = page;
 }
 document.getElementById("nav-more-btn").addEventListener("click", e => {
@@ -2460,10 +2500,21 @@ document.querySelectorAll("[data-push-link]").forEach(a => a.addEventListener("c
   e.preventDefault(); location.hash = "home";
   setTimeout(() => { showView(); const c = document.getElementById("push-card"); c.hidden = false; c.scrollIntoView({ behavior: "smooth", block: "center" }); }, 30);
 }));
-document.getElementById("more-btn").addEventListener("click", () => {
+document.getElementById("more-btn").addEventListener("click", e => {
+  e.stopPropagation();
   const sh = document.getElementById("more-sheet"), open = sh.hidden;
   sh.hidden = !open; document.getElementById("more-btn").setAttribute("aria-expanded", String(open));
+  document.body.classList.toggle("sheet-open", open);
 });
+/* Tik buiten het Meer-menu: menu dicht */
+document.addEventListener("click", e => {
+  const sh = document.getElementById("more-sheet");
+  if (!sh.hidden && !e.target.closest("#more-sheet")) { sh.hidden = true; document.getElementById("more-btn").setAttribute("aria-expanded", "false"); document.body.classList.remove("sheet-open"); }
+});
+/* Nog een keer op het tabje van de pagina waar je al bent: soepel naar boven, zoals in een echte app */
+document.querySelectorAll(".tabbar [data-view-link]").forEach(a => a.addEventListener("click", () => {
+  if (a.getAttribute("aria-current") === "page") window.scrollTo({ top: 0, behavior: "smooth" });
+}));
 window.addEventListener("hashchange", showView);
 showView();
 
@@ -2528,9 +2579,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795484900"></script>
-<script src="toto.js?v=1795484900"></script>
-<script src="pong.js?v=1795484900"></script>
+<script src="mex.js?v=1795485000"></script>
+<script src="toto.js?v=1795485000"></script>
+<script src="pong.js?v=1795485000"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2539,12 +2590,12 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795484900"></script>
-<script src="statistieken.js?v=1795484900"></script>
-<script src="race.js?v=1795484900"></script>
-<script src="rad.js?v=1795484900"></script>
-<script src="fotos.js?v=1795484900"></script>
-<script src="quotes.js?v=1795484900"></script>
-<script src="push.js?v=1795484900"></script>
+<script src="stemmen.js?v=1795485000"></script>
+<script src="statistieken.js?v=1795485000"></script>
+<script src="race.js?v=1795485000"></script>
+<script src="rad.js?v=1795485000"></script>
+<script src="fotos.js?v=1795485000"></script>
+<script src="quotes.js?v=1795485000"></script>
+<script src="push.js?v=1795485000"></script>
 </body>
 </html>
