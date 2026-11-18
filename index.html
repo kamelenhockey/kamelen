@@ -1099,6 +1099,53 @@ body:not([data-page="home"]) .hero-acties{top:50%!important;transform:translateY
 @keyframes rad-tik{40%{transform:translateX(-50%) rotate(-14deg)}}
 .rad-pijl{transform-origin:50% 0}
 @media (prefers-reduced-motion:reduce){.rad-wrap.trillen,.rad-pijl.tik{animation:none}}
+/* Laatst bijgewerkt */
+.bijgewerkt{position:absolute;top:100%;right:4px;margin-top:3px;font-size:.68rem;color:rgba(22,54,80,.6);white-space:nowrap;pointer-events:none}
+@media (max-width:760px){body[data-page="home"] .hero .wrap{padding-top:74px!important}}
+/* Eigen rij uitgelicht */
+tr.mij > td{background:#fff1d9!important}
+tr.mij > td:first-child{box-shadow:inset 3px 0 0 var(--orange)}
+li.mij{background:#fff1d9;border-radius:10px;box-shadow:inset 3px 0 0 var(--orange)}
+/* Swipen */
+.swipe-l{animation:swipe-l .3s ease-out}.swipe-r{animation:swipe-r .3s ease-out}
+@keyframes swipe-l{from{transform:translateX(40px);opacity:.3}}@keyframes swipe-r{from{transform:translateX(-40px);opacity:.3}}
+@media (prefers-reduced-motion:reduce){.swipe-l,.swipe-r{animation:none}}
+/* Kamelen Wrapped */
+body.wrapped-open{overflow:hidden}
+.wrapped{position:fixed;inset:0;z-index:200;color:#fff;display:flex;flex-direction:column;padding:calc(14px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));background:var(--ink);transition:background .5s;user-select:none;-webkit-user-select:none;touch-action:none}
+.wrapped.k-blauw{background:radial-gradient(120% 80% at 80% 0%,#2c5878 0%,#163650 60%)}
+.wrapped.k-groen{background:radial-gradient(120% 80% at 20% 10%,#2f8a57 0%,#14432a 70%)}
+.wrapped.k-oranje{background:radial-gradient(120% 80% at 80% 10%,#f6a447 0%,#c45f00 70%)}
+.wrapped.k-bier{background:radial-gradient(120% 80% at 50% 0%,#f4c34f 0%,#a66a10 75%)}
+.wrapped.k-zand{background:radial-gradient(120% 80% at 30% 0%,#c99a62 0%,#6e4a26 75%)}
+.wrapped.k-paars{background:radial-gradient(120% 80% at 70% 0%,#7a5bb5 0%,#33215e 75%)}
+.wrapped.k-goud{background:radial-gradient(120% 80% at 50% 0%,#e8c25a 0%,#7d5a0c 75%)}
+.wr-balken{display:flex;gap:4px;max-width:520px;width:100%;margin:0 auto}
+.wr-balken span{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden}
+.wr-balken i{display:block;height:100%;width:0;background:#fff}
+.wr-sluit{position:absolute;top:calc(22px + env(safe-area-inset-top));right:14px;z-index:3;width:40px;height:40px;border:0;border-radius:50%;background:rgba(0,0,0,.2);color:#fff;font-size:1.6rem;line-height:1;cursor:pointer}
+.wr-kaart{flex:1;display:flex;flex-direction:column;justify-content:center;max-width:520px;width:100%;margin:0 auto;position:relative;z-index:2;pointer-events:none}
+.wr-kaart button{pointer-events:auto}
+.wr-kaart.in > *{animation:wr-in .55s cubic-bezier(.2,.8,.2,1) both}
+.wr-kaart.in > *:nth-child(2){animation-delay:.12s}.wr-kaart.in > *:nth-child(3){animation-delay:.24s}.wr-kaart.in > *:nth-child(4){animation-delay:.36s}.wr-kaart.in > *:nth-child(5){animation-delay:.48s}
+@keyframes wr-in{from{opacity:0;transform:translateY(18px)}}
+@media (prefers-reduced-motion:reduce){.wr-kaart.in > *{animation:none}}
+.wr-klein{font-size:1rem;font-weight:600;opacity:.85;margin-bottom:6px}
+.wr-groot{font-family:var(--font-display);font-weight:400;font-size:clamp(2rem,9vw,3.2rem);line-height:1.05;margin:0 0 14px}
+.wr-getal{font-family:var(--font-display);font-size:clamp(5rem,28vw,9rem);line-height:.95;margin:4px 0 8px;font-variant-numeric:tabular-nums}
+.wr-getal small{font-size:.35em}
+.wr-tekst{font-size:1.15rem;line-height:1.45;margin:0 0 16px;max-width:30ch}
+.wr-voet{font-size:.98rem;line-height:1.45;opacity:.9;margin:0 0 8px;max-width:34ch}
+.wr-rij{display:flex;gap:22px;flex-wrap:wrap;margin:0 0 18px}
+.wr-rij div{display:grid}.wr-rij b{font-family:var(--font-display);font-weight:400;font-size:2rem}.wr-rij span{font-size:.85rem;opacity:.8}
+.wr-rij.groot b{font-size:3rem}
+.wr-kameel,.wr-type{font-size:5rem;margin-top:10px}
+.wr-knoppen{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 12px}
+.wr-knop{border:0;border-radius:999px;padding:13px 20px;font:700 1rem var(--font-body,inherit);background:#fff;color:var(--ink);cursor:pointer}
+.wr-knop.ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.6)}
+.wr-zone{position:absolute;top:70px;bottom:0;z-index:1;border:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wr-zone.links{left:0;width:33%}.wr-zone.rechts{right:0;width:67%}
+.wr-start{display:inline-flex;align-items:center;gap:8px;margin-top:12px}
 /* Klikbare wedstrijden en de wedstrijd-pop-up */
 .klik[data-match]{cursor:pointer;transition:background .15s}
 .klik[data-match]:hover{background:rgba(22,54,80,.06)}
@@ -1188,6 +1235,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <div class="hero-acties">
     <button type="button" class="ververs-knop" id="ververs-knop" aria-label="Verversen: nieuwste foto's en gegevens ophalen" title="Verversen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <button type="button" class="ik-chip" id="ik-chip" hidden></button>
+    <span class="bijgewerkt" id="bijgewerkt" aria-live="off"></span>
   </div>
   <div class="trek-ververs" id="trek-ververs" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
   <div class="wrap">
@@ -1218,7 +1266,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
         <div class="nm-group"><div class="nm-h">Competitie</div><a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a></div>
         <div class="nm-group"><div class="nm-h">Team</div><a href="#fotos" data-view-link="fotos">Foto's</a><a href="#quotes" data-view-link="quotes">Quotes</a><a href="#regels" data-view-link="regels">Kamelen-regels</a><a href="#push-card" data-push-link>🔔 Meldingen</a></div>
         <div class="nm-group"><div class="nm-h">Spellen</div><a href="#rad" data-view-link="rad">Kamelen-rad</a><a href="#race" data-view-link="race">Kamelen-racen</a><a href="#mex" data-view-link="mex">Mex</a><a href="#pong" data-view-link="pong">Pong teams</a></div>
-        <div class="nm-group"><div class="nm-h">Account</div><a href="#" data-uitloggen>Uitloggen</a></div>
+        <div class="nm-group"><div class="nm-h">Account</div><a href="#" data-wrapped>🎁 Kamelen Wrapped</a><a href="#" data-uitloggen>Uitloggen</a></div>
       </div>
     </li>
   </ul>
@@ -1614,6 +1662,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <a href="#mex" data-view-link="mex">Mex</a>
   <a href="#pong" data-view-link="pong">Pong teams</a>
   <div class="ms-h">Account</div>
+  <a href="#" data-wrapped>🎁 Kamelen Wrapped</a>
   <a href="#" data-uitloggen>Uitloggen</a>
 </div>
 <canvas id="confetti" aria-hidden="true"></canvas>
@@ -2974,6 +3023,7 @@ return Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJs
     Promise.resolve(formBezig("stemmen") ? null : veilig(() => window.renderStemmen?.())).catch(() => {}).finally(() => veilig(() => window.renderStatistieken?.()));
     const f = x => { const d = new Date(x); return isNaN(d) ? "onbekend" : d.toLocaleString("nl-NL",{dateStyle:"long",timeStyle:"short",timeZone:"Europe/Amsterdam"}); };
     if (stil) window.scrollTo(0, y); else herstelScroll();
+    window._bijgewerktOm = Date.now(); toonBijgewerkt();
     document.getElementById("foot").textContent = `Competitie: laatste wijziging ${f(DATA.competitieBijgewerkt)} (bron hockey.nl) · Liter-incassobureau en topscorers: ${live ? "live uit de spreadsheet" : "bijgewerkt " + f(DATA.bijgewerkt)}`;
   })
   .catch(() => {
@@ -2982,6 +3032,59 @@ return Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJs
   });
 }
 laadGegevens(false);
+/* ---------- Laatst bijgewerkt ---------- */
+function toonBijgewerkt(){
+  const el = document.getElementById("bijgewerkt"), t = window._bijgewerktOm; if (!el || !t) return;
+  const min = Math.floor((Date.now() - t) / 60000);
+  el.textContent = min < 1 ? "Bijgewerkt: zojuist" : min < 60 ? `Bijgewerkt: ${min} min geleden` : `Bijgewerkt: ${new Date(t).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}`;
+}
+setInterval(toonBijgewerkt, 30000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) toonBijgewerkt(); });
+
+/* ---------- Je eigen naam uitgelicht in alle lijsten ---------- */
+(() => {
+  const ik = (window.IK || {}).naam; if (!ik) return;
+  let wacht = null;
+  const markeer = () => {
+    wacht = null;
+    document.querySelectorAll("main tr, main li, #view-home tr, #view-home li").forEach(r => {
+      if (r.closest("dialog, .wrapped, .pred-list, .rad-hist")) return;
+      const cellen = r.matches("tr") ? r.querySelectorAll(":scope > td, :scope > td > *") : r.querySelectorAll(":scope > span, :scope > b, :scope > div, :scope > button > span, :scope > button > span > span, :scope > .who > .nm, :scope > button .nm");
+      const mij = [...cellen].some(c => c.textContent.trim() === ik);
+      if (mij !== r.classList.contains("mij")) r.classList.toggle("mij", mij);
+    });
+  };
+  new MutationObserver(() => { if (!wacht) wacht = setTimeout(markeer, 150); }).observe(document.body, { childList: true, subtree: true });
+  markeer();
+})();
+
+/* ---------- Swipen tussen de tabjes (telefoon) ---------- */
+(() => {
+  if (!matchMedia("(pointer:coarse)").matches) return;
+  const VOLGORDE = ["home", "wedstrijden", "stand", "toto", "topscorers", "liters", "statistieken", "voorspeller", "spelers", "stemmen", "fotos", "quotes", "regels"];
+  const NIET = "dialog, input, textarea, select, canvas, .wrapped, .rad-wrap, .rc-baan, .pong-veld, .more-sheet, [class^='mx-'], .md-tabs, .seg, .q-filter, svg#chart, [data-geen-swipe]";
+  const schuift = el => { for (let e = el; e && e !== document.body; e = e.parentElement) { const s = getComputedStyle(e); if (/(auto|scroll)/.test(s.overflowX) && e.scrollWidth > e.clientWidth + 2) return true; } return false; };
+  let x0 = null, y0 = 0, t0 = 0;
+  addEventListener("touchstart", e => {
+    const t = e.touches[0];
+    x0 = (e.touches.length === 1 && t.clientX > 24 && t.clientX < innerWidth - 24 && !e.target.closest(NIET) && !schuift(e.target) && !document.body.classList.contains("sheet-open") && !document.body.classList.contains("wrapped-open")) ? t.clientX : null;
+    y0 = t.clientY; t0 = Date.now();
+  }, { passive: true });
+  addEventListener("touchend", e => {
+    if (x0 === null) return;
+    const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
+    if (Math.abs(dx) < 70 || Math.abs(dy) > Math.abs(dx) * .6 || Date.now() - t0 > 700) return;
+    const nu = document.body.dataset.page, i = VOLGORDE.indexOf(nu); if (i < 0) return;
+    const n = i + (dx < 0 ? 1 : -1); if (n < 0 || n >= VOLGORDE.length) return;
+    location.hash = VOLGORDE[n]; window.scrollTo(0, 0);
+    setTimeout(() => {
+      const v = [...document.querySelectorAll("#view-home, .view")].find(x => !x.hidden && x.offsetParent !== null); if (!v) return;
+      v.classList.remove("swipe-l", "swipe-r"); void v.offsetWidth; v.classList.add(dx < 0 ? "swipe-l" : "swipe-r");
+      setTimeout(() => v.classList.remove("swipe-l", "swipe-r"), 320);
+    }, 0);
+  }, { passive: true });
+})();
+
 /* ---------- Altijd de nieuwste versie: verversen ---------- */
 /* Na herladen: terug naar dezelfde plek op de pagina */
 function herstelScroll(){
@@ -3096,9 +3199,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795487800"></script>
-<script src="toto.js?v=1795487800"></script>
-<script src="pong.js?v=1795487800"></script>
+<script src="mex.js?v=1795487900"></script>
+<script src="toto.js?v=1795487900"></script>
+<script src="pong.js?v=1795487900"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3107,12 +3210,13 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795487800"></script>
-<script src="statistieken.js?v=1795487800"></script>
-<script src="race.js?v=1795487800"></script>
-<script src="rad.js?v=1795487800"></script>
-<script src="fotos.js?v=1795487800"></script>
-<script src="quotes.js?v=1795487800"></script>
-<script src="push.js?v=1795487800"></script>
+<script src="stemmen.js?v=1795487900"></script>
+<script src="statistieken.js?v=1795487900"></script>
+<script src="wrapped.js?v=1795487900"></script>
+<script src="race.js?v=1795487900"></script>
+<script src="rad.js?v=1795487900"></script>
+<script src="fotos.js?v=1795487900"></script>
+<script src="quotes.js?v=1795487900"></script>
+<script src="push.js?v=1795487900"></script>
 </body>
 </html>
