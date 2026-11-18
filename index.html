@@ -1068,6 +1068,30 @@ body:not([data-page="home"]) .hero-acties{top:50%!important;transform:translateY
 @media (max-height:520px) and (orientation:landscape) and (pointer:coarse){.hero-acties{top:50%!important;transform:translateY(-50%)}}
 @media (max-width:760px){body[data-page="home"] .hero .wrap{padding-top:64px!important}}
 @media (max-width:560px){.hero-acties{top:8px;right:10px}.ververs-knop{width:36px;height:36px}.ik-chip{font-size:.82rem}.hero .ik-chip .avatar{width:28px;height:28px;min-width:28px}}
+/* Klikbare wedstrijden en de wedstrijd-pop-up */
+.klik[data-match]{cursor:pointer;transition:background .15s}
+.klik[data-match]:hover{background:rgba(22,54,80,.06)}
+.klik[data-match]:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.wm-uitslag{text-align:center;margin-bottom:10px}
+.wm-uitslag .k{font-size:.8rem;color:var(--muted)}
+.wm-score{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;font-weight:600}
+.wm-score > :first-child{justify-self:end;text-align:right}.wm-score > :last-child{justify-self:start;text-align:left}
+.wm-score b{font-family:var(--font-display);font-weight:400;font-size:2rem}
+.wm-oordeel{margin:4px 0 14px;padding:9px 12px;border-radius:10px;font-size:.9rem;background:#fbe7e2;color:#7d2a1c}
+.wm-oordeel.goed{background:#e1f2e7;color:#1e5c38}
+.wm-model{padding:14px;border-radius:14px;background:var(--ink);color:#fff}
+.wm-model .k{font-size:.8rem;color:rgba(255,255,255,.65)}
+.wm-model .mm-balk .th{background:#5b86a6;color:#fff}.wm-model .mm-balk .ui{background:var(--orange);color:var(--ink)}
+.wm-kansen{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.82rem;color:rgba(255,255,255,.8);margin-bottom:4px}
+.wm-vs{width:100%;border-collapse:collapse;font-size:.9rem}
+.wm-vs th,.wm-vs td{padding:7px 4px;border-top:1px solid var(--line);text-align:center}
+.wm-vs thead th{border-top:0;width:38%}.wm-vs thead th:nth-child(2){width:24%}
+.wm-vs tbody th{font-weight:500;color:var(--muted);font-size:.8rem}
+.wm-vs td.b{font-weight:700;color:#1e5c38}
+.wm-vs .form{display:flex;gap:3px;justify-content:center}
+.wm-uitleg{font-size:.78rem;color:var(--muted);margin:6px 0 0}
+.h2h-rij{padding:5px 0;font-size:.92rem}
+.wm-loc{margin:0;font-size:.92rem}
 /* ---------- Stijl A, indeling 2: sierlijke koppen (DM Serif Display), rustige tekst (DM Sans),
    de volgende wedstrijd als zwevende donkere kaart over de lichtblauwe kop ---------- */
 h1,h2,h3,.wordmark,.md-team,.big,.v,.cd .v,.statbar .v,.tile .big,.dlg-stats .v,.fact .big{font-weight:400!important;letter-spacing:0}
@@ -1190,7 +1214,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <section class="card quote-home" id="quote-home" data-page="home" aria-label="Quote"></section>
   <section class="card push-card" id="push-card" data-page="home" aria-label="Meldingen"></section>
   <section class="card" id="programma" data-page="wedstrijden" aria-labelledby="h-programma">
-    <div class="card-head"><div><h2 id="h-programma">Programma</h2><p>Klik op een team voor alle wedstrijden</p></div><div id="prog-toggle"></div></div>
+    <div class="card-head"><div><h2 id="h-programma">Programma</h2><p>Tik op een wedstrijd voor de voorspelling, op een team voor alle wedstrijden</p></div><div id="prog-toggle"></div></div>
     <details class="cal">
       <summary class="btn sm ghost">Zet in je agenda</summary>
       <div class="cal-menu">
@@ -1204,7 +1228,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   </section>
 
   <section class="card" id="uitslagen" data-page="wedstrijden" aria-labelledby="h-uitslagen">
-    <div class="card-head"><div><h2 id="h-uitslagen">Uitslagen</h2><p>Nieuwste bovenaan</p></div><div id="res-toggle"></div></div>
+    <div class="card-head"><div><h2 id="h-uitslagen">Uitslagen</h2><p>Nieuwste bovenaan. Tik op een wedstrijd om te zien wat het model vooraf voorspelde</p></div><div id="res-toggle"></div></div>
     <div id="results"></div>
   </section>
 
@@ -1881,7 +1905,7 @@ function renderProgram(){
   segToggle(document.getElementById("prog-toggle"), "Kamelen", "Hele poule", only => {
     const list = only ? all.filter(m => isUs(m.thuis + m.uit)) : all;
     document.getElementById("prog-list").innerHTML = groupByDate(list).map(([d, ms]) => `<div class="day">${fmtDay(d)}</div>` +
-      ms.map(m => `<div class="fx ${isUs(m.thuis+m.uit)?"us":""}"><span class="t num">${m.tijd ? esc(m.tijd) : "n.n.b."}</span><span class="h">${teamLink(m.thuis)}</span><span class="sep">–</span><span class="a">${teamLink(m.uit)}</span></div>${m.veld ? `<div class="fx-venue">${esc(m.veld)}${m.accommodatie ? ` · ${esc(m.accommodatie)}` : ""}</div>` : ""}`).join("")).join("");
+      ms.map(m => `<div class="fx klik ${isUs(m.thuis+m.uit)?"us":""}" ${matchAttr(m)}><span class="t num">${m.tijd ? esc(m.tijd) : "n.n.b."}</span><span class="h">${teamLink(m.thuis)}</span><span class="sep">–</span><span class="a">${teamLink(m.uit)}</span></div>${m.veld ? `<div class="fx-venue">${esc(m.veld)}${m.accommodatie ? ` · ${esc(m.accommodatie)}` : ""}</div>` : ""}`).join("")).join("");
   });
 }
 function renderResults(){
@@ -1893,7 +1917,7 @@ function renderResults(){
     const list = only ? all.filter(m => isUs(m.thuis + m.uit)) : all;
     document.getElementById("res-list").innerHTML = groupByDate(list).map(([d, ms]) => `<div class="day">${fmtDay(d)}</div>` +
       ms.map(m => { const ours = isUs(m.thuis + m.uit); const o = ours ? resultFor(m, isUs(m.thuis) ? m.thuis : m.uit) : null;
-        return `<div class="rs ${ours?"us":""}"><span class="h">${teamLink(m.thuis)}</span><span class="score">${esc(m.score)}</span><span class="a">${teamLink(m.uit)}</span>${badge(o)}</div>`; }).join("")).join("");
+        return `<div class="rs klik ${ours?"us":""}" ${matchAttr(m)}><span class="h">${teamLink(m.thuis)}</span><span class="score">${esc(m.score)}</span><span class="a">${teamLink(m.uit)}</span>${badge(o)}</div>`; }).join("")).join("");
   });
 }
 
@@ -1945,7 +1969,7 @@ function openTeam(team){
     const home = m.thuis === team, opp = home ? m.uit : m.thuis;
     const r = played ? resultFor(m, team) : null;
     const score = played ? (home ? m.score : m.score.split("-").reverse().join("-")) : (m.tijd || "n.n.b.");
-    return `<div class="dlg-row ${!ours && isUs(opp) ? "vs-us" : ""}"><span class="d">${fmtShort(m.datum)}</span><span class="ha">${home?"T":"U"}</span>
+    return `<div class="dlg-row klik ${!ours && isUs(opp) ? "vs-us" : ""}" ${matchAttr(m)}><span class="d">${fmtShort(m.datum)}</span><span class="ha">${home?"T":"U"}</span>
       <span>${teamLink(opp)}</span>${played ? `<span class="score">${esc(score)}</span>` : `<span class="t num">${esc(score)}</span>`}${played ? badge(r) : "<span></span>"}</div>`;
   };
   let h2h = "";
@@ -1974,11 +1998,76 @@ function openTeam(team){
   document.getElementById("dlg-body").scrollTop = 0;
   if (!dlg.open){ try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } }
 }
+
+/* ---------- Wedstrijd pop-up met voorspelling (elke wedstrijd in de poule) ---------- */
+const matchSleutel = m => `${m.datum}|${m.thuis}|${m.uit}`;
+const matchAttr = m => `data-match="${esc(matchSleutel(m))}" role="button" tabindex="0" aria-label="${esc(`${m.thuis} tegen ${m.uit}: voorspelling bekijken`)}"`;
+document.addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches?.("[data-match]")) { e.preventDefault(); openMatch(e.target.dataset.match); }
+});
+function openMatch(sleutel){
+  const alle = [...(DATA.uitslagen || []), ...(DATA.programma || [])];
+  const m = alle.find(x => matchSleutel(x) === sleutel); if (!m) return;
+  const gespeeld = /^\d+-\d+$/.test(String(m.score || ""));
+  const v = voorspelWedstrijd(m.thuis, m.uit, gespeeld ? m.datum : undefined);
+  const wijThuis = isUs(m.thuis), wijUit = isUs(m.uit), ons = wijThuis || wijUit;
+  const pct = x => Math.round(x * 100) + "%", kom = x => x.toFixed(1).replace(".", ",");
+  document.getElementById("dlg-head").classList.toggle("ours-team", ons);
+  document.getElementById("dlg-title").textContent = `${m.thuis} – ${m.uit}`;
+  document.getElementById("dlg-sub").textContent = `${fmtDay(m.datum)}${m.tijd ? ` · ${m.tijd}` : ""}${m.veld ? ` · ${m.veld}` : ""}`;
+  let html = "";
+  if (gespeeld) {
+    const [a, b] = scoreVan(m), echt = a > b ? "W" : a === b ? "G" : "V";
+    html += `<div class="wm-uitslag"><div class="k">Uitslag</div><div class="wm-score">${teamLink(m.thuis)}<b>${a} – ${b}</b>${teamLink(m.uit)}</div></div>`;
+    if (v) html += `<div class="wm-oordeel ${v.uitkomst === echt ? "goed" : "fout"}">${v.uitkomst === echt ? "✓ Het model zat goed" : "✗ Het model zat ernaast"}: vooraf werd ${v.uitslag[0]} – ${v.uitslag[1]} verwacht${v.uitslag[0] === a && v.uitslag[1] === b ? ", zelfs de exacte uitslag" : ""}.</div>`;
+  }
+  if (!v) html += `<div class="empty">Er zijn nog te weinig uitslagen om deze wedstrijd te voorspellen.</div>`;
+  else {
+    /* kansen vanuit de thuisploeg; bij onze wedstrijden in groen (wij winnen) en rood (wij verliezen) */
+    const kl = wijThuis ? ["w", "g", "v"] : wijUit ? ["v", "g", "w"] : ["th", "g", "ui"];
+    const kort = n => n.length > 14 ? n.slice(0, 13) + "…" : n;
+    html += `<div class="wm-model">
+      <div class="mm-top"><span class="k">${gespeeld ? "Voorspelling vooraf" : "Voorspelde uitslag"}</span><span class="mm-score">${esc(m.thuis)} <b>${v.uitslag[0]} – ${v.uitslag[1]}</b> ${esc(m.uit)}</span></div>
+      <div class="mm-balk" aria-label="Kansen: ${esc(m.thuis)} wint ${pct(v.pW)}, gelijk ${pct(v.pG)}, ${esc(m.uit)} wint ${pct(v.pV)}">
+        <span class="${kl[0]}" style="flex:${v.pW}">${v.pW > .16 ? `${esc(kort(m.thuis))} ${pct(v.pW)}` : v.pW > .08 ? pct(v.pW) : ""}</span><span class="${kl[1]}" style="flex:${v.pG}">${v.pG > .12 ? `Gelijk ${pct(v.pG)}` : v.pG > .07 ? pct(v.pG) : ""}</span><span class="${kl[2]}" style="flex:${v.pV}">${v.pV > .16 ? `${esc(kort(m.uit))} ${pct(v.pV)}` : v.pV > .08 ? pct(v.pV) : ""}</span>
+      </div>
+      <div class="wm-kansen"><span>${esc(m.thuis)} wint <b>${pct(v.pW)}</b></span><span>Gelijk <b>${pct(v.pG)}</b></span><span>${esc(m.uit)} wint <b>${pct(v.pV)}</b></span></div>
+      <div class="mm-voet">Verwachte doelpunten ${kom(v.lh)} – ${kom(v.lu)}${gespeeld ? ", berekend met alleen de uitslagen van vóór deze wedstrijd" : ""}</div>
+    </div>`;
+    /* De twee teams naast elkaar */
+    const rij = (label, a, b, hoogBeter = true) => {
+      const na = parseFloat(String(a).replace(",", ".")), nb = parseFloat(String(b).replace(",", "."));
+      const beter = isNaN(na) || isNaN(nb) || na === nb ? 0 : (na > nb) === hoogBeter ? 1 : 2;
+      return `<tr><td class="${beter === 1 ? "b" : ""}">${a}</td><th>${label}</th><td class="${beter === 2 ? "b" : ""}">${b}</td></tr>`;
+    };
+    const st = n => (DATA.stand || []).find(x => x.team === n), sa = st(m.thuis), sb = st(m.uit);
+    const ta = teamStats(m.thuis), tb = teamStats(m.uit);
+    const gem = (x, k) => x.gs ? kom(x[k] / x.gs) : "–";
+    const vorm = n => teamStats(n).res.slice(-5).map(x => badge(resultFor(x, n))).join("") || "–";
+    html += `<div class="dlg-sec"><h3 class="sub-h">Zo staan ze ervoor</h3><table class="wm-vs"><thead><tr><th>${teamLink(m.thuis)}</th><th></th><th>${teamLink(m.uit)}</th></tr></thead><tbody>
+      ${sa && sb ? rij("Positie", sa.positie + "e", sb.positie + "e", false) + rij("Punten", sa.punten, sb.punten) : ""}
+      ${rij("Doelpunten per wedstrijd", gem(ta, "dv"), gem(tb, "dv"))}
+      ${rij("Tegengoals per wedstrijd", gem(ta, "dt"), gem(tb, "dt"), false)}
+      ${rij("Aanvalskracht", kom(v.kh.att) + "×", kom(v.ku.att) + "×")}
+      ${rij("Verdediging (lager is beter)", kom(v.kh.def) + "×", kom(v.ku.def) + "×", false)}
+      ${rij("Elo-rating", Math.round(v.rating[m.thuis]), Math.round(v.rating[m.uit]))}
+      <tr><td><div class="form">${vorm(m.thuis)}</div></td><th>Vorm</th><td><div class="form">${vorm(m.uit)}</div></td></tr>
+    </tbody></table><p class="wm-uitleg">Aanvals- en verdedigingskracht zijn vergeleken met een gemiddeld team in de poule (1,0×).</p></div>`;
+  }
+  const onderling = (DATA.uitslagen || []).filter(x => x !== m && ((x.thuis === m.thuis && x.uit === m.uit) || (x.thuis === m.uit && x.uit === m.thuis)));
+  if (onderling.length) html += `<div class="dlg-sec"><h3 class="sub-h">Eerder dit seizoen</h3>${onderling.map(x => `<div class="h2h-rij">${fmtShort(x.datum)}: ${esc(x.thuis)} <b>${esc(x.score)}</b> ${esc(x.uit)}</div>`).join("")}</div>`;
+  if (m.accommodatie || m.adres) html += `<div class="dlg-sec"><h3 class="sub-h">Locatie</h3><p class="wm-loc">${esc(m.accommodatie || "")}${m.adres ? `<br><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(m.adres)}" target="_blank" rel="noopener">${esc(m.adres)}</a>` : ""}</p></div>`;
+  document.getElementById("dlg-body").innerHTML = html;
+  document.getElementById("dlg-body").scrollTop = 0;
+  if (!dlg.open){ try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } }
+}
 document.addEventListener("click", e => {
   const btn = e.target.closest("[data-team]");
   if (btn){ e.preventDefault(); document.getElementById("dlg-head").classList.remove("ours-team"); openTeam(btn.dataset.team); return; }
   const pl = e.target.closest("[data-player]");
   if (pl){ e.preventDefault(); openPlayer(pl.dataset.player); return; }
+  const wd = e.target.closest("[data-match]");
+  if (wd && !e.target.closest("a")){ e.preventDefault(); openMatch(wd.dataset.match); return; }
   if (e.target.id === "add-next"){
     const m = (DATA.programma || []).find(x => isUs(x.thuis + x.uit) && toDate(x.datum, x.tijd || "23:00").getTime() + 2*3600e3 > Date.now());
     if (m) downloadNextIcs(m); return;
@@ -2923,9 +3012,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795487200"></script>
-<script src="toto.js?v=1795487200"></script>
-<script src="pong.js?v=1795487200"></script>
+<script src="mex.js?v=1795487300"></script>
+<script src="toto.js?v=1795487300"></script>
+<script src="pong.js?v=1795487300"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2934,12 +3023,12 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795487200"></script>
-<script src="statistieken.js?v=1795487200"></script>
-<script src="race.js?v=1795487200"></script>
-<script src="rad.js?v=1795487200"></script>
-<script src="fotos.js?v=1795487200"></script>
-<script src="quotes.js?v=1795487200"></script>
-<script src="push.js?v=1795487200"></script>
+<script src="stemmen.js?v=1795487300"></script>
+<script src="statistieken.js?v=1795487300"></script>
+<script src="race.js?v=1795487300"></script>
+<script src="rad.js?v=1795487300"></script>
+<script src="fotos.js?v=1795487300"></script>
+<script src="quotes.js?v=1795487300"></script>
+<script src="push.js?v=1795487300"></script>
 </body>
 </html>
