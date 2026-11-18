@@ -1778,7 +1778,7 @@ function renderJarig(){
   const el = document.getElementById("jarig-banner"); if (!el) return;
   const jarig = [...INFO.entries()].filter(([, i]) => i.verjaardag).map(([naam, i]) => ({ naam, v: i.verjaardag, dagen: dagenTot(i.verjaardag) }))
     .filter(x => x.dagen !== null && x.dagen <= 7).sort((a, b) => a.dagen - b.dagen);
-  const wanneer = x => x.dagen === 0 ? "vandaag!" : x.dagen === 1 ? "morgen" : `over ${x.dagen} dagen (${fmtVerjaardag(x.v)})`;
+  const wanneer = x => x.dagen === 0 ? "vandaag!" : x.dagen === 1 ? "morgen" : `over ${x.dagen} dagen`;
   el.innerHTML = jarig.map(x => `<a class="kz-banner jarig${x.dagen === 0 ? " vandaag" : ""}" href="#spelers" data-jarig="${esc(x.naam)}"><span>${x.dagen === 0 ? "🎉" : "🎂"}</span><span><b>${esc(x.naam)} is ${x.dagen === 0 ? "vandaag jarig!" : `${wanneer(x)} jarig`}</b><br><small>${x.dagen === 0 ? "Hoera! Vergeet niet te feliciteren." : `Op ${fmtVerjaardag(x.v)}. Zet het vast in je agenda.`}</small></span><span class="kz-go">Profiel →</span></a>`).join("");
   el.querySelectorAll("[data-jarig]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); location.hash = "spelers"; setTimeout(() => openPlayer(a.dataset.jarig), 50); }));
 }
@@ -1943,9 +1943,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795480600"></script>
-<script src="toto.js?v=1795480600"></script>
-<script src="pong.js?v=1795480600"></script>
+<script src="mex.js?v=1795480700"></script>
+<script src="toto.js?v=1795480700"></script>
+<script src="pong.js?v=1795480700"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -1954,7 +1954,7 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795480600"></script>
-<script src="statistieken.js?v=1795480600"></script>
+<script src="stemmen.js?v=1795480700"></script>
+<script src="statistieken.js?v=1795480700"></script>
 </body>
 </html>
