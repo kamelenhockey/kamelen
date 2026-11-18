@@ -138,7 +138,12 @@
     Bt.worpen[x] = d6(); Bt.worpen[y] = d6();
     {
       if (Bt.worpen[x] === Bt.worpen[y]) { Bt.gelijk = true; setTimeout(() => { Bt.worpen = {}; Bt.gelijk = false; save(); render(); }, 1800); }
-      else { const verliezer = Bt.worpen[x] > Bt.worpen[y] ? x : y; setTimeout(() => verloren(verliezer, Bt.straf), 1800); }
+      else {
+        const verliezer = Bt.worpen[x] > Bt.worpen[y] ? x : y;
+        /* 2 tegen 1 in een battle telt als extra mex: een halve bak extra straf */
+        if (Math.max(Bt.worpen[x], Bt.worpen[y]) === 2 && Math.min(Bt.worpen[x], Bt.worpen[y]) === 1) { Bt.straf += 0.5; Bt.mex = true; }
+        setTimeout(() => verloren(verliezer, Bt.straf), Bt.mex ? 2600 : 1800);
+      }
     }
     save(); render();
   }
@@ -194,7 +199,7 @@
     const Bt = S.battle;
     return `<div class="mx-board"><div class="mx-turn"><div class="k">Gelijk laagst</div><div class="mx-name">Battle!</div><p class="mx-sub">Allebei één steen. <b>Hoogste verliest.</b></p></div>
       <div class="mx-battle" id="mx-battle">${Bt.spelers.map(n => `<div><div class="nm">${esc(n)}</div>${Bt.worpen[n] ? steen(Bt.worpen[n], "land") : steen(1, "idle")}</div>`).join("")}</div>
-      ${Bt.worpen[Bt.spelers[0]] ? (Bt.gelijk ? `<p class="mx-sub">Gelijk! Nog een keer…</p>` : "") : `<div class="mx-battle-go"><button type="button" class="btn" data-mx="battle">Gooi allebei</button></div>`}
+      ${Bt.worpen[Bt.spelers[0]] ? (Bt.gelijk ? `<p class="mx-sub">Gelijk! Nog een keer…</p>` : Bt.mex ? `<p class="mx-sub"><b>2 tegen 1: dat is mex!</b> Er komt een halve bak bij de straf.</p>` : "") : `<div class="mx-battle-go"><button type="button" class="btn" data-mx="battle">Gooi allebei</button></div>`}
       ${Bt.gelijk ? `<div class="mx-msgs"><p>Weer gelijk – opnieuw!</p></div>` : ""}</div>`;
   }
 
