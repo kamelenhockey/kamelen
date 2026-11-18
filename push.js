@@ -10,7 +10,7 @@
   const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
   const kan = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
   const sleutel = b => { const p = "=".repeat((4 - b.length % 4) % 4), r = atob((b + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from([...r].map(c => c.charCodeAt(0))); };
-  const stuur = (type, abonnement) => fetch(api(), { method: "POST", body: JSON.stringify({ type, abonnement }) }).then(r => r.json());
+  const stuur = (type, abonnement) => fetch(api(), { method: "POST", body: JSON.stringify({ type, abonnement, code: (window.IK || {}).code || "" }) }).then(r => r.json());
 
   const WAT = "Avond voor de wedstrijd, selectie bekend, uitslag, stemmen open, kameel en ezel van de dag en verjaardagen.";
   function toon(staat, melding = "") {

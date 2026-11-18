@@ -3,10 +3,14 @@
 // die meldingen hebben aangezet. Wat al verstuurd is, staat in meldingen-status.json (geen dubbele meldingen).
 import fs from "node:fs";
 import webpush from "web-push";
+import { parseCsv } from "./parse.mjs";
 
 const API = "https://script.google.com/macros/s/AKfycbw2n1uosUM9ctU2TH1PO-psv6CtgT_QBpxZVHY9IZgDeubBEMf3LSbv1IiDxAXxD9Bt/exec";
 const VAPID_PUBLIEK = "BCK-agIGdX3s3--RJJ7UYgdxtKS1hKiz1BxITrQxprx9gggsXMjHBZEG0LKnE9WIQjUCIOEFrCgi88TCqyL9HsQ";
 const SITE = "https://kamelenhockey.github.io/kamelen/";
+const LITERS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=224456486&single=true&output=csv";
+const AANWEZIG_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv";
+const COACHES = ["Marie", "Toryll", "Lucia"];
 const STATUS = "meldingen-status.json";
 
 const geheim = JSON.parse(process.env.KAMELEN_PUSH || "{}");
@@ -41,7 +45,44 @@ const programma = (comp.programma || []).filter(m => isUs(m.thuis + m.uit));
 const uitslagen = (comp.uitslagen || []).filter(m => isUs(m.thuis + m.uit));
 
 const te = [];   // { id, title, body, url }
-const meld = (id, title, body, url = SITE) => { if (!status.verzonden[id]) te.push({ id, title, body, url }); };
+/* voor: lijst met namen (persoonlijke melding) of leeg (iedereen) */
+const meld = (id, title, body, url = SITE, voor = null) => { if (!status.verzonden[id]) te.push({ id, title, body, url, voor }); };
+const persoonlijk = (id, naam, title, body, url) => meld(`${id}-${naam.toLowerCase()}`, title, body, url, [naam]);
+
+/* Namen gelijk trekken (Maarten = Mini enz.) */
+const CANON = new Map();
+for (const p of [...(roster.spelers || []), ...(roster.invallers || [])]) for (const n of [p.naam, ...(p.ook || [])]) CANON.set(String(n).toLowerCase(), p.naam);
+const canon = n => { n = String(n || "").trim(); const h = CANON.get(n.toLowerCase()); if (h) return h; for (const d of n.split(/\s*[\/()|,]\s*/)) { const x = CANON.get(d.toLowerCase()); if (x) return x; } return n; };
+const SPELERS = (roster.spelers || []).map(p => p.naam);
+async function csv(url) { try { const r = await fetch(url, { redirect: "follow" }); return r.ok ? parseCsv(await r.text()) : []; } catch { return []; } }
+/* Wie speelde op welke datum (MM-DD) mee */
+async function aanwezigKaart() {
+  const rows = await csv(AANWEZIG_CSV), kaart = {}; if (!rows.length) return kaart;
+  const M = { jan: 1, feb: 2, mrt: 3, maa: 3, apr: 4, mei: 5, jun: 6, jul: 7, aug: 8, sep: 9, okt: 10, nov: 11, dec: 12 }, kol = {};
+  rows[0].forEach((h, i) => { const m = String(h || "").trim().toLowerCase().match(/^(\d{1,2})[\s-]+([a-z]+)/); if (i && m && M[m[2].slice(0, 3)]) kol[String(M[m[2].slice(0, 3)]).padStart(2, "0") + "-" + m[1].padStart(2, "0")] = i; });
+  Object.keys(kol).forEach(k => kaart[k] = []);
+  let inSp = true, gezien = false;
+  for (const r of rows.slice(1)) {
+    const naam = String(r[0] || "").trim();
+    if (!naam) { if (gezien) inSp = false; continue; }
+    if (/totaal aanwezig/i.test(naam)) continue;
+    const inval = /invaller/i.test(naam); if (!inval && !inSp) continue; if (!inval) gezien = true;
+    for (const k of Object.keys(kol)) { const v = String(r[kol[k]] || "").trim(); if (inval) { if (v) kaart[k].push(v); } else if (!v || /^te laat$/i.test(v)) kaart[k].push(canon(naam)); }
+  }
+  return kaart;
+}
+/* Openstaande liters per speler */
+async function openLiters() {
+  const rows = await csv(LITERS_CSV), open = new Map();
+  for (const r of rows.slice(1)) {
+    const naam = canon(r[0]); if (!naam || /gedaan/i.test(r[4] || "")) continue;
+    const t = String(r[3] || "").toLowerCase(), m = t.match(/(\d+(?:[.,]\d+)?)\s*l(?![a-z])/);
+    const l = (m ? parseFloat(m[1].replace(",", ".")) : 0) + (/any liter/.test(t) ? 1 : 0) + (t.match(/stille\s*meter/g) || []).length * 3.25;
+    if (l > 0) open.set(naam, (open.get(naam) || 0) + l);
+  }
+  return open;
+}
+const fmtL = v => (Math.round(v * 100) / 100).toString().replace(".", ",");
 
 /* 1. Avond voor de wedstrijd (vanaf 19:00) */
 for (const m of programma) {
@@ -61,15 +102,25 @@ for (const m of uitslagen) {
   const titel = v > t ? `Gewonnen! ${v}-${t} tegen ${tegen(m)} 🎉` : v < t ? `Verloren: ${v}-${t} tegen ${tegen(m)}` : `Gelijkgespeeld: ${v}-${t} tegen ${tegen(m)}`;
   meld(`uitslag-${m.datum}`, titel, "Bekijk de nieuwe stand en vergeet niet te stemmen op de kameel en ezel van de dag.", SITE + "#stand");
 }
-/* 4. Stemmen open (75 minuten na de aftrap, tot een dag later) */
+/* 4. Stemmen open (75 minuten na de aftrap): alleen voor wie meespeelde en de coaches.
+      Drie uur later nog een herinnering voor wie nog niet stemde (zolang de stemming open is). */
+let api = {};
+try { api = await fetch(API).then(r => r.json()); } catch (e) { console.log("API niet bereikbaar", e.message); }
+const kaart = await aanwezigKaart();
 for (const m of ons) {
   if (m.datum < "2026-11-17") continue;
   const open = aftrap(m).getTime() + 75 * 60e3;
-  if (nu >= open && nu - open < 24 * uur) meld(`stem-${m.datum}`, "Stemmen is open 🐪🫏", `Wie was de kameel en wie de ezel van de dag tegen ${tegen(m)}?`, SITE + "#stemmen");
+  if (nu < open || nu - open > 24 * uur || (api.gesloten || []).includes(sleutel(m))) continue;
+  const mee = kaart[m.datum.slice(5)] || [];
+  const kiezers = mee.length ? [...mee.filter(n => SPELERS.includes(n)), ...COACHES] : [...SPELERS, ...COACHES];
+  const gestemd = new Set((api.stemmen || []).filter(x => x.wedstrijd === sleutel(m)).map(x => canon(x.stemmer)));
+  for (const n of kiezers) {
+    if (gestemd.has(n)) continue;
+    if (nu - open >= 3 * uur) persoonlijk(`stemnog-${m.datum}`, n, "Je hebt nog niet gestemd 🐪🫏", `Wie was de kameel en wie de ezel van de dag tegen ${tegen(m)}? Stem voordat de stemming sluit.`, SITE + "#stemmen");
+    else persoonlijk(`stem-${m.datum}`, n, "Stemmen is open 🐪🫏", `Wie was de kameel en wie de ezel van de dag tegen ${tegen(m)}?`, SITE + "#stemmen");
+  }
 }
 /* 5. Uitslag kameel en ezel (zodra de beheerder de stemming sluit) */
-let api = {};
-try { api = await fetch(API).then(r => r.json()); } catch (e) { console.log("API niet bereikbaar", e.message); }
 for (const k of api.gesloten || []) {
   const m = ons.find(x => sleutel(x) === k); if (!m || nu - aftrap(m) > 7 * 24 * uur) continue;
   const laatste = new Map();
@@ -79,15 +130,31 @@ for (const k of api.gesloten || []) {
   if (kamelen.length || ezels.length)
     meld(`kz-${m.datum}`, `Kameel van de dag: ${kamelen.join(" & ") || "–"} 🐪`, `Ezel van de dag: ${ezels.join(" & ") || "–"}. Die trekt een liter! 🫏`, SITE + "#stemmen");
 }
-/* 7. Toto-herinnering: 3 uur voor de aftrap; bij een ochtendwedstrijd (voor 12:00) de avond ervoor om 20:00 */
+/* 7. Kamelen-Scorito: persoonlijke herinnering voor wie nog niet voorspelde.
+      De avond ervoor (ochtendwedstrijd, 20:00) of 3 uur ervoor, en nog een keer 1 uur voor de aftrap. */
 for (const m of programma) {
   if (!m.tijd) continue;
   const af = aftrap(m), uurAftrap = +m.tijd.split(":")[0];
-  const vanaf = uurAftrap < 12 ? aftrap({ datum: plusDagen(m.datum, -1), tijd: "20:00" }) : new Date(af - 3 * uur);
-  if (nu >= vanaf && nu < af) {
-    const aantal = new Set((api.voorspellingen || []).filter(v => v.wedstrijd === `${m.thuis} – ${m.uit}` && new Date(v.aftrap).getTime() === af.getTime()).map(v => String(v.naam).toLowerCase())).size;
-    meld(`toto-${m.datum}`, "Nog niet voorspeld? 🔮", `De Kamelen-Scorito voor ${isUs(m.thuis) ? "thuis" : "uit"} tegen ${tegen(m)} sluit om ${m.tijd}${uurAftrap < 12 ? " morgenochtend" : ""}. ${aantal ? `Al ${aantal} ${aantal === 1 ? "voorspelling" : "voorspellingen"} binnen.` : "Nog niemand heeft voorspeld!"}`, SITE + "#toto");
+  const eerste = uurAftrap < 12 ? aftrap({ datum: plusDagen(m.datum, -1), tijd: "20:00" }) : new Date(af - 3 * uur);
+  const laatste = new Date(af - uur);
+  if (nu < eerste || nu >= af) continue;
+  const voorspeld = new Set((api.voorspellingen || []).filter(v => v.wedstrijd === `${m.thuis} – ${m.uit}` && new Date(v.aftrap).getTime() === af.getTime()).map(v => canon(v.naam)));
+  const wie = [...SPELERS, ...COACHES].filter(n => !voorspeld.has(n));
+  const tegenstander = `${isUs(m.thuis) ? "thuis" : "uit"} tegen ${tegen(m)}`;
+  for (const n of wie) {
+    if (nu >= laatste) persoonlijk(`scorito1u-${m.datum}`, n, "Nog 1 uur! 🔮", `Je hebt de Kamelen-Scorito voor ${tegenstander} nog niet ingevuld. Om ${m.tijd} sluit hij.`, SITE + "#toto");
+    else persoonlijk(`scorito-${m.datum}`, n, "Nog niet voorspeld? 🔮", `Vul de Kamelen-Scorito in voor ${tegenstander}. Hij sluit om ${m.tijd}${uurAftrap < 12 ? " morgenochtend" : ""}.`, SITE + "#toto");
   }
+}
+
+/* 8. Liters open: donderdag om 23:15 en een half uur na de wedstrijd (op de wedstrijddag) */
+const open = await openLiters();
+const literMelding = (id, naam, l) => persoonlijk(id, naam, "Tijd om te zuipen 🍺", `Je hebt nog ${fmtL(l)} liter openstaan bij het Liter-incassobureau. Wegwerken!`, SITE + "#liters");
+const dag = new Date(nl.datum + "T12:00:00Z").getUTCDay();   // 4 = donderdag
+if (dag === 4 && (nl.uur > 23 || (nl.uur === 23 && nl.min >= 15))) for (const [n, l] of open) literMelding(`liters-do-${nl.datum}`, n, l);
+for (const m of uitslagen.concat(programma)) {
+  const na = aftrap(m).getTime() + 2 * uur;   // wedstrijd duurt ~1,5 uur, plus een half uur
+  if (m.datum === nl.datum && nu >= na && nu - na < 6 * uur) for (const [n, l] of open) literMelding(`liters-wd-${m.datum}`, n, l);
 }
 
 /* 6. Verjaardagen (vanaf 09:00) */
@@ -112,11 +179,16 @@ console.log(`${te.length} melding(en) voor ${abonnementen.length} telefoon(s)`);
 const weg = new Set();
 for (const m of te) {
   const payload = JSON.stringify({ title: m.title, body: m.body, url: m.url, tag: m.id });
-  await Promise.all(abonnementen.map(s => webpush.sendNotification(s, payload, { TTL: 6 * 3600 }).catch(e => {
+  const doel = m.voor ? abonnementen.filter(a => m.voor.some(n => n.toLowerCase() === String(a.naam || "").toLowerCase())) : abonnementen;
+  const zuiver = a => ({ endpoint: a.endpoint, keys: a.keys });
+  await Promise.all(doel.map(s => webpush.sendNotification(zuiver(s), payload, { TTL: 6 * 3600 }).catch(e => {
     if (e.statusCode === 404 || e.statusCode === 410) weg.add(s.endpoint); else console.log("Fout", e.statusCode, e.body);
   })));
+  /* Persoonlijke melding zonder telefoon van die persoon: niet als verstuurd markeren,
+     zodat hij alsnog komt als diegene later (binnen de tijd) meldingen aanzet */
+  if (m.voor && !doel.length) continue;
   status.verzonden[m.id] = nu.toISOString();
-  console.log("Verstuurd:", m.id, m.title);
+  console.log("Verstuurd:", m.id, m.title, doel.length ? `(${doel.length} telefoon${doel.length === 1 ? "" : "s"})` : "");
 }
 if (weg.size) await fetch(API, { method: "POST", body: JSON.stringify({ type: "push-weg", pushcode: geheim.pushcode, endpoints: [...weg] }) }).catch(() => {});
 /* Oude meldingen (ouder dan 60 dagen) uit de status halen */

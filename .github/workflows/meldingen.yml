@@ -4,6 +4,8 @@ on:
   schedule:
     # Elk kwartier van ca. 07:00 tot 00:00 NL-tijd (tijden in UTC)
     - cron: "5,20,35,50 6-22 * * *"
+    # Donderdagavond 23:15 NL-tijd (liters-herinnering), zomer- en wintertijd
+    - cron: "16 21,22 * * 4"
   # Meteen na een competitie-update (nieuwe uitslag)
   workflow_run:
     workflows: ["Competitie bijwerken"]

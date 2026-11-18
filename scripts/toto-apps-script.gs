@@ -24,7 +24,7 @@ function tab_(naam, kop) {
 const voorspTab_ = () => tab_("Voorspellingen", ["Tijdstempel", "Naam", "Doelpunten Kamelen", "Doelpunten tegenstander", "Wedstrijd", "Aftrap"]);
 const stemTab_ = () => tab_("Stemmen", ["Tijdstempel", "Stemmer", "Kameel", "Ezel", "Wedstrijd", "Sluit"]);
 const sluitTab_ = () => tab_("Gesloten", ["Tijdstempel", "Wedstrijd", "Status"]);
-const pushTab_ = () => tab_("Push", ["Tijdstempel", "Endpoint", "Abonnement"]);
+const pushTab_ = () => tab_("Push", ["Tijdstempel", "Endpoint", "Abonnement", "Naam"]);
 const fotoTab_ = () => tab_("Fotos", ["Tijdstempel", "Bestand-id", "Bijschrift", "Door"]);
 const quoteTab_ = () => tab_("Quotes", ["Tijdstempel", "Id", "Wie", "Quote", "Context", "Door"]);
 function fotoMap_() {
@@ -114,7 +114,7 @@ function doGet(e) {
   /* Alleen de meldingen-robot (met de pushcode) krijgt de abonnementen te zien */
   if (e && e.parameter && e.parameter.push) {
     if (e.parameter.push !== PUSHCODE) return json_({ ok: false, fout: "pushcode" });
-    const abonnementen = pushTab_().getDataRange().getValues().slice(1).map(r => { try { return JSON.parse(r[2]); } catch (x) { return null; } }).filter(Boolean);
+    const abonnementen = pushTab_().getDataRange().getValues().slice(1).map(r => { try { const a = JSON.parse(r[2]); a.naam = String(r[3] || ""); return a; } catch (x) { return null; } }).filter(Boolean);
     return json_({ ok: true, abonnementen });
   }
   const nu = new Date();
@@ -164,8 +164,9 @@ function doPost(e) {
         const rij = pushRij_(endpoint);
         if (d.type === "push-uit") { if (rij) pushTab_().deleteRow(rij); return json_({ ok: true }); }
         const tekst = JSON.stringify({ endpoint, keys: { p256dh: String((sub.keys || {}).p256dh || "").slice(0, 200), auth: String((sub.keys || {}).auth || "").slice(0, 100) } });
-        if (rij) pushTab_().getRange(rij, 1, 1, 3).setValues([[new Date(), endpoint, tekst]]);
-        else pushTab_().appendRow([new Date(), endpoint, tekst]);
+        const wie = speler_(d.code);   // zo weet de meldingen-robot van wie deze telefoon is
+        if (rij) pushTab_().getRange(rij, 1, 1, 4).setValues([[new Date(), endpoint, tekst, wie]]);
+        else pushTab_().appendRow([new Date(), endpoint, tekst, wie]);
         return json_({ ok: true });
       }
       /* Robot ruimt verlopen abonnementen op */
