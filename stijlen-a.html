@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stijl A: vijf indelingen · Kamelen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#163650;--ink2:#2c4b63;--muted:#5e6f7c;--line:#e3e9ee;--sky:#b9d8e8;--sky-l:#e6f1f7;--or:#f08c1c;--or-d:#b85a08;--or-l:#fff3e4;--paper:#f6f4ef;--win:#2f8a57;
+  --serif:"DM Serif Display",Georgia,serif;--sans:"DM Sans",system-ui,sans-serif;--sh:0 1px 2px rgba(22,54,80,.06),0 10px 26px -18px rgba(22,54,80,.4)}
+*{box-sizing:border-box}
+body{margin:0;background:#e9eef2;font-family:var(--sans);color:var(--ink)}
+.intro{max-width:1000px;margin:0 auto;padding:28px 20px 6px}
+.intro h1{font-family:var(--serif);font-weight:400;font-size:2rem;margin:0 0 6px}
+.intro p{margin:0;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:28px;max-width:1800px;margin:0 auto;padding:20px}
+.opt h2{font-family:var(--serif);font-weight:400;font-size:1.35rem;margin:0 0 2px}
+.opt > p{margin:0 0 12px;color:var(--muted);font-size:.92rem;min-height:2.6em}
+.phone{border-radius:30px;overflow:hidden;background:#f4f6f8;border:1px solid #cfd9e0;box-shadow:0 30px 60px -40px rgba(22,54,80,.6);max-width:380px}
+.serif{font-family:var(--serif);font-weight:400}
+.f{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:5px;background:var(--win);color:#fff;font-size:.7rem;font-weight:700;margin-right:3px}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.tabbar{display:grid;grid-template-columns:repeat(5,1fr);background:#fff;border-top:1px solid var(--line);padding:8px 0 14px;font-size:.68rem;text-align:center;color:var(--muted)}
+.tabbar b{display:block;width:18px;height:18px;margin:0 auto 3px;border:1.6px solid currentColor;border-radius:5px}
+.tabbar .on{color:var(--or-d)}
+
+/* ---------- 1. Clubblad ---------- */
+.v1 .phone{background:var(--paper)}
+.v1 .mast{text-align:center;padding:22px 18px 14px;border-bottom:1px solid #ddd6c8}
+.v1 .mast img{width:64px}
+.v1 .mast h3{font-family:var(--serif);font-weight:400;font-size:2.6rem;letter-spacing:.02em;margin:4px 0 0;line-height:1}
+.v1 .mast .s{font-size:.8rem;color:var(--muted);margin-top:4px}
+.v1 .feature{padding:18px 20px 20px;border-bottom:1px solid #ddd6c8}
+.v1 .kick{font-size:.82rem;color:var(--or-d);font-weight:600}
+.v1 .feature h4{font-family:var(--serif);font-weight:400;font-size:1.9rem;line-height:1.1;margin:6px 0 8px}
+.v1 .feature h4 em{color:var(--or-d)}
+.v1 .feature p{margin:0;font-size:.95rem;line-height:1.5;color:var(--ink2)}
+.v1 .cd{display:flex;gap:18px;margin-top:14px}
+.v1 .cd div{font-size:.75rem;color:var(--muted)}
+.v1 .cd span{display:block;font-family:var(--serif);font-size:1.9rem;color:var(--ink);line-height:1}
+.v1 .notes{padding:6px 20px 18px}
+.v1 .note{display:grid;grid-template-columns:1fr auto;padding:11px 0;border-bottom:1px solid #e3ddd1;font-size:.95rem}
+.v1 .note b{font-family:var(--serif);font-weight:400;font-size:1.15rem}
+.v1 .birthday{margin:0 20px 18px;padding:10px 12px;background:#fff;border-left:3px solid var(--or);font-size:.88rem}
+
+/* ---------- 2. Kaartjes, verfijnd ---------- */
+.v2 .hero{background:linear-gradient(180deg,#d3e7f1,var(--sky));padding:20px 18px 18px;display:flex;gap:14px;align-items:center}
+.v2 .hero img{width:74px}
+.v2 .hero h3{font-family:var(--serif);font-weight:400;font-size:2.4rem;margin:0;line-height:1}
+.v2 .hero .s{font-size:.82rem;color:var(--ink2)}
+.v2 .match{margin:-2px 14px 0;transform:translateY(-6px);background:var(--ink);color:#fff;border-radius:18px;padding:18px;box-shadow:var(--sh)}
+.v2 .lbl{color:var(--or);font-size:.82rem;font-weight:600}
+.v2 .teams{display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 14px;font-family:var(--serif);font-size:1.5rem}
+.v2 .teams .o{color:var(--or)}
+.v2 .teams i{font-family:var(--sans);font-style:normal;font-size:.75rem;opacity:.5}
+.v2 .cd{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.v2 .cd div{background:rgba(255,255,255,.07);border-radius:12px;padding:8px 0;text-align:center;font-size:.7rem;color:rgba(255,255,255,.7)}
+.v2 .cd span{display:block;font-family:var(--serif);font-size:1.6rem;color:var(--or)}
+.v2 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:8px 14px 14px}
+.v2 .tile{background:#fff;border-radius:14px;padding:12px 14px;box-shadow:var(--sh)}
+.v2 .tile .k{font-size:.78rem;color:var(--muted)}
+.v2 .tile .big{font-family:var(--serif);font-size:1.6rem;line-height:1.1}
+.v2 .tile .s{font-size:.78rem;color:var(--muted)}
+
+/* ---------- 3. Wedstrijdposter ---------- */
+.v3 .poster{background:var(--ink);color:#fff;padding:20px 20px 24px;position:relative;overflow:hidden}
+.v3 .poster .top{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:rgba(255,255,255,.7)}
+.v3 .poster img{width:46px}
+.v3 .poster .vs{font-family:var(--serif);font-size:2.7rem;line-height:.98;margin:22px 0 14px}
+.v3 .poster .vs i{display:block;font-style:italic;font-size:1.2rem;color:rgba(255,255,255,.55);margin:6px 0}
+.v3 .poster .vs .o{color:var(--or)}
+.v3 .poster .when{font-size:.95rem;color:rgba(255,255,255,.85)}
+.v3 .poster .big{font-family:var(--serif);font-size:3.4rem;line-height:1;color:var(--or);margin-top:16px}
+.v3 .poster .big small{font-family:var(--sans);font-size:.85rem;color:rgba(255,255,255,.7);margin-left:6px}
+.v3 .strip{display:flex;gap:10px;overflow-x:auto;padding:14px;scrollbar-width:none}
+.v3 .chip{flex:0 0 auto;background:#fff;border-radius:14px;padding:10px 14px;box-shadow:var(--sh);min-width:130px}
+.v3 .chip .k{font-size:.75rem;color:var(--muted)}
+.v3 .chip .big{font-family:var(--serif);font-size:1.45rem}
+.v3 .sect{margin:0 14px 14px;background:#fff;border-radius:14px;box-shadow:var(--sh);overflow:hidden}
+.v3 .sect h4{font-family:var(--serif);font-weight:400;font-size:1.2rem;margin:0;padding:12px 14px 4px}
+.v3 .row{display:grid;grid-template-columns:1.5rem 1fr auto;padding:9px 14px;border-top:1px solid var(--line);font-size:.92rem}
+.v3 .row.us{background:var(--or-l)}
+
+/* ---------- 4. Licht en luchtig ---------- */
+.v4 .phone{background:#fff}
+.v4 .hero{padding:22px 20px 6px;display:flex;justify-content:space-between;align-items:center}
+.v4 .hero h3{font-family:var(--serif);font-weight:400;font-size:2.2rem;margin:0}
+.v4 .hero img{width:58px}
+.v4 .hello{padding:0 20px 14px;color:var(--muted);font-size:.95rem}
+.v4 .match{margin:0 14px;background:var(--sky-l);border:1px solid #cfe2ec;border-radius:20px;padding:18px}
+.v4 .match .lbl{font-size:.82rem;color:var(--muted)}
+.v4 .match .teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin:12px 0;text-align:center}
+.v4 .crest{width:46px;height:46px;border-radius:50%;margin:0 auto 6px;display:grid;place-items:center;font-family:var(--serif);font-size:1.2rem;background:#fff;border:1px solid #cfe2ec}
+.v4 .crest.o{background:var(--or);color:#fff;border:0}
+.v4 .teams .n{font-weight:600;font-size:.9rem}
+.v4 .teams .t{font-family:var(--serif);font-size:1.6rem}
+.v4 .cdl{text-align:center;font-size:.9rem;color:var(--ink2)}
+.v4 .cdl b{font-family:var(--serif);font-weight:400;font-size:1.25rem;color:var(--or-d)}
+.v4 .three{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:16px 14px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.v4 .three div{padding:12px 10px;text-align:center;border-left:1px solid var(--line)}
+.v4 .three div:first-child{border-left:0}
+.v4 .three .big{font-family:var(--serif);font-size:1.6rem}
+.v4 .three .k{font-size:.75rem;color:var(--muted)}
+.v4 .lst{margin:0 14px 16px}
+.v4 .lst .r{display:flex;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--line);font-size:.95rem}
+.v4 .lst .r span:last-child{color:var(--muted)}
+
+/* ---------- 5. Tijdlijn ---------- */
+.v5 .hero{background:var(--sky);padding:18px 18px 16px;display:flex;align-items:center;gap:12px}
+.v5 .hero img{width:56px}
+.v5 .hero h3{font-family:var(--serif);font-weight:400;font-size:2rem;margin:0}
+.v5 .tl{padding:18px 18px 8px 18px;position:relative}
+.v5 .tl::before{content:"";position:absolute;left:31px;top:26px;bottom:20px;width:2px;background:#d6e1e8}
+.v5 .it{display:grid;grid-template-columns:28px 1fr;gap:12px;margin-bottom:16px;position:relative}
+.v5 .dot{width:28px;height:28px;border-radius:50%;background:#fff;border:2px solid #d6e1e8;display:grid;place-items:center;font-size:.7rem;font-weight:700;z-index:1}
+.v5 .dot.w{background:var(--win);border-color:var(--win);color:#fff}
+.v5 .dot.n{background:var(--or);border-color:var(--or)}
+.v5 .card{background:#fff;border-radius:14px;padding:12px 14px;box-shadow:var(--sh)}
+.v5 .card .k{font-size:.78rem;color:var(--muted)}
+.v5 .card .t{font-family:var(--serif);font-size:1.3rem;line-height:1.15;margin-top:2px}
+.v5 .card.next{background:var(--ink);color:#fff}
+.v5 .card.next .k{color:var(--or)}
+.v5 .card.next .cd{display:flex;gap:14px;margin-top:10px;font-size:.72rem;color:rgba(255,255,255,.7)}
+.v5 .card.next .cd span{display:block;font-family:var(--serif);font-size:1.5rem;color:#fff;line-height:1}
+.v5 .mini{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 18px 16px}
+.v5 .mini div{background:#fff;border-radius:12px;padding:10px 12px;box-shadow:var(--sh);font-size:.78rem;color:var(--muted)}
+.v5 .mini b{display:block;font-family:var(--serif);font-weight:400;font-size:1.3rem;color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="intro">
+  <h1>Stijl A, vijf indelingen</h1>
+  <p>Allemaal met de sierlijke koppen van stijl A en dezelfde inhoud. Het verschil zit in hoe de homepagina is opgebouwd.</p>
+</div>
+<div class="grid">
+
+<section class="opt v1">
+  <h2>1. Clubblad</h2>
+  <p>Als de voorpagina van een clubblad: gecentreerde kop, de wedstrijd als hoofdartikel, de rest als korte berichten.</p>
+  <div class="phone">
+    <div class="mast"><img src="logo.png" alt=""><h3>Kamelen</h3><div class="s">GCHC Heren 13, Reserve 1e klasse</div></div>
+    <div class="feature">
+      <div class="kick">Zondag 22 november, 09:00</div>
+      <h4>Uit naar GHBS H13, de <em>zesde zege</em> op rij?</h4>
+      <p>Veld 3, Corpus den Hoorn. GHBS staat 9e en won thuis drie van de vijf.</p>
+      <div class="cd"><div><span>4</span>dagen</div><div><span>06</span>uur</div><div><span>25</span>min</div></div>
+    </div>
+    <div class="birthday">Nick wordt over 6 dagen jarig</div>
+    <div class="notes">
+      <div class="note"><span>Laatste uitslag</span><b>4-1 tegen Eemsmond</b></div>
+      <div class="note"><span>Stand</span><b>3e, 16 punten</b></div>
+      <div class="note"><span>Topscorer</span><b>Jon, 4 goals</b></div>
+      <div class="note"><span>Literkoning</span><b>Malcolm, 11,25 L</b></div>
+    </div>
+    <div class="tabbar"><span class="on"><b></b>Home</span><span><b></b>Wedstrijden</span><span><b></b>Stand</span><span><b></b>Toto</span><span><b></b>Meer</span></div>
+  </div>
+</section>
+
+<section class="opt v2">
+  <h2>2. Kaartjes, verfijnd</h2>
+  <p>De indeling van nu, maar rustiger: de wedstrijd als zwevende kaart over de kop, daaronder vier nette vakjes.</p>
+  <div class="phone">
+    <div class="hero"><img src="logo.png" alt=""><div><h3>Kamelen</h3><div class="s">GCHC Heren 13</div></div></div>
+    <div style="background:linear-gradient(180deg,var(--sky) 0 40%,transparent 40%)"><div class="match">
+      <div class="lbl">Volgende wedstrijd, over 4 dagen</div>
+      <div class="teams"><span>GHBS H13</span><i>tegen</i><span class="o">Kamelen</span></div>
+      <div class="cd"><div><span>4</span>dagen</div><div><span>06</span>uur</div><div><span>25</span>min</div><div><span>04</span>sec</div></div>
+    </div></div>
+    <div class="tiles">
+      <div class="tile"><div class="k">Laatste uitslag</div><div class="big">4-1</div><div class="s">tegen Eemsmond</div></div>
+      <div class="tile"><div class="k">Stand</div><div class="big">3e</div><div><span class="f">W</span><span class="f">W</span><span class="f">W</span><span class="f">W</span><span class="f">W</span></div></div>
+      <div class="tile"><div class="k">Topscorer</div><div class="big">Jon</div><div class="s">4 doelpunten</div></div>
+      <div class="tile"><div class="k">Literkoning</div><div class="big">Malcolm</div><div class="s">11,25 liter</div></div>
+    </div>
+    <div class="tabbar"><span class="on"><b></b>Home</span><span><b></b>Wedstrijden</span><span><b></b>Stand</span><span><b></b>Toto</span><span><b></b>Meer</span></div>
+  </div>
+</section>
+
+<section class="opt v3">
+  <h2>3. Wedstrijdposter</h2>
+  <p>De volgende wedstrijd vult het hele scherm als een affiche. De rest schuif je opzij of scroll je naar beneden.</p>
+  <div class="phone">
+    <div class="poster">
+      <div class="top"><span>Speelronde 10</span><img src="logo.png" alt=""></div>
+      <div class="vs">GHBS H13<i>tegen</i><span class="o">Kamelen</span></div>
+      <div class="when">Zondag 22 november, 09:00, uit<br>Veld 3, Corpus den Hoorn</div>
+      <div class="big">4 dagen<small>en 6 uur</small></div>
+    </div>
+    <div class="strip">
+      <div class="chip"><div class="k">Laatste uitslag</div><div class="big">4-1 W</div></div>
+      <div class="chip"><div class="k">Stand</div><div class="big">3e</div></div>
+      <div class="chip"><div class="k">Topscorer</div><div class="big">Jon</div></div>
+      <div class="chip"><div class="k">Literkoning</div><div class="big">Malcolm</div></div>
+    </div>
+    <div class="sect"><h4>Stand</h4>
+      <div class="row"><span class="muted">1</span><span>Sneek H1</span><b class="num">22</b></div>
+      <div class="row"><span class="muted">2</span><span>GHBS H14</span><b class="num">18</b></div>
+      <div class="row us"><span class="muted">3</span><span>Kamelen</span><b class="num">16</b></div>
+    </div>
+    <div class="tabbar"><span class="on"><b></b>Home</span><span><b></b>Wedstrijden</span><span><b></b>Stand</span><span><b></b>Toto</span><span><b></b>Meer</span></div>
+  </div>
+</section>
+
+<section class="opt v4">
+  <h2>4. Licht en luchtig</h2>
+  <p>Veel wit en lichtblauw, geen donkere blokken. Een rustige, frisse app met de wedstrijd als zacht blauw kaartje.</p>
+  <div class="phone">
+    <div class="hero"><h3>Kamelen</h3><img src="logo.png" alt=""></div>
+    <div class="hello">Nog 4 dagen tot de volgende wedstrijd. Nick is over 6 dagen jarig.</div>
+    <div class="match">
+      <div class="lbl">Zondag 22 november, 09:00</div>
+      <div class="teams"><div><div class="crest">G</div><div class="n">GHBS H13</div></div><div class="t">tegen</div><div><div class="crest o">K</div><div class="n">Kamelen</div></div></div>
+      <div class="cdl">Aftrap over <b>4 d 06 u 25 m</b></div>
+    </div>
+    <div class="three">
+      <div><div class="big">3e</div><div class="k">in de stand</div></div>
+      <div><div class="big">4-1</div><div class="k">laatste uitslag</div></div>
+      <div><div class="big">16</div><div class="k">punten</div></div>
+    </div>
+    <div class="lst">
+      <div class="r"><span>Topscorer</span><span>Jon, 4</span></div>
+      <div class="r"><span>Literkoning</span><span>Malcolm, 11,25 L</span></div>
+      <div class="r"><span>Kameel van de dag</span><span>stemmen loopt</span></div>
+    </div>
+    <div class="tabbar"><span class="on"><b></b>Home</span><span><b></b>Wedstrijden</span><span><b></b>Stand</span><span><b></b>Toto</span><span><b></b>Meer</span></div>
+  </div>
+</section>
+
+<section class="opt v5">
+  <h2>5. Tijdlijn</h2>
+  <p>Home als verhaal van het seizoen: vorige wedstrijd, volgende wedstrijd en wat er daarna komt, onder elkaar.</p>
+  <div class="phone">
+    <div class="hero"><img src="logo.png" alt=""><h3>Kamelen</h3></div>
+    <div class="tl">
+      <div class="it"><div class="dot w">W</div><div class="card"><div class="k">Di 17 november, thuis</div><div class="t">4-1 tegen Eemsmond</div></div></div>
+      <div class="it"><div class="dot n"></div><div class="card next"><div class="k">Volgende, zo 22 november 09:00</div><div class="t">GHBS H13 uit</div><div class="cd"><div><span>4</span>dagen</div><div><span>06</span>uur</div><div><span>25</span>min</div></div></div></div>
+      <div class="it"><div class="dot"></div><div class="card"><div class="k">Zo 29 november 15:30, thuis</div><div class="t">Leeuwarden H2</div></div></div>
+    </div>
+    <div class="mini"><div><b>3e</b>16 punten</div><div><b>Jon</b>topscorer, 4</div></div>
+    <div class="tabbar"><span class="on"><b></b>Home</span><span><b></b>Wedstrijden</span><span><b></b>Stand</span><span><b></b>Toto</span><span><b></b>Meer</span></div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>
