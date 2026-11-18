@@ -53,13 +53,16 @@
 
   function render() {
     box.innerHTML = `
-      <div class="rad-wrap">${svg()}</div>
+      <div class="rad-wrap" id="rad-wrap" role="button" tabindex="0" aria-label="Draai aan het rad">${svg()}</div>
       <div class="rad-uitslag" id="rad-uitslag" role="status" aria-live="polite">${verdubbelaar ? `<span class="rad-x">Verdubbelaar actief: ×${2 ** verdubbelaar}</span>` : `<span class="muted">Tik op de knop en laat het rad beslissen.</span>`}</div>
       <div class="rad-knoppen"><button type="button" class="btn rad-knop" id="rad-draai">Draai aan het rad</button></div>
       ${geschiedenis.length ? `<div class="rad-hist"><h3 class="sub-h">Eerder vanavond</h3><ol>${geschiedenis.slice(0, 8).map(g => `<li>${g}</li>`).join("")}</ol></div>` : ""}`;
     const wiel = document.getElementById("rad-wiel");
     wiel.style.transform = `rotate(${draai}deg)`;
     document.getElementById("rad-draai").addEventListener("click", spin);
+    const wrap = document.getElementById("rad-wrap");
+    wrap.addEventListener("click", spin);
+    wrap.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); spin(); } });
   }
 
   function spin() {
