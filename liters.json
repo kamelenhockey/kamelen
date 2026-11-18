@@ -1,5 +1,5 @@
 {
- "bijgewerkt": "2026-11-17T20:45:16.862Z",
+ "bijgewerkt": "2026-11-18T20:45:26.545Z",
  "naamCorrecties": {
   "Boudwijn": "Boudewijn"
  },
@@ -190,7 +190,14 @@
    "naam": "Snack ",
    "datum": "13 nov training",
    "reden": "100man weglopen",
-   "hoeveel": "stille meter ",
+   "hoeveel": "1L",
+   "status": ""
+  },
+  {
+   "naam": "Jesse",
+   "datum": "17 nov wedstrijd",
+   "reden": "Ezel van de dag (tegen Eemsmond H1)",
+   "hoeveel": "1L",
    "status": ""
   }
  ]
