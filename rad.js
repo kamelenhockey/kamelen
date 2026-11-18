@@ -4,21 +4,26 @@
    ========================================================= */
 (function () {
   const box = document.getElementById("rad"); if (!box) return;
+  /* Volgorde door elkaar. Smalle vakjes (kleine kans): Huis, Liter toevoegen en Dubbelloops. */
   const VAKKEN = [
     { kort: "Aanvoerdersbak", tekst: "Aanvoerdersbak (ook oud-aanvoerders)" },
-    { kort: "Aanvoerders delen uit", tekst: "Aanvoerders (ook oud-aanvoerders) mogen een bak uitdelen" },
-    { kort: "Coachbak", tekst: "Coachbak" },
-    { kort: "Feutenbak", tekst: "Feutenbak" },
-    { kort: "Verdedigersbak", tekst: "Verdedigersbak" },
-    { kort: "Middenveldbak", tekst: "Middenveldbak" },
-    { kort: "Aanvalbak", tekst: "Aanvalbak" },
-    { kort: "Keepersbak", tekst: "Keepersbak" },
     { kort: "Zelf halve leo", tekst: "Zelf een halve leo" },
-    { kort: "Zelf bak", tekst: "Zelf een bak" },
-    { kort: "Bak uitdelen", tekst: "Bak uitdelen" },
-    { kort: "HUIS", tekst: "HUIS!", gewicht: .3, huis: true },
-    { kort: "Nog een keer", tekst: "Nog een keer draaien", opnieuw: true },
+    { kort: "Middenveldbak", tekst: "Middenveldbak" },
     { kort: "Nog een keer ×2", tekst: "Nog een keer draaien én verdubbelaar", opnieuw: true, dubbel: true },
+    { kort: "Keepersbak", tekst: "Keepersbak" },
+    { kort: "Bak uitdelen", tekst: "Bak uitdelen" },
+    { kort: "HUIS", tekst: "HUIS!", gewicht: .3, huis: true, kleur: "#c0392b" },
+    { kort: "Nog een keer", tekst: "Nog een keer draaien", opnieuw: true },
+    { kort: "Feutenbak", tekst: "Feutenbak" },
+    { kort: "Aanvoerders delen uit", tekst: "Aanvoerders (ook oud-aanvoerders) mogen een bak uitdelen" },
+    { kort: "Halve leo uitdelen", tekst: "Halve leo uitdelen" },
+    { kort: "LITER", tekst: "Liter toevoegen! Er komt een liter bij in het Liter-incassobureau.", gewicht: .35, klein: true, kleur: "#d4a017" },
+    { kort: "Verdedigersbak", tekst: "Verdedigersbak" },
+    { kort: "Coachbak", tekst: "Coachbak" },
+    { kort: "Dubbelloops uitdelen", tekst: "Dubbelloops uitdelen" },
+    { kort: "DUBBELLOOPS", tekst: "Dubbelloops! Zelf twee tegelijk.", gewicht: .35, klein: true, kleur: "#6b4fa0" },
+    { kort: "Zelf bak", tekst: "Zelf een bak" },
+    { kort: "Aanvalbak", tekst: "Aanvalbak" },
     { kort: "Veteranenbak", tekst: "Veteranenbak (wie er het langst bij zit)" }
   ];
   const KLEUREN = ["#163650", "#f08c1c", "#b9d8e8", "#2c4b63", "#f6b46a", "#e6f1f7"];
@@ -38,11 +43,11 @@
     return `<svg viewBox="0 0 400 400" class="rad-svg" aria-hidden="true">
       <g id="rad-wiel">
         ${VAKKEN.map(v => {
-          const kleur = v.huis ? "#c0392b" : KLEUREN[k++ % KLEUREN.length];
+          const kleur = v.kleur || KLEUREN[k++ % KLEUREN.length];
           const mid = (v.van + v.tot) / 2;
-          const tk = v.huis ? "#fff" : TEKSTKLEUR[kleur];
+          const tk = v.kleur ? "#fff" : TEKSTKLEUR[kleur];
           return `<path d="${vakPad(v)}" fill="${kleur}" stroke="#fff" stroke-width="2"/>
-            <text transform="rotate(${(mid - 90).toFixed(2)} 200 200)" x="${v.huis ? 376 : 378}" y="200" dominant-baseline="middle" fill="${tk}" font-size="${v.huis ? 10 : 13}" font-weight="700" text-anchor="end" style="font-family:'DM Sans',system-ui,sans-serif">${v.kort}</text>`;
+            <text transform="rotate(${(mid - 90).toFixed(2)} 200 200)" x="${v.kleur ? 376 : 378}" y="200" dominant-baseline="middle" fill="${tk}" font-size="${v.kleur ? 8.5 : 11.5}" font-weight="700" text-anchor="end" style="font-family:'DM Sans',system-ui,sans-serif">${v.kort}</text>`;
         }).join("")}
         <circle cx="200" cy="200" r="190" fill="none" stroke="#163650" stroke-width="6"/>
       </g>
@@ -87,7 +92,7 @@
     bezig = false;
     const uit = document.getElementById("rad-uitslag"), knop = document.getElementById("rad-draai");
     knop.disabled = false;
-    try { navigator.vibrate?.(vak.huis ? [80, 60, 80, 60, 200] : 60); } catch {}
+    try { navigator.vibrate?.(vak.huis || vak.klein ? [80, 60, 80, 60, 200] : 60); } catch {}
     let tekst;
     if (vak.opnieuw) {
       if (vak.dubbel) verdubbelaar++;
@@ -97,7 +102,7 @@
     } else {
       const x = verdubbelaar ? 2 ** verdubbelaar : 1;
       tekst = x > 1 ? `${vak.tekst} <b class="rad-x">×${x}</b>` : vak.tekst;
-      uit.innerHTML = `<div class="rad-res${vak.huis ? " huis" : ""}">${tekst}</div>${vak.huis ? `<p>Al het bier op tafel (behalve de pitchers)!</p>` : ""}`;
+      uit.innerHTML = `<div class="rad-res${vak.huis ? " huis" : vak.klein ? " klein" : ""}" ${vak.kleur ? `style="color:${vak.kleur}"` : ""}>${tekst}</div>${vak.huis ? `<p>Al het bier op tafel (behalve de pitchers)!</p>` : ""}`;
       verdubbelaar = 0;
       knop.textContent = "Draai aan het rad";
     }
