@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kies een stijl · Kamelen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,400..700&family=Plus+Jakarta+Sans:wght@400..800&family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@600;700&family=Figtree:wght@400..800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#e9eef2;font-family:system-ui,sans-serif;color:#163650}
+.intro{max-width:900px;margin:0 auto;padding:28px 20px 8px}
+.intro h1{margin:0 0 6px;font-size:1.6rem}
+.intro p{margin:0;color:#5e6f7c}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px;max-width:1240px;margin:0 auto;padding:20px}
+.opt h2{font-size:1.1rem;margin:0 0 4px}
+.opt > p{margin:0 0 12px;color:#5e6f7c;font-size:.92rem}
+.phone{border-radius:28px;overflow:hidden;background:var(--bg);border:1px solid #cfd9e0;box-shadow:0 30px 60px -40px rgba(22,54,80,.6);font-family:var(--body);color:var(--ink)}
+.hero{background:var(--hero);padding:20px 18px;display:flex;gap:14px;align-items:center}
+.hero img{width:76px}
+.wm{font-family:var(--display);font-weight:var(--dw);font-size:2.3rem;line-height:1;letter-spacing:var(--dls);margin:0}
+.lg{font-size:.85rem;color:#3f5a6e;margin-top:4px}
+.banner{margin:0 14px 14px;background:#fff;border-radius:var(--r);padding:12px 14px;display:flex;gap:10px;align-items:center;font-size:.9rem;box-shadow:var(--sh)}
+.banner b{display:block}
+.match{background:var(--ink);color:#fff;padding:20px 18px}
+.lbl{color:var(--accent);font-weight:600;font-size:.85rem}
+.teams{display:flex;justify-content:space-between;align-items:center;margin:10px 0 14px;font-family:var(--display);font-weight:var(--dw);font-size:1.45rem;letter-spacing:var(--dls)}
+.teams .ours{color:var(--accent)}
+.teams .vs{font-family:var(--body);font-size:.8rem;opacity:.5}
+.cd{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.cd div{background:rgba(255,255,255,.07);border-radius:var(--r);padding:10px 0;text-align:center}
+.cd .v{display:block;font-family:var(--num);font-weight:700;font-size:1.7rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.cd .l{font-size:.72rem;opacity:.7}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+.tile{background:#fff;border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh)}
+.tile .k{font-size:.8rem;color:#5e6f7c}
+.tile .big{font-family:var(--num);font-weight:700;font-size:1.6rem;line-height:1.1;margin-top:2px}
+.tile .s{font-size:.8rem;color:#5e6f7c}
+.f{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:5px;background:#2f8a57;color:#fff;font-size:.7rem;font-weight:700;margin-right:3px}
+.list{margin:0 14px 18px;background:#fff;border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.list h3{font-family:var(--display);font-weight:var(--dw);letter-spacing:var(--dls);font-size:1.15rem;margin:0;padding:14px 14px 6px}
+.row{display:grid;grid-template-columns:1.6rem 1fr auto;gap:8px;padding:9px 14px;border-top:1px solid #eef2f5;font-size:.92rem}
+.row .p{color:#5e6f7c}.row .pt{font-weight:700;font-variant-numeric:tabular-nums}
+.row.us{background:#fff6ea}
+/* Opties */
+.a{--display:"DM Serif Display",Georgia,serif;--body:"DM Sans",system-ui,sans-serif;--num:"DM Sans",system-ui,sans-serif;--dw:400;--dls:0;--r:14px;--sh:0 1px 2px rgba(22,54,80,.06),0 8px 24px -16px rgba(22,54,80,.35);--bg:#f4f6f8;--hero:linear-gradient(180deg,#cfe4ef,#b9d8e8);--ink:#163650;--accent:#f39a35}
+.b{--display:"Plus Jakarta Sans",system-ui,sans-serif;--body:"Plus Jakarta Sans",system-ui,sans-serif;--num:"Plus Jakarta Sans",system-ui,sans-serif;--dw:800;--dls:-.02em;--r:18px;--sh:0 10px 30px -20px rgba(22,54,80,.45);--bg:#f1f5f8;--hero:#b9d8e8;--ink:#163650;--accent:#f08c1c}
+.c{--display:"Barlow Semi Condensed",system-ui,sans-serif;--body:"Barlow",system-ui,sans-serif;--num:"Barlow Semi Condensed",system-ui,sans-serif;--dw:700;--dls:0;--r:10px;--sh:0 1px 0 #dbe4ea;--bg:#eef3f6;--hero:#b9d8e8;--ink:#163650;--accent:#f08c1c}
+.d{--display:"Figtree",system-ui,sans-serif;--body:"Figtree",system-ui,sans-serif;--num:"Figtree",system-ui,sans-serif;--dw:800;--dls:-.01em;--r:14px;--sh:0 1px 2px rgba(22,54,80,.08);--bg:#f2f5f7;--hero:#b9d8e8;--ink:#163650;--accent:#f08c1c}
+</style>
+</head>
+<body>
+<div class="intro">
+  <h1>Welke stijl vind je het mooist?</h1>
+  <p>Vier voorbeelden met dezelfde inhoud en dezelfde clubkleuren. Alleen het lettertype en de afwerking verschillen.</p>
+</div>
+<div class="grid" id="grid"></div>
+<template id="tpl">
+  <div class="phone">
+    <div class="hero"><img src="logo.png" alt=""><div><p class="wm">KAMELEN</p><div class="lg">GCHC Heren 13 · Reserve 1e klasse</div></div></div>
+    <div style="background:var(--hero);padding-bottom:2px"><div class="banner"><span style="font-size:1.4rem">🎂</span><span><b>Nick is over 6 dagen jarig</b>Op 24 november</span></div></div>
+    <div class="match">
+      <div class="lbl">Volgende wedstrijd, over 4 dagen</div>
+      <div class="teams"><span>GHBS H13</span><span class="vs">vs</span><span class="ours">GCHC H13</span></div>
+      <div class="cd"><div><span class="v">4</span><span class="l">dagen</span></div><div><span class="v">06</span><span class="l">uur</span></div><div><span class="v">25</span><span class="l">min</span></div><div><span class="v">04</span><span class="l">sec</span></div></div>
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="k">Laatste uitslag</div><div class="big">4-1</div><div class="s">thuis tegen Eemsmond</div></div>
+      <div class="tile"><div class="k">Stand</div><div class="big">3e</div><div><span class="f">W</span><span class="f">W</span><span class="f">W</span><span class="f">W</span><span class="f">W</span></div></div>
+      <div class="tile"><div class="k">Topscorer</div><div class="big">Jon</div><div class="s">4 doelpunten</div></div>
+      <div class="tile"><div class="k">Literkoning</div><div class="big">Malcolm</div><div class="s">11,25 liter</div></div>
+    </div>
+    <div class="list"><h3>Stand</h3>
+      <div class="row"><span class="p">1</span><span>Sneek H1</span><span class="pt">22</span></div>
+      <div class="row"><span class="p">2</span><span>GHBS H14</span><span class="pt">18</span></div>
+      <div class="row us"><span class="p">3</span><span>GCHC H13</span><span class="pt">16</span></div>
+    </div>
+  </div>
+</template>
+<script>
+const opties = [
+  ["a", "A · Klassiek clubblad", "Sierlijke koppen met schreef, rustige tekst eronder. Warm en een beetje chic."],
+  ["b", "B · Zacht en modern", "Ronde, vriendelijke letter, ruime hoeken en zachte schaduwen. Zoals een fijne app."],
+  ["c", "C · Sportief", "Iets smallere koppen zoals op een scorebord, maar met een vloeiende letter. Strak en sportief."],
+  ["d", "D · Zoals eerst", "Het lettertype van vóór vandaag, met de nieuwe rustige opmaak."]
+];
+const g = document.getElementById("grid"), t = document.getElementById("tpl");
+for (const [k, naam, uitleg] of opties) {
+  const d = document.createElement("section"); d.className = "opt " + k;
+  d.innerHTML = `<h2>${naam}</h2><p>${uitleg}</p>`; d.appendChild(t.content.cloneNode(true)); g.appendChild(d);
+}
+</script>
+</body>
+</html>
