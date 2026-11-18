@@ -71,6 +71,30 @@ nav.bar ul{list-style:none;margin:0 auto;max-width:1120px;padding:0 12px;display
 nav.bar a{display:block;padding:12px 12px;color:#e9e3dd;text-decoration:none;font-weight:600;font-size:.9rem;white-space:nowrap;border-bottom:2px solid transparent}
 nav.bar a:hover{color:#fff;border-bottom-color:var(--orange)}
 
+/* ---------- Tegenstanderprofiel bij de volgende wedstrijd ---------- */
+function tegenstanderHtml(m){
+  const opp = isUs(m.thuis) ? m.uit : m.thuis, zijThuis = m.thuis === opp;
+  const st = (DATA.stand || []).find(t => t.team === opp); if (!st) return "";
+  const ts = teamStats(opp);
+  const vorm = ts.res.slice(-5).map(x => resultFor(x, opp));
+  const zij = ts.res.filter(x => (x.thuis === opp) === zijThuis);
+  const rec = l => { let w = 0, g = 0, v = 0; l.forEach(x => { const r = resultFor(x, opp); r === "W" ? w++ : r === "V" ? v++ : g++; }); return `${w}-${g}-${v}`; };
+  const een = n => (ts.gs ? (n / ts.gs).toFixed(1).replace(".", ",") : "–");
+  const onderling = (DATA.uitslagen || []).filter(x => (x.thuis === opp || x.uit === opp) && isUs(x.thuis + x.uit)).sort((a, b) => b.datum.localeCompare(a.datum))[0];
+  const us = (DATA.stand || []).find(t => isUs(t.team));
+  const verschil = us ? us.punten - st.punten : null;
+  return `<div class="md-opp">
+    <div class="md-opp-head"><div class="k">Tegenstander</div><button type="button" class="md-opp-link" data-team="${esc(opp)}">${esc(opp)} · alle wedstrijden →</button></div>
+    <div class="md-opp-grid">
+      <div><div class="k">Stand</div><div class="v">${st.positie}e · ${st.punten} pt</div><div class="s">${verschil === null ? "" : verschil > 0 ? `${verschil} pt achter ons` : verschil < 0 ? `${-verschil} pt voor ons` : "evenveel punten als wij"}</div></div>
+      <div><div class="k">Vorm</div><div class="chips">${vorm.map(badge).join("")}</div></div>
+      <div><div class="k">${zijThuis ? "Thuis" : "Uit"} (W-G-V)</div><div class="v">${rec(zij)}</div></div>
+      <div><div class="k">Doelpunten / wedstrijd</div><div class="v">${een(ts.dv)} – ${een(ts.dt)}</div><div class="s">voor – tegen</div></div>
+    </div>
+    ${onderling ? `<div class="md-opp-h2h">Vorige keer: ${esc(onderling.thuis)} – ${esc(onderling.uit)} <b>${esc(onderling.score)}</b> (${fmtShort(onderling.datum)}) ${badge(resultFor(onderling, isUs(onderling.thuis) ? onderling.thuis : onderling.uit))}</div>` : ""}
+  </div>`;
+}
+
 /* ---------- Wedstrijddag ---------- */
 .matchday{background:var(--ink);color:#fff;border-top:1px solid #234b6a}
 .matchday .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;padding-top:28px;padding-bottom:32px}
@@ -84,6 +108,16 @@ nav.bar a:hover{color:#fff;border-bottom-color:var(--orange)}
 .md-meta{display:flex;flex-wrap:wrap;gap:8px}
 .tag{display:inline-flex;align-items:center;padding:4px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);font-weight:600;font-size:.86rem}
 .tag.hot{background:var(--orange);border-color:var(--orange);color:var(--ink)}
+.md-opp{margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12)}
+.md-opp-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px}
+.md-opp .k{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.md-opp-link{background:none;border:0;padding:0;color:#ffd29a;font:inherit;font-weight:700;cursor:pointer;text-align:left}
+.md-opp-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 20px}
+@media (max-width:640px){.md-opp-grid{grid-template-columns:1fr 1fr}}
+.md-opp .v{font-weight:800;font-size:1.05rem}
+.md-opp .s{font-size:.78rem;color:rgba(255,255,255,.6)}
+.md-opp .chips{display:flex;gap:4px;margin-top:2px}
+.md-opp-h2h{margin-top:12px;font-size:.88rem;color:rgba(255,255,255,.8)}
 .md-venue{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.12)}
 .md-venue .k{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.55)}
 .md-venue .v{font-weight:700;font-size:1.05rem;line-height:1.35}
@@ -595,6 +629,18 @@ body.pong-actief .tabbar{display:none}
 .jarig-wrap{display:grid;gap:10px}
 .kz-banner.jarig{background:var(--sky,#b9d8e8)}
 .kz-banner.jarig.vandaag{background:var(--orange)}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.bdg{display:flex;gap:8px;align-items:center;padding:7px 9px;border-radius:10px;background:var(--orange-soft);border:1px solid #f3c98f}
+.bdg .ic{font-size:1.3rem;line-height:1}
+.bdg b{display:block;font-size:.8rem;line-height:1.2}
+.bdg small{display:block;font-size:.68rem;color:var(--muted);line-height:1.25}
+.bdg.uit{background:var(--bg);border-color:var(--line);opacity:.5}
+.bdg.uit .ic{filter:grayscale(1)}
+.push-card{grid-column:1/-1;padding:16px 20px}
+.push-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.push-row p{margin:4px 0 0;color:var(--muted);font-size:.88rem;max-width:62ch}
+.push-h{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.push-msg{color:var(--ink)!important;font-weight:600}
 .kz-banner.done{background:var(--orange-soft);border:1px solid #f3c98f}
 .kz-go{font-weight:800}
 .kz-open{display:grid;gap:14px}
@@ -750,6 +796,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
   <div id="jarig-banner" data-page="home" class="kz-banner-wrap jarig-wrap"></div>
   <div id="kz-banner" data-page="home" class="kz-banner-wrap"></div>
   <section class="dash" id="dash" data-page="home" aria-label="Overzicht"></section>
+  <section class="card push-card" id="push-card" data-page="home" aria-label="Meldingen"></section>
   <section class="card" id="programma" data-page="wedstrijden" aria-labelledby="h-programma">
     <div class="card-head"><div><h2 id="h-programma">Programma</h2><p>Klik op een team voor alle wedstrijden</p></div><div id="prog-toggle"></div></div>
     <details class="cal">
@@ -1063,6 +1110,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
   <a href="#mex" data-view-link="mex">Mex</a>
   <a href="#pong" data-view-link="pong">Pong teams</a>
   <a href="#regels" data-view-link="regels">Kamelen-regels</a>
+  <a href="#push-card" data-push-link>🔔 Meldingen</a>
 </div>
 <canvas id="confetti" aria-hidden="true"></canvas>
 <div class="pong-veld" id="pong-veld" hidden>
@@ -1189,7 +1237,8 @@ function renderNext(){
       ${m.tijd ? `<div class="cd" id="countdown" role="timer" aria-live="off"></div>` : ""}
       ${m.veld || m.accommodatie ? `<div class="md-venue"><div><div class="k">Veld</div><div class="v">${esc(m.veld || "n.n.b.")}</div></div>
         <div><div class="k">Locatie</div><div class="v">${esc(m.accommodatie || "")}${m.adres ? `<br><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(m.adres)}" target="_blank" rel="noopener">${esc(m.adres)}</a>` : ""}</div></div></div>` : ""}
-      <div id="md-weather"></div>`;
+      <div id="md-weather"></div>
+      ${tegenstanderHtml(m)}`;
     renderWeather(m);
     const cd = document.getElementById("countdown");
     if (cd){
@@ -1782,6 +1831,8 @@ function openPlayer(naam){
     ${[...kTitels.map(r => ["🐪", r]), ...eTitels.map(r => ["🫏", r])].sort((a, b) => b[1].m.datum.localeCompare(a[1].m.datum)).map(([ic, r]) => `<div class="prow"><span class="d">${fmtShort(r.m.datum)}</span><span>tegen ${esc(tegenVan(r.m))}</span><span>${ic} ${ic === "🐪" ? "kameel" : "ezel"}</span></div>`).join("")}</div>` : "";
   /* Toto */
   const tp = DATA.totoProfiel, tl = tp?.perSpeler.get(p.naam);
+  /* Badges */
+  const badgeHtml = p.invaller ? "" : badgesHtml(p, o, kTitels.length, eTitels.length, tp);
   let totoHtml = "";
   if (tl && tl.length){
     const plek = tp.stand.findIndex(x => x.naam === p.naam) + 1, st = tp.stand[plek - 1];
@@ -1801,13 +1852,45 @@ function openPlayer(naam){
       <div><div class="v">${sc}</div><div class="k">SC</div></div>
       <div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}</div><div class="k">Liters</div></div>
     </div>
-    ${invHtml}${opkHtml}<div class="psec"><h3 class="sub-h">Doelpunten</h3>${goalsHtml}</div>
+    ${badgeHtml}${invHtml}${opkHtml}<div class="psec"><h3 class="sub-h">Doelpunten</h3>${goalsHtml}</div>
     ${kzHtml}${totoHtml}
     <div class="psec"><h3 class="sub-h">Literboetes${p.liters && p.liters.open > 0 ? ` · ${fmtL(p.liters.open)} L open` : ""}</h3>${litHtml}</div>`;
   document.getElementById("dlg-body").scrollTop = 0;
   if (!dlg.open){ try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } }
 }
 
+
+/* ---------- Badges op het spelersprofiel ---------- */
+function badgesHtml(p, o, kameel, ezel, tp){
+  const perWedstrijd = new Map(); p.goals.forEach(g => { const k = g.match?.datum || g.label; perWedstrijd.set(k, (perWedstrijd.get(k) || 0) + 1); });
+  const maxPerWedstrijd = Math.max(0, ...perWedstrijd.values());
+  const sc = p.goals.filter(g => g.soort === "sc").length;
+  let reeks = 0, best = 0; for (const t of DATA.trAanwezig || []){ reeks = t.aanwezig.has(p.naam) ? reeks + 1 : 0; best = Math.max(best, reeks); }
+  const lit = buildRanking(DATA.liters || [], {}), litPlek = lit.findIndex(x => x.naam === p.naam);
+  const st = tp?.stand.find(x => x.naam === p.naam);
+  const seizoen = (() => { const d = new Date(); return d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1; })();
+  const lijst = [
+    ["⚽", "Eerste doelpunt", "Minstens één keer gescoord", p.goals.length >= 1],
+    ["✌️", "Dubbelslag", "Twee keer gescoord in één wedstrijd", maxPerWedstrijd >= 2],
+    ["🎩", "Hattrick", "Drie keer gescoord in één wedstrijd", maxPerWedstrijd >= 3],
+    ["🎯", "Strafcornerspecialist", "Twee of meer strafcornerdoelpunten", sc >= 2],
+    ["🛡️", "IJzeren Kameel", "Geen enkele wedstrijd gemist", !!(o && o.wT && o.wA === o.wT)],
+    ["🏋️", "Trainingsbeest", "90% of meer van de trainingen aanwezig", !!(o && o.tT >= 3 && o.tA / o.tT >= .9)],
+    ["🔥", "Vijf op rij", "Vijf trainingen achter elkaar aanwezig", best >= 5],
+    ["😇", "Engeltje", "Nog nooit een literboete", !p.liters],
+    ["🧽", "Schone lei", "Boetes gehad en alles weggewerkt", !!(p.liters && p.liters.liters >= 1 && p.liters.open === 0)],
+    ["🍺", "Literkoning", "Bovenaan het literklassement", litPlek === 0],
+    ["🐪", "Kameel van de dag", "Minstens één keer gekozen", kameel >= 1],
+    ["🫏", "Ezel van de dag", "Ook dat is een prestatie", ezel >= 1],
+    ["🔮", "Orakel", "Een uitslag precies goed voorspeld in de toto", !!(st && st.exact >= 1)],
+    ["⏰", "Laatkomer", "Te laat op training", !!(o && o.laat >= 1)],
+    ["👴", "Veteraan", "Al vijf jaar of langer Kameel", !!(p.sinds && seizoen - p.sinds >= 5)],
+    ["🌱", "Groentje", "Eerste seizoen bij de Kamelen", !!(p.sinds && p.sinds >= seizoen)],
+  ];
+  const ja = lijst.filter(b => b[3]), nee = lijst.filter(b => !b[3]);
+  return `<div class="psec"><h3 class="sub-h">Badges · ${ja.length} van ${lijst.length}</h3><div class="badges">${[...ja, ...nee].map(([ic, naam, uitleg, ok]) =>
+    `<span class="bdg${ok ? "" : " uit"}" title="${esc(uitleg)}"><span class="ic">${ic}</span><span><b>${esc(naam)}</b><small>${esc(uitleg)}</small></span></span>`).join("")}</div></div>`;
+}
 
 /* ---------- Verjaardagen ---------- */
 const MAANDEN = ["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
@@ -1989,9 +2072,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795481000"></script>
-<script src="toto.js?v=1795481000"></script>
-<script src="pong.js?v=1795481000"></script>
+<script src="mex.js?v=1795481100"></script>
+<script src="toto.js?v=1795481100"></script>
+<script src="pong.js?v=1795481100"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2000,7 +2083,8 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795481000"></script>
-<script src="statistieken.js?v=1795481000"></script>
+<script src="stemmen.js?v=1795481100"></script>
+<script src="statistieken.js?v=1795481100"></script>
+<script src="push.js?v=1795481100"></script>
 </body>
 </html>

@@ -5,6 +5,7 @@
  */
 const TEAMCODE = "VUL-HIER-JULLIE-CODE-IN";        // voor iedereen in het team
 const BEHEERCODE = "VUL-HIER-JOUW-BEHEERCODE-IN";  // alleen voor jou: stemmingen sluiten
+const PUSHCODE = "VUL-HIER-DE-PUSHCODE-IN";        // geheim voor de meldingen-robot (GitHub)
 
 function tab_(naam, kop) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -15,6 +16,12 @@ function tab_(naam, kop) {
 const voorspTab_ = () => tab_("Voorspellingen", ["Tijdstempel", "Naam", "Doelpunten Kamelen", "Doelpunten tegenstander", "Wedstrijd", "Aftrap"]);
 const stemTab_ = () => tab_("Stemmen", ["Tijdstempel", "Stemmer", "Kameel", "Ezel", "Wedstrijd", "Sluit"]);
 const sluitTab_ = () => tab_("Gesloten", ["Tijdstempel", "Wedstrijd", "Status"]);
+const pushTab_ = () => tab_("Push", ["Tijdstempel", "Endpoint", "Abonnement"]);
+function pushRij_(endpoint) {
+  const rows = pushTab_().getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) if (rows[i][1] === endpoint) return i + 1;
+  return 0;
+}
 function json_(obj) { return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON); }
 const gelijk_ = (a, b) => String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
 const naam_ = n => String(n || "").trim().slice(0, 40);
@@ -26,7 +33,13 @@ function gesloten_() {
   return Object.keys(st).filter(k => st[k] === "dicht");
 }
 
-function doGet() {
+function doGet(e) {
+  /* Alleen de meldingen-robot (met de pushcode) krijgt de abonnementen te zien */
+  if (e && e.parameter && e.parameter.push) {
+    if (e.parameter.push !== PUSHCODE) return json_({ ok: false, fout: "pushcode" });
+    const abonnementen = pushTab_().getDataRange().getValues().slice(1).map(r => { try { return JSON.parse(r[2]); } catch (x) { return null; } }).filter(Boolean);
+    return json_({ ok: true, abonnementen });
+  }
   const nu = new Date();
   const dicht = gesloten_();
   const voorspellingen = voorspTab_().getDataRange().getValues().slice(1).map(r => {
@@ -52,6 +65,23 @@ function doPost(e) {
         const w = String(d.wedstrijd || "").slice(0, 120);
         if (!w || (d.actie !== "sluit" && d.actie !== "heropen")) return json_({ ok: false, fout: "invoer" });
         sluitTab_().appendRow([new Date(), w, d.actie === "sluit" ? "dicht" : "open"]);
+        return json_({ ok: true });
+      }
+      /* Meldingen aan- of uitzetten op een telefoon */
+      if (d.type === "push-aan" || d.type === "push-uit") {
+        const sub = d.abonnement || {}, endpoint = String(sub.endpoint || "");
+        if (!/^https:\/\//.test(endpoint) || endpoint.length > 1000) return json_({ ok: false, fout: "invoer" });
+        const rij = pushRij_(endpoint);
+        if (d.type === "push-uit") { if (rij) pushTab_().deleteRow(rij); return json_({ ok: true }); }
+        const tekst = JSON.stringify({ endpoint, keys: { p256dh: String((sub.keys || {}).p256dh || "").slice(0, 200), auth: String((sub.keys || {}).auth || "").slice(0, 100) } });
+        if (rij) pushTab_().getRange(rij, 1, 1, 3).setValues([[new Date(), endpoint, tekst]]);
+        else pushTab_().appendRow([new Date(), endpoint, tekst]);
+        return json_({ ok: true });
+      }
+      /* Robot ruimt verlopen abonnementen op */
+      if (d.type === "push-weg") {
+        if (d.pushcode !== PUSHCODE) return json_({ ok: false, fout: "pushcode" });
+        (d.endpoints || []).forEach(ep => { const rij = pushRij_(ep); if (rij) pushTab_().deleteRow(rij); });
         return json_({ ok: true });
       }
       if (!gelijk_(d.code, TEAMCODE)) return json_({ ok: false, fout: "code" });

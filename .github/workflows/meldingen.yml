@@ -1,0 +1,40 @@
+name: Pushmeldingen
+
+on:
+  schedule:
+    # Elk kwartier van ca. 07:00 tot 00:00 NL-tijd (tijden in UTC)
+    - cron: "5,20,35,50 6-22 * * *"
+  # Meteen na een competitie-update (nieuwe uitslag)
+  workflow_run:
+    workflows: ["Competitie bijwerken"]
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: meldingen
+  cancel-in-progress: false
+
+jobs:
+  meldingen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund --no-save web-push@3.6.7
+      - run: node scripts/meldingen.mjs
+        env:
+          KAMELEN_PUSH: ${{ secrets.KAMELEN_PUSH }}
+      - name: Status opslaan
+        run: |
+          git config user.name "kamelen-bot"
+          git config user.email "kamelen-bot@users.noreply.github.com"
+          [ -f meldingen-status.json ] && git add meldingen-status.json || true
+          git diff --staged --quiet || (git commit -m "Meldingen verstuurd" && git pull --rebase && git push)
