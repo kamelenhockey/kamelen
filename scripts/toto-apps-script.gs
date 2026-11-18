@@ -31,6 +31,7 @@ const stemTab_ = () => tab_("Stemmen", ["Tijdstempel", "Stemmer", "Kameel", "Eze
 const sluitTab_ = () => tab_("Gesloten", ["Tijdstempel", "Wedstrijd", "Status"]);
 const pushTab_ = () => tab_("Push", ["Tijdstempel", "Endpoint", "Abonnement", "Naam"]);
 const fotoTab_ = () => tab_("Fotos", ["Tijdstempel", "Bestand-id", "Bijschrift", "Door"]);
+const profielTab_ = () => tab_("Profielfotos", ["Naam", "Bestand-id", "Tijdstempel"]);
 const quoteTab_ = () => tab_("Quotes", ["Tijdstempel", "Id", "Wie", "Quote", "Context", "Door"]);
 function fotoMap_() {
   const props = PropertiesService.getScriptProperties();
@@ -206,7 +207,9 @@ function doGet(e) {
   });
   const fotos = fotoTab_().getDataRange().getValues().slice(1).map(r => ({ tijd: r[0], id: r[1], bijschrift: r[2], door: r[3] }));
   const quotes = quoteTab_().getDataRange().getValues().slice(1).map(r => ({ tijd: r[0], id: r[1], wie: r[2], tekst: r[3], context: r[4], door: r[5] }));
-  return json_({ ok: true, voorspellingen, stemmen, gesloten: dicht, fotos, quotes });
+  const profielfotos = {};
+  profielTab_().getDataRange().getValues().slice(1).forEach(r => { if (r[0] && r[1]) profielfotos[r[0]] = r[1]; });
+  return json_({ ok: true, voorspellingen, stemmen, gesloten: dicht, fotos, quotes, profielfotos });
 }
 
 function doPost(e) {
@@ -267,6 +270,19 @@ function doPost(e) {
         const bestand = fotoMap_().createFile(blob);
         bestand.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
         fotoTab_().appendRow([new Date(), bestand.getId(), String(d.bijschrift || "").slice(0, 200), ik]);
+        return json_({ ok: true, id: bestand.getId() });
+      }
+      /* Eigen profielfoto (de site maakt er eerst een vierkante JPEG van 512 px van). Een oude foto gaat naar de prullenbak. */
+      if (d.type === "profielfoto") {
+        const data = String(d.data || "");
+        if (!/^[A-Za-z0-9+/=]+$/.test(data) || data.length > 1500000) return json_({ ok: false, fout: "invoer" });
+        const bestand = fotoMap_().createFile(Utilities.newBlob(Utilities.base64Decode(data), "image/jpeg", "profiel-" + ik + "-" + Date.now() + ".jpg"));
+        bestand.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        const sh = profielTab_(), rij = rijMetId_(sh, 0, ik);
+        if (rij) {
+          try { DriveApp.getFileById(String(sh.getRange(rij, 2).getValue())).setTrashed(true); } catch (x) {}
+          sh.getRange(rij, 1, 1, 3).setValues([[ik, bestand.getId(), new Date()]]);
+        } else sh.appendRow([ik, bestand.getId(), new Date()]);
         return json_({ ok: true, id: bestand.getId() });
       }
       /* Quote toevoegen */

@@ -453,6 +453,12 @@ td.delta{color:var(--muted);font-size:.8rem}
 .player .nm{font-family:var(--font-display);font-weight:800;font-size:1.15rem;line-height:1.1}
 .players-sub{grid-column:1/-1;font-size:1.2rem;font-weight:800;margin:14px 0 0}
 .avatar.inv{background:var(--line)}
+.avatar.foto{padding:0;overflow:hidden;background:var(--sky)}
+.avatar.foto img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar.groot{width:88px;height:88px;border-radius:22px;font-size:2rem}
+.pf-rij{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.pf-knop{cursor:pointer}
+.pf-status{font-size:.85rem;color:var(--muted)}
 .player .sel{font-size:.72rem;font-weight:700;color:var(--orange-ink)}
 .pstats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);padding-top:10px}
 .pstats > div + div{border-left:1px solid var(--line);padding-left:12px}
@@ -2183,10 +2189,42 @@ function playerData(){
       return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || a.naam.localeCompare(b.naam);
     });
 }
+/* Eigen profielfoto uploaden: vierkant bijsnijden (midden) tot 512 px en naar het Apps Script sturen */
+document.addEventListener("change", async e => {
+  if (e.target.id !== "pf-input" || !e.target.files[0]) return;
+  const st = document.getElementById("pf-status"), f = e.target.files[0];
+  st.textContent = "Uploaden…";
+  try {
+    const data = await new Promise((ok, fout) => {
+      const img = new Image(), u = URL.createObjectURL(f);
+      img.onload = () => {
+        const z = Math.min(img.width, img.height), c = document.createElement("canvas"); c.width = c.height = 512;
+        c.getContext("2d").drawImage(img, (img.width - z) / 2, (img.height - z) / 2, z, z, 0, 0, 512, 512);
+        URL.revokeObjectURL(u); ok(c.toDataURL("image/jpeg", .85).split(",")[1]);
+      };
+      img.onerror = () => fout(new Error("Dit bestand is geen foto."));
+      img.src = u;
+    });
+    const r = await fetch(TOTO_CONFIG.api, { method: "POST", body: JSON.stringify({ type: "profielfoto", code: TOTO_CONFIG.teamcode, data }) }).then(r => r.json());
+    if (!r.ok) throw new Error(r.fout === "code" ? "Log opnieuw in." : "Uploaden lukte niet.");
+    DATA.profielfotos = { ...(DATA.profielfotos || {}), [window.IK.naam]: r.id };
+    renderPlayers(); openPlayer(window.IK.naam);
+    document.getElementById("pf-status").textContent = "Profielfoto opgeslagen!";
+  } catch (err) { st.textContent = err.message || "Uploaden lukte niet."; }
+});
+
+/* Avatar: profielfoto als die er is, anders de beginletters */
+function avatarHtml(p, groot){
+  const id = (DATA.profielfotos || {})[p.naam];
+  const ini = p.naam.split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase();
+  return id
+    ? `<span class="avatar foto${groot ? " groot" : ""}"><img src="https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w${groot ? 400 : 160}" alt="" loading="lazy" referrerpolicy="no-referrer"></span>`
+    : `<span class="avatar${p.invaller ? " inv" : ""}${groot ? " groot" : ""}">${esc(ini)}</span>`;
+}
 function playerCard(p){
   const initials = p.naam.split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase();
   return `<button type="button" class="player" data-player="${esc(p.naam)}">
-    <div class="top-row"><span class="avatar${p.invaller ? " inv" : ""}">${esc(initials)}</span><div><div class="nm">${esc(p.naam)}</div>${p.sel ? `<div class="sel">In de selectie</div>` : ""}${p.ingevallen ? `<div class="sel" style="color:var(--muted)">${p.ingevallen.length}× ingevallen</div>` : ""}</div></div>
+    <div class="top-row">${avatarHtml(p)}<div><div class="nm">${esc(p.naam)}</div>${p.sel ? `<div class="sel">In de selectie</div>` : ""}${p.ingevallen ? `<div class="sel" style="color:var(--muted)">${p.ingevallen.length}× ingevallen</div>` : ""}</div></div>
     ${p.invaller ? "" : (() => { const t = badgeTelling(badgeLijst(p)); return t.aantal ? `<div class="bdg-kaart" title="${t.aantal} badges: ${t.goud} goud, ${t.zilver} zilver, ${t.brons} brons">${t.goud ? `🥇${t.goud} ` : ""}${t.zilver ? `🥈${t.zilver} ` : ""}${t.brons ? `🥉${t.brons}` : ""}<span>${t.aantal} ${t.aantal === 1 ? "badge" : "badges"}</span></div>` : ""; })()}
     <div class="pstats"><div><div class="k">Doelpunten</div><div class="v">${p.goals.length}</div><span class="balls">${p.goals.map(g => `<span class="ball ${ballCls(g.soort)}"></span>`).join("")}</span></div>
       <div><div class="k">Liters</div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}<small> L</small></div>${p.liters && p.liters.open > 0 ? `<span class="pill open">${fmtL(p.liters.open)} L open</span>` : p.liters ? `<span class="pill done">alles gedaan</span>` : ""}</div></div>
@@ -2263,7 +2301,9 @@ function openPlayer(naam){
       </div>
       <div class="prow"><span class="d">Beste gok</span><span>${esc(beste.gok)} tegen ${esc(tegenVan(beste.m))} (werd ${esc(beste.m.score)})</span><span>${beste.pts ? `+${beste.pts}` : "0 punten"}</span></div></div>`;
   }
-  document.getElementById("dlg-body").innerHTML = `
+  const eigen = window.IK && window.IK.naam === p.naam;
+  const fotoHtml = `<div class="pf-rij">${avatarHtml(p, true)}${eigen ? `<label class="btn sm ghost pf-knop"><input type="file" accept="image/*" hidden id="pf-input">${(DATA.profielfotos || {})[p.naam] ? "Profielfoto wijzigen" : "Profielfoto toevoegen"}</label><span class="pf-status" id="pf-status" role="status"></span>` : ""}</div>`;
+  document.getElementById("dlg-body").innerHTML = `${fotoHtml}
     <div class="dlg-stats num" style="grid-template-columns:repeat(4,minmax(0,1fr))">
       <div><div class="v">${p.goals.length}</div><div class="k">Goals</div></div>
       <div><div class="v">${veld}</div><div class="k">Veld</div></div>
@@ -2606,9 +2646,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795485600"></script>
-<script src="toto.js?v=1795485600"></script>
-<script src="pong.js?v=1795485600"></script>
+<script src="mex.js?v=1795485700"></script>
+<script src="toto.js?v=1795485700"></script>
+<script src="pong.js?v=1795485700"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2617,12 +2657,12 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795485600"></script>
-<script src="statistieken.js?v=1795485600"></script>
-<script src="race.js?v=1795485600"></script>
-<script src="rad.js?v=1795485600"></script>
-<script src="fotos.js?v=1795485600"></script>
-<script src="quotes.js?v=1795485600"></script>
-<script src="push.js?v=1795485600"></script>
+<script src="stemmen.js?v=1795485700"></script>
+<script src="statistieken.js?v=1795485700"></script>
+<script src="race.js?v=1795485700"></script>
+<script src="rad.js?v=1795485700"></script>
+<script src="fotos.js?v=1795485700"></script>
+<script src="quotes.js?v=1795485700"></script>
+<script src="push.js?v=1795485700"></script>
 </body>
 </html>
