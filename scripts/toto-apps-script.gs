@@ -45,6 +45,54 @@ function pushRij_(endpoint) {
   for (let i = 1; i < rows.length; i++) if (rows[i][1] === endpoint) return i + 1;
   return 0;
 }
+/* Wie speelde welke wedstrijd mee? Komt uit het gepubliceerde tabblad "Afwezigheid Wedstrijden":
+   een leeg vakje (of "Te laat") = meegespeeld, plus de namen in de rijen "Invaller". */
+const AANWEZIG_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWb-e6CJxfZblU3eZdDwDu_RT0AQQK536xoumOq2_NqyejB-K2H3CAfxf5UrlpWKW1i_XbvMUfQBpj/pub?gid=1818619826&single=true&output=csv";
+const MAANDEN_ = { jan: 1, feb: 2, mrt: 3, maa: 3, apr: 4, mei: 5, jun: 6, jul: 7, aug: 8, sep: 9, okt: 10, oct: 10, nov: 11, dec: 12 };
+function aanwezigKaart_() {
+  const cache = CacheService.getScriptCache(), oud = cache.get("aanwezig");
+  if (oud) return JSON.parse(oud);
+  let rows = [];
+  try { rows = Utilities.parseCsv(UrlFetchApp.fetch(AANWEZIG_CSV, { muteHttpExceptions: true }).getContentText()); } catch (x) { return {}; }
+  if (!rows.length) return {};
+  const kolom = {};   // "MM-DD" -> kolomnummer (laatste blok wint: huidig seizoen)
+  rows[0].forEach((h, i) => {
+    const m = String(h || "").trim().toLowerCase().match(/^(\d{1,2})[\s-]+([a-z]+)/);
+    if (i > 0 && m && MAANDEN_[m[2].slice(0, 3)]) kolom[("0" + MAANDEN_[m[2].slice(0, 3)]).slice(-2) + "-" + ("0" + m[1]).slice(-2)] = i;
+  });
+  const kaart = {};
+  Object.keys(kolom).forEach(k => kaart[k] = []);
+  let inSpelers = true, gezien = false;
+  rows.slice(1).forEach(r => {
+    const naam = String(r[0] || "").trim();
+    if (!naam) { if (gezien) inSpelers = false; return; }
+    if (/totaal aanwezig/i.test(naam)) return;
+    const invaller = /invaller/i.test(naam);
+    if (!invaller && !inSpelers) return;
+    if (!invaller) gezien = true;
+    Object.keys(kolom).forEach(k => {
+      const v = String(r[kolom[k]] || "").trim();
+      if (invaller) { if (v) kaart[k].push(v); }
+      else if (!v || /^te laat$/i.test(v)) kaart[k].push(naam);
+    });
+  });
+  cache.put("aanwezig", JSON.stringify(kaart), 300);
+  return kaart;
+}
+/* Namen die meespeelden op een datum (yyyy-mm-dd), of null als die datum niet in het blad staat */
+function meegespeeld_(datum, kaart) {
+  const k = String(datum || "").slice(5, 10), lijst = (kaart || aanwezigKaart_())[k];
+  return lijst && lijst.length ? lijst.map(n => String(n).toLowerCase()) : null;
+}
+const isCoach_ = n => Object.keys(COACHCODES).some(k => COACHCODES[k] === n);
+/* Telt een stem? Alleen als stemmer meespeelde (of coach is) en kameel en ezel meespeelden */
+function stemGeldig_(stemmer, kameel, ezel, wedstrijd, kaart) {
+  const mee = meegespeeld_(String(wedstrijd).split("|")[0], kaart);
+  if (!mee) return true;   // datum (nog) niet in het blad: niet blokkeren
+  const in_ = n => mee.indexOf(String(n || "").toLowerCase()) >= 0;
+  return (in_(stemmer) || isCoach_(stemmer)) && in_(kameel) && in_(ezel);
+}
+
 function json_(obj) { return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON); }
 const gelijk_ = (a, b) => String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
 const naam_ = n => String(n || "").trim().slice(0, 40);
@@ -75,7 +123,8 @@ function doGet(e) {
     const open = r[5] && new Date(r[5]) > nu;
     return { tijd: r[0], naam: r[1], voor: open ? null : r[2], tegen: open ? null : r[3], wedstrijd: r[4], aftrap: r[5] };
   });
-  const stemmen = stemTab_().getDataRange().getValues().slice(1).map(r => {
+  const kaart = aanwezigKaart_();
+  const stemmen = stemTab_().getDataRange().getValues().slice(1).filter(r => stemGeldig_(r[1], r[2], r[3], r[4], kaart)).map(r => {
     const zichtbaar = dicht.indexOf(r[4]) >= 0;
     return { tijd: r[0], stemmer: r[1], kameel: zichtbaar ? r[2] : null, ezel: zichtbaar ? r[3] : null, wedstrijd: r[4] };
   });
@@ -152,6 +201,11 @@ function doPost(e) {
         if (stemmer === kameel || stemmer === ezel) return json_({ ok: false, fout: "zelf" });
         const coaches = Object.keys(COACHCODES).map(k => COACHCODES[k]);
         if (coaches.indexOf(kameel) >= 0 || coaches.indexOf(ezel) >= 0) return json_({ ok: false, fout: "coach" });
+        const mee = meegespeeld_(w.split("|")[0]);
+        if (mee) {
+          if (mee.indexOf(stemmer.toLowerCase()) < 0 && !isCoach_(stemmer)) return json_({ ok: false, fout: "niet mee" });
+          if (mee.indexOf(kameel.toLowerCase()) < 0 || mee.indexOf(ezel.toLowerCase()) < 0) return json_({ ok: false, fout: "niet gespeeld" });
+        }
         const opent = new Date(d.opent);
         if (isNaN(opent) || new Date() < opent) return json_({ ok: false, fout: "nog niet" });
         if (gesloten_().indexOf(w) >= 0) return json_({ ok: false, fout: "gesloten" });
@@ -170,4 +224,4 @@ function doPost(e) {
 }
 
 /* Eén keer uitvoeren in de editor (knop "Uitvoeren") om toestemming voor Google Drive te geven */
-function machtigen() { Logger.log("Fotomap: " + fotoMap_().getUrl()); }
+function machtigen() { Logger.log("Fotomap: " + fotoMap_().getUrl()); Logger.log("Meegespeeld: " + JSON.stringify(aanwezigKaart_())); }

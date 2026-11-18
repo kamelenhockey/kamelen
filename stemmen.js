@@ -12,7 +12,8 @@
   const CFG = window.TOTO_CONFIG || {};
   const OPEN_NA = 75 * 60e3;
   const START = "2026-11-17";              // eerste wedstrijd met stemming
-  let GESLOTEN = new Set();
+  let GESLOTEN = new Set(), AANWEZIG = new Map();
+  const COACHES = ["Marie", "Toryll", "Lucia"];
   const LS = "kamelen-toto";               // teamcode en naam delen met de toto
   const eigen = () => { try { return JSON.parse(localStorage.getItem(LS) || "{}"); } catch { return {}; } };
   const bewaar = o => { try { localStorage.setItem(LS, JSON.stringify(o)); } catch {} };
@@ -69,9 +70,15 @@
   function render(res) {
     if (!box) return;
     const nu = Date.now(), m = stemWedstrijd(), e = eigen();
-    const namen = [...(typeof ROSTER !== "undefined" ? ROSTER : [])];
+    let namen = [...(typeof ROSTER !== "undefined" ? ROSTER : [])];
     let html = "";
-    if (m) {
+    const ik = (window.IK || {}).naam || "";
+    /* Alleen wie meespeelde (en de coaches) mag stemmen, en alleen op wie meespeelde */
+    const mee = m ? AANWEZIG.get(m.datum) : null;
+    if (mee && mee.size) namen = [...namen.filter(n => mee.has(n)), ...[...mee].filter(n => !namen.includes(n)).sort()];
+    if (m && mee && mee.size && !mee.has(ik) && !COACHES.includes(ik)) {
+      html += `<div class="empty"><strong>Je speelde deze wedstrijd niet mee</strong>Alleen wie tegen ${esc(tegen(m))} meedeed en de coaches kunnen stemmen. De uitslag zie je hier zodra de stemming gesloten is.</div>`;
+    } else if (m) {
       const r = res.find(x => sleutel(x.m) === sleutel(m));
       const gestemd = r ? r.stemmers : [];
       const mijn = e.stemmen?.[sleutel(m)];
@@ -196,7 +203,7 @@
         const r = await fetch(CFG.api, { method: "POST", body: JSON.stringify({ type: "stem", code, stemmer, kameel, ezel, wedstrijd: sleutel(m), opent: opent(m).toISOString() }) });
         const res = await r.json();
         if (!res.ok) {
-          st.textContent = { code: "Je inlogcode klopt niet meer. Log opnieuw in.", coach: "Op een coach stemmen kan niet.", zelf: "Op jezelf stemmen mag niet.", gesloten: "De stemming is al gesloten.", "nog niet": "De stemming is nog niet open." }[res.fout] || "Opslaan lukte niet. Is het script al bijgewerkt?";
+          st.textContent = { code: "Je inlogcode klopt niet meer. Log opnieuw in.", coach: "Op een coach stemmen kan niet.", "niet mee": "Je speelde deze wedstrijd niet mee, dus je kunt niet stemmen.", "niet gespeeld": "Je kunt alleen stemmen op wie meespeelde.", zelf: "Op jezelf stemmen mag niet.", gesloten: "De stemming is al gesloten.", "nog niet": "De stemming is nog niet open." }[res.fout] || "Opslaan lukte niet. Is het script al bijgewerkt?";
           if (res.fout === "code") { delete e.code; bewaar(e); }
           knop.disabled = false; return;
         }
@@ -210,7 +217,8 @@
   window.renderStemmen = async function (vers) {
     let stemmen = [];
     try {
-      const j = await window.kamelenApi(vers);
+      const [j, aanw] = await Promise.all([window.kamelenApi(vers), window.kamelenAanwezig ? window.kamelenAanwezig() : Promise.resolve(new Map())]);
+      AANWEZIG = aanw || new Map();
       GESLOTEN = new Set(j.gesloten || []);
       stemmen = (j.stemmen || []).map(s => ({ stemmer: canon(s.stemmer), kameel: s.kameel === null ? null : canon(s.kameel), ezel: s.ezel === null ? null : canon(s.ezel), wedstrijdKey: String(s.wedstrijd || "") }));
     } catch {}

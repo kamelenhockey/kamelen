@@ -246,6 +246,36 @@
       </div>`;
   }
 
+  /* Wie speelde welke wedstrijd mee (spelers met een leeg vakje + invallers). Gebruikt door het stemmen.
+     Geeft een Map: datum -> Set met namen. Zonder exclusies, want het gaat om wie er echt was. */
+  let _aanwezig = null;
+  window.kamelenAanwezig = function (vers) {
+    if (_aanwezig && !vers) return _aanwezig;
+    _aanwezig = fetch(CFG.wedstrijden, { cache: "no-store" }).then(r => r.ok ? r.text() : "").then(t => {
+      const rows = parseCsv(t), kaart = new Map(); if (!rows.length) return kaart;
+      let blok = [], vorige = -1;
+      rows[0].forEach((h, i) => {
+        const k = i > 0 && kopDag(h); if (!k) return;
+        const sl = ((k.maand + 5) % 12) * 100 + k.dag;
+        if (sl < vorige) blok = [];
+        vorige = sl; blok.push({ i, datum: kopDatum(k, false) });
+      });
+      blok.forEach(c => kaart.set(c.datum, new Set()));
+      let inSpelers = true, gezien = false;
+      for (const r of rows.slice(1)) {
+        const naam = (r[0] || "").trim();
+        if (!naam) { if (gezien) inSpelers = false; continue; }
+        if (/totaal aanwezig/i.test(naam)) continue;
+        if (/invaller/i.test(naam)) { blok.forEach(c => { const v = (r[c.i] || "").trim(); if (v) kaart.get(c.datum).add(v); }); continue; }
+        if (!inSpelers) continue;
+        gezien = true;
+        blok.forEach(c => { const v = (r[c.i] || "").trim(); if (!v || /^te laat$/i.test(v)) kaart.get(c.datum).add(canon(naam)); });
+      }
+      return kaart;
+    }).catch(() => new Map());
+    return _aanwezig;
+  };
+
   window.renderStatistieken = async function () {
     if (!CFG.wedstrijden || !CFG.trainingen) { box.innerHTML = `<div class="empty">Statistieken zijn nog niet ingesteld.</div>`; return; }
     box.innerHTML = `<div class="empty">Statistieken laden…</div>`;
