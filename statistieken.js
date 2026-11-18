@@ -115,6 +115,7 @@
     const lit = buildRanking(DATA.liters || [], {});
     S.liters = lit.reduce((s, p) => s + p.liters, 0); S.litersOpen = lit.reduce((s, p) => s + p.open, 0);
     S.literKoning = lit[0];
+    S.literLoser = [...lit].filter(x => x.open > 0).sort((a, b) => b.open - a.open || b.liters - a.liters)[0];
     S.snelBetaler = lit.filter(p => p.liters >= 2 && p.open === 0).sort((a, b) => b.liters - a.liters)[0];
 
     /* opkomst per speler */
@@ -195,7 +196,8 @@
     if (S.goalsTotaal) feiten.push(feit("Strafcorners", pct(S.sc / S.goalsTotaal), `van de ingevulde doelpunten kwam uit een strafcorner${S.scKoning ? ` · specialist: ${esc(S.scKoning[0])} (${S.scKoning[1]})` : ""}`, "accent"));
     if (S.goalsTotaal) feiten.push(feit("Verschillende scorers", S.scorers, `Kamelen scoorden al minstens één keer`));
     if (S.dv) feiten.push(feit("Liter per doelpunt", een(S.liters / S.dv), `liter bier aan boetes per gescoord doelpunt`, "beer"));
-    if (S.literKoning) feiten.push(feit("Literkoning", esc(S.literKoning.naam), `${fmtL(S.literKoning.liters)} L, waarvan nog ${fmtL(S.literKoning.open)} L open`, "beer"));
+    const loser = S.literLoser;
+    if (loser) feiten.push(feit("Literloser", esc(loser.naam), `${fmtL(loser.open)} L nog open (${fmtL(loser.liters)} L in totaal)`, "beer"));
     if (S.snelBetaler) feiten.push(feit("Netjes betaald", esc(S.snelBetaler.naam), `${fmtL(S.snelBetaler.liters)} L aan boetes en alles al weggewerkt`, "beer"));
     if (S.ijzer.length) feiten.push(feit("IJzeren Kameel", S.ijzer.length === 1 ? esc(S.ijzer[0]) : S.ijzer.length, S.ijzer.length === 1 ? "miste geen enkele wedstrijd" : `spelers misten geen enkele wedstrijd: ${S.ijzer.map(esc).join(", ")}`, "accent"));
     if (S.trainingsBeesten.length) feiten.push(feit(S.trainingsBeesten.length > 1 ? "Trainingsbeesten" : "Trainingsbeest", S.trainingsBeesten.map(o => esc(o.naam)).join(" & "), `${pct(S.trainingsBeesten[0].tP)} van de trainingen aanwezig${S.trainingsBeesten.length > 1 ? ", allebei even vaak" : ""}`));

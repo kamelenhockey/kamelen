@@ -247,6 +247,7 @@ td.form{display:flex;gap:3px}
 .rank .amt b{font-family:var(--font-display);font-weight:800;font-size:1.2rem}
 .rank .amt small{display:block;font-size:.72rem;color:var(--muted)}
 .pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.7rem;font-weight:700;background:var(--sky-soft);color:#2d5970}
+.pill.loser{background:#fde3e1;color:#a3271b}
 .pill.open{background:#ffe6c8;color:#8a4708}
 .pill.done{background:#dcf1e4;color:#22663f}
 .facts{list-style:none;margin:0 0 12px 3rem;padding:6px 0 0 16px;border-left:2px solid #f3dfb8;display:grid;gap:6px;font-size:.88rem}
@@ -1713,16 +1714,18 @@ function renderLiters(){
   const max = Math.max(1, ...list.map(p => p.liters));
   let pos = 0, prev = null;
   list.forEach((p,i) => { const k = `${p.liters}|${p.stil}`; if (k !== prev) pos = i+1; prev = k; p.pos = pos; });
-  const titles = ["Literkoning", "", ""];
+  const titles = ["", "", ""];
   document.getElementById("podium").innerHTML = list.slice(0,3).map((p,i) => {
     const h = Math.max(36, 36 + p.liters / max * 84);
     return `<div class="pod p${i+1}"><span class="medal">${p.pos}</span><div class="title">${titles[i]}</div>
       <div class="nm">${esc(p.naam)}</div><div class="amt">${fmtL(p.liters)} L ${p.stil ? `<small>· ${p.stil}× stil</small>` : ""}</div>
       <div class="pint" style="height:${h}px" aria-hidden="true"><div class="beer" style="--h:86%"></div><span class="shine"></span></div></div>`;
   }).join("");
+  const loser = [...list].filter(p => p.open > 0).sort((a, b) => b.open - a.open || b.liters - a.liters)[0], loserNaam = loser ? loser.naam : null;
   document.getElementById("rank").innerHTML = list.map((p, i) => {
     const id = `f${i}`;
     const tags = [
+      p.naam === loserNaam ? `<span class="pill loser">Literloser</span>` : "",
       p.open > 0 ? `<span class="pill open">${fmtL(p.open)} L open</span>` : (p.liters > 0 ? `<span class="pill done">alles gedaan</span>` : "")
     ].join("");
     return `<li><button aria-expanded="false" aria-controls="${id}">
@@ -2121,7 +2124,7 @@ function badgesHtml(p, o, kameel, ezel, tp){
   const maxPerWedstrijd = Math.max(0, ...perWedstrijd.values());
   const sc = p.goals.filter(g => g.soort === "sc").length;
   let reeks = 0, best = 0; for (const t of DATA.trAanwezig || []){ reeks = t.aanwezig.has(p.naam) ? reeks + 1 : 0; best = Math.max(best, reeks); }
-  const lit = buildRanking(DATA.liters || [], {}), litPlek = lit.findIndex(x => x.naam === p.naam);
+  const lit = buildRanking(DATA.liters || [], {}), litLoser = lit.filter(x => x.open > 0).sort((a, b) => b.open - a.open || b.liters - a.liters)[0];
   const st = tp?.stand.find(x => x.naam === p.naam);
   const seizoen = (() => { const d = new Date(); return d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1; })();
   /* Extra gegevens voor badges */
@@ -2158,7 +2161,7 @@ function badgesHtml(p, o, kameel, ezel, tp){
     ["🛢️", "Biervat", "Tien liter of meer aan boetes", !!(p.liters && p.liters.liters >= 10)],
     ["🤫", "Stille meter", "Een stille meter moeten trekken", !!(p.liters && p.liters.stil > 0)],
     ["💸", "Wanbetaler", "Drie liter of meer nog open", !!(p.liters && p.liters.open >= 3)],
-    ["🍺", "Literkoning", "Bovenaan bij het Liter-incassobureau", litPlek === 0],
+    ["🍺", "Literloser", "De meeste liters nog open", !!(p.liters && p.liters.open > 0 && litLoser && litLoser.naam === p.naam)],
     ["🐪", "Kameel van de dag", "Minstens één keer gekozen", kameel >= 1],
     ["🐫", "Dubbele bult", "Twee keer of vaker kameel van de dag", kameel >= 2],
     ["🫏", "Ezel van de dag", "Ook dat is een prestatie", ezel >= 1],
@@ -2227,8 +2230,9 @@ function renderDash(){
   for (const w of DATA.doelpunten || []) for (const g of w.goals) goals.set(g.wie, (goals.get(g.wie) || 0) + 1);
   const top = [...goals.entries()].sort((a,b) => b[1] - a[1])[0];
   tiles.push(`<a class="tile accent" href="#topscorers"><span class="k">Topscorer</span><span class="big">${top ? esc(top[0]) : "–"}</span><span class="sub">${top ? `${top[1]} ${top[1] === 1 ? "doelpunt" : "doelpunten"}` : "nog geen doelpunten"}</span></a>`);
-  const lit = buildRanking(DATA.liters || [], {})[0];
-  tiles.push(`<a class="tile beer" href="#liters"><span class="k">Literkoning</span><span class="big">${lit ? esc(lit.naam) : "–"}</span><span class="sub">${lit ? `${fmtL(lit.liters)} L · ${fmtL(lit.open)} L open` : "nog geen boetes"}</span></a>`);
+  /* Literloser: wie de meeste liters nog open heeft staan */
+  const lit = buildRanking(DATA.liters || [], {}).filter(p => p.open > 0).sort((a, b) => b.open - a.open || b.liters - a.liters)[0];
+  tiles.push(`<a class="tile beer" href="#liters"><span class="k">Literloser</span><span class="big">${lit ? esc(lit.naam) : "–"}</span><span class="sub">${lit ? `${fmtL(lit.open)} L nog open` : "niemand heeft nog iets open"}</span></a>`);
   box.innerHTML = tiles.join("");
 }
 
@@ -2404,9 +2408,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795483400"></script>
-<script src="toto.js?v=1795483400"></script>
-<script src="pong.js?v=1795483400"></script>
+<script src="mex.js?v=1795483500"></script>
+<script src="toto.js?v=1795483500"></script>
+<script src="pong.js?v=1795483500"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2415,11 +2419,11 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795483400"></script>
-<script src="statistieken.js?v=1795483400"></script>
-<script src="rad.js?v=1795483400"></script>
-<script src="fotos.js?v=1795483400"></script>
-<script src="quotes.js?v=1795483400"></script>
-<script src="push.js?v=1795483400"></script>
+<script src="stemmen.js?v=1795483500"></script>
+<script src="statistieken.js?v=1795483500"></script>
+<script src="rad.js?v=1795483500"></script>
+<script src="fotos.js?v=1795483500"></script>
+<script src="quotes.js?v=1795483500"></script>
+<script src="push.js?v=1795483500"></script>
 </body>
 </html>
