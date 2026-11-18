@@ -11,6 +11,7 @@
   if (!box) return;
 
   const PUNT_EXACT = 3, PUNT_TOTO = 1;
+  const MODEL_NAAM = "Kamelen-model";
   const aftrap = m => toDate(m.datum, m.tijd || "12:00");
   const onzeWedstrijden = () => [...(DATA.uitslagen || []), ...(DATA.programma || [])]
     .filter(m => isUs(m.thuis + m.uit))
@@ -54,6 +55,16 @@
       if (!m) continue;
       perMatch.get(sleutel(m)).voorsp.set(r.naam, r);  // laatste inzending telt
     }
+    /* Het Kamelen-model doet mee: bij elke gespeelde wedstrijd waar iemand voorspelde, en bij de volgende.
+       Voor gespeelde wedstrijden alleen met de uitslagen van vóór die wedstrijd, dus eerlijk. */
+    const nu = Date.now(), volgende = ws.find(w => aftrap(w) > nu);
+    if (typeof voorspelWedstrijd === "function") for (const { m, voorsp } of perMatch.values()) {
+      const gespeeld = !!onsScore(m);
+      if (!(gespeeld && voorsp.size) && m !== volgende) continue;
+      const v = voorspelWedstrijd(m.thuis, m.uit, gespeeld ? m.datum : undefined); if (!v) continue;
+      const [h, u] = v.uitslag, wijThuis = isUs(m.thuis);
+      voorsp.set(MODEL_NAAM, { naam: MODEL_NAAM, tijd: new Date(aftrap(m) - 60000), voor: wijThuis ? h : u, tegen: wijThuis ? u : h, model: true });
+    }
     const stand = new Map();
     for (const { m, voorsp } of perMatch.values()) {
       const s = onsScore(m); if (!s) continue;
@@ -88,7 +99,9 @@
         (perSpeler.get(naam) || perSpeler.set(naam, []).get(naam)).push({ m, gok: scoreTekst(r.voor, r.tegen, m), pts, verschil: Math.abs(r.voor - sc[0]) + Math.abs(r.tegen - sc[1]), v: r.voor, t: r.tegen, echt: sc });
       }
     }
-    DATA.totoProfiel = { stand, perSpeler };
+    /* Statistieken en badges zijn voor spelers: het model telt daar niet mee */
+    perSpeler.delete(MODEL_NAAM);
+    DATA.totoProfiel = { stand: stand.filter(p => p.naam !== MODEL_NAAM), perSpeler };
     window.renderStatsExtra?.(); try { renderPlayers(); } catch {}
     const nu = Date.now();
     const volgende = ws.find(m => aftrap(m) > nu);
@@ -115,17 +128,17 @@
         ${CFG.api ? "" : `<a class="btn mx-big" href="${esc(CFG.form)}" target="_blank" rel="noopener">Doe je voorspelling</a>`}
       </div>
       ${CFG.api ? formulier(volgende) : ""}
-      <div class="tt-voted"><span class="k">${v.size} ${v.size === 1 ? "voorspelling" : "voorspellingen"}</span>${[...v.keys()].map(n => `<span class="tt-chip">${esc(n)}</span>`).join("")}${v.size ? `<span class="tt-hint">Wat ze voorspeld hebben zie je na de aftrap.</span>` : ""}</div>`;
+      <div class="tt-voted"><span class="k">${v.size - v.has(MODEL_NAAM)} ${v.size - v.has(MODEL_NAAM) === 1 ? "voorspelling" : "voorspellingen"}</span>${[...v.values()].map(r => r.model ? `<span class="tt-chip tt-model">🐪 Model: <b>${scoreTekst(r.voor, r.tegen, volgende)}</b></span>` : `<span class="tt-chip">${esc(r.naam)}</span>`).join("")}${v.size - v.has(MODEL_NAAM) ? `<span class="tt-hint">Wat ze voorspeld hebben zie je na de aftrap. Het model laat zijn gok alvast zien.</span>` : ""}</div>`;
     }
     html += `<div class="tt-grid"><div><h3 class="sub-h">Klassement</h3>${stand.length ? `<table><thead><tr><th class="r">#</th><th>Speler</th><th class="r" title="Precies goed (${PUNT_EXACT} punten)">Exact</th><th class="r" title="Juiste toto (${PUNT_TOTO} punt)">Toto</th><th class="r">Gesp.</th><th class="r">Ptn</th></tr></thead><tbody>
-      ${stand.map((p, i) => `<tr class="${i === 0 ? "lead" : ""}"><td class="r pos">${i + 1}</td><td>${esc(p.naam)}</td><td class="r">${p.exact}</td><td class="r">${p.toto}</td><td class="r">${p.aantal}</td><td class="r pts">${p.punten}</td></tr>`).join("")}</tbody></table>
-      <p class="note">Precies goed = ${PUNT_EXACT} punten · juiste winnaar of gelijkspel = ${PUNT_TOTO} punt. Wie onderaan eindigt, trakteert.</p>` : `<div class="empty">Nog geen gespeelde wedstrijden met voorspellingen.</div>`}</div>
+      ${stand.map((p, i) => `<tr class="${i === 0 ? "lead" : ""}${p.naam === MODEL_NAAM ? " tt-model" : ""}"><td class="r pos">${i + 1}</td><td>${p.naam === MODEL_NAAM ? `🐪 ${esc(p.naam)} <small class="tt-bot">computer</small>` : esc(p.naam)}</td><td class="r">${p.exact}</td><td class="r">${p.toto}</td><td class="r">${p.aantal}</td><td class="r pts">${p.punten}</td></tr>`).join("")}</tbody></table>
+      <p class="note">Precies goed = ${PUNT_EXACT} punten · juiste winnaar of gelijkspel = ${PUNT_TOTO} punt. Wie onderaan eindigt, trakteert. Het Kamelen-model voorspelt elke wedstrijd met alleen de uitslagen van daarvóór; wint het model, dan trakteert niemand extra.</p>` : `<div class="empty">Nog geen gespeelde wedstrijden met voorspellingen.</div>`}</div>
       <div><h3 class="sub-h">Per wedstrijd</h3>${gespeeld.length ? gespeeld.map(m => {
         const s = onsScore(m), v = [...perMatch.get(sleutel(m)).voorsp.values()];
         return `<div class="tt-played"><div class="tt-ph"><span class="d">${fmtShort(m.datum)}</span><span>${isUs(m.thuis) ? "thuis" : "uit"} tegen ${teamLink(tegenstander(m))}</span><span class="score">${esc(m.score)}</span></div>
           <div class="tt-preds">${v.sort((a, b) => a.naam.localeCompare(b.naam)).map(r => {
             const pts = r.voor === s[0] && r.tegen === s[1] ? PUNT_EXACT : toto(r.voor, r.tegen) === toto(s[0], s[1]) ? PUNT_TOTO : 0;
-            return `<span class="tt-pred p${pts}">${esc(r.naam)} <b>${scoreTekst(r.voor, r.tegen, m)}</b>${pts ? ` <small>+${pts}</small>` : ""}</span>`;
+            return `<span class="tt-pred p${pts}${r.model ? " tt-model" : ""}">${r.model ? "🐪 " : ""}${esc(r.naam)} <b>${scoreTekst(r.voor, r.tegen, m)}</b>${pts ? ` <small>+${pts}</small>` : ""}</span>`;
           }).join("")}</div></div>`;
       }).join("") : `<div class="empty">Na de eerste wedstrijd met voorspellingen staan ze hier.</div>`}</div></div>`;
     box.innerHTML = html;
