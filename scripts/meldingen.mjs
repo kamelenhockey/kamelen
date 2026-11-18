@@ -164,7 +164,12 @@ if (nl.uur >= 9) for (const p of roster.spelers || []) {
 
 /* Testmelding: zet een nieuwe "id" in testmelding.json om een test te versturen */
 const test = lees("testmelding.json", null);
-if (test && test.id && !status.verzonden[`test-${test.id}`]) te.push({ id: `test-${test.id}`, title: test.title || "Test", body: test.body || "", url: SITE, test: true });
+/* Met "voor": ["Mini", "Casper"] gaat de test alleen naar die personen, elk met een eigen melding */
+if (test && test.id) {
+  if (Array.isArray(test.voor) && test.voor.length) {
+    for (const n of test.voor) { const id = `test-${test.id}-${n.toLowerCase()}`; if (!status.verzonden[id]) te.push({ id, title: test.title || "Test", body: String(test.body || "").replace("{naam}", n), url: SITE, voor: [n], test: true }); }
+  } else if (!status.verzonden[`test-${test.id}`]) te.push({ id: `test-${test.id}`, title: test.title || "Test", body: test.body || "", url: SITE, test: true });
+}
 
 /* Eerste keer: alles wat nu al zou gelden als verstuurd markeren (geen stortvloed oude meldingen) */
 if (eersteKeer) {
