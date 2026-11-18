@@ -224,4 +224,12 @@ function doPost(e) {
 }
 
 /* Eén keer uitvoeren in de editor (knop "Uitvoeren") om toestemming voor Google Drive te geven */
-function machtigen() { Logger.log("Fotomap: " + fotoMap_().getUrl()); Logger.log("Meegespeeld: " + JSON.stringify(aanwezigKaart_())); }
+function machtigen() {
+  Logger.log("Fotomap: " + fotoMap_().getUrl());
+  try {
+    const r = UrlFetchApp.fetch(AANWEZIG_CSV, { muteHttpExceptions: true });
+    Logger.log("Afwezigheidsblad: status " + r.getResponseCode() + ", begint met: " + r.getContentText().slice(0, 80));
+  } catch (x) { Logger.log("Afwezigheidsblad: FOUT " + x); }
+  CacheService.getScriptCache().remove("aanwezig2");
+  Logger.log("Meegespeeld: " + JSON.stringify(aanwezigKaart_()));
+}
