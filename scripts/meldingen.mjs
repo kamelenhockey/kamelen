@@ -79,6 +79,17 @@ for (const k of api.gesloten || []) {
   if (kamelen.length || ezels.length)
     meld(`kz-${m.datum}`, `Kameel van de dag: ${kamelen.join(" & ") || "–"} 🐪`, `Ezel van de dag: ${ezels.join(" & ") || "–"}. Die trekt een liter! 🫏`, SITE + "#stemmen");
 }
+/* 7. Toto-herinnering: 3 uur voor de aftrap; bij een ochtendwedstrijd (voor 12:00) de avond ervoor om 20:00 */
+for (const m of programma) {
+  if (!m.tijd) continue;
+  const af = aftrap(m), uurAftrap = +m.tijd.split(":")[0];
+  const vanaf = uurAftrap < 12 ? aftrap({ datum: plusDagen(m.datum, -1), tijd: "20:00" }) : new Date(af - 3 * uur);
+  if (nu >= vanaf && nu < af) {
+    const aantal = new Set((api.voorspellingen || []).filter(v => v.wedstrijd === `${m.thuis} – ${m.uit}` && new Date(v.aftrap).getTime() === af.getTime()).map(v => String(v.naam).toLowerCase())).size;
+    meld(`toto-${m.datum}`, "Nog niet voorspeld? 🔮", `De toto voor ${isUs(m.thuis) ? "thuis" : "uit"} tegen ${tegen(m)} sluit om ${m.tijd}${uurAftrap < 12 ? " morgenochtend" : ""}. ${aantal ? `Al ${aantal} ${aantal === 1 ? "voorspelling" : "voorspellingen"} binnen.` : "Nog niemand heeft voorspeld!"}`, SITE + "#toto");
+  }
+}
+
 /* 6. Verjaardagen (vanaf 09:00) */
 if (nl.uur >= 9) for (const p of roster.spelers || []) {
   if (p.verjaardag && p.verjaardag === nl.datum.slice(5)) meld(`jarig-${p.naam}-${nl.datum.slice(0, 4)}`, `🎉 ${p.naam} is vandaag jarig!`, "Vergeet niet te feliciteren. Wie trakteert er op een rondje?", SITE + "#spelers");
