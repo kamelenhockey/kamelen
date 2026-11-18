@@ -81,8 +81,8 @@
         <form id="kz-form" data-key="${esc(sleutel(m))}">
           ${mijn ? `<div class="tt-mine">Jouw stem: kameel <b>${esc(mijn.kameel)}</b>, ezel <b>${esc(mijn.ezel)}</b>. Je kunt hem aanpassen zolang de stemming open is.</div>` : ""}
           <input type="hidden" id="kz-stemmer" value="${esc((window.IK || {}).naam || "")}"><p class="kz-ik">Je stemt als <b>${esc((window.IK || {}).naam || "")}</b>. Op jezelf stemmen kan niet.</p>
-          <div class="kz-sec"><h3><span class="kz-ic kameel">🐪</span> Kameel van de dag</h3><p>Wie was vandaag de beste of leukste Kameel?</p>${keuzes("kameel", mijn?.kameel)}</div>
-          <div class="kz-sec"><h3><span class="kz-ic ezel">🫏</span> Ezel van de dag</h3><p>Wie verdient de ezel? Die moet een liter trekken.</p>${keuzes("ezel", mijn?.ezel)}</div>
+          <div class="kz-sec"><h3><span class="kz-ic kameel">🐪</span> Kameel van de dag</h3><p>Wie speelde vandaag het best, vergeleken met zijn eigen gebruikelijke niveau?</p>${keuzes("kameel", mijn?.kameel)}</div>
+          <div class="kz-sec"><h3><span class="kz-ic ezel">🫏</span> Ezel van de dag</h3><p>Wie speelde vandaag het slechtst, vergeleken met zijn eigen gebruikelijke niveau? Die moet een liter trekken.</p>${keuzes("ezel", mijn?.ezel)}</div>
           <div class="tt-submit"><button class="btn mx-big" type="submit">${mijn ? "Stem aanpassen" : "Stem uitbrengen"}</button><span class="tt-status" id="kz-status" role="status"></span></div>
         </form>
         <div class="tt-voted"><span class="k">${gestemd.length} ${gestemd.length === 1 ? "stem" : "stemmen"}</span>${gestemd.map(n => `<span class="tt-chip">${esc(n)}</span>`).join("")}${gestemd.length ? `<span class="tt-hint">De uitslag wordt bekend als de stemming gesloten wordt.</span>` : ""}</div>
