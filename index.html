@@ -1695,8 +1695,17 @@ function playerData(){
   for (const w of DATA.doelpunten || []){ const m = zoekWedstrijd(w); for (const g of w.goals){ const p = get(g.wie); if (p) p.goals.push({ ...g, match:m, label:w.label }); } }
   for (const r of buildRanking(DATA.liters || [], {})){ const p = get(r.naam); if (p) p.liters = r; }
   for (const n of DATA.opstelling || []) get(n);
+  /* Invallers uit het tabblad 'Afwezigheid Wedstrijden' (alleen bekende invaller-bijnamen samenvoegen,
+     zodat bv. invaller "Thijmen" niet met Kameel Tijmen wordt verward) */
+  for (const x of DATA.invalSheet || []){
+    const raw = String(x.naam || "").trim(); if (!raw) continue;
+    const hit = CANON.get(raw.toLowerCase());
+    const naam = hit && INVALLERS.has(hit) ? hit : raw.charAt(0).toUpperCase() + raw.slice(1);
+    if (!P.has(naam)) P.set(naam, {naam, goals:[], liters:null, eigen:true});
+    const p = P.get(naam); (p.ingevallen ||= []).includes(x.datum) || p.ingevallen.push(x.datum);
+  }
   const sel = new Set((DATA.opstelling || []).map(canon));
-  return [...P.values()].map(p => ({...p, sel: sel.has(p.naam), invaller: ROSTER.size > 0 && !ROSTER.has(p.naam)}))
+  return [...P.values()].map(p => ({...p, sel: sel.has(p.naam), invaller: p.eigen || (ROSTER.size > 0 && !ROSTER.has(p.naam))}))
     .sort((a,b) => {
       /* Volgorde van spelers.json; invallers daarna op naam */
       const order = [...ROSTER], ia = order.indexOf(a.naam), ib = order.indexOf(b.naam);
@@ -1706,7 +1715,7 @@ function playerData(){
 function playerCard(p){
   const initials = p.naam.split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase();
   return `<button type="button" class="player" data-player="${esc(p.naam)}">
-    <div class="top-row"><span class="avatar${p.invaller ? " inv" : ""}">${esc(initials)}</span><div><div class="nm">${esc(p.naam)}</div>${p.sel ? `<div class="sel">In de selectie</div>` : ""}</div></div>
+    <div class="top-row"><span class="avatar${p.invaller ? " inv" : ""}">${esc(initials)}</span><div><div class="nm">${esc(p.naam)}</div>${p.sel ? `<div class="sel">In de selectie</div>` : ""}${p.ingevallen ? `<div class="sel" style="color:var(--muted)">${p.ingevallen.length}× ingevallen</div>` : ""}</div></div>
     <div class="pstats"><div><div class="k">Doelpunten</div><div class="v">${p.goals.length}</div><span class="balls">${p.goals.map(g => `<span class="ball ${ballCls(g.soort)}"></span>`).join("")}</span></div>
       <div><div class="k">Liters</div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}<small> L</small></div>${p.liters && p.liters.open > 0 ? `<span class="pill open">${fmtL(p.liters.open)} L open</span>` : p.liters ? `<span class="pill done">alles gedaan</span>` : ""}</div></div>
   </button>`;
@@ -1728,6 +1737,10 @@ function openPlayer(naam){
     return `<div class="prow"><span class="d">${m ? fmtShort(m.datum) : ""}</span><span>${m ? `${isUs(m.thuis) ? "thuis" : "uit"} tegen ${teamLink(opp)}` : esc(opp)}</span><span><span class="ball ${ballCls(g.soort)}" style="display:inline-block;vertical-align:-1px;margin-right:6px"></span>${SOORT_NAAM[g.soort]}</span></div>`;
   }).join("") : `<div class="empty">Nog geen doelpunten.</div>`;
   const litHtml = p.liters ? p.liters.feiten.map(f => `<div class="prow"><span class="d">${esc(f.datum)}</span><span>${esc(f.reden)}</span><span class="pill ${f.done?"done":"open"}">${esc(f.hoeveel)}${f.done?" · gedaan":""}</span></div>`).join("") : `<div class="empty">Een voorbeeldige Kameel: nog geen boetes.</div>`;
+  const invHtml = p.ingevallen ? `<div class="psec"><h3 class="sub-h">Ingevallen · ${p.ingevallen.length}×</h3>${p.ingevallen.slice().sort().reverse().map(d => {
+    const m = [...(DATA.uitslagen || []), ...(DATA.programma || [])].find(w => w.datum === d && isUs(w.thuis + w.uit));
+    return `<div class="prow"><span class="d">${fmtShort(d)}</span><span>${m ? `${isUs(m.thuis) ? "thuis" : "uit"} tegen ${teamLink(isUs(m.thuis) ? m.uit : m.thuis)}` : ""}</span><span>${m && m.score ? esc(m.score) : ""}</span></div>`;
+  }).join("")}</div>` : "";
   document.getElementById("dlg-body").innerHTML = `
     <div class="dlg-stats num" style="grid-template-columns:repeat(4,minmax(0,1fr))">
       <div><div class="v">${p.goals.length}</div><div class="k">Goals</div></div>
@@ -1735,7 +1748,7 @@ function openPlayer(naam){
       <div><div class="v">${sc}</div><div class="k">SC</div></div>
       <div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}</div><div class="k">Liters</div></div>
     </div>
-    <div class="psec"><h3 class="sub-h">Doelpunten</h3>${goalsHtml}</div>
+    ${invHtml}<div class="psec"><h3 class="sub-h">Doelpunten</h3>${goalsHtml}</div>
     <div class="psec"><h3 class="sub-h">Literboetes${p.liters && p.liters.open > 0 ? ` · ${fmtL(p.liters.open)} L open` : ""}</h3>${litHtml}</div>`;
   document.getElementById("dlg-body").scrollTop = 0;
   if (!dlg.open){ try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } }
@@ -1896,9 +1909,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1794960108"></script>
-<script src="toto.js?v=1794960108"></script>
-<script src="pong.js?v=1794960108"></script>
+<script src="mex.js?v=1795480000"></script>
+<script src="toto.js?v=1795480000"></script>
+<script src="pong.js?v=1795480000"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -1907,7 +1920,7 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1794960108"></script>
-<script src="statistieken.js?v=1794960108"></script>
+<script src="stemmen.js?v=1795480000"></script>
+<script src="statistieken.js?v=1795480000"></script>
 </body>
 </html>

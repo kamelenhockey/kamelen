@@ -201,6 +201,7 @@
     const speeldagen = new Set([...(DATA.uitslagen || []), ...(DATA.programma || [])].filter(m => isUs(m.thuis + m.uit)).map(m => m.datum));
     wed.sessies = wed.sessies.filter(x => speeldagen.has(x.datum));
     wed.invallers = wed.invallers.filter(x => speeldagen.has(x.datum));
+    DATA.invalSheet = wed.invallers; window.renderPlayers?.();
     render(bereken(wed, tr));
   };
 })();
