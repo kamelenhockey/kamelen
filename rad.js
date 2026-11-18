@@ -17,7 +17,7 @@
     { kort: "Feutenbak", tekst: "Feutenbak" },
     { kort: "Aanvoerders delen uit", tekst: "Aanvoerders (ook oud-aanvoerders) mogen een bak uitdelen" },
     { kort: "Halve leo uitdelen", tekst: "Halve leo uitdelen" },
-    { kort: "LITER", tekst: "Liter toevoegen!", gewicht: .35, klein: true, kleur: "#d4a017" },
+    { kort: "LITER", tekst: "Liter trekken!", gewicht: .35, klein: true, kleur: "#d4a017" },
     { kort: "Verdedigersbak", tekst: "Verdedigersbak" },
     { kort: "Coachbak", tekst: "Coachbak" },
     { kort: "Dubbelloops uitdelen", tekst: "Dubbelloops uitdelen" },
