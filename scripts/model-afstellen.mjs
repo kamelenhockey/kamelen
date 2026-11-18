@@ -31,7 +31,6 @@ function evalP(P){let goed=0,n=0,brier=0,ll=0;
    n++;if(pick===e)goed++; brier+=['W','G','V'].reduce((s,k)=>s+Math.pow(v[k]-(k===e?1:0),2),0); ll+=-Math.log(Math.max(1e-6,v[e]));});
   return {goed,n,acc:goed/n,brier:brier/n,ll:ll/n};}
 
-const sc=m=>m.score.split('-').map(Number);
 function eloProbs(P,thuis,uit,datum){let r={};const g=t=>r[t]??1500;
  R.filter(m=>m.datum<datum).forEach(m=>{const[a,b]=sc(m);const d=g(m.thuis)+P.H-g(m.uit),ph=1/(1+Math.pow(10,-d/400));const s=a>b?1:a===b?.5:0,mov=Math.log(Math.abs(a-b)+1)+1,delta=P.K*mov*(s-ph);r[m.thuis]=g(m.thuis)+delta;r[m.uit]=g(m.uit)-delta;});
  const d=g(thuis)+P.H-g(uit),ph=1/(1+Math.pow(10,-d/400)),pd=P.D*Math.exp(-Math.abs(d)/P.S);return {W:(1-pd)*ph,G:pd,V:(1-pd)*(1-ph)};}
