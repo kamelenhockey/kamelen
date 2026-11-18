@@ -104,7 +104,7 @@
         k.push({ kleur: "k-goud", html: `<div class="wr-klein">Badges verdiend</div>
           <div class="wr-getal" data-tel="${t.aantal}">${t.aantal}</div>
           <div class="wr-rij"><div><b>🥇 ${t.goud}</b><span>goud</span></div><div><b>🥈 ${t.zilver}</b><span>zilver</span></div><div><b>🥉 ${t.brons}</b><span>brons</span></div></div>
-          ${zeld ? `<p class="wr-voet">Je zeldzaamste: <b>${zeld.ic} ${esc(zeld.naam)}</b>${(telling.get(zeld.naam) || 0) === 1 ? ", die heeft verder niemand!" : `, maar ${telling.get(zeld.naam) - 1} anderen hebben hem ook.`}</p>` : ""}` });
+          ${zeld ? `<p class="wr-voet">Je zeldzaamste: <b>${zeld.ic} ${esc(zeld.naam)}</b>${(telling.get(zeld.naam) || 0) === 1 ? ", die heeft verder niemand!" : `, maar ${telling.get(zeld.naam) - 1 === 1 ? "één ander heeft hem" : `${telling.get(zeld.naam) - 1} anderen hebben hem`} ook.`}</p>` : ""}` });
       }
     } catch {}
 
