@@ -71,30 +71,6 @@ nav.bar ul{list-style:none;margin:0 auto;max-width:1120px;padding:0 12px;display
 nav.bar a{display:block;padding:12px 12px;color:#e9e3dd;text-decoration:none;font-weight:600;font-size:.9rem;white-space:nowrap;border-bottom:2px solid transparent}
 nav.bar a:hover{color:#fff;border-bottom-color:var(--orange)}
 
-/* ---------- Tegenstanderprofiel bij de volgende wedstrijd ---------- */
-function tegenstanderHtml(m){
-  const opp = isUs(m.thuis) ? m.uit : m.thuis, zijThuis = m.thuis === opp;
-  const st = (DATA.stand || []).find(t => t.team === opp); if (!st) return "";
-  const ts = teamStats(opp);
-  const vorm = ts.res.slice(-5).map(x => resultFor(x, opp));
-  const zij = ts.res.filter(x => (x.thuis === opp) === zijThuis);
-  const rec = l => { let w = 0, g = 0, v = 0; l.forEach(x => { const r = resultFor(x, opp); r === "W" ? w++ : r === "V" ? v++ : g++; }); return `${w}-${g}-${v}`; };
-  const een = n => (ts.gs ? (n / ts.gs).toFixed(1).replace(".", ",") : "–");
-  const onderling = (DATA.uitslagen || []).filter(x => (x.thuis === opp || x.uit === opp) && isUs(x.thuis + x.uit)).sort((a, b) => b.datum.localeCompare(a.datum))[0];
-  const us = (DATA.stand || []).find(t => isUs(t.team));
-  const verschil = us ? us.punten - st.punten : null;
-  return `<div class="md-opp">
-    <div class="md-opp-head"><div class="k">Tegenstander</div><button type="button" class="md-opp-link" data-team="${esc(opp)}">${esc(opp)} · alle wedstrijden →</button></div>
-    <div class="md-opp-grid">
-      <div><div class="k">Stand</div><div class="v">${st.positie}e · ${st.punten} pt</div><div class="s">${verschil === null ? "" : verschil > 0 ? `${verschil} pt achter ons` : verschil < 0 ? `${-verschil} pt voor ons` : "evenveel punten als wij"}</div></div>
-      <div><div class="k">Vorm</div><div class="chips">${vorm.map(badge).join("")}</div></div>
-      <div><div class="k">${zijThuis ? "Thuis" : "Uit"} (W-G-V)</div><div class="v">${rec(zij)}</div></div>
-      <div><div class="k">Doelpunten / wedstrijd</div><div class="v">${een(ts.dv)} – ${een(ts.dt)}</div><div class="s">voor – tegen</div></div>
-    </div>
-    ${onderling ? `<div class="md-opp-h2h">Vorige keer: ${esc(onderling.thuis)} – ${esc(onderling.uit)} <b>${esc(onderling.score)}</b> (${fmtShort(onderling.datum)}) ${badge(resultFor(onderling, isUs(onderling.thuis) ? onderling.thuis : onderling.uit))}</div>` : ""}
-  </div>`;
-}
-
 /* ---------- Wedstrijddag ---------- */
 .matchday{background:var(--ink);color:#fff;border-top:1px solid #234b6a}
 .matchday .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;padding-top:28px;padding-bottom:32px}
@@ -1217,6 +1193,30 @@ function renderStats(){
   document.getElementById("stats").innerHTML = cells.join("");
 }
 
+/* ---------- Tegenstanderprofiel bij de volgende wedstrijd ---------- */
+function tegenstanderHtml(m){
+  const opp = isUs(m.thuis) ? m.uit : m.thuis, zijThuis = m.thuis === opp;
+  const st = (DATA.stand || []).find(t => t.team === opp); if (!st) return "";
+  const ts = teamStats(opp);
+  const vorm = ts.res.slice(-5).map(x => resultFor(x, opp));
+  const zij = ts.res.filter(x => (x.thuis === opp) === zijThuis);
+  const rec = l => { let w = 0, g = 0, v = 0; l.forEach(x => { const r = resultFor(x, opp); r === "W" ? w++ : r === "V" ? v++ : g++; }); return `${w}-${g}-${v}`; };
+  const een = n => (ts.gs ? (n / ts.gs).toFixed(1).replace(".", ",") : "–");
+  const onderling = (DATA.uitslagen || []).filter(x => (x.thuis === opp || x.uit === opp) && isUs(x.thuis + x.uit)).sort((a, b) => b.datum.localeCompare(a.datum))[0];
+  const us = (DATA.stand || []).find(t => isUs(t.team));
+  const verschil = us ? us.punten - st.punten : null;
+  return `<div class="md-opp">
+    <div class="md-opp-head"><div class="k">Tegenstander</div><button type="button" class="md-opp-link" data-team="${esc(opp)}">${esc(opp)} · alle wedstrijden →</button></div>
+    <div class="md-opp-grid">
+      <div><div class="k">Stand</div><div class="v">${st.positie}e · ${st.punten} pt</div><div class="s">${verschil === null ? "" : verschil > 0 ? `${verschil} pt achter ons` : verschil < 0 ? `${-verschil} pt voor ons` : "evenveel punten als wij"}</div></div>
+      <div><div class="k">Vorm</div><div class="chips">${vorm.map(badge).join("")}</div></div>
+      <div><div class="k">${zijThuis ? "Thuis" : "Uit"} (W-G-V)</div><div class="v">${rec(zij)}</div></div>
+      <div><div class="k">Doelpunten / wedstrijd</div><div class="v">${een(ts.dv)} – ${een(ts.dt)}</div><div class="s">voor – tegen</div></div>
+    </div>
+    ${onderling ? `<div class="md-opp-h2h">Vorige keer: ${esc(onderling.thuis)} – ${esc(onderling.uit)} <b>${esc(onderling.score)}</b> (${fmtShort(onderling.datum)}) ${badge(resultFor(onderling, isUs(onderling.thuis) ? onderling.thuis : onderling.uit))}</div>` : ""}
+  </div>`;
+}
+
 /* ---------- Wedstrijddag ---------- */
 let countdownTimer;
 function renderNext(){
@@ -2072,9 +2072,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795481100"></script>
-<script src="toto.js?v=1795481100"></script>
-<script src="pong.js?v=1795481100"></script>
+<script src="mex.js?v=1795481200"></script>
+<script src="toto.js?v=1795481200"></script>
+<script src="pong.js?v=1795481200"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2083,8 +2083,8 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795481100"></script>
-<script src="statistieken.js?v=1795481100"></script>
-<script src="push.js?v=1795481100"></script>
+<script src="stemmen.js?v=1795481200"></script>
+<script src="statistieken.js?v=1795481200"></script>
+<script src="push.js?v=1795481200"></script>
 </body>
 </html>
