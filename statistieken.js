@@ -192,7 +192,7 @@
       </div>`;
   }
 
-  window.renderStats = async function () {
+  window.renderStatistieken = async function () {
     if (!CFG.wedstrijden || !CFG.trainingen) { box.innerHTML = `<div class="empty">Statistieken zijn nog niet ingesteld.</div>`; return; }
     box.innerHTML = `<div class="empty">Statistieken laden…</div>`;
     const lees = u => fetch(u, { cache: "no-store" }).then(r => r.ok ? r.text() : "").then(t => leesAfwezigheid(parseCsv(t))).catch(() => ({ sessies: [], invallers: [] }));
@@ -202,6 +202,7 @@
     wed.sessies = wed.sessies.filter(x => speeldagen.has(x.datum));
     wed.invallers = wed.invallers.filter(x => speeldagen.has(x.datum));
     DATA.invalSheet = wed.invallers; window.renderPlayers?.();
-    render(bereken(wed, tr));
+    try { render(bereken(wed, tr)); }
+    catch (e) { console.error(e); box.innerHTML = `<div class="empty">De statistieken konden niet worden geladen. Ververs de pagina.</div>`; }
   };
 })();

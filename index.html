@@ -1875,7 +1875,13 @@ Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("ops
     (DATA.doelpunten || []).forEach(w => w.goals.forEach(g => { g.wie = canon(g.wie); }));
     if (!comp.programma && !DATA.liters) throw new Error("geen gegevens");
     if (DATA.competitie) document.getElementById("league").textContent = DATA.competitie;
-    renderStats(); renderNext(); renderProgram(); renderResults(); renderStandings(); renderTopscorers(); renderLiters(); initPredictor(); renderSeason(); renderPlayers(); initAgenda(); window.renderMex?.(); window.renderToto?.(); renderDash(); confettiNaWinst(); DATA.litersBasis = DATA.liters; window.renderStemmen?.().then(() => window.renderStats?.());
+    /* Elk onderdeel apart: als er één faalt, werkt de rest gewoon door */
+    const veilig = f => { try { const r = f(); if (r && r.catch) r.catch(e => console.error(e)); return r; } catch (e) { console.error(e); } };
+    [renderStats, renderNext, renderProgram, renderResults, renderStandings, renderTopscorers, renderLiters, initPredictor, renderSeason, renderPlayers, initAgenda, () => window.renderMex?.(), () => window.renderToto?.(), renderDash, confettiNaWinst].forEach(veilig);
+    DATA.litersBasis = DATA.liters;
+    veilig(() => window.renderStatistieken?.());
+    /* Na het ophalen van de stemmen (ezel-liters) de statistieken nog eens bijwerken */
+    Promise.resolve(veilig(() => window.renderStemmen?.())).catch(() => {}).finally(() => veilig(() => window.renderStatistieken?.()));
     const f = x => { const d = new Date(x); return isNaN(d) ? "onbekend" : d.toLocaleString("nl-NL",{dateStyle:"long",timeStyle:"short",timeZone:"Europe/Amsterdam"}); };
     document.getElementById("foot").textContent = `Competitie: laatste wijziging ${f(DATA.competitieBijgewerkt)} (bron hockey.nl) · Literklassement en topscorers: ${live ? "live uit de spreadsheet" : "bijgewerkt " + f(DATA.bijgewerkt)}`;
   })
@@ -1909,9 +1915,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795480100"></script>
-<script src="toto.js?v=1795480100"></script>
-<script src="pong.js?v=1795480100"></script>
+<script src="mex.js?v=1795480200"></script>
+<script src="toto.js?v=1795480200"></script>
+<script src="pong.js?v=1795480200"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -1920,7 +1926,7 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795480100"></script>
-<script src="statistieken.js?v=1795480100"></script>
+<script src="stemmen.js?v=1795480200"></script>
+<script src="statistieken.js?v=1795480200"></script>
 </body>
 </html>
