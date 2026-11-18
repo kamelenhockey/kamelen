@@ -705,6 +705,13 @@ table.opk td{padding:7px 8px}
 .wbar .track b{position:relative;padding-left:8px;line-height:22px;font-variant-numeric:tabular-nums}
 @media (max-width:900px){ .stat-two{grid-template-columns:1fr} .stat-strip{grid-template-columns:repeat(3,1fr)} .stat-strip > div:nth-child(4){border-left:0} .stat-strip > div:nth-child(n+4){border-top:1px solid rgba(255,255,255,.12)} }
 table.opk .kort{display:none}
+.stand-tools,.stand-legenda{display:none}
+@media (max-width:560px){
+  .stand-tools{display:flex;justify-content:flex-end;margin:-4px 0 8px}
+  #standings.stand-detail .stand-legenda{display:block;font-size:.8rem;color:var(--muted);margin:0 0 8px}
+  #standings.stand-detail .hide-sm{display:table-cell!important}
+  #standings.stand-detail td,#standings.stand-detail th{white-space:nowrap;padding-left:7px;padding-right:7px}
+}
 @media (max-width:560px){ .bar-td{display:none} .wbar.reden{grid-template-columns:8.5rem 1fr}
   table.opk{font-size:.92rem;width:100%}
   table.opk th,table.opk td{padding:9px 6px}
@@ -1413,13 +1420,23 @@ function renderResults(){
 }
 
 /* ---------- Stand ---------- */
+document.addEventListener("click", e => {
+  if (!e.target.closest("#stand-toggle")) return;
+  let d = false; try { d = localStorage.getItem("kamelen-stand-details") === "1"; } catch {}
+  try { localStorage.setItem("kamelen-stand-details", d ? "0" : "1"); } catch {}
+  renderStandings();
+});
 function renderStandings(){
   const s = DATA.stand || [];
   const box = document.getElementById("standings");
   if (!s.length){ box.innerHTML = empty("Nog geen stand", "", DATA.hockeyNlUrl); return; }
   const aftrek = DATA.puntenAftrek || {};
   document.getElementById("stand-sub").textContent = `${DATA.competitie || ""}${DATA.standPer ? ` · per ${DATA.standPer}` : ""}`;
-  box.innerHTML = `<div class="tablewrap"><table><thead><tr>
+  let details = false; try { details = localStorage.getItem("kamelen-stand-details") === "1"; } catch {}
+  box.classList.toggle("stand-detail", details);
+  box.innerHTML = `<div class="stand-tools"><button type="button" class="btn sm ghost" id="stand-toggle" aria-pressed="${details}">${details ? "Verberg details" : "Toon details"}</button></div>
+    <p class="stand-legenda">GS gespeeld, W gewonnen, G gelijk, V verloren, DV doelpunten voor, DT doelpunten tegen, DS doelsaldo, PT punten. Schuif de tabel opzij voor alles.</p>
+    <div class="tablewrap"><table><thead><tr>
       <th class="r">#</th><th>Team</th><th class="r" title="Gespeeld">GS</th>
       <th class="r hide-sm" title="Gewonnen">W</th><th class="r hide-sm" title="Gelijk">G</th><th class="r hide-sm" title="Verloren">V</th>
       <th class="r hide-sm" title="Doelpunten voor">DV</th><th class="r hide-sm" title="Doelpunten tegen">DT</th>
@@ -2194,9 +2211,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795481700"></script>
-<script src="toto.js?v=1795481700"></script>
-<script src="pong.js?v=1795481700"></script>
+<script src="mex.js?v=1795481800"></script>
+<script src="toto.js?v=1795481800"></script>
+<script src="pong.js?v=1795481800"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2205,8 +2222,8 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795481700"></script>
-<script src="statistieken.js?v=1795481700"></script>
-<script src="push.js?v=1795481700"></script>
+<script src="stemmen.js?v=1795481800"></script>
+<script src="statistieken.js?v=1795481800"></script>
+<script src="push.js?v=1795481800"></script>
 </body>
 </html>
