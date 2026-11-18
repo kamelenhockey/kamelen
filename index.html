@@ -1778,7 +1778,9 @@ function seasonPositions(){
   const teams = (DATA.stand || []).map(t => t.team);
   const aftrek = DATA.puntenAftrek || {};
   const dates = [...new Set(res.map(m => m.datum))];
-  const st = Object.fromEntries(teams.map(t => [t, {pt:-(aftrek[t]||0), dv:0, dt:0, gs:0}]));
+  /* Puntenaftrek op de speeldag waarop hij gegeven is (onbekend: vanaf het begin) */
+  const moment = DATA.aftrekMoment || {};
+  const st = Object.fromEntries(teams.map(t => [t, {pt: moment[t] ? 0 : -(aftrek[t]||0), dv:0, dt:0, gs:0}]));
   const out = [];
   let i = 0;
   for (const d of dates){
@@ -1788,6 +1790,7 @@ function seasonPositions(){
       H.dv += a; H.dt += b; U.dv += b; U.dt += a; H.gs++; U.gs++;
       if (a > b) H.pt += 3; else if (a < b) U.pt += 3; else { H.pt++; U.pt++; }
     }
+    for (const t of teams) if (moment[t] === d) st[t].pt -= (aftrek[t] || 0);
     const order = [...teams].sort((x,y) => st[y].pt - st[x].pt || st[x].gs - st[y].gs || (st[y].dv-st[y].dt) - (st[x].dv-st[x].dt) || st[y].dv - st[x].dv || x.localeCompare(y));
     out.push({ datum: d, pos: Object.fromEntries(order.map((t,k) => [t, k+1])), pt: Object.fromEntries(teams.map(t => [t, st[t].pt])) });
   }
@@ -1841,7 +1844,7 @@ function renderSeason(){
   };
   svg.onpointerleave = () => { tip.hidden = true; cross.setAttribute("visibility", "hidden"); hd.innerHTML = ""; };
   document.getElementById("chart-table").innerHTML = `<table><thead><tr><th>Speeldag</th>${series.slice().reverse().map(([t]) => `<th class="r">${esc(t)}</th>`).join("")}</tr></thead><tbody>${rounds.map(r => `<tr><td>${fmtDay(r.datum,{day:"numeric",month:"short"})}</td>${series.slice().reverse().map(([t]) => `<td class="r">${r.pos[t]}e (${r.pt[t]} pt)</td>`).join("")}</tr>`).join("")}</tbody></table>
-    ${(DATA.puntenAftrek||{})[us] ? `<p class="note">De puntenaftrek is vanaf het begin meegeteld.</p>` : ""}`;
+    ${(DATA.puntenAftrek||{})[us] ? `<p class="note">${(DATA.aftrekMoment||{})[us] ? `De ${(DATA.puntenAftrek||{})[us]} punten aftrek zijn verwerkt op ${fmtShort((DATA.aftrekMoment||{})[us])}: die wedstrijd leverde netto 0 punten op.` : "De puntenaftrek is vanaf het begin meegeteld."}</p>` : ""}`;
 }
 
 /* ---------- Spelers ---------- */
@@ -2176,7 +2179,7 @@ const loadDoelpunten = () => fetchText(DOELPUNTEN_CSV).catch(() => fetchText("do
 Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("opstelling.json"), loadLitersLive().catch(() => null), loadDoelpunten(), loadJson("spelers.json")])
   .then(([comp, lit, ops, live, doelpunten, roster]) => {
     initRoster(roster);
-    DATA = { ...comp, ...lit, ...(live ? {liters: live} : {}), opstelling: ops.spelers || [], opstellingWedstrijd: ops.wedstrijd || null, doelpunten };
+    DATA = { aftrekMoment: { "GCHC H13": "2026-10-18" }, ...comp, ...lit, ...(live ? {liters: live} : {}), opstelling: ops.spelers || [], opstellingWedstrijd: ops.wedstrijd || null, doelpunten };
     (DATA.doelpunten || []).forEach(w => w.goals.forEach(g => { g.wie = canon(g.wie); }));
     if (!comp.programma && !DATA.liters) throw new Error("geen gegevens");
     if (DATA.competitie) document.getElementById("league").textContent = DATA.competitie;
@@ -2221,9 +2224,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795482300"></script>
-<script src="toto.js?v=1795482300"></script>
-<script src="pong.js?v=1795482300"></script>
+<script src="mex.js?v=1795482400"></script>
+<script src="toto.js?v=1795482400"></script>
+<script src="pong.js?v=1795482400"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2232,8 +2235,8 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795482300"></script>
-<script src="statistieken.js?v=1795482300"></script>
-<script src="push.js?v=1795482300"></script>
+<script src="stemmen.js?v=1795482400"></script>
+<script src="statistieken.js?v=1795482400"></script>
+<script src="push.js?v=1795482400"></script>
 </body>
 </html>
