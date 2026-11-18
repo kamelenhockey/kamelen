@@ -466,6 +466,9 @@ td.delta{color:var(--muted);font-size:.8rem}
 .avatar.foto{padding:0;overflow:hidden;background:var(--sky)}
 .avatar.foto img{width:100%;height:100%;object-fit:cover;display:block}
 .avatar.groot{width:88px;height:88px;border-radius:22px;font-size:2rem}
+.pf-zoom{border:0;cursor:zoom-in;transition:transform .15s}
+.pf-zoom:hover{transform:scale(1.04)}
+.lightbox .pf-groot{width:min(86vw,560px);height:auto;aspect-ratio:1;object-fit:cover;border-radius:24px}
 .pf-rij{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
 .pf-knop{cursor:pointer}
 .pf-status{font-size:.85rem;color:var(--muted)}
@@ -2300,12 +2303,25 @@ document.addEventListener("change", async e => {
   } catch (err) { st.textContent = err.message || "Uploaden lukte niet."; }
 });
 
+/* Profielfoto vergroten */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-pf-groot]"); if (!b) return;
+  const dlg = document.createElement("dialog"); dlg.className = "lightbox";
+  dlg.innerHTML = `<button type="button" class="lb-sluit" aria-label="Sluiten">✕</button>
+    <img class="pf-groot" src="https://drive.google.com/thumbnail?id=${encodeURIComponent(b.dataset.pfGroot)}&sz=w1200" alt="Profielfoto van ${esc(b.dataset.pfNaam)}" referrerpolicy="no-referrer">
+    <div class="lb-tekst"><b>${esc(b.dataset.pfNaam)}</b></div>`;
+  dlg.addEventListener("click", ev => { if (ev.target.closest(".lb-sluit") || ev.target === dlg || ev.target.classList.contains("pf-groot")) dlg.close(); });
+  dlg.addEventListener("close", () => dlg.remove());
+  document.body.appendChild(dlg); dlg.showModal();
+});
+
 /* Avatar: profielfoto als die er is, anders de beginletters */
 function avatarHtml(p, groot){
   const id = (DATA.profielfotos || {})[p.naam];
   const ini = p.naam.split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase();
+  if (id && groot) return `<button type="button" class="avatar foto groot pf-zoom" data-pf-groot="${esc(id)}" data-pf-naam="${esc(p.naam)}" aria-label="Profielfoto van ${esc(p.naam)} vergroten"><img src="https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w400" alt="" referrerpolicy="no-referrer"></button>`;
   return id
-    ? `<span class="avatar foto${groot ? " groot" : ""}"><img src="https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w${groot ? 400 : 160}" alt="" loading="lazy" referrerpolicy="no-referrer"></span>`
+    ? `<span class="avatar foto"><img src="https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w160" alt="" loading="lazy" referrerpolicy="no-referrer"></span>`
     : `<span class="avatar${p.invaller ? " inv" : ""}${groot ? " groot" : ""}">${esc(ini)}</span>`;
 }
 function playerCard(p){
@@ -2733,9 +2749,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795486000"></script>
-<script src="toto.js?v=1795486000"></script>
-<script src="pong.js?v=1795486000"></script>
+<script src="mex.js?v=1795486100"></script>
+<script src="toto.js?v=1795486100"></script>
+<script src="pong.js?v=1795486100"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2744,12 +2760,12 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795486000"></script>
-<script src="statistieken.js?v=1795486000"></script>
-<script src="race.js?v=1795486000"></script>
-<script src="rad.js?v=1795486000"></script>
-<script src="fotos.js?v=1795486000"></script>
-<script src="quotes.js?v=1795486000"></script>
-<script src="push.js?v=1795486000"></script>
+<script src="stemmen.js?v=1795486100"></script>
+<script src="statistieken.js?v=1795486100"></script>
+<script src="race.js?v=1795486100"></script>
+<script src="rad.js?v=1795486100"></script>
+<script src="fotos.js?v=1795486100"></script>
+<script src="quotes.js?v=1795486100"></script>
+<script src="push.js?v=1795486100"></script>
 </body>
 </html>
