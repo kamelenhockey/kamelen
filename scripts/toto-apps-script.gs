@@ -47,10 +47,10 @@ function pushRij_(endpoint) {
 }
 /* Wie speelde welke wedstrijd mee? Komt uit het gepubliceerde tabblad "Afwezigheid Wedstrijden":
    een leeg vakje (of "Te laat") = meegespeeld, plus de namen in de rijen "Invaller". */
-const AANWEZIG_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWb-e6CJxfZblU3eZdDwDu_RT0AQQK536xoumOq2_NqyejB-K2H3CAfxf5UrlpWKW1i_XbvMUfQBpj/pub?gid=1818619826&single=true&output=csv";
+const AANWEZIG_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv";
 const MAANDEN_ = { jan: 1, feb: 2, mrt: 3, maa: 3, apr: 4, mei: 5, jun: 6, jul: 7, aug: 8, sep: 9, okt: 10, oct: 10, nov: 11, dec: 12 };
 function aanwezigKaart_() {
-  const cache = CacheService.getScriptCache(), oud = cache.get("aanwezig");
+  const cache = CacheService.getScriptCache(), oud = cache.get("aanwezig2");
   if (oud) return JSON.parse(oud);
   let rows = [];
   try { rows = Utilities.parseCsv(UrlFetchApp.fetch(AANWEZIG_CSV, { muteHttpExceptions: true }).getContentText()); } catch (x) { return {}; }
@@ -76,7 +76,7 @@ function aanwezigKaart_() {
       else if (!v || /^te laat$/i.test(v)) kaart[k].push(naam);
     });
   });
-  cache.put("aanwezig", JSON.stringify(kaart), 300);
+  if (Object.keys(kaart).length) cache.put("aanwezig2", JSON.stringify(kaart), 300);
   return kaart;
 }
 /* Namen die meespeelden op een datum (yyyy-mm-dd), of null als die datum niet in het blad staat */
