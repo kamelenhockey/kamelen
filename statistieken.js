@@ -128,7 +128,8 @@
     S.opkomst = [...spelers.values()].map(x => ({ ...x, wP: x.wT ? x.wA / x.wT : 0, tP: x.tT ? x.tA / x.tT : 0, totP: (x.wA + x.tA) / Math.max(1, x.wT + x.tT) }))
       .sort((a, b) => b.totP - a.totP || b.wP - a.wP || a.naam.localeCompare(b.naam));
     S.ijzer = S.opkomst.filter(x => x.wT && x.wA === x.wT).map(x => x.naam);
-    S.trainingsBeest = [...S.opkomst].sort((a, b) => b.tP - a.tP)[0];
+    const maxT = Math.max(...S.opkomst.map(o => o.tP));
+    S.trainingsBeesten = S.opkomst.length ? S.opkomst.filter(o => o.tP === maxT) : [];
     S.gemTraining = avg(tr.sessies.map(s => s.spelers.filter(p => p.aanwezig).length));
     S.drukste = [...tr.sessies].sort((a, b) => cnt(b) - cnt(a))[0];
     S.rustigste = [...tr.sessies].sort((a, b) => cnt(a) - cnt(b))[0];
@@ -172,7 +173,7 @@
     if (S.literKoning) feiten.push(feit("Literkoning", esc(S.literKoning.naam), `${fmtL(S.literKoning.liters)} L, waarvan nog ${fmtL(S.literKoning.open)} L open`, "beer"));
     if (S.snelBetaler) feiten.push(feit("Netjes betaald", esc(S.snelBetaler.naam), `${fmtL(S.snelBetaler.liters)} L aan boetes en alles al weggewerkt`, "beer"));
     if (S.ijzer.length) feiten.push(feit("IJzeren Kameel", S.ijzer.length === 1 ? esc(S.ijzer[0]) : S.ijzer.length, S.ijzer.length === 1 ? "miste geen enkele wedstrijd" : `spelers misten geen enkele wedstrijd: ${S.ijzer.map(esc).join(", ")}`, "accent"));
-    if (S.trainingsBeest) feiten.push(feit("Trainingsbeest", esc(S.trainingsBeest.naam), `${pct(S.trainingsBeest.tP)} van de trainingen aanwezig`));
+    if (S.trainingsBeesten.length) feiten.push(feit(S.trainingsBeesten.length > 1 ? "Trainingsbeesten" : "Trainingsbeest", S.trainingsBeesten.map(o => esc(o.naam)).join(" & "), `${pct(S.trainingsBeesten[0].tP)} van de trainingen aanwezig${S.trainingsBeesten.length > 1 ? ", allebei even vaak" : ""}`));
     if (!isNaN(S.gemTraining)) feiten.push(feit("Gemiddeld op training", een(S.gemTraining), `spelers per training${S.drukste ? ` · drukst: ${cnt(S.drukste)} (${fmtShort(S.drukste.datum)}), rustigst: ${cnt(S.rustigste)} (${fmtShort(S.rustigste.datum)})` : ""}`));
     if (!isNaN(S.opkW) && !isNaN(S.opkV)) feiten.push(feit("Opkomst doet ertoe", `${een(S.opkW)} vs ${een(S.opkV)}`, `spelers gemiddeld bij winst tegen bij verlies`));
     if (S.invallers.length) feiten.push(feit("Invallers", S.invallers.length, `keer een invaller nodig gehad · ${[...new Set(S.invallers.map(i => i.naam))].map(esc).join(", ")}`));
