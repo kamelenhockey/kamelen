@@ -100,10 +100,15 @@
       for (const r of randen) { const g = 360 - r; tikken += Math.floor((a1 - g) / 360) - Math.floor((a0 - g) / 360); }
       if (tikken > 0) { tik(Math.min(1, (1 - p) * 1.4 + .25)); if (pijl) { pijl.classList.remove("tik"); void pijl.offsetWidth; pijl.classList.add("tik"); } }
       vorigeHoek = hoek;
-      if (p < 1) requestAnimationFrame(stap);
+      if (p < 1) volgendBeeld(stap);
       else { vorigeDraai = draai; setTimeout(() => klaar(vak), 150); }
     };
-    requestAnimationFrame(stap);
+    volgendBeeld(stap);
+  }
+  /* Volgend beeld; valt terug op een timer als het scherm geen beelden levert (bv. op de achtergrond) */
+  function volgendBeeld(cb) {
+    let klaar = false; const doe = () => { if (!klaar) { klaar = true; cb(performance.now()); } };
+    requestAnimationFrame(doe); setTimeout(doe, 50);
   }
 
   /* ---------- Geluid: het klik-klik-klik van een echt rad ---------- */
