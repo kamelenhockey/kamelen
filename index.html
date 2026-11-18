@@ -3,6 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<script>
+/* Codescherm: alleen met de teamcode kom je verder. De code zelf staat hier niet, alleen een vingerafdruk (SHA-256). */
+window.TOEGANG_f1653c51d48cd2ec3535449e13bd3c906dd12e881950db7648a89a0fa1b36e07 = "f1653c51d48cd2ec3535449e13bd3c906dd12e881950db7648a89a0fa1b36e07";
+try { if (localStorage.getItem("kamelen-toegang") !== window.TOEGANG_f1653c51d48cd2ec3535449e13bd3c906dd12e881950db7648a89a0fa1b36e07) document.documentElement.classList.add("op-slot"); }
+catch (e) { document.documentElement.classList.add("op-slot"); }
+</script>
+<style>
+html.op-slot body > *:not(#slot){display:none!important}
+#slot{display:none}
+html.op-slot #slot{display:grid;place-items:center;min-height:100vh;min-height:100dvh;padding:24px;background:linear-gradient(180deg,#d3e7f1,#b9d8e8)}
+.slot-kaart{width:min(380px,100%);background:#fff;border-radius:20px;padding:28px 24px;text-align:center;box-shadow:0 24px 50px -30px rgba(22,54,80,.6)}
+.slot-kaart img{width:110px}
+.slot-kaart h1{font-family:"DM Serif Display",Georgia,serif;font-weight:400;font-size:2.4rem;margin:6px 0 4px;color:#163650}
+.slot-kaart p{margin:0 0 18px;color:#5e6f7c;font-family:"DM Sans",system-ui,sans-serif}
+.slot-kaart input{width:100%;box-sizing:border-box;font-family:"DM Sans",system-ui,sans-serif;font-size:1.1rem;padding:12px 14px;border:1px solid #cfd9e0;border-radius:12px;text-align:center}
+.slot-kaart button{width:100%;margin-top:10px;font-family:"DM Sans",system-ui,sans-serif;font-weight:700;font-size:1rem;padding:12px;border:0;border-radius:12px;background:#163650;color:#fff;cursor:pointer}
+.slot-fout{min-height:1.4em;margin-top:10px;color:#b3261e;font-family:"DM Sans",system-ui,sans-serif;font-size:.9rem}
+</style>
 <meta name="description" content="Teamsite van GCHC H13, de Kamelen: programma, uitslagen, stand, topscorers en het literklassement.">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -843,6 +862,32 @@ h1,h2,h3{font-family:var(--font-display)}
 </style>
 </head>
 <body>
+<div id="slot">
+  <form class="slot-kaart" id="slot-form">
+    <img src="logo.png" alt="">
+    <h1>Kamelen</h1>
+    <p>Vul de teamcode in om verder te gaan.</p>
+    <input id="slot-code" type="password" autocomplete="current-password" placeholder="Teamcode" aria-label="Teamcode" required>
+    <button type="submit">Naar binnen</button>
+    <div class="slot-fout" id="slot-fout" role="alert"></div>
+  </form>
+</div>
+<script>
+document.getElementById("slot-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const code = document.getElementById("slot-code").value.trim().toLowerCase();
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(code));
+  const hash = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+  if (hash === window.TOEGANG_HASH) {
+    try { localStorage.setItem("kamelen-toegang", hash); } catch (x) {}
+    document.documentElement.classList.remove("op-slot");
+    window.scrollTo(0, 0);
+    window.dispatchEvent(new Event("resize"));
+  } else {
+    document.getElementById("slot-fout").textContent = "Die code klopt niet.";
+  }
+});
+</script>
 <header class="hero">
   <div class="wrap">
     <img src="logo.png" alt="Logo van de Kamelen: een lopende oranje kameel">
@@ -2299,9 +2344,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795482500"></script>
-<script src="toto.js?v=1795482500"></script>
-<script src="pong.js?v=1795482500"></script>
+<script src="mex.js?v=1795482600"></script>
+<script src="toto.js?v=1795482600"></script>
+<script src="pong.js?v=1795482600"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2310,10 +2355,10 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795482500"></script>
-<script src="statistieken.js?v=1795482500"></script>
-<script src="fotos.js?v=1795482500"></script>
-<script src="quotes.js?v=1795482500"></script>
-<script src="push.js?v=1795482500"></script>
+<script src="stemmen.js?v=1795482600"></script>
+<script src="statistieken.js?v=1795482600"></script>
+<script src="fotos.js?v=1795482600"></script>
+<script src="quotes.js?v=1795482600"></script>
+<script src="push.js?v=1795482600"></script>
 </body>
 </html>
