@@ -1030,14 +1030,26 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 }
 
 .hero{position:relative}
-.ik-chip{position:absolute;top:12px;right:max(16px,calc((100vw - 1120px)/2 + 20px));z-index:5;display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border:0;border-radius:99px;background:rgba(255,255,255,.8);box-shadow:0 4px 14px -8px rgba(22,54,80,.6);font:600 .9rem var(--font-body,inherit);color:var(--ink);cursor:pointer;backdrop-filter:blur(6px)}
+.hero-acties{position:absolute;top:12px;right:max(16px,calc((100vw - 1120px)/2 + 20px));z-index:5;display:flex;align-items:center;gap:8px}
+.ik-chip{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border:0;border-radius:99px;background:rgba(255,255,255,.8);box-shadow:0 4px 14px -8px rgba(22,54,80,.6);font:600 .9rem var(--font-body,inherit);color:var(--ink);cursor:pointer;backdrop-filter:blur(6px)}
+.ververs-knop{display:grid;place-items:center;width:40px;height:40px;border:0;border-radius:50%;background:rgba(255,255,255,.8);box-shadow:0 4px 14px -8px rgba(22,54,80,.6);color:var(--ink);cursor:pointer;backdrop-filter:blur(6px)}
+.ververs-knop:hover{background:#fff}
+.ververs-knop:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.ververs-knop.draait svg,.trek-ververs.draait svg{animation:ververs-draai .8s linear infinite}
+@keyframes ververs-draai{to{transform:rotate(360deg)}}
+.trek-ververs{position:fixed;left:50%;top:0;z-index:60;width:40px;height:40px;margin-left:-20px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--ink);box-shadow:0 6px 18px -8px rgba(22,54,80,.7);transform:translateY(-60px);opacity:0;pointer-events:none}
+.trek-ververs.klaar{color:var(--orange)}
+.ververs-toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:12px;padding:10px 12px 10px 16px;border-radius:14px;background:var(--ink);color:#fff;box-shadow:0 14px 30px -14px rgba(0,0,0,.6);font-size:.9rem;max-width:calc(100vw - 24px)}
+.ververs-toast .vt-x{background:transparent;padding:6px}
+.ververs-toast button{border:0;border-radius:8px;padding:7px 12px;background:var(--orange);color:#fff;font:600 .85rem inherit;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.ververs-knop.draait svg,.trek-ververs.draait svg{animation:none}}
 .ik-chip:hover{background:#fff}
 .ik-chip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .ik-chip[disabled]{cursor:default}
 .hero .ik-chip .avatar{width:32px;height:32px;min-width:32px;font-size:.78rem}
 .hero .ik-chip img{width:100%;height:100%;object-fit:cover}
-@media (max-width:760px){.hero .wrap{padding-top:54px!important}}
-@media (max-width:560px){.ik-chip{top:8px;right:10px;font-size:.82rem}.hero .ik-chip .avatar{width:28px;height:28px;min-width:28px}}
+@media (max-width:760px){.hero .wrap{padding-top:62px!important}}
+@media (max-width:560px){.hero-acties{top:8px;right:10px}.ververs-knop{width:36px;height:36px}.ik-chip{font-size:.82rem}.hero .ik-chip .avatar{width:28px;height:28px;min-width:28px}}
 /* ---------- Stijl A, indeling 2: sierlijke koppen (DM Serif Display), rustige tekst (DM Sans),
    de volgende wedstrijd als zwevende donkere kaart over de lichtblauwe kop ---------- */
 h1,h2,h3,.wordmark,.md-team,.big,.v,.cd .v,.statbar .v,.tile .big,.dlg-stats .v,.fact .big{font-weight:400!important;letter-spacing:0}
@@ -1100,7 +1112,11 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
 });
 </script>
 <header class="hero">
-  <button type="button" class="ik-chip" id="ik-chip" hidden></button>
+  <div class="hero-acties">
+    <button type="button" class="ververs-knop" id="ververs-knop" aria-label="Verversen: nieuwste foto's en gegevens ophalen" title="Verversen"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button type="button" class="ik-chip" id="ik-chip" hidden></button>
+  </div>
+  <div class="trek-ververs" id="trek-ververs" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
   <div class="wrap">
     <img src="logo.png" alt="Logo van de Kamelen: een lopende oranje kameel">
     <div>
@@ -2759,19 +2775,92 @@ Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("ops
     /* Na het ophalen van de stemmen (ezel-liters) de statistieken nog eens bijwerken */
     Promise.resolve(veilig(() => window.renderStemmen?.())).catch(() => {}).finally(() => veilig(() => window.renderStatistieken?.()));
     const f = x => { const d = new Date(x); return isNaN(d) ? "onbekend" : d.toLocaleString("nl-NL",{dateStyle:"long",timeStyle:"short",timeZone:"Europe/Amsterdam"}); };
+    herstelScroll();
     document.getElementById("foot").textContent = `Competitie: laatste wijziging ${f(DATA.competitieBijgewerkt)} (bron hockey.nl) · Liter-incassobureau en topscorers: ${live ? "live uit de spreadsheet" : "bijgewerkt " + f(DATA.bijgewerkt)}`;
   })
   .catch(() => {
     document.querySelector("main").insertAdjacentHTML("afterbegin", `<div class="card wide">${empty("De gegevens konden niet worden geladen", "Ververs de pagina om het opnieuw te proberen.")}</div>`);
   });
+/* ---------- Altijd de nieuwste versie: verversen ---------- */
+/* Na herladen: terug naar dezelfde plek op de pagina */
+function herstelScroll(){
+  try {
+    const s = JSON.parse(sessionStorage.getItem("kamelen-scroll") || "null"); sessionStorage.removeItem("kamelen-scroll");
+    if (s && s.hash === location.hash && Date.now() - s.t < 60000) requestAnimationFrame(() => setTimeout(() => window.scrollTo(0, s.y), 60));
+  } catch {}
+}
+let _nietHerladenTot = 0;   // bijvoorbeeld tijdens het kiezen van een foto
+document.addEventListener("click", e => {
+  const l = e.target.closest("label"), f = l && (l.querySelector('input[type="file"]') || (l.htmlFor && document.getElementById(l.htmlFor)));
+  if (e.target.closest('input[type="file"]') || (f && f.type === "file")) _nietHerladenTot = Date.now() + 3 * 60000;
+}, true);
+document.addEventListener("change", e => { if (e.target.matches('input[type="file"]')) _nietHerladenTot = Date.now() + 60000; }, true);
+/* Is er iets bezig dat je kwijt zou raken? Dan niet vanzelf herladen. */
+function bezigMetIets(){
+  if (Date.now() < _nietHerladenTot) return true;
+  if (document.querySelector("dialog[open]")) return true;
+  return [...document.querySelectorAll("input, textarea")].some(i =>
+    i.type !== "hidden" && i.type !== "file" && i.type !== "checkbox" && i.type !== "radio" && i.offsetParent && i.value !== i.defaultValue);
+}
+function verversNu(){
+  ["ververs-knop", "trek-ververs"].forEach(id => document.getElementById(id)?.classList.add("draait"));
+  try { sessionStorage.setItem("kamelen-scroll", JSON.stringify({ hash: location.hash, y: window.scrollY, t: Date.now() })); } catch {}
+  const reg = window._kamelenReg;
+  Promise.race([reg ? reg.update().catch(() => {}) : Promise.resolve(), new Promise(r => setTimeout(r, 1500))]).finally(() => location.reload());
+}
+window.verversNu = verversNu;
+function toonVerversToast(tekst){
+  if (document.querySelector(".ververs-toast")) return;
+  const d = document.createElement("div"); d.className = "ververs-toast"; d.setAttribute("role", "status");
+  d.innerHTML = `<span>${tekst}</span><button type="button">Verversen</button><button type="button" class="vt-x" aria-label="Sluiten">✕</button>`;
+  d.querySelector("button").onclick = verversNu; d.querySelector(".vt-x").onclick = () => d.remove(); document.body.appendChild(d);
+}
+document.getElementById("ververs-knop").addEventListener("click", verversNu);
+/* Terug in de app na een tijdje weg te zijn geweest: vanzelf de nieuwste stand ophalen */
+let _wegSinds = 0;
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { _wegSinds = Date.now(); return; }
+  window._kamelenReg?.update().catch(() => {});
+  if (_wegSinds && Date.now() - _wegSinds > 45000) {
+    if (bezigMetIets()) toonVerversToast("Er kan nieuws zijn sinds je weg was.");
+    else verversNu();
+  }
+  _wegSinds = 0;
+});
+/* Naar beneden trekken bovenaan de pagina = verversen (zoals in andere apps) */
+(() => {
+  const el = document.getElementById("trek-ververs"); let start = null, dy = 0;
+  const NIET = "dialog, canvas, .rad-wiel, .race-baan, .mx-die, .more-sheet, input, textarea, select, [data-geen-trek]";
+  addEventListener("touchstart", e => {
+    start = (window.scrollY <= 0 && e.touches.length === 1 && !e.target.closest(NIET) && !document.body.classList.contains("sheet-open")) ? e.touches[0].clientY : null; dy = 0;
+  }, { passive: true });
+  addEventListener("touchmove", e => {
+    if (start === null) return;
+    dy = e.touches[0].clientY - start;
+    if (dy <= 0 || window.scrollY > 0) { el.style.opacity = 0; el.style.transform = "translateY(-60px)"; return; }
+    const p = Math.min(dy, 140);
+    el.style.opacity = Math.min(1, p / 70); el.style.transform = `translateY(${p * .55 - 20}px) rotate(${p * 2.5}deg)`;
+    el.classList.toggle("klaar", dy > 110);
+  }, { passive: true });
+  addEventListener("touchend", () => {
+    if (start === null) return; start = null;
+    if (dy > 110) { el.style.transform = "translateY(44px)"; el.style.opacity = 1; verversNu(); }
+    else { el.style.transition = "transform .2s, opacity .2s"; el.style.opacity = 0; el.style.transform = "translateY(-60px)"; setTimeout(() => el.style.transition = "", 220); }
+  }, { passive: true });
+})();
 /* ---------- App: offline bewaren ---------- */
 if ("serviceWorker" in navigator) window.addEventListener("load", () => {
   navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(reg => {
+    window._kamelenReg = reg;
     reg.update().catch(() => {});
-    /* Nieuwe versie geïnstalleerd: één keer herladen zodat je hem meteen ziet */
+    /* Nieuwe versie van de app: meteen gebruiken (of even vragen als je ergens mee bezig bent) */
     reg.addEventListener("updatefound", () => {
       const nw = reg.installing;
-      nw?.addEventListener("statechange", () => { if (nw.state === "activated" && navigator.serviceWorker.controller && !sessionStorage.getItem("kamelen-herladen")) { sessionStorage.setItem("kamelen-herladen", "1"); location.reload(); } });
+      nw?.addEventListener("statechange", () => {
+        if (nw.state !== "activated" || !navigator.serviceWorker.controller) return;
+        if (bezigMetIets()) toonVerversToast("Er is een nieuwe versie van de app.");
+        else verversNu();
+      });
     });
   }).catch(() => {});
 });
@@ -2792,9 +2881,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795486600"></script>
-<script src="toto.js?v=1795486600"></script>
-<script src="pong.js?v=1795486600"></script>
+<script src="mex.js?v=1795486700"></script>
+<script src="toto.js?v=1795486700"></script>
+<script src="pong.js?v=1795486700"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -2803,12 +2892,12 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795486600"></script>
-<script src="statistieken.js?v=1795486600"></script>
-<script src="race.js?v=1795486600"></script>
-<script src="rad.js?v=1795486600"></script>
-<script src="fotos.js?v=1795486600"></script>
-<script src="quotes.js?v=1795486600"></script>
-<script src="push.js?v=1795486600"></script>
+<script src="stemmen.js?v=1795486700"></script>
+<script src="statistieken.js?v=1795486700"></script>
+<script src="race.js?v=1795486700"></script>
+<script src="rad.js?v=1795486700"></script>
+<script src="fotos.js?v=1795486700"></script>
+<script src="quotes.js?v=1795486700"></script>
+<script src="push.js?v=1795486700"></script>
 </body>
 </html>
