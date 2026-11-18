@@ -592,6 +592,9 @@ body.pong-actief .tabbar{display:none}
 .kz-banner{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;background:var(--orange);color:var(--ink);border-radius:var(--r);padding:14px 18px;text-decoration:none}
 .kz-banner > span:first-child{font-size:1.8rem}
 .kz-banner small{color:rgba(22,54,80,.8);font-weight:600}
+.jarig-wrap{display:grid;gap:10px}
+.kz-banner.jarig{background:var(--sky,#b9d8e8)}
+.kz-banner.jarig.vandaag{background:var(--orange)}
 .kz-banner.done{background:var(--orange-soft);border:1px solid #f3c98f}
 .kz-go{font-weight:800}
 .kz-open{display:grid;gap:14px}
@@ -744,6 +747,7 @@ footer{color:var(--muted);font-size:.8rem;padding-bottom:36px}
 </section>
 
 <main class="wrap">
+  <div id="jarig-banner" data-page="home" class="kz-banner-wrap jarig-wrap"></div>
   <div id="kz-banner" data-page="home" class="kz-banner-wrap"></div>
   <section class="dash" id="dash" data-page="home" aria-label="Overzicht"></section>
   <section class="card" id="programma" data-page="wedstrijden" aria-labelledby="h-programma">
@@ -1085,9 +1089,10 @@ const empty = (title, text, url) => `<div class="empty"><strong>${esc(title)}</s
 let DATA = {};
 
 /* ---------- Spelerslijst: bijnamen naar één naam ---------- */
-let CANON = new Map(), ROSTER = new Set(), INVALLERS = new Set();
+let CANON = new Map(), ROSTER = new Set(), INVALLERS = new Set(), INFO = new Map();
 function initRoster(r){
-  CANON = new Map(); ROSTER = new Set(); INVALLERS = new Set();
+  CANON = new Map(); ROSTER = new Set(); INVALLERS = new Set(); INFO = new Map();
+  [...(r.spelers || []), ...(r.invallers || [])].forEach(p => INFO.set(p.naam, { verjaardag: p.verjaardag, sinds: p.sinds }));
   const add = (list, set) => (list || []).forEach(p => { set.add(p.naam); [p.naam, ...(p.ook || [])].forEach(n => CANON.set(n.trim().toLowerCase(), p.naam)); });
   add(r.spelers, ROSTER); add(r.invallers, INVALLERS);
 }
@@ -1705,7 +1710,7 @@ function playerData(){
     const p = P.get(naam); (p.ingevallen ||= []).includes(x.datum) || p.ingevallen.push(x.datum);
   }
   const sel = new Set((DATA.opstelling || []).map(canon));
-  return [...P.values()].map(p => ({...p, sel: sel.has(p.naam), invaller: p.eigen || (ROSTER.size > 0 && !ROSTER.has(p.naam))}))
+  return [...P.values()].map(p => ({...p, ...(INFO.get(p.naam) || {}), sel: sel.has(p.naam), invaller: p.eigen || (ROSTER.size > 0 && !ROSTER.has(p.naam))}))
     .sort((a,b) => {
       /* Volgorde van spelers.json; invallers daarna op naam */
       const order = [...ROSTER], ia = order.indexOf(a.naam), ib = order.indexOf(b.naam);
@@ -1715,7 +1720,7 @@ function playerData(){
 function playerCard(p){
   const initials = p.naam.split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase();
   return `<button type="button" class="player" data-player="${esc(p.naam)}">
-    <div class="top-row"><span class="avatar${p.invaller ? " inv" : ""}">${esc(initials)}</span><div><div class="nm">${esc(p.naam)}</div>${p.sel ? `<div class="sel">In de selectie</div>` : ""}${p.ingevallen ? `<div class="sel" style="color:var(--muted)">${p.ingevallen.length}× ingevallen</div>` : ""}</div></div>
+    <div class="top-row"><span class="avatar${p.invaller ? " inv" : ""}">${esc(initials)}</span><div><div class="nm">${esc(p.naam)}</div>${p.sel ? `<div class="sel">In de selectie</div>` : ""}${p.ingevallen ? `<div class="sel" style="color:var(--muted)">${p.ingevallen.length}× ingevallen</div>` : ""}${!p.invaller && (p.sinds || p.verjaardag) ? `<div class="sel" style="color:var(--muted)">${p.sinds ? `Kameel sinds ${p.sinds}` : ""}${p.sinds && p.verjaardag ? " · " : ""}${p.verjaardag ? `🎂 ${fmtVerjaardag(p.verjaardag)}` : ""}</div>` : ""}</div></div>
     <div class="pstats"><div><div class="k">Doelpunten</div><div class="v">${p.goals.length}</div><span class="balls">${p.goals.map(g => `<span class="ball ${ballCls(g.soort)}"></span>`).join("")}</span></div>
       <div><div class="k">Liters</div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}<small> L</small></div>${p.liters && p.liters.open > 0 ? `<span class="pill open">${fmtL(p.liters.open)} L open</span>` : p.liters ? `<span class="pill done">alles gedaan</span>` : ""}</div></div>
   </button>`;
@@ -1730,7 +1735,10 @@ function openPlayer(naam){
   const p = playerData().find(x => x.naam === naam); if (!p) return;
   document.getElementById("dlg-head").classList.add("ours-team");
   document.getElementById("dlg-title").textContent = p.naam;
-  document.getElementById("dlg-sub").textContent = (p.invaller ? "Invaller" : "Kameel") + (p.sel ? " · in de selectie" : "");
+  const dg = p.verjaardag ? dagenTot(p.verjaardag) : null;
+  document.getElementById("dlg-sub").textContent = (p.invaller ? "Invaller" : p.sinds ? `Kameel sinds ${p.sinds}` : "Kameel")
+    + (p.verjaardag ? ` · jarig op ${fmtVerjaardag(p.verjaardag)}${dg === 0 ? " (vandaag! 🎉)" : dg === 1 ? " (morgen)" : dg <= 7 ? ` (over ${dg} dagen)` : ""}` : "")
+    + (p.sel ? " · in de selectie" : "");
   const sc = p.goals.filter(g => g.soort === "sc").length, sb = p.goals.filter(g => g.soort === "sb").length, veld = p.goals.length - sc - sb;
   const goalsHtml = p.goals.length ? p.goals.slice().sort((a,b) => (b.match?.datum||"").localeCompare(a.match?.datum||"")).map(g => {
     const m = g.match, opp = m ? (isUs(m.thuis) ? m.uit : m.thuis) : g.label;
@@ -1754,6 +1762,26 @@ function openPlayer(naam){
   if (!dlg.open){ try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } }
 }
 
+
+/* ---------- Verjaardagen ---------- */
+const MAANDEN = ["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
+const fmtVerjaardag = v => { const [m, d] = String(v).split("-").map(Number); return `${d} ${MAANDEN[m - 1]}`; };
+/* Dagen tot de volgende verjaardag (0 = vandaag) */
+function dagenTot(v){
+  const [m, d] = String(v).split("-").map(Number); if (!m || !d) return null;
+  const nu = new Date(), vandaag = new Date(nu.getFullYear(), nu.getMonth(), nu.getDate());
+  let dt = new Date(vandaag.getFullYear(), m - 1, d);
+  if (dt < vandaag) dt = new Date(vandaag.getFullYear() + 1, m - 1, d);
+  return Math.round((dt - vandaag) / 864e5);
+}
+function renderJarig(){
+  const el = document.getElementById("jarig-banner"); if (!el) return;
+  const jarig = [...INFO.entries()].filter(([, i]) => i.verjaardag).map(([naam, i]) => ({ naam, v: i.verjaardag, dagen: dagenTot(i.verjaardag) }))
+    .filter(x => x.dagen !== null && x.dagen <= 7).sort((a, b) => a.dagen - b.dagen);
+  const wanneer = x => x.dagen === 0 ? "vandaag!" : x.dagen === 1 ? "morgen" : `over ${x.dagen} dagen (${fmtVerjaardag(x.v)})`;
+  el.innerHTML = jarig.map(x => `<a class="kz-banner jarig${x.dagen === 0 ? " vandaag" : ""}" href="#spelers" data-jarig="${esc(x.naam)}"><span>${x.dagen === 0 ? "🎉" : "🎂"}</span><span><b>${esc(x.naam)} is ${x.dagen === 0 ? "vandaag jarig!" : `${wanneer(x)} jarig`}</b><br><small>${x.dagen === 0 ? "Hoera! Vergeet niet te feliciteren." : `Op ${fmtVerjaardag(x.v)}. Zet het vast in je agenda.`}</small></span><span class="kz-go">Profiel →</span></a>`).join("");
+  el.querySelectorAll("[data-jarig]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); location.hash = "spelers"; setTimeout(() => openPlayer(a.dataset.jarig), 50); }));
+}
 
 /* ---------- Startpagina: vier overzichtsvakjes ---------- */
 function renderDash(){
@@ -1877,7 +1905,7 @@ Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("ops
     if (DATA.competitie) document.getElementById("league").textContent = DATA.competitie;
     /* Elk onderdeel apart: als er één faalt, werkt de rest gewoon door */
     const veilig = f => { try { const r = f(); if (r && r.catch) r.catch(e => console.error(e)); return r; } catch (e) { console.error(e); } };
-    [renderStats, renderNext, renderProgram, renderResults, renderStandings, renderTopscorers, renderLiters, initPredictor, renderSeason, renderPlayers, initAgenda, () => window.renderMex?.(), () => window.renderToto?.(), renderDash, confettiNaWinst].forEach(veilig);
+    [renderStats, renderNext, renderProgram, renderResults, renderStandings, renderTopscorers, renderLiters, initPredictor, renderSeason, renderPlayers, initAgenda, () => window.renderMex?.(), () => window.renderToto?.(), renderDash, renderJarig, confettiNaWinst].forEach(veilig);
     DATA.litersBasis = DATA.liters;
     veilig(() => window.renderStatistieken?.());
     /* Na het ophalen van de stemmen (ezel-liters) de statistieken nog eens bijwerken */
@@ -1915,9 +1943,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795480500"></script>
-<script src="toto.js?v=1795480500"></script>
-<script src="pong.js?v=1795480500"></script>
+<script src="mex.js?v=1795480600"></script>
+<script src="toto.js?v=1795480600"></script>
+<script src="pong.js?v=1795480600"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -1926,7 +1954,7 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795480500"></script>
-<script src="statistieken.js?v=1795480500"></script>
+<script src="stemmen.js?v=1795480600"></script>
+<script src="statistieken.js?v=1795480600"></script>
 </body>
 </html>
