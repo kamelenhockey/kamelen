@@ -89,7 +89,7 @@ function meegespeeld_(datum, kaart) {
   const k = String(datum || "").slice(5, 10), lijst = (kaart || aanwezigKaart_())[k];
   return lijst && lijst.length ? lijst.map(n => String(n).toLowerCase()) : null;
 }
-const rol_ = code => { const c = String(code || "").trim().toLowerCase(), heeft = o => Object.keys(o).some(k => k.toLowerCase() === c); return heeft(SPELERCODES) ? "speler" : heeft(COACHCODES) ? "coach" : heeft(INVALLERCODES) ? "invaller" : ""; };
+const rol_ = code => { const c = String(code || "").trim().toLowerCase(), heeft = o => Object.keys(o).some(k => k.toLowerCase() === c); return heeft(SPELERCODES) ? "speler" : heeft(COACHCODES) ? "coach" : heeft(INVALLERCODES) || automatischeInvaller_(code) ? "invaller" : ""; };
 const isCoach_ = n => Object.keys(COACHCODES).some(k => COACHCODES[k] === n);
 /* Telt een stem? Alleen als stemmer meespeelde (of coach is) en kameel en ezel meespeelden */
 function stemGeldig_(stemmer, kameel, ezel, wedstrijd, kaart) {
@@ -134,12 +134,30 @@ function ezelLiterBoeken_(wedstrijd) {
 function json_(obj) { return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON); }
 const gelijk_ = (a, b) => String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
 const naam_ = n => String(n || "").trim().slice(0, 40);
+/* Nieuwe invallers krijgen vanzelf een code: "Invaller" + naam (of "Oudkameel" + naam),
+   zodra die naam in een invaller-rij van het afwezigheidsblad staat. Je hoeft dan niets aan dit script te veranderen. */
+const zonderAccent_ = t => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "").toLowerCase();
+function invallerNamen_() {
+  const cache = CacheService.getScriptCache(), oud = cache.get("invallers");
+  if (oud) return JSON.parse(oud);
+  let rows = [];
+  try { rows = Utilities.parseCsv(UrlFetchApp.fetch(AANWEZIG_CSV, { muteHttpExceptions: true }).getContentText()); } catch (x) { return []; }
+  const namen = [];
+  rows.forEach(r => { if (/invaller/i.test(String(r[0] || ""))) r.slice(1).forEach(v => { v = String(v || "").trim(); if (v && namen.indexOf(v) < 0) namen.push(v); }); });
+  if (namen.length) cache.put("invallers", JSON.stringify(namen), 300);
+  return namen;
+}
+function automatischeInvaller_(code) {
+  const m = String(code || "").trim().match(/^(invaller|oudkameel)(.+)$/i); if (!m) return "";
+  const gezocht = zonderAccent_(m[2]);
+  return invallerNamen_().find(n => zonderAccent_(n) === gezocht) || "";
+}
 function speler_(code) {
   const c = String(code || "").trim().toLowerCase();
   for (const k in SPELERCODES) if (k.toLowerCase() === c) return SPELERCODES[k];
   for (const k in COACHCODES) if (k.toLowerCase() === c) return COACHCODES[k];
   for (const k in INVALLERCODES) if (k.toLowerCase() === c) return INVALLERCODES[k];
-  return "";
+  return automatischeInvaller_(code);
 }
 
 /* Laatste status per wedstrijd: "dicht" of "open" */
