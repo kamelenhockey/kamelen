@@ -85,10 +85,11 @@
       for (const [naam, r] of voorsp) {
         if (r.verborgen || isNaN(r.voor)) continue;
         const pts = r.voor === sc[0] && r.tegen === sc[1] ? PUNT_EXACT : toto(r.voor, r.tegen) === toto(sc[0], sc[1]) ? PUNT_TOTO : 0;
-        (perSpeler.get(naam) || perSpeler.set(naam, []).get(naam)).push({ m, gok: scoreTekst(r.voor, r.tegen, m), pts, verschil: Math.abs(r.voor - sc[0]) + Math.abs(r.tegen - sc[1]) });
+        (perSpeler.get(naam) || perSpeler.set(naam, []).get(naam)).push({ m, gok: scoreTekst(r.voor, r.tegen, m), pts, verschil: Math.abs(r.voor - sc[0]) + Math.abs(r.tegen - sc[1]), v: r.voor, t: r.tegen, echt: sc });
       }
     }
     DATA.totoProfiel = { stand, perSpeler };
+    window.renderStatsExtra?.();
     const nu = Date.now();
     const volgende = ws.find(m => aftrap(m) > nu);
     const gespeeld = ws.filter(m => onsScore(m) && perMatch.get(sleutel(m)).voorsp.size).reverse();

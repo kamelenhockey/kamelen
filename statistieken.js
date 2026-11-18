@@ -224,8 +224,12 @@
     box.innerHTML = `
       <div class="stat-strip">${kern.map(([k, v]) => `<div><div class="k">${k}</div><div class="v num">${v}</div></div>`).join("")}</div>
 
+      <div id="stats-persoonlijk"></div>
+
       <h2 class="stat-h">Opvallend</h2>
       <div class="facts">${feiten.join("")}</div>
+
+      <div id="stats-extra"></div>
 
       <section class="card">
         <div class="card-head"><div><h2>Opkomst per speler</h2><p>${S.aantalWedLijst} wedstrijden en ${S.aantalTrainingen} trainingen tot nu toe${UITSLUITEN.length ? ` · ${UITSLUITEN.map(u => u.namen.join(", ")).join("; ")} tellen in de eerste seizoenshelft niet mee` : ""}</p></div></div>
@@ -276,6 +280,80 @@
     return _aanwezig;
   };
 
+  /* ---------- Kameel & ezel, Kamelen-Scorito en jouw eigen seizoen ---------- */
+  window.renderStatsExtra = function () {
+    const pers = document.getElementById("stats-persoonlijk"), extra = document.getElementById("stats-extra");
+    if (!pers || !extra) return;
+    const feit = (k, groot, tekst, stijl = "") => `<div class="fact ${stijl}"><div class="k">${k}</div><div class="big">${groot}</div><div class="t">${tekst}</div></div>`;
+    const een = x => (Math.round(x * 10) / 10).toString().replace(".", ",");
+    const tegen = m => isUs(m.thuis) ? m.uit : m.thuis;
+    const ik = (window.IK || {}).naam;
+
+    /* Kameel & ezel */
+    const kz = DATA.kzUitslagen || [], kf = [];
+    if (kz.length) {
+      const titels = new Map(), tel = (n, k) => { const p = titels.get(n) || { k: 0, e: 0 }; p[k]++; titels.set(n, p); };
+      kz.forEach(r => { r.kamelen.forEach(n => tel(n, "k")); r.ezels.forEach(n => tel(n, "e")); });
+      const rij = [...titels.entries()];
+      const maxK = Math.max(0, ...rij.map(([, p]) => p.k)), maxE = Math.max(0, ...rij.map(([, p]) => p.e));
+      if (maxK) kf.push(feit("Meeste kameel-titels", rij.filter(([, p]) => p.k === maxK).map(([n]) => esc(n)).join(" & "), `${maxK}× kameel van de dag. Op weg naar de prijs!`));
+      if (maxE) kf.push(feit("Meeste ezel-titels", rij.filter(([, p]) => p.e === maxE).map(([n]) => esc(n)).join(" & "), `${maxE}× ezel van de dag, dus ook ${maxE} ${maxE === 1 ? "liter" : "liter"} getrokken`, "beer"));
+      let top = null;
+      kz.forEach(r => [...(r.k || new Map())].forEach(([n, c]) => { if (!top || c > top.c) top = { n, c, m: r.m, tot: r.stemmers.length }; }));
+      if (top) kf.push(feit("Grootste kameel-zege", esc(top.n), `${top.c} van de ${top.tot} stemmen tegen ${esc(tegen(top.m))}`));
+      const beide = rij.filter(([, p]) => p.k && p.e).map(([n]) => esc(n));
+      if (beide.length) kf.push(feit("Van held tot ezel", beide.join(", "), "zowel kameel als ezel van de dag geweest"));
+      const opk = kz.reduce((s, r) => s + r.stemmers.length, 0) / kz.length;
+      kf.push(feit("Stemmers per wedstrijd", een(opk), `gemiddeld, over ${kz.length} ${kz.length === 1 ? "stemming" : "stemmingen"}`));
+    }
+
+    /* Kamelen-Scorito */
+    const tp = DATA.totoProfiel, sf = [];
+    if (tp && tp.stand.length) {
+      const st = tp.stand, top = st[0];
+      sf.push(feit("Scorito-koning", esc(top.naam), `${top.punten} punten, ${top.exact}× precies goed`));
+      const alle = [...tp.perSpeler.entries()].flatMap(([n, l]) => l.map(x => ({ n, ...x })));
+      if (alle.length) {
+        const exact = alle.filter(x => x.pts === 3).length;
+        sf.push(feit("Precies goed", exact, `van de ${alle.length} voorspellingen (${Math.round(exact / alle.length * 100)}%)`));
+        const perN = [...tp.perSpeler.entries()].filter(([, l]) => l.length).map(([n, l]) => ({ n, saldo: l.reduce((s, x) => s + (x.v - x.t), 0) / l.length, echt: l.reduce((s, x) => s + (x.echt[0] - x.echt[1]), 0) / l.length }));
+        if (perN.length > 1) {
+          const opt = [...perN].sort((a, b) => b.saldo - a.saldo)[0], pes = [...perN].sort((a, b) => a.saldo - b.saldo)[0];
+          sf.push(feit("Grootste optimist", esc(opt.n), `voorspelt gemiddeld ${opt.saldo >= 0 ? "+" : ""}${een(opt.saldo)} doelsaldo voor de Kamelen`));
+          if (pes.n !== opt.n) sf.push(feit("Grootste pessimist", esc(pes.n), `voorspelt gemiddeld ${pes.saldo >= 0 ? "+" : ""}${een(pes.saldo)} doelsaldo`));
+        }
+        const gemV = alle.reduce((s, x) => s + x.v, 0) / alle.length, gemT = alle.reduce((s, x) => s + x.t, 0) / alle.length;
+        const echtV = alle.reduce((s, x) => s + x.echt[0], 0) / alle.length, echtT = alle.reduce((s, x) => s + x.echt[1], 0) / alle.length;
+        sf.push(feit("Team voorspelt", `${een(gemV)}–${een(gemT)}`, `gemiddeld, terwijl het echt ${een(echtV)}–${een(echtT)} werd`));
+      }
+      const trouw = [...st].sort((a, b) => b.aantal - a.aantal)[0];
+      if (trouw && trouw.aantal > 1) sf.push(feit("Trouwste voorspeller", esc(trouw.naam), `${trouw.aantal} wedstrijden voorspeld`));
+    }
+
+    extra.innerHTML = `
+      <h2 class="stat-h">Kameel &amp; ezel van de dag</h2>
+      ${kf.length ? `<div class="facts">${kf.join("")}</div>` : `<div class="card empty">Zodra de eerste stemming gesloten is, staan hier de kameel- en ezelstatistieken.</div>`}
+      <h2 class="stat-h">Kamelen-Scorito</h2>
+      ${sf.length ? `<div class="facts">${sf.join("")}</div>` : `<div class="card empty">Na de eerste wedstrijd met voorspellingen verschijnen hier de Scorito-statistieken.</div>`}`;
+
+    /* Jouw seizoen */
+    if (!ik) { pers.innerHTML = ""; return; }
+    const o = (DATA.profielOpkomst || new Map()).get(ik);
+    const goals = (DATA.doelpunten || []).reduce((s, w) => s + w.goals.filter(g => g.wie === ik).length, 0);
+    const lit = buildRanking(DATA.liters || [], {}), mijnL = lit.find(p => p.naam === ik), litPlek = lit.findIndex(p => p.naam === ik) + 1;
+    const kTit = kz.filter(r => r.kamelen.includes(ik)).length, eTit = kz.filter(r => r.ezels.includes(ik)).length;
+    const tst = tp ? tp.stand.findIndex(x => x.naam === ik) + 1 : 0, tme = tp ? tp.stand[tst - 1] : null;
+    const tegels = [];
+    if (o && o.wT) tegels.push(["Wedstrijden", `${o.wA}/${o.wT}`, `${Math.round(o.wA / o.wT * 100)}% aanwezig`]);
+    if (o && o.tT) tegels.push(["Trainingen", `${o.tA}/${o.tT}`, `${Math.round(o.tA / o.tT * 100)}% aanwezig`]);
+    tegels.push(["Doelpunten", goals, goals ? "dit seizoen" : "die eerste komt nog"]);
+    tegels.push(["Liters", mijnL ? fmtL(mijnL.liters) : "0", mijnL ? (mijnL.open ? `${fmtL(mijnL.open)} L nog open · ${litPlek}e` : "alles weggewerkt") : "nog geen boetes"]);
+    if (kz.length) tegels.push(["Kameel / ezel", `${kTit} / ${eTit}`, "titels van de dag"]);
+    if (tme) tegels.push(["Scorito", `${tst}e`, `${tme.punten} punten, ${tme.exact}× precies goed`]);
+    pers.innerHTML = `<section class="card mijn-seizoen"><div class="card-head"><div><h2>Jouw seizoen, ${esc(ik)}</h2><p>Je eigen cijfers van dit seizoen</p></div></div>
+      <div class="mijn-grid">${tegels.map(([k, v, s]) => `<div><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("")}</div></section>`;
+  };
+
   window.renderStatistieken = async function () {
     if (!CFG.wedstrijden || !CFG.trainingen) { box.innerHTML = `<div class="empty">Statistieken zijn nog niet ingesteld.</div>`; return; }
     box.innerHTML = `<div class="empty">Statistieken laden…</div>`;
@@ -286,7 +364,7 @@
     wed.sessies = wed.sessies.filter(x => speeldagen.has(x.datum));
     wed.invallers = wed.invallers.filter(x => speeldagen.has(x.datum));
     DATA.invalSheet = wed.invallers; window.renderPlayers?.();
-    try { render(bereken(wed, tr)); }
+    try { render(bereken(wed, tr)); window.renderStatsExtra(); }
     catch (e) { console.error(e); box.innerHTML = `<div class="empty">De statistieken konden niet worden geladen. Ververs de pagina.</div>`; }
   };
 })();
