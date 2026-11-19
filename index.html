@@ -1159,6 +1159,32 @@ body.wrapped-open{overflow:hidden}
 .wr-lijst b{font-family:var(--font-display);font-weight:400;font-size:1.6rem;line-height:1.15}
 .wr-quote{margin:4px 0 0;font-family:var(--font-display);font-size:1.5rem;line-height:1.25;max-width:26ch}
 .wr-start{display:inline-flex;align-items:center;gap:8px;margin-top:12px}
+/* Ideeënbox */
+.idee-form{padding:18px 20px;margin-bottom:18px}
+.idee-soorten{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
+.idee-soorten button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font:inherit;font-size:.88rem;cursor:pointer;color:var(--ink)}
+.idee-soorten button[aria-checked="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.idee-balk{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;margin-bottom:12px}
+.idee-balk .q-filter{margin:0}
+.idee-sort{font-size:.85rem;color:var(--muted);display:flex;gap:6px;align-items:center}
+.idee-sort select{font:inherit;padding:5px 8px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.idee-lijst{display:grid;gap:10px}
+.idee{display:grid;grid-template-columns:auto 1fr;gap:14px;padding:14px 16px;align-items:start}
+.idee-stem{display:grid;justify-items:center;gap:0;min-width:48px;padding:6px 4px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--muted);cursor:pointer;font:inherit}
+.idee-stem span{font-size:.8rem;line-height:1}.idee-stem b{font-size:1.15rem;color:var(--ink)}
+.idee-stem.aan{background:var(--orange);border-color:var(--orange);color:var(--ink)}
+.idee-stem:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.idee-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.idee-soort,.idee-status{font-size:.75rem;padding:2px 8px;border-radius:999px;background:#eef2f5;color:var(--ink)}
+.st-gepland .idee-status{background:#fff1d9}.st-gedaan .idee-status{background:#e1f2e7;color:#1e5c38}.st-afgewezen .idee-status{background:#f3e6e4;color:#7d2a1c}
+.st-gedaan .idee-tekst,.st-afgewezen .idee-tekst{opacity:.75}
+.idee-tekst{margin:0 0 6px;white-space:pre-wrap;line-height:1.45}
+.idee-reactie{margin:0 0 6px;font-size:.9rem;padding:6px 10px;border-left:3px solid var(--orange);background:#fbf6ee;border-radius:0 8px 8px 0}
+.idee-voet{font-size:.8rem;color:var(--muted)}
+.idee-link{background:none;border:0;padding:0;font:inherit;color:#b3261e;cursor:pointer;text-decoration:underline}
+.idee-beheer{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.idee-beheer button{font:inherit;font-size:.75rem;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);cursor:pointer;color:var(--ink)}
+.idee-beheer button[aria-pressed="true"]{background:var(--ink);color:#fff}
 /* Klikbare wedstrijden en de wedstrijd-pop-up */
 .klik[data-match]{cursor:pointer;transition:background .15s}
 .klik[data-match]:hover{background:rgba(22,54,80,.06)}
@@ -1277,7 +1303,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
     <li class="nav-more"><button type="button" id="nav-more-btn" aria-expanded="false" aria-controls="nav-more-menu">Meer <span aria-hidden="true">▾</span></button>
       <div class="nav-more-menu" id="nav-more-menu" hidden>
         <div class="nm-group"><div class="nm-h">Competitie</div><a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a></div>
-        <div class="nm-group"><div class="nm-h">Team</div><a href="#fotos" data-view-link="fotos">Foto's</a><a href="#quotes" data-view-link="quotes">Quotes</a><a href="#regels" data-view-link="regels">Kamelen-regels</a><a href="#push-card" data-push-link>🔔 Meldingen</a></div>
+        <div class="nm-group"><div class="nm-h">Team</div><a href="#fotos" data-view-link="fotos">Foto's</a><a href="#quotes" data-view-link="quotes">Quotes</a><a href="#regels" data-view-link="regels">Kamelen-regels</a><a href="#ideeen" data-view-link="ideeen">💡 Ideeënbox</a><a href="#push-card" data-push-link>🔔 Meldingen</a></div>
         <div class="nm-group"><div class="nm-h">Spellen</div><a href="#rad" data-view-link="rad">Kamelen-rad</a><a href="#race" data-view-link="race">Kamelen-racen</a><a href="#mex" data-view-link="mex">Mex</a><a href="#pong" data-view-link="pong">Pong teams</a></div>
         <div class="nm-group"><div class="nm-h">Account</div><a href="#" data-wrapped>🎁 Kamelen Wrapped</a><a href="#" data-uitloggen>Uitloggen</a></div>
       </div>
@@ -1437,6 +1463,15 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
 </div>
 
 <!-- ================= QUOTES ================= -->
+<div id="view-ideeen" class="view" hidden>
+  <div class="wrap page">
+    <header class="page-head">
+      <h1>Ideeënbox</h1>
+      <p>Iets voor de app, het team of de derde helft? Stuur je idee in en stem op de ideeën van anderen. De populairste komen bovenaan.</p>
+    </header>
+    <div id="ideeen"><div class="card empty">Ideeën laden…</div></div>
+  </div>
+</div>
 <div id="view-quotes" class="view" hidden>
   <div class="wrap page">
     <header class="page-head">
@@ -1668,6 +1703,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <a href="#fotos" data-view-link="fotos">Foto's</a>
   <a href="#quotes" data-view-link="quotes">Quotes</a>
   <a href="#regels" data-view-link="regels">Kamelen-regels</a>
+  <a href="#ideeen" data-view-link="ideeen">💡 Ideeënbox</a>
   <a href="#push-card" data-push-link>🔔 Meldingen</a>
   <div class="ms-h">Spellen</div>
   <a href="#rad" data-view-link="rad">Kamelen-rad</a>
@@ -2925,7 +2961,7 @@ document.querySelectorAll("[data-dice]").forEach(el => {
 });
 
 /* ---------- Pagina's: home, regels, mex ---------- */
-const VIEWS = ["spelers", "statistieken", "toto", "stemmen", "fotos", "quotes", "rad", "race", "voorspeller", "regels", "mex", "pong"];
+const VIEWS = ["spelers", "statistieken", "toto", "stemmen", "fotos", "quotes", "ideeen", "rad", "race", "voorspeller", "regels", "mex", "pong"];
 const HOME_PAGES = ["home", "wedstrijden", "stand", "topscorers", "liters"];
 /* Oude links (#programma, #uitslagen, #seizoen, #wedstrijd) blijven werken */
 const PAGE_OF = { "": "home", home: "home", wedstrijd: "home", programma: "wedstrijden", uitslagen: "wedstrijden", wedstrijden: "wedstrijden", stand: "stand", seizoen: "stand", topscorers: "topscorers", liters: "liters" };
@@ -3031,6 +3067,7 @@ return Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJs
     veilig(() => window.renderStatistieken?.());
     if (!formBezig("fotos")) veilig(() => window.renderFotos?.());
     if (!formBezig("quotes")) veilig(() => window.renderQuotes?.());
+    if (!formBezig("ideeen")) veilig(() => window.renderIdeeen?.());
     veilig(() => window.kamelenApi().then(j => { if (j && j.profielfotos) zetProfielfotos(j.profielfotos); }));
     /* Na het ophalen van de stemmen (ezel-liters) de statistieken nog eens bijwerken */
     Promise.resolve(formBezig("stemmen") ? null : veilig(() => window.renderStemmen?.())).catch(() => {}).finally(() => veilig(() => window.renderStatistieken?.()));
@@ -3075,7 +3112,7 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) toon
 /* ---------- Swipen tussen de tabjes (telefoon) ---------- */
 (() => {
   if (!matchMedia("(pointer:coarse)").matches) return;
-  const VOLGORDE = ["home", "wedstrijden", "stand", "toto", "topscorers", "liters", "statistieken", "voorspeller", "spelers", "stemmen", "fotos", "quotes", "regels"];
+  const VOLGORDE = ["home", "wedstrijden", "stand", "toto", "topscorers", "liters", "statistieken", "voorspeller", "spelers", "stemmen", "fotos", "quotes", "ideeen", "regels"];
   const NIET = "dialog, input, textarea, select, canvas, .wrapped, .rad-wrap, .rc-baan, .pong-veld, .more-sheet, [class^='mx-'], .md-tabs, .seg, .q-filter, svg#chart, [data-geen-swipe]";
   const schuift = el => { for (let e = el; e && e !== document.body; e = e.parentElement) { const s = getComputedStyle(e); if (/(auto|scroll)/.test(s.overflowX) && e.scrollWidth > e.clientWidth + 2) return true; } return false; };
   let x0 = null, y0 = 0, t0 = 0;
@@ -3213,9 +3250,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795488500"></script>
-<script src="toto.js?v=1795488500"></script>
-<script src="pong.js?v=1795488500"></script>
+<script src="mex.js?v=1795488600"></script>
+<script src="toto.js?v=1795488600"></script>
+<script src="pong.js?v=1795488600"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3224,13 +3261,14 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795488500"></script>
-<script src="statistieken.js?v=1795488500"></script>
-<script src="wrapped.js?v=1795488500"></script>
-<script src="race.js?v=1795488500"></script>
-<script src="rad.js?v=1795488500"></script>
-<script src="fotos.js?v=1795488500"></script>
-<script src="quotes.js?v=1795488500"></script>
-<script src="push.js?v=1795488500"></script>
+<script src="stemmen.js?v=1795488600"></script>
+<script src="statistieken.js?v=1795488600"></script>
+<script src="wrapped.js?v=1795488600"></script>
+<script src="race.js?v=1795488600"></script>
+<script src="rad.js?v=1795488600"></script>
+<script src="fotos.js?v=1795488600"></script>
+<script src="quotes.js?v=1795488600"></script>
+<script src="ideeen.js?v=1795488600"></script>
+<script src="push.js?v=1795488600"></script>
 </body>
 </html>

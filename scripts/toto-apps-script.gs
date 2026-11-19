@@ -33,6 +33,7 @@ const pushTab_ = () => tab_("Push", ["Tijdstempel", "Endpoint", "Abonnement", "N
 const fotoTab_ = () => tab_("Fotos", ["Tijdstempel", "Bestand-id", "Bijschrift", "Door"]);
 const profielTab_ = () => tab_("Profielfotos", ["Naam", "Bestand-id", "Tijdstempel"]);
 const quoteTab_ = () => tab_("Quotes", ["Tijdstempel", "Id", "Wie", "Quote", "Context", "Door"]);
+const ideeTab_ = () => tab_("Ideeen", ["Tijdstempel", "Id", "Door", "Idee", "Soort", "Stemmen", "Status", "Reactie"]);
 function fotoMap_() {
   const props = PropertiesService.getScriptProperties();
   const id = props.getProperty("FOTOMAP");
@@ -209,7 +210,8 @@ function doGet(e) {
   const quotes = quoteTab_().getDataRange().getValues().slice(1).map(r => ({ tijd: r[0], id: r[1], wie: r[2], tekst: r[3], context: r[4], door: r[5] }));
   const profielfotos = {};
   profielTab_().getDataRange().getValues().slice(1).forEach(r => { if (r[0] && r[1]) profielfotos[r[0]] = r[1]; });
-  return json_({ ok: true, voorspellingen, stemmen, gesloten: dicht, fotos, quotes, profielfotos });
+  const ideeen = ideeTab_().getDataRange().getValues().slice(1).filter(r => r[1]).map(r => ({ tijd: r[0], id: r[1], door: r[2], tekst: r[3], soort: r[4], stemmen: String(r[5] || "").split(",").filter(String), status: r[6] || "nieuw", reactie: r[7] || "" }));
+  return json_({ ok: true, voorspellingen, stemmen, gesloten: dicht, fotos, quotes, profielfotos, ideeen });
 }
 
 function doPost(e) {
@@ -224,6 +226,20 @@ function doPost(e) {
         if (d.actie === "verwijder-foto") {
           const rij = rijMetId_(fotoTab_(), 1, d.id);
           if (rij) { try { DriveApp.getFileById(String(d.id)).setTrashed(true); } catch (x) {} fotoTab_().deleteRow(rij); }
+          return json_({ ok: true });
+        }
+        /* Ideeënbox: status en reactie zetten, of een idee weghalen */
+        if (d.actie === "idee-status") {
+          const rij = rijMetId_(ideeTab_(), 1, d.id);
+          if (rij) {
+            if (["nieuw", "gepland", "gedaan", "afgewezen"].indexOf(d.status) >= 0) ideeTab_().getRange(rij, 7).setValue(d.status);
+            if (typeof d.reactie === "string") ideeTab_().getRange(rij, 8).setValue(d.reactie.slice(0, 300));
+          }
+          return json_({ ok: true });
+        }
+        if (d.actie === "verwijder-idee") {
+          const rij = rijMetId_(ideeTab_(), 1, d.id);
+          if (rij) ideeTab_().deleteRow(rij);
           return json_({ ok: true });
         }
         if (d.actie === "verwijder-quote") {
@@ -314,6 +330,30 @@ function doPost(e) {
         return json_({ ok: true, id: bestand.getId() });
       }
       /* Quote toevoegen */
+      /* Ideeënbox: idee toevoegen, (on)stemmen, eigen idee weghalen */
+      if (d.type === "idee") {
+        const tekst = String(d.tekst || "").trim().slice(0, 600);
+        const soort = ["app", "team", "derde helft", "anders"].indexOf(d.soort) >= 0 ? d.soort : "anders";
+        if (tekst.length < 3) return json_({ ok: false, fout: "invoer" });
+        ideeTab_().appendRow([new Date(), Utilities.getUuid().slice(0, 8), ik, tekst, soort, ik, "nieuw", ""]);
+        return json_({ ok: true });
+      }
+      if (d.type === "idee-stem") {
+        const sh = ideeTab_(), rij = rijMetId_(sh, 1, d.id);
+        if (!rij) return json_({ ok: false, fout: "weg" });
+        const lock = LockService.getScriptLock(); lock.waitLock(5000);
+        try {
+          const cel = sh.getRange(rij, 6), l = String(cel.getValue() || "").split(",").filter(String), i = l.indexOf(ik);
+          if (i >= 0) l.splice(i, 1); else l.push(ik);
+          cel.setValue(l.join(","));
+        } finally { lock.releaseLock(); }
+        return json_({ ok: true });
+      }
+      if (d.type === "idee-weg") {
+        const sh = ideeTab_(), rij = rijMetId_(sh, 1, d.id);
+        if (rij && sh.getRange(rij, 3).getValue() === ik) sh.deleteRow(rij);
+        return json_({ ok: true });
+      }
       if (d.type === "quote") {
         const wie = naam_(d.wie), tekst = String(d.tekst || "").trim().slice(0, 400);
         if (!wie || !tekst) return json_({ ok: false, fout: "invoer" });
