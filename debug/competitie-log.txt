@@ -1,0 +1,31 @@
+2026-11-19T17:16:56.291Z
+FOUT: page.waitForFunction: Timeout 60000ms exceeded.
+    at leesTekstEenmaal (/home/runner/work/kamelen/kamelen/scripts/update-competitie.mjs:20:14)
+    at async leesTekst (/home/runner/work/kamelen/kamelen/scripts/update-competitie.mjs:12:18)
+    at /home/runner/work/kamelen/kamelen/async file:/home/runner/work/kamelen/kamelen/scripts/update-competitie.mjs:57:20
+
+HTTP 504 https://www.hockey.nl/match-center
+console: Failed to load resource: the server responded with a status of 504 ()
+HTTP 504 https://www.hockey.nl/match-center
+console: Failed to load resource: the server responded with a status of 504 ()
+HTTP 504 https://www.hockey.nl/match-center
+console: Failed to load resource: the server responded with a status of 504 ()
+
+URL: https://www.hockey.nl/match-center#/team/21368|182976/program
+TITEL: 504 Gateway Timeout
+--- BODY ---
+ERROR 504
+Gateway Timeout
+We could not establish a connection to www.hockey.nl
+You
+IP: 52.173.181.25
+bunny.net
+Edge Network
+www.hockey.nl
+Your Destination
+What happened?
+A timeout occured while waiting for www.hockey.nl origin server to respond. The server hosting the website might be unavailable.
+What can I do?
+If you are a visitor, please try again in a few minutes. If you are the administrator, please check your origin server status.
+--- MATCH CENTER ---
+(geen match-center/shadowRoot)
