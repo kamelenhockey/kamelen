@@ -24,16 +24,16 @@
     const beheer = !!beheercode();
     box.innerHTML = `
       <form class="card foto-form" id="foto-form">
-        <h2 class="sub-h">Foto's toevoegen</h2>
+        <h2 class="sub-h">Foto's en video's toevoegen</h2>
         <div class="foto-velden">
           <div class="tt-f"><span>Jouw naam</span><div class="tt-ik">${esc((window.IK || {}).naam || "")}</div><input type="hidden" id="foto-door" value="${esc((window.IK || {}).naam || "")}"></div>
           <label class="tt-f"><span>Bijschrift (mag leeg)</span><input id="foto-tekst" type="text" maxlength="200" placeholder="Bijvoorbeeld: derde helft na Daring"></label>
         </div>
-        <label class="foto-kies"><input id="foto-bestand" type="file" accept="image/*" multiple hidden><span class="btn">Kies foto's</span><span class="foto-gekozen" id="foto-gekozen">Nog niets gekozen</span></label>
+        <label class="foto-kies"><input id="foto-bestand" type="file" accept="image/*,video/*" multiple hidden><span class="btn">Kies foto's of video's</span><span class="foto-gekozen" id="foto-gekozen">Nog niets gekozen</span></label>
         <div class="foto-acties"><button class="btn" type="submit" id="foto-knop" disabled>Uploaden</button><span class="tt-status" id="foto-status" role="status"></span></div>
       </form>
       ${FOTOS.length ? `<div class="foto-grid">${FOTOS.map((f, i) => `
-        <figure class="foto"><button type="button" class="foto-open" data-i="${i}" aria-label="Foto openen${f.bijschrift ? `: ${esc(f.bijschrift)}` : ""}"><img src="${url(f.id, 700)}" alt="${esc(f.bijschrift || "Foto van de Kamelen")}" loading="lazy" referrerpolicy="no-referrer"></button>
+        <figure class="foto${f.soort === "video" ? " is-video" : ""}"><button type="button" class="foto-open" data-i="${i}" aria-label="${f.soort === "video" ? "Video afspelen" : "Foto openen"}${f.bijschrift ? `: ${esc(f.bijschrift)}` : ""}"><img src="${url(f.id, 700)}" alt="${esc(f.bijschrift || (f.soort === "video" ? "Video van de Kamelen" : "Foto van de Kamelen"))}" loading="lazy" referrerpolicy="no-referrer"${f.soort === "video" ? ` onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'video-leeg',textContent:'Video wordt nog verwerkt'}))"` : ""}>${f.soort === "video" ? `<span class="video-play" aria-hidden="true">▶</span>` : ""}</button>
           ${f.bijschrift || f.door ? `<figcaption>${f.bijschrift ? esc(f.bijschrift) : ""}<small>${f.door ? `${esc(f.door)}, ` : ""}${datum(f.tijd)}</small></figcaption>` : ""}
           ${beheer ? `<button type="button" class="foto-weg" data-weg="${esc(f.id)}">Verwijderen</button>` : ""}
         </figure>`).join("")}</div>` : `<div class="card empty">Nog geen foto's. Voeg de eerste toe!</div>`}`;
@@ -41,10 +41,30 @@
     const input = document.getElementById("foto-bestand");
     input.addEventListener("change", () => {
       const n = input.files.length;
-      document.getElementById("foto-gekozen").textContent = n ? `${n} ${n === 1 ? "foto" : "foto's"} gekozen` : "Nog niets gekozen";
+      const v = [...input.files].filter(isVideo).length, f = n - v;
+      document.getElementById("foto-gekozen").textContent = n ? [f ? `${f} ${f === 1 ? "foto" : "foto's"}` : "", v ? `${v} ${v === 1 ? "video" : "video's"}` : ""].filter(Boolean).join(" en ") + " gekozen" : "Nog niets gekozen";
       document.getElementById("foto-knop").disabled = !n;
     });
     document.getElementById("foto-form").addEventListener("submit", upload);
+  }
+
+  const isVideo = f => /^video\//.test(f.type) || /\.(mov|mp4|m4v|webm|3gp)$/i.test(f.name || "");
+  /* Video: het script opent een upload-sessie in Drive, de telefoon stuurt het bestand daar rechtstreeks heen */
+  async function uploadVideo(f, bijschrift, door, voortgang) {
+    const mime = /^video\//.test(f.type) ? f.type : /\.mov$/i.test(f.name) ? "video/quicktime" : "video/mp4";
+    const s = await fetch(CFG.api, { method: "POST", body: JSON.stringify({ type: "video-start", code: CFG.teamcode, naam: f.name, mime, grootte: f.size }) }).then(r => r.json());
+    if (!s.ok) throw new Error(s.fout || "start mislukt");
+    const id = await new Promise((ok, fout) => {
+      const x = new XMLHttpRequest();
+      x.open("PUT", s.url);
+      x.setRequestHeader("Content-Type", mime);
+      x.upload.onprogress = e => { if (e.lengthComputable) voortgang(Math.round(e.loaded / e.total * 100)); };
+      x.onload = () => { try { const j = JSON.parse(x.responseText); if (x.status < 300 && j.id) ok(j.id); else fout(new Error("Drive " + x.status)); } catch { fout(new Error("Drive " + x.status)); } };
+      x.onerror = () => fout(new Error("verbinding verbroken"));
+      x.send(f);
+    });
+    const k = await fetch(CFG.api, { method: "POST", body: JSON.stringify({ type: "video-klaar", code: CFG.teamcode, id, bijschrift, door }) }).then(r => r.json());
+    if (!k.ok) throw new Error(k.fout || "opslaan mislukt");
   }
 
   /* Verklein naar max. 1600 px en geef base64-JPEG terug */
@@ -73,14 +93,19 @@
     const e = eigen(); e.naam = door; bewaar(e);
     let gelukt = 0;
     for (const [i, f] of files.entries()) {
-      st.textContent = `Foto ${i + 1} van ${files.length} uploaden…`;
+      const wat = isVideo(f) ? "Video" : "Foto";
+      st.textContent = `${wat} ${i + 1} van ${files.length} uploaden…`;
       try {
+        if (isVideo(f)) {
+          await uploadVideo(f, bijschrift, door, pct => { st.textContent = `Video ${i + 1} van ${files.length} uploaden… ${pct}%`; });
+          gelukt++; continue;
+        }
         const data = await verklein(f);
         const r = await fetch(CFG.api, { method: "POST", body: JSON.stringify({ type: "foto", code: CFG.teamcode, door, bijschrift, data }) }).then(r => r.json());
         if (r.ok) gelukt++; else throw new Error(r.fout);
-      } catch (err) { st.textContent = `Foto ${i + 1} lukte niet. ${/DriveApp|rechten|permission/i.test(String(err)) ? "Het script heeft nog geen toegang tot Drive (stap 'machtigen')." : `(${String(err.message || err).slice(0, 120)})`}`; }
+      } catch (err) { st.textContent = `${wat} ${i + 1} lukte niet. ${/DriveApp|rechten|permission/i.test(String(err)) ? "Het script heeft nog geen toegang tot Drive (stap 'machtigen')." : `(${String(err.message || err).slice(0, 120)})`}`; }
     }
-    if (gelukt) { await laad(true); document.getElementById("foto-status").textContent = `${gelukt} ${gelukt === 1 ? "foto" : "foto's"} toegevoegd.`; }
+    if (gelukt) { await laad(true); document.getElementById("foto-status").textContent = `${gelukt} ${gelukt === 1 ? "bestand" : "bestanden"} toegevoegd.${files.some(isVideo) ? " Een video kan een paar minuten nodig hebben voordat hij afspeelt." : ""}`; }
     else knop.disabled = false;
   }
 
@@ -91,7 +116,7 @@
     const toon = () => {
       const f = FOTOS[k];
       dlg.innerHTML = `<button type="button" class="lb-sluit" aria-label="Sluiten">✕</button>
-        <img src="${url(f.id, 1600)}" alt="${esc(f.bijschrift || "Foto")}" referrerpolicy="no-referrer">
+        ${f.soort === "video" ? `<iframe class="lb-video" src="https://drive.google.com/file/d/${encodeURIComponent(f.id)}/preview" allow="autoplay; fullscreen" allowfullscreen title="${esc(f.bijschrift || "Video")}"></iframe>` : `<img src="${url(f.id, 1600)}" alt="${esc(f.bijschrift || "Foto")}" referrerpolicy="no-referrer">`}
         <div class="lb-tekst">${f.bijschrift ? `<b>${esc(f.bijschrift)}</b>` : ""}<span>${f.door ? `${esc(f.door)}, ` : ""}${datum(f.tijd)} · ${k + 1} van ${FOTOS.length}</span></div>
         ${FOTOS.length > 1 ? `<button type="button" class="lb-pijl vorige" aria-label="Vorige">‹</button><button type="button" class="lb-pijl volgende" aria-label="Volgende">›</button>` : ""}`;
     };

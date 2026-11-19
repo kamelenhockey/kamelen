@@ -857,6 +857,10 @@ body.pong-actief .tabbar{display:none}
 dialog.lightbox{padding:0;border:0;background:rgba(10,24,36,.96);color:#fff;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;display:grid;place-items:center}
 dialog.lightbox::backdrop{background:rgba(10,24,36,.9)}
 .lightbox img{max-width:94vw;max-height:78vh;border-radius:8px}
+.lb-video{width:min(94vw,1000px);aspect-ratio:16/9;max-height:78vh;border:0;border-radius:8px;background:#000}
+.foto.is-video .foto-open{position:relative;cursor:pointer;min-height:140px}
+.video-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:rgba(22,54,80,.82);color:#fff;font-size:1.4rem;padding-left:4px;box-shadow:0 6px 18px -6px rgba(0,0,0,.6)}
+.video-leeg{display:grid;place-items:center;min-height:180px;color:var(--muted);font-size:.85rem;background:#dfe7ec}
 .lb-tekst{text-align:center;padding:12px 16px;max-width:60ch}
 .lb-tekst b{display:block;font-weight:600}
 .lb-tekst span{font-size:.85rem;opacity:.7}
@@ -1143,8 +1147,10 @@ body.wrapped-open{overflow:hidden}
 .wr-knoppen{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 12px}
 .wr-knop{border:0;border-radius:999px;padding:13px 20px;font:700 1rem var(--font-body,inherit);background:#fff;color:var(--ink);cursor:pointer}
 .wr-knop.ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.6)}
-.wr-zone{position:absolute;top:70px;bottom:0;z-index:1;border:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wr-zone{position:absolute;top:70px;bottom:calc(110px + env(safe-area-inset-bottom));z-index:1;border:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .wr-zone.links{left:0;width:33%}.wr-zone.rechts{right:0;width:67%}
+.wr-muziek{position:relative;z-index:3;max-width:520px;width:100%;margin:10px auto 0;min-height:80px;border-radius:12px;overflow:hidden;background:rgba(0,0,0,.2)}
+.wr-muziek iframe{display:block;border:0;border-radius:12px}
 .wr-start{display:inline-flex;align-items:center;gap:8px;margin-top:12px}
 /* Klikbare wedstrijden en de wedstrijd-pop-up */
 .klik[data-match]{cursor:pointer;transition:background .15s}
@@ -3200,9 +3206,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795488200"></script>
-<script src="toto.js?v=1795488200"></script>
-<script src="pong.js?v=1795488200"></script>
+<script src="mex.js?v=1795488300"></script>
+<script src="toto.js?v=1795488300"></script>
+<script src="pong.js?v=1795488300"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3211,13 +3217,13 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795488200"></script>
-<script src="statistieken.js?v=1795488200"></script>
-<script src="wrapped.js?v=1795488200"></script>
-<script src="race.js?v=1795488200"></script>
-<script src="rad.js?v=1795488200"></script>
-<script src="fotos.js?v=1795488200"></script>
-<script src="quotes.js?v=1795488200"></script>
-<script src="push.js?v=1795488200"></script>
+<script src="stemmen.js?v=1795488300"></script>
+<script src="statistieken.js?v=1795488300"></script>
+<script src="wrapped.js?v=1795488300"></script>
+<script src="race.js?v=1795488300"></script>
+<script src="rad.js?v=1795488300"></script>
+<script src="fotos.js?v=1795488300"></script>
+<script src="quotes.js?v=1795488300"></script>
+<script src="push.js?v=1795488300"></script>
 </body>
 </html>

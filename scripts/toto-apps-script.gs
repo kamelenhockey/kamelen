@@ -205,7 +205,7 @@ function doGet(e) {
     const zichtbaar = dicht.indexOf(r[4]) >= 0;
     return { tijd: r[0], stemmer: r[1], kameel: zichtbaar ? r[2] : null, ezel: zichtbaar ? r[3] : null, wedstrijd: r[4] };
   });
-  const fotos = fotoTab_().getDataRange().getValues().slice(1).map(r => ({ tijd: r[0], id: r[1], bijschrift: r[2], door: r[3] }));
+  const fotos = fotoTab_().getDataRange().getValues().slice(1).map(r => ({ tijd: r[0], id: r[1], bijschrift: r[2], door: r[3], soort: r[4] || "foto" }));
   const quotes = quoteTab_().getDataRange().getValues().slice(1).map(r => ({ tijd: r[0], id: r[1], wie: r[2], tekst: r[3], context: r[4], door: r[5] }));
   const profielfotos = {};
   profielTab_().getDataRange().getValues().slice(1).forEach(r => { if (r[0] && r[1]) profielfotos[r[0]] = r[1]; });
@@ -271,6 +271,34 @@ function doPost(e) {
         bestand.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
         fotoTab_().appendRow([new Date(), bestand.getId(), String(d.bijschrift || "").slice(0, 200), ik]);
         return json_({ ok: true, id: bestand.getId() });
+      }
+      /* Video: de site uploadt het bestand zelf rechtstreeks naar Drive (te groot om via dit script te sturen).
+         Stap 1: het script opent een upload-sessie voor alleen dat ene bestand in de fotomap en geeft het upload-adres terug. */
+      if (d.type === "video-start") {
+        const mime = /^video\/[\w.+-]+$/.test(String(d.mime || "")) ? String(d.mime) : "video/mp4";
+        const grootte = Number(d.grootte) || 0;
+        if (!grootte || grootte > 700 * 1024 * 1024) return json_({ ok: false, fout: "Video is te groot (max. 700 MB)." });
+        const naam = String(d.naam || "video").replace(/[^\w.\- ]/g, "").slice(-60) || "video.mp4";
+        const res = UrlFetchApp.fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id", {
+          method: "post", contentType: "application/json; charset=UTF-8", muteHttpExceptions: true,
+          headers: { Authorization: "Bearer " + ScriptApp.getOAuthToken(), "X-Upload-Content-Type": mime, "X-Upload-Content-Length": String(grootte), Origin: "https://kamelenhockey.github.io" },
+          payload: JSON.stringify({ name: "kamelen-video-" + Date.now() + "-" + naam, parents: [fotoMap_().getId()], mimeType: mime })
+        });
+        const h = res.getHeaders(), loc = h.Location || h.location;
+        if (res.getResponseCode() !== 200 || !loc) return json_({ ok: false, fout: "Drive gaf fout " + res.getResponseCode() });
+        return json_({ ok: true, url: loc });
+      }
+      /* Stap 2: upload klaar. Alleen bestanden uit de fotomap tellen. */
+      if (d.type === "video-klaar") {
+        const id = String(d.id || "");
+        if (!/^[\w-]{10,}$/.test(id)) return json_({ ok: false, fout: "invoer" });
+        const f = DriveApp.getFileById(id), ouders = f.getParents();
+        if (!ouders.hasNext() || ouders.next().getId() !== fotoMap_().getId() || !/^video\//.test(f.getMimeType())) return json_({ ok: false, fout: "invoer" });
+        f.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        const sh = fotoTab_();
+        if (!sh.getRange(1, 5).getValue()) sh.getRange(1, 5).setValue("Soort");
+        sh.appendRow([new Date(), id, String(d.bijschrift || "").slice(0, 200), ik, "video"]);
+        return json_({ ok: true, id: id });
       }
       /* Eigen profielfoto (de site maakt er eerst een vierkante JPEG van 512 px van). Een oude foto gaat naar de prullenbak. */
       if (d.type === "profielfoto") {

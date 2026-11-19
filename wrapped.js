@@ -189,13 +189,14 @@
     el.innerHTML = `<div class="wr-balken">${K.map(() => `<span><i></i></span>`).join("")}</div>
       <button type="button" class="wr-sluit" aria-label="Sluiten">×</button>
       <div class="wr-kaart" aria-live="polite"></div>
-      <button type="button" class="wr-zone links" aria-label="Vorige"></button><button type="button" class="wr-zone rechts" aria-label="Volgende"></button>`;
+      <button type="button" class="wr-zone links" aria-label="Vorige"></button><button type="button" class="wr-zone rechts" aria-label="Volgende"></button>
+      <div class="wr-muziek"><div id="wr-spotify"></div></div>`;
     document.body.appendChild(el); document.body.classList.add("wrapped-open");
     el.querySelector(".wr-sluit").onclick = sluit;
     el.querySelector(".wr-zone.links").onclick = () => ga(i - 1);
     el.querySelector(".wr-zone.rechts").onclick = () => ga(i + 1);
     const vast = v => () => { if (v) { pauze = true; rest -= performance.now() - start; clearTimeout(timer); } else if (pauze) { pauze = false; plan(); } };
-    el.addEventListener("pointerdown", e => { if (!e.target.closest("button:not(.wr-zone)")) vast(true)(); });
+    el.addEventListener("pointerdown", e => { if (!e.target.closest("button:not(.wr-zone), .wr-muziek")) vast(true)(); });
     el.addEventListener("pointerup", vast(false)); el.addEventListener("pointercancel", vast(false));
     let y0 = null; el.addEventListener("touchstart", e => { y0 = e.touches[0].clientY; }, { passive: true });
     el.addEventListener("touchend", e => { if (y0 !== null && e.changedTouches[0].clientY - y0 > 110) sluit(); y0 = null; }, { passive: true });
@@ -205,11 +206,34 @@
       if (b.dataset.wr === "deel") deel(K[i].deel);
     });
     document.addEventListener("keydown", toets);
+    muziekAan();
     ga(0);
   }
+
+  /* ---------- Soundtrack: Karma Chameleon via de officiële Spotify-speler ----------
+     Speelt vanzelf als de browser dat toestaat; anders tik je op ▶ in de speler onderin.
+     Zonder ingelogd Spotify-account in de browser speelt Spotify een fragment van 30 seconden. */
+  const NUMMER = "spotify:track:2wSAWEYUHkt92X4SBAPqZE";
+  let spotifyApi = null, speler = null;
+  function muziekAan() {
+    const maak = api => {
+      const plek = document.getElementById("wr-spotify"); if (!plek) return;
+      api.createController(plek, { uri: NUMMER, width: "100%", height: 80, theme: "dark" }, c => {
+        speler = c;
+        c.addListener("ready", () => { try { c.play(); } catch {} });
+      });
+    };
+    if (spotifyApi) return maak(spotifyApi);
+    window.onSpotifyIframeApiReady = api => { spotifyApi = api; maak(api); };
+    if (!document.getElementById("spotify-api")) {
+      const sc = document.createElement("script"); sc.id = "spotify-api"; sc.async = true;
+      sc.src = "https://open.spotify.com/embed/iframe-api/v1"; document.head.appendChild(sc);
+    }
+  }
+  function muziekUit() { try { speler?.pause(); speler?.destroy(); } catch {} speler = null; }
   function toets(e) { if (!el) return; if (e.key === "Escape") sluit(); if (e.key === "ArrowRight") ga(i + 1); if (e.key === "ArrowLeft") ga(i - 1); }
   function sluit() {
-    clearTimeout(timer); document.removeEventListener("keydown", toets);
+    clearTimeout(timer); document.removeEventListener("keydown", toets); muziekUit();
     if (el) el.remove(); el = null; document.body.classList.remove("wrapped-open");
   }
   function plan() {
