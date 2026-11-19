@@ -8,6 +8,34 @@
   const een = x => (Math.round(x * 10) / 10).toString().replace(".", ",");
   const plekTekst = n => n === 1 ? "de nummer 1" : `${n}e`;
 
+  /* Pas beschikbaar direct na de allerlaatste wedstrijd van het seizoen (aftrap + 2 uur),
+     en alleen in de seizoensafsluiting (april t/m augustus), zodat de winterstop niet telt. */
+  function laatsteWedstrijd() {
+    const ons = [...(DATA.uitslagen || []), ...(DATA.programma || [])].filter(m => isUs(m.thuis + m.uit));
+    if (!ons.length) return null;
+    return ons.map(m => toDate(m.datum, m.tijd || "12:00")).sort((a, b) => b - a)[0];
+  }
+  function beschikbaar() {
+    const nu = new Date(), laatst = laatsteWedstrijd();
+    if (!laatst || nu.getMonth() < 3 || nu.getMonth() > 7) return false;
+    const nogTeSpelen = (DATA.programma || []).some(m => isUs(m.thuis + m.uit) && toDate(m.datum, m.tijd || "12:00") > nu);
+    return !nogTeSpelen && nu - laatst > 2 * 3600e3;
+  }
+  function updateZichtbaarheid() {
+    const ok = beschikbaar();
+    document.querySelectorAll("[data-wrapped]").forEach(a => { a.style.display = ok ? "" : "none"; });
+    const wrap = document.querySelector("#home-banners .wrap");
+    let b = document.getElementById("wrapped-banner");
+    if (ok && wrap && !b) {
+      b = document.createElement("div"); b.id = "wrapped-banner"; b.className = "kz-banner-wrap";
+      b.innerHTML = `<a class="kz-banner" href="#" data-wrapped><span>🎁</span><span><b>Je Kamelen Wrapped staat klaar!</b><br><small>Het seizoen zit erop. Bekijk jouw seizoen in kaartjes.</small></span><span class="kz-go">Bekijken</span></a>`;
+      wrap.prepend(b);
+    } else if (!ok && b) b.remove();
+  }
+  window.wrappedBeschikbaar = beschikbaar;
+  window.updateWrapped = updateZichtbaarheid;
+  updateZichtbaarheid();
+
   function seizoen() { const nu = new Date(), j = nu.getMonth() >= 7 ? nu.getFullYear() : nu.getFullYear() - 1; return `${j}/${String(j + 1).slice(2)}`; }
 
   /* Rang van naam in een lijst [{naam, waarde}] (hoog is beter tenzij laagBeter) */
@@ -26,7 +54,7 @@
 
     k.push({ kleur: "k-blauw", html: `<div class="wr-klein">Kamelen Wrapped ${seizoen()}</div>
       <h2 class="wr-groot">${esc(naam)},<br>dit was jouw seizoen</h2>
-      <p class="wr-tekst">Tot nu toe dan. Tik rechts voor verder, links voor terug. Hou vast om te pauzeren.</p><div class="wr-kameel" aria-hidden="true">🐪</div>` });
+      <p class="wr-tekst">Het seizoen zit erop. Tik rechts voor verder, links voor terug. Hou vast om te pauzeren.</p><div class="wr-kameel" aria-hidden="true">🐪</div>` });
 
     /* Opkomst */
     const o = (DATA.profielOpkomst || new Map()).get(naam);
@@ -115,7 +143,7 @@
 
     /* Slot */
     k.push({ kleur: "k-oranje", slot: true, html: `<div class="wr-klein">Dat was het</div>
-      <h2 class="wr-groot">Op naar de rest van het seizoen, ${esc(naam)}!</h2>
+      <h2 class="wr-groot">Bedankt voor het seizoen, ${esc(naam)}! Op naar het volgende.</h2>
       <div class="wr-knoppen"><button type="button" class="wr-knop" data-wr="deel">Deel je seizoen</button><button type="button" class="wr-knop ghost" data-wr="opnieuw">Nog een keer</button></div>
       <p class="wr-voet" id="wr-deelstatus"></p>`, deel: deelTekst({ naam, o, goals: goals.length, mijn, kz, ts, type }) });
     return k;
@@ -153,7 +181,7 @@
 
   function open() {
     const naam = (window.IK || {}).naam;
-    if (!naam) return;
+    if (!naam || !beschikbaar()) return;
     K = kaarten(naam);
     if (!K) { alert("Kamelen Wrapped is alleen voor spelers van de selectie."); return; }
     el = document.createElement("div");

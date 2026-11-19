@@ -422,7 +422,7 @@
     if (tme) tegels.push(["Scorito", `${tst}e`, `${tme.punten} punten, ${tme.exact}× precies goed`]);
     pers.innerHTML = `<section class="card mijn-seizoen"><div class="card-head"><div><h2>Jouw seizoen, ${esc(ik)}</h2><p>Je eigen cijfers van dit seizoen</p></div></div>
       <div class="mijn-grid">${tegels.map(([k, v, s]) => `<div><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("")}</div>
-      <button type="button" class="btn wr-start" data-wrapped>🎁 Bekijk je Kamelen Wrapped</button></section>`;
+      ${window.wrappedBeschikbaar?.() ? `<button type="button" class="btn wr-start" data-wrapped>🎁 Bekijk je Kamelen Wrapped</button>` : ""}</section>`;
   };
 
   window.renderStatistieken = async function () {
