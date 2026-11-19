@@ -64,6 +64,48 @@
       <h2 class="wr-groot">${esc(naam)},<br>dit was jouw seizoen</h2>
       <p class="wr-tekst">Het seizoen zit erop. Tik rechts voor verder, links voor terug. Hou vast om te pauzeren.</p><div class="wr-kameel" aria-hidden="true">🐪</div>` });
 
+    /* ---------- Het team ---------- */
+    const onze = (DATA.uitslagen || []).filter(m => isUs(m.thuis + m.uit) && /^\d+-\d+$/.test(String(m.score || "")));
+    const ONS = onze.length ? (isUs(onze[0].thuis) ? onze[0].thuis : onze[0].uit) : "";
+    const vt = m => { const [a, b] = String(m.score).split("-").map(Number); return isUs(m.thuis) ? [a, b] : [b, a]; };
+    const tgn = m => isUs(m.thuis) ? m.uit : m.thuis;
+    if (onze.length) {
+      const w = onze.filter(m => { const [v, t] = vt(m); return v > t; }).length, g = onze.filter(m => { const [v, t] = vt(m); return v === t; }).length;
+      const dv = onze.reduce((s, m) => s + vt(m)[0], 0), dt = onze.reduce((s, m) => s + vt(m)[1], 0);
+      const st = (DATA.stand || []).find(x => x.team === ONS);
+      k.push({ kleur: "k-groen", html: `<div class="wr-klein">Eerst: het team</div>
+        <h2 class="wr-groot">${st ? `${st.positie}e plek, ${st.punten} punten` : `${w} keer gewonnen`}</h2>
+        <div class="wr-rij"><div><b>${w}</b><span>gewonnen</span></div><div><b>${g}</b><span>gelijk</span></div><div><b>${onze.length - w - g}</b><span>verloren</span></div></div>
+        <p class="wr-tekst">${dv} goals gemaakt, ${dt} tegen. ${dv > dt ? `Een doelsaldo van +${dv - dt}.` : "Daar valt nog wat te halen."}</p>` });
+      const ruim = [...onze].sort((a, b) => (vt(b)[0] - vt(b)[1]) - (vt(a)[0] - vt(a)[1]));
+      const best = ruim[0], slechtst = ruim[ruim.length - 1];
+      const gekste = [...onze].sort((a, b) => (vt(b)[0] + vt(b)[1]) - (vt(a)[0] + vt(a)[1]))[0];
+      k.push({ kleur: "k-blauw", html: `<div class="wr-klein">Hoogte- en dieptepunten</div>
+        <div class="wr-lijst">
+          <div><span>🏆 Grootste zege</span><b>${vt(best)[0]}–${vt(best)[1]} tegen ${esc(tgn(best))}</b></div>
+          ${vt(slechtst)[0] < vt(slechtst)[1] ? `<div><span>🥶 Pijnlijkste avond</span><b>${vt(slechtst)[0]}–${vt(slechtst)[1]} tegen ${esc(tgn(slechtst))}</b></div>` : ""}
+          <div><span>🎢 Meeste goals in één wedstrijd</span><b>${vt(gekste)[0]}–${vt(gekste)[1]} tegen ${esc(tgn(gekste))}</b></div>
+        </div>` });
+    }
+    const alleSp = playerData().filter(p => !p.invaller);
+    const tsTeam = [...alleSp].sort((a, b) => (b.goals || []).length - (a.goals || []).length)[0];
+    const litAll = buildRanking(DATA.liters || [], {});
+    const litTot = litAll.reduce((s, p) => s + p.liters, 0);
+    const redenT = new Map(); litAll.forEach(p => p.feiten.forEach(f => { const r = (f.reden || "").trim(); if (r) redenT.set(r, (redenT.get(r) || 0) + 1); }));
+    const topReden = [...redenT.entries()].sort((a, b) => b[1] - a[1])[0];
+    const kzT = DATA.kzUitslagen || [], kTel = new Map();
+    kzT.forEach(r => r.kamelen.forEach(nm => kTel.set(nm, (kTel.get(nm) || 0) + 1)));
+    const topK = [...kTel.entries()].sort((a, b) => b[1] - a[1])[0];
+    const fotosT = (DATA.fotos || []).length, quotesT = (window.KAMELEN_QUOTES || []).length;
+    k.push({ kleur: "k-bier", html: `<div class="wr-klein">Het team in cijfers</div>
+      <div class="wr-lijst">
+        ${tsTeam && (tsTeam.goals || []).length ? `<div><span>⚽ Topscorer</span><b>${esc(tsTeam.naam)} (${tsTeam.goals.length})</b></div>` : ""}
+        ${topK ? `<div><span>🐪 Vaakst kameel</span><b>${esc(topK[0])} (${topK[1]}×)</b></div>` : ""}
+        ${litTot ? `<div><span>🍺 Liters in de boetepot</span><b>${fmtL(litTot)} L</b></div>` : ""}
+        ${topReden ? `<div><span>🧾 Populairste boete</span><b>${esc(topReden[0])} (${topReden[1]}×)</b></div>` : ""}
+        ${fotosT || quotesT ? `<div><span>📸 Foto's en quotes</span><b>${fotosT} ${fotosT === 1 ? "foto" : "foto's"}, ${quotesT} ${quotesT === 1 ? "quote" : "quotes"}</b></div>` : ""}
+      </div>` });
+
     /* Opkomst */
     const o = (DATA.profielOpkomst || new Map()).get(naam);
     if (o && (o.wT || o.tT)) {
@@ -127,7 +169,7 @@
       const x = tp.stand[ts - 1];
       k.push({ kleur: "k-paars", html: `<div class="wr-klein">Kamelen-Scorito</div>
         <div class="wr-getal">${ts}<small>e</small></div><p class="wr-tekst">van de ${tp.stand.length} voorspellers, met <b>${x.punten}</b> punten.</p>
-        <p class="wr-voet">${x.exact ? `${x.exact}× had je de uitslag precies goed.` : "De exacte uitslag zat er nog niet bij."} ${ts === tp.stand.length ? "Onderaan betekent trakteren…" : ""}</p>` });
+        <p class="wr-voet">${x.exact ? `${x.exact}× had je de uitslag precies goed.` : "De exacte uitslag zat er nog niet bij."} ${tp.stand.length > 1 && ts === tp.stand.length ? "Onderaan betekent trakteren…" : ""}</p>` });
     }
 
     /* Badges */
@@ -143,6 +185,54 @@
           ${zeld ? `<p class="wr-voet">Je zeldzaamste: <b>${zeld.ic} ${esc(zeld.naam)}</b>${(telling.get(zeld.naam) || 0) === 1 ? ", die heeft verder niemand!" : `, maar ${telling.get(zeld.naam) - 1 === 1 ? "één ander heeft hem" : `${telling.get(zeld.naam) - 1} anderen hebben hem`} ook.`}</p>` : ""}` });
       }
     } catch {}
+
+    /* ---------- Nog meer over jou ---------- */
+    /* Geluksbrenger: winstpercentage met en zonder jou */
+    const wa = DATA.wedAanwezig || [];
+    if (wa.length && onze.length) {
+      const met = [], zonder = [];
+      onze.forEach(m => { const s = wa.find(x => x.datum === m.datum); if (!s) return; (s.aanwezig.has(naam) ? met : zonder).push(m); });
+      const pct = l => l.length ? Math.round(l.filter(m => { const [v, t] = vt(m); return v > t; }).length / l.length * 100) : null;
+      const pm = pct(met), pz = pct(zonder);
+      if (met.length) {
+        const ptn = l => l.reduce((s, m) => { const [v, t] = vt(m); return s + (v > t ? 3 : v === t ? 1 : 0); }, 0);
+        k.push({ kleur: "k-groen", html: `<div class="wr-klein">Ben jij een geluksbrenger?</div>
+          <div class="wr-getal">${pm}%</div><p class="wr-tekst">van de wedstrijden met jou erbij werd gewonnen (${ptn(met)} punten uit ${met.length} wedstrijden).</p>
+          <p class="wr-voet">${pz === null ? "Je hebt geen enkele wedstrijd gemist, dus het team weet niet beter." : pm > pz ? `Zonder jou was dat maar ${pz}%. Talisman!` : pm < pz ? `Zonder jou was het ${pz}%. Toeval natuurlijk…` : `Zonder jou ook ${pz}%. Stabiel.`}</p>` });
+      }
+    }
+    /* Trainingsreeks en trainingsmaatje */
+    const tr = DATA.trAanwezig || [];
+    if (tr.length) {
+      let reeks = 0, max = 0; tr.forEach(x => { reeks = x.aanwezig.has(naam) ? reeks + 1 : 0; max = Math.max(max, reeks); });
+      const samen = new Map();
+      [...tr, ...wa].forEach(x => { if (!x.aanwezig.has(naam)) return; x.aanwezig.forEach(nm => { if (nm !== naam && alleSp.some(p => p.naam === nm)) samen.set(nm, (samen.get(nm) || 0) + 1); }); });
+      const maat = [...samen.entries()].sort((a, b) => b[1] - a[1])[0];
+      k.push({ kleur: "k-paars", html: `<div class="wr-klein">Langste reeks</div>
+        <div class="wr-getal" data-tel="${max}">${max}</div><p class="wr-tekst">${max === 1 ? "training" : "trainingen"} op rij was je erbij.</p>
+        ${maat ? `<p class="wr-voet">Je trouwste maatje: <b>${esc(maat[0])}</b>. Jullie stonden ${maat[1]} keer samen op het veld.</p>` : ""}` });
+    }
+    /* Foto's en quotes */
+    const mijnFotos = (DATA.fotos || []).filter(f => f.door === naam).length;
+    const overMij = (window.KAMELEN_QUOTES || []).filter(q => String(q.wie || "").split(/,|&| en /).map(x => x.trim()).includes(naam));
+    if (mijnFotos || overMij.length) {
+      const q = overMij[0];
+      k.push({ kleur: "k-zand", html: `<div class="wr-klein">Vastgelegd</div>
+        <div class="wr-rij groot"><div><b>📸 ${mijnFotos}</b><span>${mijnFotos === 1 ? "foto" : "foto's"} gedeeld</span></div><div><b>💬 ${overMij.length}</b><span>${overMij.length === 1 ? "quote" : "quotes"} van jou</span></div></div>
+        ${q ? `<blockquote class="wr-quote">“${esc(q.tekst)}”</blockquote>` : `<p class="wr-voet">Nog geen quote van jou. Volgend seizoen iets geks roepen!</p>`}` });
+    }
+    /* Scorito tegen het model */
+    if (ts && DATA.totoProfiel) {
+      const mijnV = DATA.totoProfiel.perSpeler.get(naam) || [];
+      if (mijnV.length && typeof voorspelWedstrijd === "function") {
+        let modelPts = 0;
+        mijnV.forEach(x => { const v = voorspelWedstrijd(x.m.thuis, x.m.uit, x.m.datum); if (!v) return; const [h, u] = v.uitslag, wv = isUs(x.m.thuis) ? h : u, wt = isUs(x.m.thuis) ? u : h; modelPts += wv === x.echt[0] && wt === x.echt[1] ? 3 : Math.sign(wv - wt) === Math.sign(x.echt[0] - x.echt[1]) ? 1 : 0; });
+        const ik = mijnV.reduce((s, x) => s + x.pts, 0);
+        k.push({ kleur: "k-rood", html: `<div class="wr-klein">Jij tegen het Kamelen-model</div>
+          <div class="wr-rij groot"><div><b>${ik}</b><span>jouw punten</span></div><div><b>${modelPts}</b><span>🐪 model</span></div></div>
+          <p class="wr-tekst">${ik > modelPts ? "Je hebt de computer verslagen. Mens wint!" : ik < modelPts ? "Het model was slimmer. Volgend seizoen revanche." : "Gelijkspel tussen mens en machine."}</p>` });
+      }
+    }
 
     /* Jouw Kamelen-type */
     const type = kamelenType({ naam, o, goals: goals.length, gr, mijn, lit, kz, ts, tp });

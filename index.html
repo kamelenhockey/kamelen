@@ -1123,6 +1123,7 @@ body.wrapped-open{overflow:hidden}
 .wrapped.k-bier{background:radial-gradient(120% 80% at 50% 0%,#f4c34f 0%,#a66a10 75%)}
 .wrapped.k-zand{background:radial-gradient(120% 80% at 30% 0%,#c99a62 0%,#6e4a26 75%)}
 .wrapped.k-paars{background:radial-gradient(120% 80% at 70% 0%,#7a5bb5 0%,#33215e 75%)}
+.wrapped.k-rood{background:radial-gradient(120% 80% at 30% 0%,#d9534a 0%,#6b1a16 75%)}
 .wrapped.k-goud{background:radial-gradient(120% 80% at 50% 0%,#e8c25a 0%,#7d5a0c 75%)}
 .wr-balken{display:flex;gap:4px;max-width:520px;width:100%;margin:0 auto}
 .wr-balken span{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden}
@@ -1151,6 +1152,12 @@ body.wrapped-open{overflow:hidden}
 .wr-zone.links{left:0;width:33%}.wr-zone.rechts{right:0;width:67%}
 .wr-muziek{position:relative;z-index:3;max-width:520px;width:100%;margin:10px auto 0;min-height:80px;border-radius:12px;overflow:hidden;background:rgba(0,0,0,.2)}
 .wr-muziek iframe{display:block;border:0;border-radius:12px}
+.wr-lijst{display:grid;gap:14px;margin-top:8px}
+.wr-lijst div{display:grid;gap:2px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.2)}
+.wr-lijst div:last-child{border-bottom:0}
+.wr-lijst span{font-size:.9rem;opacity:.8}
+.wr-lijst b{font-family:var(--font-display);font-weight:400;font-size:1.6rem;line-height:1.15}
+.wr-quote{margin:4px 0 0;font-family:var(--font-display);font-size:1.5rem;line-height:1.25;max-width:26ch}
 .wr-start{display:inline-flex;align-items:center;gap:8px;margin-top:12px}
 /* Klikbare wedstrijden en de wedstrijd-pop-up */
 .klik[data-match]{cursor:pointer;transition:background .15s}
@@ -3206,9 +3213,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795488400"></script>
-<script src="toto.js?v=1795488400"></script>
-<script src="pong.js?v=1795488400"></script>
+<script src="mex.js?v=1795488500"></script>
+<script src="toto.js?v=1795488500"></script>
+<script src="pong.js?v=1795488500"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3217,13 +3224,13 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795488400"></script>
-<script src="statistieken.js?v=1795488400"></script>
-<script src="wrapped.js?v=1795488400"></script>
-<script src="race.js?v=1795488400"></script>
-<script src="rad.js?v=1795488400"></script>
-<script src="fotos.js?v=1795488400"></script>
-<script src="quotes.js?v=1795488400"></script>
-<script src="push.js?v=1795488400"></script>
+<script src="stemmen.js?v=1795488500"></script>
+<script src="statistieken.js?v=1795488500"></script>
+<script src="wrapped.js?v=1795488500"></script>
+<script src="race.js?v=1795488500"></script>
+<script src="rad.js?v=1795488500"></script>
+<script src="fotos.js?v=1795488500"></script>
+<script src="quotes.js?v=1795488500"></script>
+<script src="push.js?v=1795488500"></script>
 </body>
 </html>
