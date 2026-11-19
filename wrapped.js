@@ -15,7 +15,15 @@
     if (!ons.length) return null;
     return ons.map(m => toDate(m.datum, m.tijd || "12:00")).sort((a, b) => b - a)[0];
   }
+  /* Proefversie: met ?wrapped=proef in het adres kun je hem nu al bekijken (alleen jij, op dat apparaat) */
+  const PROEF = (() => {
+    try {
+      if (new URLSearchParams(location.search).get("wrapped") === "proef") sessionStorage.setItem("kamelen-wrapped-proef", "1");
+      return sessionStorage.getItem("kamelen-wrapped-proef") === "1";
+    } catch { return false; }
+  })();
   function beschikbaar() {
+    if (PROEF) return true;
     const nu = new Date(), laatst = laatsteWedstrijd();
     if (!laatst || nu.getMonth() < 3 || nu.getMonth() > 7) return false;
     const nogTeSpelen = (DATA.programma || []).some(m => isUs(m.thuis + m.uit) && toDate(m.datum, m.tijd || "12:00") > nu);
@@ -28,7 +36,7 @@
     let b = document.getElementById("wrapped-banner");
     if (ok && wrap && !b) {
       b = document.createElement("div"); b.id = "wrapped-banner"; b.className = "kz-banner-wrap";
-      b.innerHTML = `<a class="kz-banner" href="#" data-wrapped><span>🎁</span><span><b>Je Kamelen Wrapped staat klaar!</b><br><small>Het seizoen zit erop. Bekijk jouw seizoen in kaartjes.</small></span><span class="kz-go">Bekijken</span></a>`;
+      b.innerHTML = `<a class="kz-banner" href="#" data-wrapped><span>🎁</span><span><b>${PROEF ? "Proef: Kamelen Wrapped" : "Je Kamelen Wrapped staat klaar!"}</b><br><small>${PROEF ? "Alleen voor jou zichtbaar, met de cijfers van nu." : "Het seizoen zit erop. Bekijk jouw seizoen in kaartjes."}</small></span><span class="kz-go">Bekijken</span></a>`;
       wrap.prepend(b);
     } else if (!ok && b) b.remove();
   }
@@ -52,7 +60,7 @@
     if (!ik) return null;
     const n = spelers.length;
 
-    k.push({ kleur: "k-blauw", html: `<div class="wr-klein">Kamelen Wrapped ${seizoen()}</div>
+    k.push({ kleur: "k-blauw", html: `<div class="wr-klein">Kamelen Wrapped ${seizoen()}${PROEF ? " · proefversie" : ""}</div>
       <h2 class="wr-groot">${esc(naam)},<br>dit was jouw seizoen</h2>
       <p class="wr-tekst">Het seizoen zit erop. Tik rechts voor verder, links voor terug. Hou vast om te pauzeren.</p><div class="wr-kameel" aria-hidden="true">🐪</div>` });
 
