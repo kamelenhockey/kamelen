@@ -1268,6 +1268,55 @@ body:not([data-page="home"]) .proef-label{display:none}
   body.home-proef[data-page="home"] .hero .wrap > img{width:76px!important}
   body.home-proef[data-page="home"] .hero::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 46' preserveAspectRatio='none'%3E%3Cpath d='M0 30 C 180 6 360 6 560 22 S 940 44 1140 22 S 1360 10 1440 18 V46 H0Z' fill='%23b9d8e8'/%3E%3C/svg%3E")}
 }
+/* ---------- Design-proef (?design=proef) ---------- */
+.dp-achter,.dp-mini,.dp-zand,.dp-tabkameel{display:none}
+body.design-proef .dp-label{bottom:calc(104px + env(safe-area-inset-bottom))}
+body.design-proef:not([data-page="home"]) .dp-label{display:flex}
+/* 1. glazen kaarten op home */
+body.design-proef[data-page="home"] .dp-achter{display:block;position:fixed;inset:-30px;z-index:-1;background:var(--ink) center/cover no-repeat;filter:blur(14px) saturate(1.1);transform:scale(1.05)}
+body.design-proef[data-page="home"] .dp-achter::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(242,245,247,.35),rgba(242,245,247,.62))}
+body.design-proef[data-page="home"]{background:transparent}
+body.design-proef[data-page="home"] .home-banners,body.design-proef[data-page="home"] .matchday,body.design-proef[data-page="home"] main.wrap,body.design-proef[data-page="home"] #view-home{background:transparent!important}
+body.design-proef[data-page="home"] .card,body.design-proef[data-page="home"] .tile{background:rgba(255,255,255,.62);border-color:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);box-shadow:0 10px 30px -18px rgba(22,54,80,.45)}
+body.design-proef[data-page="home"] .kz-banner{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+body.design-proef[data-page="home"] .kz-banner.jarig{background:rgba(255,255,255,.62)}
+body.design-proef[data-page="home"] .kz-banner:not(.jarig){background:rgba(240,140,28,.82)}
+body.design-proef[data-page="home"] .matchday .wrap{background:rgba(22,54,80,.78);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-radius:22px;margin-top:14px;margin-bottom:14px;box-shadow:0 20px 40px -24px rgba(0,0,0,.6)}
+/* 2. kop die meeschuift + compacte balk */
+body.design-proef .hero .hero-foto{will-change:transform;transform-origin:50% 0}
+body.design-proef .dp-mini{display:flex;position:fixed;left:0;right:0;top:0;z-index:70;align-items:center;gap:10px;padding:calc(6px + env(safe-area-inset-top)) 16px 6px;background:rgba(22,54,80,.82);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;transform:translateY(-110%);transition:transform .25s ease;cursor:pointer}
+body.design-proef .dp-mini.zicht{transform:none}
+body.design-proef .dp-mini img{width:30px;height:auto}
+body.design-proef .dp-mini b{font-family:var(--font-display);font-weight:400;font-size:1.25rem;flex:1}
+body.design-proef .dp-mini .avatar{width:30px!important;height:30px!important;min-width:30px;margin:0!important;border-radius:50%;overflow:hidden;font-size:.7rem}
+body.design-proef .dp-mini .avatar img{width:100%;height:100%;object-fit:cover}
+@media (min-width:761px){body.design-proef .dp-mini{display:none}}
+/* 3. kameeltje in de tabbalk */
+body.design-proef .tabbar{overflow:visible}
+body.design-proef .dp-tabkameel{display:block;position:absolute;left:0;top:-19px;width:28px;line-height:0;transition:transform .6s cubic-bezier(.4,.1,.3,1),opacity .2s;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+body.design-proef .dp-tabkameel img{width:100%;height:auto;display:block}
+body.design-proef .dp-tabkameel.links img{transform:scaleX(-1)}
+body.design-proef .dp-tabkameel.loopt{animation:dp-hobbel .15s ease-in-out 4 alternate}
+@keyframes dp-hobbel{to{translate:0 -4px;rotate:-6deg}}
+/* 4. zandvlaag */
+body.design-proef .dp-zand{display:block;position:fixed;inset:0;z-index:90;pointer-events:none;opacity:0;
+  background:linear-gradient(100deg,transparent 0%,rgba(236,186,118,.0) 18%,rgba(233,178,104,.55) 42%,rgba(244,206,150,.45) 55%,rgba(236,186,118,0) 78%,transparent 100%),
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .38 0 0 0 0 .16 0 0 0 1.1 -.35'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:100% 100%,160px 160px;transform:translateX(-100%)}
+body.design-proef .dp-zand.waai{animation:dp-waai .55s ease-out}
+@keyframes dp-waai{0%{opacity:0;transform:translateX(-80%)}25%{opacity:1}100%{opacity:0;transform:translateX(80%)}}
+/* 5. lege schermen met humor */
+.dp-leeg-kameel{display:block;margin:0 auto 8px;width:64px;opacity:.85;animation:dp-wiebel 3s ease-in-out infinite}
+.dp-leeg-kameel img{width:100%;height:auto;display:block}
+@keyframes dp-wiebel{50%{transform:rotate(-4deg) translateY(-2px)}}
+.dp-leeg-grap{display:block;margin-top:6px;font-size:.85rem;font-style:italic;color:var(--muted)}
+body.design-proef .empty{text-align:center}
+/* 6. jarige-modus */
+.dp-logo-box{position:relative;display:inline-block;line-height:0}
+.dp-muts{position:absolute;width:30%;right:4%;top:-22%;transform:rotate(18deg);filter:drop-shadow(0 3px 4px rgba(0,0,0,.25));animation:dp-muts 2.4s ease-in-out infinite}
+@keyframes dp-muts{50%{transform:rotate(10deg) translateY(-3px)}}
+.dp-jarig-pil{display:inline-block;margin-top:8px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.88);color:var(--ink);font-size:.88rem}
+@media (prefers-reduced-motion:reduce){.dp-leeg-kameel,.dp-muts{animation:none}}
 /* Ideeënbox */
 .idee-form{padding:18px 20px;margin-bottom:18px}
 .idee-soorten{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
@@ -3425,6 +3474,7 @@ window.STATS_CONFIG = {
 <script src="fotos.js?v=1795489500"></script>
 <script src="quotes.js?v=1795489500"></script>
 <script src="ideeen.js?v=1795489500"></script>
+<script src="design-proef.js?v=1795489500"></script>
 <script src="push.js?v=1795489500"></script>
 </body>
 </html>
