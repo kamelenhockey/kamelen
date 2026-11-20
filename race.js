@@ -134,8 +134,8 @@
         <span class="rc-jager" id="rc-jager" aria-hidden="true"><span class="rc-jager-lijf"><svg viewBox="0 0 72 64" class="rc-jager-svg"><g class="jg-been2"><path d="M26 38 L22 50 L19 58" stroke="#5f6b30" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M14 57 h10 q3 0 3 3 v1 h-14 z" fill="#8a6a3e" stroke="#4a3418" stroke-width="1.2"/></g><path d="M22 24 Q30 21 37 24 L38 40 Q30 42 23 40 Z" fill="#8f9a52" stroke="#4d5426" stroke-width="1.4"/><path d="M26 27 h5 v5 h-5 z M33 27 h4 v5 h-4z" fill="#7c8746" stroke="#4d5426" stroke-width=".8"/><rect x="22.5" y="37" width="15.5" height="3.2" fill="#4a3418"/><rect x="29" y="37" width="3" height="3.2" fill="#c9a14a"/><g class="jg-been1"><path d="M33 38 L37 49 L36 58" stroke="#6d7a3a" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M33 57 h10 q3 0 3 3 v1 h-14 z" fill="#a07a48" stroke="#4a3418" stroke-width="1.2"/></g><g class="jg-geweer"><path d="M24 31 L40 28 L41 31 L28 34 Q25 35 24 33 Z" fill="#8b5a2b" stroke="#4a2e12" stroke-width="1"/><rect x="39" y="27.2" width="31" height="2.6" rx="1" fill="#2d2d2d"/><rect x="42" y="23" width="12" height="3.4" rx="1.6" fill="#1e1e1e"/><rect x="45" y="26" width="2" height="1.8" fill="#1e1e1e"/><rect x="40" y="29.5" width="12" height="2.2" rx="1" fill="#8b5a2b"/></g><path d="M27 26 Q24 31 30 32 L38 31" stroke="#8f9a52" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M35 25 Q42 27 46 29" stroke="#7c8746" stroke-width="4.6" stroke-linecap="round" fill="none"/><circle cx="38.5" cy="31" r="2.4" fill="#eab48c"/><circle cx="46.5" cy="29.6" r="2.3" fill="#eab48c"/><path d="M27 18 Q27 10 33 10 Q39 10 39 17 Q39 23 33 23 Q28 23 27 18 Z" fill="#f2c29b" stroke="#a8724a" stroke-width="1"/><path d="M33.5 19.6 Q36.5 17.8 39.4 19.2 Q41.4 20 42 18.4 Q42.2 21.6 38.8 21.2 Q36.6 20.8 34.6 21.6 Q32.6 21.6 33.5 19.6 Z" fill="#b8742a" stroke="#6e420f" stroke-width=".7"/><circle cx="36" cy="15.6" r="1.2" fill="#2b4a7a"/><path d="M34.2 13.6 l3.6 -.6" stroke="#6b4518" stroke-width="1.2" stroke-linecap="round"/><path d="M39 16.5 q1.6 .8 0 2" stroke="#a8724a" stroke-width="1" fill="none"/><ellipse cx="32.5" cy="11.2" rx="11" ry="2.6" fill="#e3d6b4" stroke="#8a7a52" stroke-width="1"/><path d="M25 11 Q25 2 32.5 2 Q40 2 40 11 Z" fill="#efe4c6" stroke="#8a7a52" stroke-width="1"/><path d="M25.3 9.4 Q32.5 7.6 39.7 9.4 L39.9 10.8 Q32.5 9.2 25.1 10.8 Z" fill="#8a6a3e"/></svg></span></span>
         <div class="rc-aftel" id="rc-aftel" aria-live="assertive"></div></div>
       <div class="rc-feed" id="rc-feed" aria-live="polite"></div>
-      <p class="rc-bron">Leeuwengeluid: த*உழவன் via Wikimedia Commons</p>
-      <div class="rc-knoppen" id="rc-afbreken"><button type="button" class="btn sm ghost" data-rc="afbreken">Race afbreken</button></div>
+
+      <div class="rc-knoppen" id="rc-afbreken"><button type="button" class="btn sm ghost" data-rc="afbreken">Race afbreken</button><button type="button" class="btn sm ghost" data-rc="muziek">${muziekAan() ? "🎵 Muziek aan" : "🔇 Muziek uit"}</button></div>
       <div id="rc-uitslag"></div>`;
   }
 
@@ -224,8 +224,59 @@
   }
 
 
+  /* ---------- Saloonmuziek: honky-tonk piano (The Entertainer van Scott Joplin, 1902, publiek domein) ---------- */
+  const muziekAan = () => { try { return localStorage.getItem("kamelen-race-muziek") !== "uit"; } catch { return true; } };
+  const NOOT = n => { const m = /^([A-G])(#?)(\d)$/.exec(n); const i = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] ? 1 : 0); return 440 * Math.pow(2, (i - 9) / 12 + (Number(m[3]) - 4)); };
+  /* melodie in zestienden: [noot, lengte] */
+  const MELODIE = [
+    ["D5",1],["D#5",1],["E5",1],["C6",2],["E5",1],["C6",2],["E5",1],["C6",6],["C6",1],["D6",1],["D#6",1],["E6",1],["C6",1],["D6",1],["E6",2],["B5",1],["D6",2],["C6",6],
+    ["D5",1],["D#5",1],["E5",1],["C6",2],["E5",1],["C6",2],["E5",1],["C6",6],["A5",2],["G5",1],["F#5",1],["A5",1],["C6",1],["E6",2],["D6",1],["C6",1],["A5",1],["D6",6],
+    ["D5",1],["D#5",1],["E5",1],["C6",2],["E5",1],["C6",2],["E5",1],["C6",6],["C6",1],["D6",1],["D#6",1],["E6",1],["C6",1],["D6",1],["E6",2],["B5",1],["D6",2],["C6",8],
+    ["C6",1],["D6",1],["E6",1],["C6",1],["D6",1],["E6",2],["C6",1],["D6",1],["C6",1],["E6",1],["C6",1],["D6",1],["E6",2],["C6",1],["D6",1],["C6",1],["E6",1],["C6",1],["D6",1],["E6",2],["B5",1],["D6",2],["C6",4]
+  ];
+  /* oempa-bas per maat van 8 zestienden: [grondtoon, akkoord] */
+  const C = ["C3", ["E4","G4","C5"]], G7 = ["G2", ["F4","G4","B4"]], D7 = ["D3", ["F#4","A4","C5"]], F = ["F2", ["F4","A4","C5"]];
+  const BAS = [C, C, G7, C, C, D7, D7, G7, C, C, G7, C, C, F, G7, C];
+  let muziekTimer = null, muziekUit = null;
+  function piano(c, uit, f, t, d, v) {
+    [[-7, "triangle"], [8, "square"]].forEach(([cent, type], k) => {
+      const o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.value = f; o.detune.value = cent;
+      const vol = v * (k ? .35 : 1);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .008); g.gain.exponentialRampToValueAtTime(vol * .35, t + .12); g.gain.exponentialRampToValueAtTime(.0001, t + Math.max(.2, d + .15));
+      o.connect(g).connect(uit); o.start(t); o.stop(t + d + .2);
+    });
+  }
+  function startMuziek() {
+    stopMuziek(true);
+    if (!muziekAan()) return;
+    const c = ac(); if (!c) return;
+    const uit = c.createGain(), filter = c.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 2600;
+    uit.gain.value = .0001; uit.gain.exponentialRampToValueAtTime(.32, c.currentTime + .6);
+    uit.connect(filter).connect(c.destination); muziekUit = uit;
+    const Z = .105;                        // seconden per zestiende
+    const melLen = MELODIE.reduce((s, [, l]) => s + l, 0);
+    let t0 = c.currentTime + .1, mi = 0, mt = t0 - Z * 2, bi = 0, bt = t0;   // opmaat
+    const plan = () => {
+      const tot = c.currentTime + .6;
+      while (mt < tot) { const [n, l] = MELODIE[mi]; piano(c, uit, NOOT(n), mt, l * Z * .9, .16); mt += l * Z; mi = (mi + 1) % MELODIE.length; }
+      while (bt < tot) {
+        const [g, akk] = BAS[Math.floor(bi / 4) % BAS.length], tel = bi % 4;
+        if (tel % 2 === 0) piano(c, uit, NOOT(g) * (tel === 2 ? 1.5 : 1), bt, Z * 1.6, .13);
+        else akk.forEach(n => piano(c, uit, NOOT(n), bt, Z * 1.4, .05));
+        bt += Z * 2; bi++;
+      }
+    };
+    plan(); muziekTimer = setInterval(plan, 150);
+  }
+  function stopMuziek(direct) {
+    clearInterval(muziekTimer); muziekTimer = null;
+    const g = muziekUit; muziekUit = null; if (!g || !AC) return;
+    const t = AC.currentTime; try { g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t); g.gain.exponentialRampToValueAtTime(.0001, t + (direct ? .05 : 2.5)); } catch {}
+    setTimeout(() => { try { g.disconnect(); } catch {} }, direct ? 100 : 2700);
+  }
+
   let loper = null, teller = null;
-  function stopTimers() { cancelAnimationFrame(loper); clearTimeout(teller); loper = teller = null; }
+  function stopTimers() { cancelAnimationFrame(loper); clearTimeout(teller); loper = teller = null; stopMuziek(true); }
 
   /* De race draait op requestAnimationFrame: elke frame een klein stapje, dus vloeiend.
      Gebeurtenissen geven geen sprong maar een duw die in ~0,7 s wordt verwerkt. */
@@ -323,7 +374,7 @@
     const tel = () => {
       if (rustig || k >= tellen.length) { aftel.className = "rc-aftel"; aftel.textContent = ""; return lopen(); }
       aftel.textContent = tellen[k]; aftel.className = "rc-aftel"; void aftel.offsetWidth; aftel.className = "rc-aftel toon" + (k === 3 ? " go" : "");
-      if (k === 3) baan.classList.add("open");
+      if (k === 3) { baan.classList.add("open"); setTimeout(startMuziek, 600); }
       piep(k === 3);
       try { navigator.vibrate?.(k === 3 ? 120 : 30); } catch {}
       k++; teller = setTimeout(tel, k === 4 ? 250 : 1000);
@@ -420,6 +471,7 @@
           const verschil = marge < .6 ? "met een neuslengte" : marge < 1.5 ? "met een halve bult" : marge < 4 ? `met ${marge.toFixed(1).replace(".", ",")} meter voorsprong` : "met een straatlengte voorsprong";
           melding(`FINISH! ${volgorde[0]} wint ${verschil}!`, "groot");
           document.getElementById("rc-afbreken")?.remove();
+          setTimeout(() => stopMuziek(false), 2500);
           try { window.schietConfetti?.(); } catch {}
           setTimeout(() => afrekenen(volgorde, Object.fromEntries([...doden].map(([i, hoe]) => [S.kamelen[i], hoe]))), 1100);
           return;
@@ -471,6 +523,7 @@
     if (a === "naar-inzet") S.fase = "inzet";
     if (a === "terug" || a === "setup") S.fase = "setup";
     if (a === "start") { ac(); laadBrul(); return race(); }
+    if (a === "muziek") { const aan = !muziekAan(); try { localStorage.setItem("kamelen-race-muziek", aan ? "aan" : "uit"); } catch {} b.textContent = aan ? "🎵 Muziek aan" : "🔇 Muziek uit"; if (aan && S.fase === "race") startMuziek(); else stopMuziek(true); return; }
     if (a === "afbreken") { stopTimers(); S.fase = "inzet"; }
     if (a === "opnieuw") { S.inzet = {}; S.fase = "inzet"; }
     if (a === "reset") { S.tel = {}; S.races = 0; S.inzet = {}; }
