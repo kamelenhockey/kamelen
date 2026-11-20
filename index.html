@@ -650,7 +650,7 @@ nav.bar a[aria-current="page"]{color:#fff;border-bottom-color:var(--orange)}
 @media (max-width:760px), (max-height:520px) and (orientation:landscape) and (pointer:coarse){
   nav.bar{display:none}
   body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
-  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;z-index:30;left:0;right:0;bottom:0;background:rgba(22,54,80,.97);backdrop-filter:blur(8px);padding:6px 4px calc(6px + env(safe-area-inset-bottom));border-top:1px solid #234b6a}
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;z-index:30;left:0;right:0;bottom:0;background:#163650;padding:6px 4px calc(6px + env(safe-area-inset-bottom));border-top:1px solid #234b6a}
   .tabbar a,.tabbar button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;color:rgba(255,255,255,.6);font-size:.66rem;font-weight:600;letter-spacing:.02em}
   .tabbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .tabbar [aria-current="page"],.tabbar button[aria-expanded="true"]{color:var(--orange)}
@@ -1279,7 +1279,7 @@ body:not([data-page="home"]) .proef-label{display:none}
 body.design-proef .dp-label{bottom:calc(104px + env(safe-area-inset-bottom))}
 body.design-proef:not([data-page="home"]) .dp-label{display:flex}
 /* 1. lichte "glazen" kaarten op home (zonder zware vervaging: soepel op iPhone) */
-body[data-page="home"]{background:var(--tint,var(--bg));transition:background-color .4s}
+body[data-page="home"]{background:var(--tint,var(--bg))}
 body.design-proef[data-page="home"] .home-banners,body.design-proef[data-page="home"] .matchday,body.design-proef[data-page="home"] #view-home{background:var(--tint,var(--bg))!important}
 body.design-proef[data-page="home"] .matchday .wrap{background:var(--ink)}
 body.design-proef[data-page="home"] .card,body.design-proef[data-page="home"] .tile{background:rgba(255,255,255,.86);border-color:rgba(22,54,80,.08);box-shadow:0 10px 26px -20px rgba(22,54,80,.55)}
@@ -3311,7 +3311,7 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) toon
       if (mij !== r.classList.contains("mij")) r.classList.toggle("mij", mij);
     });
   };
-  new MutationObserver(() => { if (!wacht) wacht = setTimeout(markeer, 150); }).observe(document.body, { childList: true, subtree: true });
+  new MutationObserver(m => { if (!wacht && m.some(x => [...x.addedNodes].some(n => n.nodeType === 1))) wacht = setTimeout(markeer, 150); }).observe(document.body, { childList: true, subtree: true });
   markeer();
 })();
 
@@ -3456,9 +3456,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795490300"></script>
-<script src="toto.js?v=1795490300"></script>
-<script src="pong.js?v=1795490300"></script>
+<script src="mex.js?v=1795490400"></script>
+<script src="toto.js?v=1795490400"></script>
+<script src="pong.js?v=1795490400"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3467,15 +3467,15 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795490300"></script>
-<script src="statistieken.js?v=1795490300"></script>
-<script src="wrapped.js?v=1795490300"></script>
-<script src="race.js?v=1795490300"></script>
-<script src="rad.js?v=1795490300"></script>
-<script src="fotos.js?v=1795490300"></script>
-<script src="quotes.js?v=1795490300"></script>
-<script src="ideeen.js?v=1795490300"></script>
-<script src="design-proef.js?v=1795490300"></script>
-<script src="push.js?v=1795490300"></script>
+<script src="stemmen.js?v=1795490400"></script>
+<script src="statistieken.js?v=1795490400"></script>
+<script src="wrapped.js?v=1795490400"></script>
+<script src="race.js?v=1795490400"></script>
+<script src="rad.js?v=1795490400"></script>
+<script src="fotos.js?v=1795490400"></script>
+<script src="quotes.js?v=1795490400"></script>
+<script src="ideeen.js?v=1795490400"></script>
+<script src="design-proef.js?v=1795490400"></script>
+<script src="push.js?v=1795490400"></script>
 </body>
 </html>

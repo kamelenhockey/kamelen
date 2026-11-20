@@ -1,7 +1,7 @@
 /* =========================================================
    Design-extra's voor iedereen
    - glazen kaarten op home met de woestijnfoto erachter
-   - kop die meeschuift bij scrollen + compacte balk bovenin
+   - compacte balk bovenin bij scrollen
    - kameeltje in de tabbalk dat naar het actieve tabje loopt
    - zandvlaag bij het wisselen van tabje
    - lege schermen met humor
@@ -20,12 +20,8 @@
   let tik = false;
   const opScroll = () => {
     tik = false;
-    const y = window.scrollY, hero = document.querySelector(".hero"), foto = document.querySelector(".hero .hero-foto");
+    const y = window.scrollY, hero = document.querySelector(".hero");
     const h = hero ? hero.offsetHeight : 200;
-    if (foto && !rustig && document.body.dataset.page === "home") {
-      const t = Math.min(y, h);
-      foto.style.transform = `translate3d(0,${Math.round(t * .4)}px,0)`;
-    }
     mini.classList.toggle("zicht", y > h - 50);
   };
   addEventListener("scroll", () => { if (!tik) { tik = true; requestAnimationFrame(opScroll); } }, { passive: true });
@@ -66,7 +62,6 @@
     vorigePagina = p;
     setTimeout(loop, 30);
     setTimeout(opScroll, 50);
-    if (p !== "home") { const f = document.querySelector(".hero .hero-foto"); if (f) f.style.transform = ""; }
   };
   addEventListener("hashchange", () => setTimeout(wissel, 0));
   setTimeout(wissel, 300);
@@ -92,7 +87,8 @@
     });
   };
   let lw = null;
-  new MutationObserver(() => { if (!lw) lw = setTimeout(() => { lw = null; leeg(); }, 200); }).observe(document.body, { childList: true, subtree: true });
+  /* Alleen reageren als er echt elementen bijkomen (niet op de aftelklok die elke seconde tikt) */
+  new MutationObserver(m => { if (!lw && m.some(x => [...x.addedNodes].some(n => n.nodeType === 1))) lw = setTimeout(() => { lw = null; leeg(); }, 200); }).observe(document.body, { childList: true, subtree: true });
 
   /* ---------- 6. Jarige-modus ---------- */
   const jarigVandaag = () => {
