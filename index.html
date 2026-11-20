@@ -953,6 +953,52 @@ body.pong-actief .tabbar{display:none}
 .rc-tabel{width:100%;margin-bottom:10px}
 .rc-stake{flex-wrap:wrap}
 @media (prefers-reduced-motion:reduce){.rc-lijf,.rc-stof,.rc-zand,.rc-wolk,.rc-cactus,.rc-baan.finale,.rc-aftel.toon,.rc-sprong{animation:none!important}}
+/* ---------- Kamelenrace 2.0 ---------- */
+.rc-bord{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;padding:2px 0}
+.rc-bord-k{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;padding:4px 10px 4px 4px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:700;font-size:.82rem;color:var(--ink);white-space:nowrap}
+.rc-bord-k i{font-style:normal;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#fff;font-size:.72rem}
+.rc-bord-k.eerste{border-color:#d4a017;background:#fff6dc;box-shadow:0 0 0 2px rgba(212,160,23,.25)}
+.rc-bord-k.eerste::after{content:"👑";font-size:.8rem}
+.rc-lucht{height:58px;background:linear-gradient(180deg,#8fc8ea 0%,#cfe8f5 70%,#f4e3bd 100%);border-bottom:0}
+.rc-zon{right:34px;top:8px;width:26px;height:26px}
+.rc-duin{position:absolute;left:0;right:0;bottom:0;background-repeat:repeat-x;background-position:0 100%}
+.rc-duin.ver{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='40'%3E%3Cpath d='M0 40 V26 Q60 6 120 22 T240 18 T400 24 V40Z' fill='%23e6c48a'/%3E%3C/svg%3E");height:34px;background-size:400px 34px;opacity:.85}
+.rc-duin.nab{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='30'%3E%3Cpath d='M0 30 V20 Q50 2 110 16 T210 12 T300 18 V30Z' fill='%23d9ab62'/%3E%3Cpath d='M70 14 v-12 m0 5 h-5 v-4 m5 6 h5 v-5' stroke='%235f8f3a' stroke-width='3' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");height:24px;bottom:-1px;background-size:300px 24px}
+.rc-tribune{position:absolute;left:0;right:0;bottom:0;height:3px;background:repeating-linear-gradient(90deg,#c9963f 0 18px,#b5822f 18px 36px)}
+.rc-baan.rent .rc-duin.ver{animation:rcDuin 9s linear infinite}
+.rc-baan.rent .rc-duin.nab{animation:rcDuinN 3.6s linear infinite}
+.rc-baan.slowmo .rc-duin.ver{animation-duration:26s}.rc-baan.slowmo .rc-duin.nab{animation-duration:10s}
+@keyframes rcDuin{to{background-position:-400px 100%}}
+@keyframes rcDuinN{to{background-position:-300px 100%}}
+.rc-lnaam{display:flex;align-items:center;gap:5px}
+.rc-lnaam i{font-style:normal;flex:0 0 auto;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:.68rem}
+.rc-zand{height:3.1rem;background-image:radial-gradient(rgba(140,95,30,.2) 1px,transparent 1.6px),linear-gradient(180deg,rgba(255,255,255,.15),rgba(160,110,40,.08));background-size:14px 10px,100% 100%}
+.rc-kameel{font-size:inherit;width:58px}
+.rc-lijf{display:block;position:relative;transform:none;transform-origin:40% 95%;filter:drop-shadow(0 2px 1px rgba(90,60,10,.25))}
+.rc-lijf img{display:block;width:58px;height:auto}
+.rc-dek{position:absolute;left:27%;top:26%;width:30%;height:30%;border-radius:4px 4px 8px 8px;background:var(--c);color:#fff;font:800 .62rem/1 var(--font-body);display:grid;place-items:center;box-shadow:inset 0 -2px 0 rgba(0,0,0,.18);border:1.5px solid rgba(255,255,255,.85);font-style:normal}
+.rc-schaduw{position:absolute;left:8px;right:10px;bottom:-3px;height:6px;border-radius:50%;background:rgba(90,60,10,.28)}
+.rc-baan.rent .rc-schaduw{animation:rcSchaduw .34s ease-in-out infinite}
+.rc-lane:nth-of-type(2n) .rc-schaduw{animation-delay:-.12s}.rc-lane:nth-of-type(3n) .rc-schaduw{animation-delay:-.22s}
+@keyframes rcSchaduw{25%{transform:scaleX(.75);opacity:.6}75%{transform:scaleX(.88)}}
+@keyframes rcGalop{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-6px) rotate(-6deg)}50%{transform:translateY(0) rotate(1deg)}75%{transform:translateY(-3px) rotate(4deg)}}
+@keyframes rcVal{0%,100%{transform:rotate(0)}20%{transform:rotate(28deg) translateY(3px)}50%{transform:rotate(-200deg) translateY(-6px)}75%{transform:rotate(-360deg)}}
+.rc-stof{display:none}
+.rc-puf{position:absolute;top:58%;border-radius:50%;background:radial-gradient(circle at 40% 40%,#f6e2b8,#d9b679 70%,transparent 72%);pointer-events:none}
+.rc-kroon{top:-1.2rem}
+.rc-plek{left:-.5rem;top:-.1rem;z-index:2}
+.rc-geluid{position:absolute;right:8px;top:6px;z-index:4;border:0;background:rgba(255,255,255,.75);border-radius:999px;width:30px;height:30px;font-size:.95rem;cursor:pointer}
+.rc-baan.bevroren .rc-lane,.rc-baan.bevroren .rc-lucht{filter:sepia(.55) contrast(1.05)}
+.rc-baan.bevroren .rc-lane *,.rc-baan.bevroren .rc-lucht *{animation-play-state:paused!important}
+.rc-foto{position:absolute;left:50%;top:50%;z-index:5;translate:-50% -50%;background:#fff;padding:10px 16px 12px;border-radius:6px;box-shadow:0 14px 30px -10px rgba(0,0,0,.45);text-align:center;rotate:-3deg;animation:rcFoto .5s cubic-bezier(.2,1.4,.4,1) .2s both;min-width:180px}
+.rc-foto-k{display:block;font-size:.72rem;font-weight:800;color:var(--muted)}
+.rc-foto b{display:block;font-family:var(--font-display);font-size:1.6rem;font-weight:400;color:var(--ink);line-height:1.1}
+.rc-foto span:last-child{font-size:.85rem;font-weight:600;color:var(--ink-2)}
+@keyframes rcFoto{from{scale:.3;opacity:0;rotate:-14deg}}
+@media (max-width:560px){.rc-zand{height:2.6rem}.rc-kameel,.rc-lijf img{width:46px}.rc-lucht{height:46px}.rc-dek{font-size:.52rem}}
+@media (prefers-reduced-motion:reduce){.rc-duin,.rc-schaduw{animation:none!important}}
+@media (max-height:520px) and (orientation:landscape) and (pointer:coarse){.rc-zand{height:2.1rem}.rc-kameel,.rc-lijf img{width:38px}.rc-lucht{height:30px}.rc-bord{margin-bottom:4px}}
+
 
 /* Kamelen-rad */
 .tt-ik{font-weight:700;font-size:1.05rem;padding:10px 0}
@@ -1610,7 +1656,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <section class="card karavaan" id="karavaan" data-page="home" aria-labelledby="kr-h">
     <div class="kr-kop"><h2 id="kr-h">Karavaanroute</h2><p class="kr-sub"></p></div>
     <div class="kr-doek"></div>
-    <p class="kr-legenda"><span>🌴 oase = gewonnen</span><span>⛺ tent = gelijk</span><span>🪨 rots = verloren</span><span>🏁 laatste speeldag</span></p>
+    <p class="kr-legenda"><span>🌴 oase = gewonnen</span><span>🌵 cactus = gelijk</span><span>🌪️ zandstorm = verloren</span><span>🏁 laatste speeldag</span></p>
   </section>
   <section class="card quote-home" id="quote-home" data-page="home" aria-label="Quote"></section>
   <section class="card push-card" id="push-card" data-page="home" aria-label="Meldingen"></section>
@@ -3649,9 +3695,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795491600"></script>
-<script src="toto.js?v=1795491600"></script>
-<script src="pong.js?v=1795491600"></script>
+<script src="mex.js?v=1795491800"></script>
+<script src="toto.js?v=1795491800"></script>
+<script src="pong.js?v=1795491800"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3660,18 +3706,18 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795491600"></script>
-<script src="statistieken.js?v=1795491600"></script>
-<script src="wrapped.js?v=1795491600"></script>
-<script src="race.js?v=1795491600"></script>
-<script src="rad.js?v=1795491600"></script>
-<script src="fotos.js?v=1795491600"></script>
-<script src="quotes.js?v=1795491600"></script>
-<script src="ideeen.js?v=1795491600"></script>
-<script src="seizoen.js?v=1795491600"></script>
-<script src="zege.js?v=1795491600"></script>
-<script src="karavaan.js?v=1795491600"></script>
-<script src="design-proef.js?v=1795491600"></script>
-<script src="push.js?v=1795491600"></script>
+<script src="stemmen.js?v=1795491800"></script>
+<script src="statistieken.js?v=1795491800"></script>
+<script src="wrapped.js?v=1795491800"></script>
+<script src="race.js?v=1795491800"></script>
+<script src="rad.js?v=1795491800"></script>
+<script src="fotos.js?v=1795491800"></script>
+<script src="quotes.js?v=1795491800"></script>
+<script src="ideeen.js?v=1795491800"></script>
+<script src="seizoen.js?v=1795491800"></script>
+<script src="zege.js?v=1795491800"></script>
+<script src="karavaan.js?v=1795491800"></script>
+<script src="design-proef.js?v=1795491800"></script>
+<script src="push.js?v=1795491800"></script>
 </body>
 </html>

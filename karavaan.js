@@ -1,5 +1,5 @@
 /* Karavaanroute op Home: het seizoen als tocht door de woestijn
-   (oase = winst, tent = gelijk, rots = verlies; de kameel staat bij de laatste uitslag) */
+   (oase = winst, cactus = gelijk, zandstorm = verlies; de kameel staat bij de laatste uitslag) */
 (() => {
   const esc = s => String(s).replace(/[<>&"]/g, "");
 
@@ -7,8 +7,8 @@
   const sec = document.getElementById("karavaan"); if (!sec) return;
   const ICOON = {
     zege: `<ellipse cx="0" cy="6" rx="14" ry="4.5" fill="#5fb3e0"/><path d="M-2 6 Q-4 -6 1 -18" stroke="#7a4a1e" stroke-width="3" fill="none" stroke-linecap="round"/><g fill="#2e9e4f"><path d="M1 -18 Q-10 -24 -16 -14 Q-8 -18 1 -16Z"/><path d="M1 -18 Q12 -24 17 -13 Q9 -18 1 -16Z"/><path d="M1 -18 Q-2 -30 -10 -30 Q-3 -25 0 -17Z"/><path d="M1 -18 Q6 -30 13 -28 Q6 -25 2 -17Z"/></g>`,
-    gelijk: `<path d="M-12 6 L0 -14 L12 6 Z" fill="#e9c98f" stroke="#8a6a3e" stroke-width="2" stroke-linejoin="round"/><path d="M-3 6 L0 -4 L3 6Z" fill="#6b4f2a"/>`,
-    verlies: `<path d="M-12 6 Q-13 -4 -5 -8 Q2 -12 8 -6 Q14 -1 12 6 Z" fill="#a39b92" stroke="#6f675f" stroke-width="2"/><path d="M-2 -6 L1 -1 L-1 3" stroke="#6f675f" stroke-width="1.5" fill="none"/>`
+    gelijk: `<ellipse cx="0" cy="7" rx="11" ry="3" fill="rgba(140,95,30,.25)"/><path d="M-3 7 V-14 Q-3 -19 0 -19 Q3 -19 3 -14 V7 Z" fill="#4f9a45" stroke="#2f6b2a" stroke-width="1.6"/><path d="M-3 -2 H-8 Q-10 -2 -10 -5 V-10 Q-10 -12 -8.5 -12 Q-7 -12 -7 -10 V-5 H-3" fill="#4f9a45" stroke="#2f6b2a" stroke-width="1.6"/><path d="M3 -6 H8 Q10 -6 10 -9 V-13 Q10 -15 8.5 -15 Q7 -15 7 -13 V-9 H3" fill="#4f9a45" stroke="#2f6b2a" stroke-width="1.6"/><circle cx="0" cy="-19" r="2.2" fill="#f27da0"/>`,
+    verlies: `<g fill="none" stroke="#b08850" stroke-linecap="round"><path d="M-13 -16 Q0 -21 13 -16" stroke-width="3.4"/><path d="M-10 -9 Q0 -13 10 -9" stroke-width="3"/><path d="M-7 -2 Q0 -5 7 -2" stroke-width="2.6"/><path d="M-4 4 Q0 2 4 4" stroke-width="2.2"/></g><circle cx="9" cy="-4" r="1.3" fill="#b08850"/><circle cx="-11" cy="1" r="1.1" fill="#b08850"/><circle cx="13" cy="-11" r="1" fill="#b08850"/>`
   };
 
   const teken = () => {
@@ -56,7 +56,7 @@
     const vlagje = `<g transform="translate(${eind[0] + 4} ${eind[1] - 8})"><path d="M0 0 V-30" stroke="#163650" stroke-width="2.5"/><path d="M0 -30 h18 v12 h-18z" fill="#fff" stroke="#163650" stroke-width="1.5"/><path d="M0 -30h6v6h-6z M12 -30h6v6h-6z M6 -24h6v6h-6z" fill="#163650"/></g>`;
     const len = alle.filter(s => s.soort !== "komt").length;
     const tel = k => gespeeld.filter(s => s.soort === k).length;
-    sec.querySelector(".kr-sub").textContent = `${len} van de ${N} etappes gereisd · ${tel("zege")} ${tel("zege") === 1 ? "oase" : "oases"}, ${tel("gelijk")} ${tel("gelijk") === 1 ? "tent" : "tenten"}, ${tel("verlies")} ${tel("verlies") === 1 ? "rots" : "rotsen"}`;
+    sec.querySelector(".kr-sub").textContent = `${len} van de ${N} etappes gereisd · ${tel("zege")} ${tel("zege") === 1 ? "oase" : "oases"}, ${tel("gelijk")} ${tel("gelijk") === 1 ? "cactus" : "cactussen"}, ${tel("verlies")} ${tel("verlies") === 1 ? "zandstorm" : "zandstormen"}`;
     const doek = sec.querySelector(".kr-doek");
     doek.innerHTML = `<svg width="${breedte}" height="${H}" viewBox="0 0 ${breedte} ${H}" role="img" aria-label="Karavaanroute van het seizoen">
       <path d="M0 ${H} Q${breedte * .2} ${H - 46} ${breedte * .45} ${H - 22} T${breedte} ${H - 30} V${H} Z" fill="rgba(201,150,80,.16)"/>
