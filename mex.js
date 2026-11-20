@@ -268,15 +268,35 @@
     d.className = "mx-alarm"; d.setAttribute("role", "alertdialog"); d.setAttribute("aria-modal", "true"); d.setAttribute("aria-labelledby", "mx-alarm-t");
     d.innerHTML = `<div class="mx-alarm-in"><div class="mx-alarm-ic" aria-hidden="true">🚨</div>
       <h2 id="mx-alarm-t">LET OP!<br>${esc(n).toUpperCase()}, JE BENT 100-MAN.<br>JE MAG NIET WEG!</h2>
-      <p>Eerst moet iemand anders 100 gooien. Tot die tijd blijf je zitten.</p>
-      <button type="button" class="mx-alarm-ok">Oké, ik blijf zitten</button></div>`;
+      <p>Eerst moet iemand anders 100 gooien. Alleen als <b>iedereen</b> toestemming geeft, mag je eerder weg.</p>
+      <div class="mx-alarm-knoppen"><button type="button" class="mx-alarm-ok">Oké, ik blijf zitten</button><button type="button" class="mx-alarm-toestemming">Iedereen geeft toestemming</button></div>
+      <div class="mx-toestemming" hidden><p>Iedereen tikt zelf op zijn naam om akkoord te geven:</p>
+        <div class="mx-akkoord">${S.spelers.filter(x => x !== n).map(x => `<button type="button" data-akkoord="${esc(x)}" aria-pressed="false">${esc(x)}</button>`).join("")}</div>
+        <button type="button" class="mx-alarm-weg" disabled>${esc(n)} mag weg</button></div></div>`;
     document.body.appendChild(d);
     const sluit = () => { stopSirene(); d.remove(); };
     d.querySelector(".mx-alarm-ok").onclick = sluit;
+    d.querySelector(".mx-alarm-toestemming").onclick = () => {
+      stopSirene(); clearTimeout(stopTimer);
+      d.classList.add("rustig"); d.querySelector(".mx-toestemming").hidden = false; d.querySelector(".mx-alarm-toestemming").hidden = true;
+    };
+    d.querySelector(".mx-akkoord").onclick = e => {
+      const b = e.target.closest("[data-akkoord]"); if (!b) return;
+      b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true");
+      const alle = [...d.querySelectorAll("[data-akkoord]")].every(x => x.getAttribute("aria-pressed") === "true");
+      d.querySelector(".mx-alarm-weg").disabled = !alle;
+    };
+    d.querySelector(".mx-alarm-weg").onclick = () => {
+      sluit();
+      const H = S.honderd;
+      if (H.main === n) { H.main = H.extra; H.extra = null; } else if (H.extra === n) H.extra = null;
+      const R = S.ronde; if (R?.huidig) R.huidig.berichten.push(`Iedereen gaf toestemming: ${esc(n)} mag weg als 100-man.${H.main ? ` ${esc(H.main)} is nu de 100-man.` : " Er is nu geen 100-man."}`);
+      verlaat(n);
+    };
     d.querySelector(".mx-alarm-ok").focus();
     try { navigator.vibrate?.([400, 150, 400, 150, 400, 150, 800]); } catch {}
     sirene();
-    setTimeout(() => { if (d.isConnected) sluit(); }, 12000);
+    const stopTimer = setTimeout(() => { if (d.isConnected && !d.classList.contains("rustig")) sluit(); }, 12000);
   }
   let ac = null, sireneOsc = null;
   function sirene() {
