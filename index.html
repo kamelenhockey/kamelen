@@ -1344,6 +1344,18 @@ body.design-proef .empty{text-align:center}
 .idee-beheer{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
 .idee-beheer button{font:inherit;font-size:.75rem;padding:3px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);cursor:pointer;color:var(--ink)}
 .idee-beheer button[aria-pressed="true"]{background:var(--ink);color:#fff}
+/* Selectie in de wedstrijd-pop-up */
+.sel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.sel-chip{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:6px 10px 6px 6px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:.9rem;font-weight:600;color:var(--ink);cursor:pointer;min-width:0}
+span.sel-chip{cursor:default}
+.sel-chip:hover{border-color:var(--ink)}
+.sel-chip .avatar{width:30px!important;height:30px!important;min-width:30px;margin:0!important;font-size:.72rem}
+.sel-chip .avatar img{width:100%;height:100%;object-fit:cover}
+.sel-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sel-goals{font-size:.75rem;letter-spacing:-.1em}
+.sel-chip small{font-size:.66rem;color:var(--muted);font-weight:500}
+.sel-chip.inval{border-style:dashed}
+.sel-kz{margin:10px 0 0;font-size:.9rem}
 /* Klikbare wedstrijden en de wedstrijd-pop-up */
 .klik[data-match]{cursor:pointer;transition:background .15s}
 .klik[data-match]:hover{background:rgba(22,54,80,.06)}
@@ -2330,6 +2342,8 @@ function openMatch(sleutel){
     html += `<div class="wm-uitslag"><div class="k">Uitslag</div><div class="wm-score">${teamLink(m.thuis)}<b>${a} – ${b}</b>${teamLink(m.uit)}</div></div>`;
     if (v) html += `<div class="wm-oordeel ${v.uitkomst === echt ? "goed" : "fout"}">${v.uitkomst === echt ? "✓ Het model zat goed" : "✗ Het model zat ernaast"}: vooraf werd ${v.uitslag[0]} – ${v.uitslag[1]} verwacht${v.uitslag[0] === a && v.uitslag[1] === b ? ", zelfs de exacte uitslag" : ""}.</div>`;
   }
+  /* Gespeelde wedstrijd van ons: wie deed er mee (wordt meteen daarna ingeladen) */
+  if (gespeeld && ons) html += `<div class="dlg-sec" id="wm-selectie"><h3 class="sub-h">Selectie</h3><p class="muted">Selectie laden…</p></div>`;
   if (!v) html += `<div class="empty">Er zijn nog te weinig uitslagen om deze wedstrijd te voorspellen.</div>`;
   else {
     /* kansen vanuit de thuisploeg; bij onze wedstrijden in groen (wij winnen) en rood (wij verliezen) */
@@ -2369,6 +2383,32 @@ function openMatch(sleutel){
   document.getElementById("dlg-body").innerHTML = html;
   document.getElementById("dlg-body").scrollTop = 0;
   if (!dlg.open){ try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } }
+  if (gespeeld && ons) toonSelectie(m);
+}
+/* Wie speelde mee: spelers met een leeg vakje of "te laat" + invallers, met doelpunten en kameel/ezel van die dag */
+async function toonSelectie(m){
+  const box = () => document.getElementById("wm-selectie");
+  let kaart = new Map();
+  try { kaart = window.kamelenAanwezig ? await window.kamelenAanwezig() : new Map(); } catch {}
+  const el = box(); if (!el) return;
+  const wie = kaart.get(m.datum);
+  if (!wie || !wie.size) { el.innerHTML = `<h3 class="sub-h">Selectie</h3><p class="muted">Voor deze wedstrijd is geen selectie bekend.</p>`; return; }
+  const goals = new Map();
+  for (const w of DATA.doelpunten || []) { const mm = zoekWedstrijd(w); if (mm && mm.datum === m.datum) w.goals.forEach(g => goals.set(g.wie, [...(goals.get(g.wie) || []), g.soort])); }
+  const kz = (DATA.kzUitslagen || []).find(r => r.m && r.m.datum === m.datum);
+  const spelers = [...wie].map(n => typeof canon === "function" ? (canon(n) || n) : n);
+  const vast = spelers.filter(n => ROSTER.has(n)).sort((a, b) => (goals.get(b) || []).length - (goals.get(a) || []).length || a.localeCompare(b));
+  const inval = spelers.filter(n => !ROSTER.has(n)).sort();
+  const pd = typeof playerData === "function" ? playerData() : [];
+  const chip = (n, invaller) => {
+    const p = pd.find(x => x.naam === n), g = goals.get(n) || [];
+    const ic = (kz && kz.kamelen.includes(n) ? " 🐪" : "") + (kz && kz.ezels.includes(n) ? " 🫏" : "");
+    const doel = g.length ? `<span class="sel-goals" title="${g.length} ${g.length === 1 ? "doelpunt" : "doelpunten"}">${"⚽".repeat(Math.min(g.length, 4))}${g.length > 4 ? `×${g.length}` : ""}</span>` : "";
+    return `<${p ? "button type=\"button\" data-player=\"" + esc(n) + "\"" : "span"} class="sel-chip${invaller ? " inval" : ""}">${avatarHtml(p || { naam: n })}<span class="sel-nm">${esc(n)}${ic}</span>${doel}${invaller ? `<small>invaller</small>` : ""}</${p ? "button" : "span"}>`;
+  };
+  el.innerHTML = `<h3 class="sub-h">Selectie <small class="muted">(${spelers.length} ${spelers.length === 1 ? "speler" : "spelers"})</small></h3>
+    <div class="sel-grid">${vast.map(n => chip(n, false)).join("")}${inval.map(n => chip(n, true)).join("")}</div>
+    ${kz ? `<p class="sel-kz">🐪 Kameel: <b>${kz.kamelen.map(esc).join(" & ") || "–"}</b> · 🫏 Ezel: <b>${kz.ezels.map(esc).join(" & ") || "–"}</b></p>` : ""}`;
 }
 document.addEventListener("click", e => {
   const btn = e.target.closest("[data-team]");
@@ -3456,9 +3496,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795490500"></script>
-<script src="toto.js?v=1795490500"></script>
-<script src="pong.js?v=1795490500"></script>
+<script src="mex.js?v=1795490600"></script>
+<script src="toto.js?v=1795490600"></script>
+<script src="pong.js?v=1795490600"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3467,15 +3507,15 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795490500"></script>
-<script src="statistieken.js?v=1795490500"></script>
-<script src="wrapped.js?v=1795490500"></script>
-<script src="race.js?v=1795490500"></script>
-<script src="rad.js?v=1795490500"></script>
-<script src="fotos.js?v=1795490500"></script>
-<script src="quotes.js?v=1795490500"></script>
-<script src="ideeen.js?v=1795490500"></script>
-<script src="design-proef.js?v=1795490500"></script>
-<script src="push.js?v=1795490500"></script>
+<script src="stemmen.js?v=1795490600"></script>
+<script src="statistieken.js?v=1795490600"></script>
+<script src="wrapped.js?v=1795490600"></script>
+<script src="race.js?v=1795490600"></script>
+<script src="rad.js?v=1795490600"></script>
+<script src="fotos.js?v=1795490600"></script>
+<script src="quotes.js?v=1795490600"></script>
+<script src="ideeen.js?v=1795490600"></script>
+<script src="design-proef.js?v=1795490600"></script>
+<script src="push.js?v=1795490600"></script>
 </body>
 </html>
