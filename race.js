@@ -134,6 +134,7 @@
         <span class="rc-jager" id="rc-jager" aria-hidden="true"><span class="rc-jager-lijf"><svg viewBox="0 0 72 64" class="rc-jager-svg"><g class="jg-been2"><path d="M26 38 L22 50 L19 58" stroke="#5f6b30" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M14 57 h10 q3 0 3 3 v1 h-14 z" fill="#8a6a3e" stroke="#4a3418" stroke-width="1.2"/></g><path d="M22 24 Q30 21 37 24 L38 40 Q30 42 23 40 Z" fill="#8f9a52" stroke="#4d5426" stroke-width="1.4"/><path d="M26 27 h5 v5 h-5 z M33 27 h4 v5 h-4z" fill="#7c8746" stroke="#4d5426" stroke-width=".8"/><rect x="22.5" y="37" width="15.5" height="3.2" fill="#4a3418"/><rect x="29" y="37" width="3" height="3.2" fill="#c9a14a"/><g class="jg-been1"><path d="M33 38 L37 49 L36 58" stroke="#6d7a3a" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M33 57 h10 q3 0 3 3 v1 h-14 z" fill="#a07a48" stroke="#4a3418" stroke-width="1.2"/></g><g class="jg-geweer"><path d="M24 31 L40 28 L41 31 L28 34 Q25 35 24 33 Z" fill="#8b5a2b" stroke="#4a2e12" stroke-width="1"/><rect x="39" y="27.2" width="31" height="2.6" rx="1" fill="#2d2d2d"/><rect x="42" y="23" width="12" height="3.4" rx="1.6" fill="#1e1e1e"/><rect x="45" y="26" width="2" height="1.8" fill="#1e1e1e"/><rect x="40" y="29.5" width="12" height="2.2" rx="1" fill="#8b5a2b"/></g><path d="M27 26 Q24 31 30 32 L38 31" stroke="#8f9a52" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M35 25 Q42 27 46 29" stroke="#7c8746" stroke-width="4.6" stroke-linecap="round" fill="none"/><circle cx="38.5" cy="31" r="2.4" fill="#eab48c"/><circle cx="46.5" cy="29.6" r="2.3" fill="#eab48c"/><path d="M27 18 Q27 10 33 10 Q39 10 39 17 Q39 23 33 23 Q28 23 27 18 Z" fill="#f2c29b" stroke="#a8724a" stroke-width="1"/><path d="M33.5 19.6 Q36.5 17.8 39.4 19.2 Q41.4 20 42 18.4 Q42.2 21.6 38.8 21.2 Q36.6 20.8 34.6 21.6 Q32.6 21.6 33.5 19.6 Z" fill="#b8742a" stroke="#6e420f" stroke-width=".7"/><circle cx="36" cy="15.6" r="1.2" fill="#2b4a7a"/><path d="M34.2 13.6 l3.6 -.6" stroke="#6b4518" stroke-width="1.2" stroke-linecap="round"/><path d="M39 16.5 q1.6 .8 0 2" stroke="#a8724a" stroke-width="1" fill="none"/><ellipse cx="32.5" cy="11.2" rx="11" ry="2.6" fill="#e3d6b4" stroke="#8a7a52" stroke-width="1"/><path d="M25 11 Q25 2 32.5 2 Q40 2 40 11 Z" fill="#efe4c6" stroke="#8a7a52" stroke-width="1"/><path d="M25.3 9.4 Q32.5 7.6 39.7 9.4 L39.9 10.8 Q32.5 9.2 25.1 10.8 Z" fill="#8a6a3e"/></svg></span></span>
         <div class="rc-aftel" id="rc-aftel" aria-live="assertive"></div></div>
       <div class="rc-feed" id="rc-feed" aria-live="polite"></div>
+      <p class="rc-bron">Leeuwengeluid: த*உழவன் via Wikimedia Commons</p>
       <div class="rc-knoppen" id="rc-afbreken"><button type="button" class="btn sm ghost" data-rc="afbreken">Race afbreken</button></div>
       <div id="rc-uitslag"></div>`;
   }
@@ -158,7 +159,40 @@
     const o = c.createOscillator(), g2 = c.createGain(); o.type = "sine"; o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(40, t + .2);
     g2.gain.setValueAtTime(.9, t); g2.gain.exponentialRampToValueAtTime(.001, t + .25); o.connect(g2).connect(c.destination); o.start(t); o.stop(t + .3);
   }
+  /* Echte leeuwenbrul: opname van Wikimedia Commons ("Lion raring-sound1TamilNadu178.ogg",
+     eigen werk van த*உழவன், vrij te gebruiken met naamsvermelding). We spelen het luidste stuk af.
+     Lukt het laden niet (offline), dan valt hij terug op de nagemaakte brul hieronder. */
+  const BRUL_URLS = [
+    "https://upload.wikimedia.org/wikipedia/commons/transcoded/7/7d/Lion_raring-sound1TamilNadu178.ogg/Lion_raring-sound1TamilNadu178.ogg.mp3",
+    "https://upload.wikimedia.org/wikipedia/commons/7/7d/Lion_raring-sound1TamilNadu178.ogg"
+  ];
+  let brulBuffer = null, brulStart = 0, brulLaden = null;
+  function laadBrul() {
+    const c = ac(); if (!c || brulBuffer || brulLaden) return brulLaden;
+    brulLaden = (async () => {
+      for (const u of BRUL_URLS) {
+        try {
+          const r = await fetch(u, { mode: "cors" }); if (!r.ok) continue;
+          const buf = await c.decodeAudioData(await r.arrayBuffer());
+          /* zoek waar de brul echt begint: eerste stuk boven 45% van het hardste */
+          const d = buf.getChannelData(0), stap = Math.floor(buf.sampleRate * .05), rms = [];
+          for (let i = 0; i + stap < d.length; i += stap) { let s = 0; for (let j = i; j < i + stap; j++) s += d[j] * d[j]; rms.push(Math.sqrt(s / stap)); }
+          const max = Math.max(...rms), k = rms.findIndex(v => v > max * .45);
+          brulStart = Math.max(0, k * .05 - .15); brulBuffer = buf; return buf;
+        } catch {}
+      }
+      brulLaden = null; return null;
+    })();
+    return brulLaden;
+  }
   function brulGeluid() {
+    const c = ac(); if (!c) return;
+    if (!brulBuffer) return nepBrul();
+    const s = c.createBufferSource(), g = c.createGain(), t = c.currentTime, duur = Math.min(4, brulBuffer.duration - brulStart);
+    s.buffer = brulBuffer; g.gain.setValueAtTime(1.4, t); g.gain.setValueAtTime(1.4, t + duur - .6); g.gain.linearRampToValueAtTime(.0001, t + duur);
+    s.connect(g).connect(c.destination); s.start(t, brulStart, duur);
+  }
+  function nepBrul() {
     const c = ac(); if (!c) return; const t = c.currentTime + .02, d = 2.3;
     const uit = c.createGain(); uit.gain.value = .9;
     /* grofheid: vervorming */
@@ -436,7 +470,7 @@
     const a = b.dataset.rc;
     if (a === "naar-inzet") S.fase = "inzet";
     if (a === "terug" || a === "setup") S.fase = "setup";
-    if (a === "start") { ac(); return race(); }
+    if (a === "start") { ac(); laadBrul(); return race(); }
     if (a === "afbreken") { stopTimers(); S.fase = "inzet"; }
     if (a === "opnieuw") { S.inzet = {}; S.fase = "inzet"; }
     if (a === "reset") { S.tel = {}; S.races = 0; S.inzet = {}; }
