@@ -227,12 +227,22 @@
     const roster = [...(typeof ROSTER !== "undefined" ? ROSTER : [])].filter(n => !S.spelers.includes(n));
     const H = S.honderd;
     return `<div class="mx-beheer">
-      <h3 class="sub-h">Spelers in deze pot</h3>
-      <div class="mx-chips">${S.spelers.map(n => `<span class="mx-chip${n === H.main || n === H.extra ? " honderd" : ""}">${esc(n)}${n === H.main || n === H.extra ? " 💯" : ""} <button type="button" aria-label="${esc(n)} verlaat het spel" data-mx="verlaat" data-n="${esc(n)}">×</button></span>`).join("")}</div>
+      <h3 class="sub-h">Spelers en beurtvolgorde</h3>
+      <p class="mx-hint">Sleep aan ☰ (of gebruik ↑ ↓) om de volgorde te veranderen. Wie in deze ronde nog moet gooien, volgt meteen de nieuwe volgorde. Met × verlaat iemand het spel.</p>
+      <ol class="mx-volgorde" id="mx-volgorde">${S.spelers.map((n, i) => `<li data-i="${i}"${n === H.main || n === H.extra ? ` class="honderd"` : ""}><span class="mx-greep" title="Sleep om te verplaatsen" aria-hidden="true">☰</span><b>${i + 1}</b><span class="mx-vnm">${esc(n)}${n === H.main || n === H.extra ? " 💯" : ""}</span>
+        <span class="mx-vknop"><button type="button" aria-label="${esc(n)} omhoog" data-mx="op" data-i="${i}" ${i === 0 ? "disabled" : ""}>↑</button><button type="button" aria-label="${esc(n)} omlaag" data-mx="neer" data-i="${i}" ${i === S.spelers.length - 1 ? "disabled" : ""}>↓</button><button type="button" aria-label="${esc(n)} verlaat het spel" data-mx="verlaat" data-n="${esc(n)}">×</button></span></li>`).join("")}</ol>
       <div class="mx-add"><input type="text" id="mx-naam" placeholder="Iemand komt erbij" autocomplete="off"><button type="button" class="btn sm" data-mx="voeg">Toevoegen</button></div>
       ${roster.length ? `<div class="mx-roster"><span class="mx-hint">Snel kiezen:</span>${roster.map(n => `<button type="button" class="mx-pick" data-mx="pick" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div>` : ""}
       <p class="mx-hint">Nieuwe spelers sluiten achteraan aan in de lopende ronde.</p>
     </div>`;
+  }
+  /* Na het verschuiven: wie in de lopende ronde nog moet gooien, volgt de nieuwe volgorde */
+  function herorden() {
+    const R = S.ronde;
+    if (S.fase !== "spel" || !R || R.verliezers) return;
+    const nu = R.volgorde[R.beurt], gedaan = R.volgorde.slice(0, R.beurt + 1), rest = R.volgorde.slice(R.beurt + 1);
+    const start = S.spelers.indexOf(nu), plek = n => (S.spelers.indexOf(n) - start + S.spelers.length) % S.spelers.length;
+    R.volgorde = [...gedaan, ...rest.sort((a, b) => plek(a) - plek(b))];
   }
   function erbij(n) {
     if (!n || S.spelers.includes(n)) return;
@@ -331,7 +341,7 @@
   function los() {
     if (!sleep) return;
     const { van, naar } = sleep; sleep = null;
-    if (van !== naar) { const [n] = S.spelers.splice(van, 1); S.spelers.splice(naar, 0, n); save(); try { navigator.vibrate?.(15); } catch {} }
+    if (van !== naar) { const [n] = S.spelers.splice(van, 1); S.spelers.splice(naar, 0, n); herorden(); save(); try { navigator.vibrate?.(15); } catch {} }
     render();
   }
   box.addEventListener("touchstart", e => {
@@ -398,7 +408,7 @@
     const b = e.target.closest("[data-mx]"); if (!b) return;
     const a = b.dataset.mx;
     if (a === "pick") { if (S.fase === "setup") S.spelers.push(b.dataset.n); else erbij(b.dataset.n); save(); render(); }
-    if (a === "op" || a === "neer") { const i = Number(b.dataset.i), j = i + (a === "op" ? -1 : 1); [S.spelers[i], S.spelers[j]] = [S.spelers[j], S.spelers[i]]; save(); render(); }
+    if (a === "op" || a === "neer") { const i = Number(b.dataset.i), j = i + (a === "op" ? -1 : 1); [S.spelers[i], S.spelers[j]] = [S.spelers[j], S.spelers[i]]; herorden(); save(); render(); }
     if (a === "beheer") { beheerOpen = !beheerOpen; render(); }
     if (a === "verlaat") verlaat(b.dataset.n);
     if (a === "weg") { S.spelers.splice(Number(b.dataset.i), 1); save(); render(); }
