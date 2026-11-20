@@ -1239,31 +1239,34 @@ body.wrapped-open{overflow:hidden}
 .spel-tegel .st-ic{font-size:2.4rem;line-height:1}
 .spel-tegel b{font-family:var(--font-display);font-weight:400;font-size:1.4rem}
 .spel-tegel span:last-child{color:var(--muted);font-size:.9rem}
-/* ---------- Proef: nieuwe homepagina met de woestijnkameel (alleen met ?home=proef) ---------- */
+/* ---------- Proef: nieuwe homepagina met wisselende woestijnfoto's (alleen met ?home=proef) ---------- */
 .hero .hero-foto{display:none}
-body.home-proef[data-page="home"] .hero{overflow:hidden;background:linear-gradient(180deg,#9fc3e6 0%,#c6dcee 55%,#f3dcc0 100%);border-bottom:0}
-body.home-proef[data-page="home"] .hero .hero-foto{display:block;position:absolute;z-index:0;object-fit:cover;pointer-events:none;max-width:none!important}
-body.home-proef[data-page="home"] .hero .wrap{position:relative;z-index:1}
-body.home-proef[data-page="home"] .hero::after{content:"";position:absolute;z-index:1;left:0;right:0;bottom:-1px;height:46px;pointer-events:none;
+body.home-proef[data-page="home"] .hero{overflow:hidden;background:var(--ink);border-bottom:0}
+body.home-proef[data-page="home"] .hero .hero-foto{display:block;position:absolute;inset:0;z-index:0;width:100%!important;height:100%!important;max-width:none!important;object-fit:cover;object-position:var(--fd,50% 55%);pointer-events:none;animation:hf-in .9s ease-out both}
+@keyframes hf-in{from{opacity:0;transform:scale(1.04)}}
+body.home-proef[data-page="home"] .hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(22,54,80,.92) 0%,rgba(22,54,80,.78) 32%,rgba(22,54,80,.25) 62%,rgba(22,54,80,0) 85%)}
+body.home-proef[data-page="home"] .hero .wrap{position:relative;z-index:2}
+body.home-proef[data-page="home"] .hero-acties{z-index:6}
+body.home-proef[data-page="home"] .wordmark{color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.35)}
+body.home-proef[data-page="home"] .hero .eyebrow{color:rgba(255,255,255,.8)}
+body.home-proef[data-page="home"] .hero .league{color:rgba(255,255,255,.85)}
+body.home-proef[data-page="home"] .hero .wrap > img{filter:drop-shadow(0 6px 14px rgba(0,0,0,.35))}
+body.home-proef[data-page="home"] .bijgewerkt{background:rgba(255,255,255,.75);padding:1px 7px;border-radius:99px;color:var(--ink)}
+body.home-proef[data-page="home"] .hero::after{content:"";position:absolute;z-index:3;left:0;right:0;bottom:-1px;height:40px;pointer-events:none;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 46' preserveAspectRatio='none'%3E%3Cpath d='M0 30 C 180 6 360 6 560 22 S 940 44 1140 22 S 1360 10 1440 18 V46 H0Z' fill='%23163650'/%3E%3C/svg%3E") bottom/100% 100% no-repeat}
-body.home-proef[data-page="home"] .wordmark{text-shadow:0 2px 18px rgba(255,255,255,.55)}
-body.home-proef[data-page="home"] .hero .eyebrow{color:var(--orange-ink)}
 .proef-label{position:fixed;left:50%;bottom:calc(70px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:80;display:flex;gap:10px;align-items:center;padding:6px 8px 6px 14px;border-radius:999px;background:var(--ink);color:#fff;font-size:.8rem;box-shadow:0 8px 20px -10px rgba(0,0,0,.6)}
 body:not([data-page="home"]) .proef-label{display:none}
-.proef-label a{color:#fff;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:999px;text-decoration:none}
+.proef-label a,.proef-label button{color:#fff;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:999px;text-decoration:none;border:0;font:inherit;cursor:pointer}
 @media (min-width:761px){
-  body.home-proef[data-page="home"] .hero .wrap{min-height:300px;padding-bottom:56px}
-  body.home-proef[data-page="home"] .hero .hero-foto{right:0;top:0;height:100%!important;width:min(64%,820px)!important;object-position:55% 18%;
-    -webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.55) 22%,#000 45%);mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.55) 22%,#000 45%)}
-  body.home-proef[data-page="home"] .statbar{position:relative;z-index:2;background:rgba(255,255,255,.88);backdrop-filter:blur(8px)}
+  body.home-proef[data-page="home"] .hero .wrap{min-height:320px;padding-bottom:56px}
+  body.home-proef[data-page="home"] .statbar{position:relative;z-index:2;background:rgba(255,255,255,.9);backdrop-filter:blur(8px)}
 }
-body.home-proef[data-page="home"] .bijgewerkt{background:rgba(255,255,255,.7);padding:1px 7px;border-radius:99px;color:var(--ink)}
 @media (max-width:760px){
+  body.home-proef[data-page="home"] .hero .hero-foto{bottom:auto;height:min(68vw,290px)!important;object-position:var(--fm,50% 55%);-webkit-mask-image:linear-gradient(180deg,#000 62%,transparent 100%);mask-image:linear-gradient(180deg,#000 62%,transparent 100%)}
+  body.home-proef[data-page="home"] .hero::before{background:linear-gradient(180deg,rgba(22,54,80,.25) 0%,rgba(22,54,80,0) 25%)}
+  body.home-proef[data-page="home"] .hero .wrap{padding-top:calc(min(68vw,290px) - 34px)!important;padding-bottom:44px!important}
+  body.home-proef[data-page="home"] .hero .wrap > img{width:76px!important}
   body.home-proef[data-page="home"] .hero::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 46' preserveAspectRatio='none'%3E%3Cpath d='M0 30 C 180 6 360 6 560 22 S 940 44 1140 22 S 1360 10 1440 18 V46 H0Z' fill='%23b9d8e8'/%3E%3C/svg%3E")}
-  body.home-proef[data-page="home"] .hero .hero-foto{left:0;top:0;width:100%!important;height:250px!important;object-position:72% 40%;
-    -webkit-mask-image:linear-gradient(180deg,#000 55%,transparent 100%);mask-image:linear-gradient(180deg,#000 55%,transparent 100%)}
-  body.home-proef[data-page="home"] .hero .wrap{padding-top:196px!important;padding-bottom:40px!important}
-  body.home-proef[data-page="home"] .hero .wrap > img{width:76px!important;filter:drop-shadow(0 4px 10px rgba(22,54,80,.25))}
 }
 /* Ideeënbox */
 .idee-form{padding:18px 20px;margin-bottom:18px}
@@ -1382,7 +1385,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
     <button type="button" class="ik-chip" id="ik-chip" hidden></button>
     <span class="bijgewerkt" id="bijgewerkt" aria-live="off"></span>
   </div>
-  <img class="hero-foto" src="kameel-woestijn.jpg?v=2" alt="" aria-hidden="true" width="1356" height="904" decoding="async">
+  <img class="hero-foto" alt="" aria-hidden="true" decoding="async">
   <div class="trek-ververs" id="trek-ververs" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
   <div class="wrap">
     <img src="logo.png" alt="Logo van de Kamelen: een lopende oranje kameel">
@@ -3227,8 +3230,18 @@ laadGegevens(false);
     if (q === "uit") sessionStorage.removeItem("kamelen-home-proef");
     if (sessionStorage.getItem("kamelen-home-proef") !== "1") return;
     document.body.classList.add("home-proef");
+    /* Elke keer dat de app opent een andere woestijnfoto */
+    const FOTOS = [{"src": "woestijn/1.jpg", "d": "50% 62%", "m": "45% 60%"}, {"src": "woestijn/2.jpg", "d": "50% 58%", "m": "50% 55%"}, {"src": "woestijn/3.jpg", "d": "78% 62%", "m": "82% 58%"}, {"src": "woestijn/4.jpg", "d": "50% 55%", "m": "55% 55%"}, {"src": "woestijn/5.jpg", "d": "50% 62%", "m": "50% 60%"}];
+    let i = 0; try { i = (Number(localStorage.getItem("kamelen-hero-foto")) + 1) % FOTOS.length || 0; localStorage.setItem("kamelen-hero-foto", i); } catch {}
+    const zet = n => {
+      const f = FOTOS[n], img = document.querySelector(".hero .hero-foto"), hero = document.querySelector(".hero");
+      hero.style.setProperty("--fd", f.d); hero.style.setProperty("--fm", f.m);
+      img.style.animation = "none"; void img.offsetWidth; img.style.animation = ""; img.src = f.src;
+    };
+    zet(i);
     const l = document.createElement("div"); l.className = "proef-label";
-    l.innerHTML = `<span>Proefversie homepagina</span><a href="?home=uit#home">Uitzetten</a>`;
+    l.innerHTML = `<span>Proef homepagina</span><button type="button">Volgende foto</button><a href="?home=uit#home">Uitzetten</a>`;
+    l.querySelector("button").onclick = () => { i = (i + 1) % FOTOS.length; try { localStorage.setItem("kamelen-hero-foto", i); } catch {} zet(i); };
     document.body.appendChild(l);
   } catch {}
 })();
@@ -3400,9 +3413,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795489100"></script>
-<script src="toto.js?v=1795489100"></script>
-<script src="pong.js?v=1795489100"></script>
+<script src="mex.js?v=1795489200"></script>
+<script src="toto.js?v=1795489200"></script>
+<script src="pong.js?v=1795489200"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3411,14 +3424,14 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795489100"></script>
-<script src="statistieken.js?v=1795489100"></script>
-<script src="wrapped.js?v=1795489100"></script>
-<script src="race.js?v=1795489100"></script>
-<script src="rad.js?v=1795489100"></script>
-<script src="fotos.js?v=1795489100"></script>
-<script src="quotes.js?v=1795489100"></script>
-<script src="ideeen.js?v=1795489100"></script>
-<script src="push.js?v=1795489100"></script>
+<script src="stemmen.js?v=1795489200"></script>
+<script src="statistieken.js?v=1795489200"></script>
+<script src="wrapped.js?v=1795489200"></script>
+<script src="race.js?v=1795489200"></script>
+<script src="rad.js?v=1795489200"></script>
+<script src="fotos.js?v=1795489200"></script>
+<script src="quotes.js?v=1795489200"></script>
+<script src="ideeen.js?v=1795489200"></script>
+<script src="push.js?v=1795489200"></script>
 </body>
 </html>
