@@ -487,11 +487,13 @@ td.delta{color:var(--muted);font-size:.8rem}
 .mx-setup p{margin:0 0 10px;color:var(--ink-2)}
 .mx-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;margin-bottom:10px}
 .mx-volgorde{list-style:none;margin:10px 0 14px;padding:0;display:grid;gap:6px}
-.mx-volgorde li{display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--orange-soft);border:1px solid #f3c98f;border-radius:12px;font-weight:600;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;transition:transform .15s}
+.mx-volgorde li{display:flex;align-items:center;gap:10px;padding:6px 10px 6px 4px;background:var(--orange-soft);border:1px solid #f3c98f;border-radius:12px;font-weight:600;user-select:none;-webkit-user-select:none;transition:transform .15s}
+.mx-volgorde.bezig li{transition:transform .15s}
 .mx-volgorde li.sleept{transition:none;z-index:2;position:relative;box-shadow:0 10px 24px -10px rgba(22,54,80,.6);cursor:grabbing;background:#fff}
 .mx-volgorde li:first-child{border-color:var(--orange)}
 .mx-volgorde li:first-child .mx-vnm::after{content:" · begint";font-weight:500;color:var(--orange-ink);font-size:.8rem}
-.mx-greep{color:var(--muted);font-size:1.1rem}
+.mx-greep{display:grid;place-items:center;width:44px;height:44px;margin:-2px 0;border-radius:10px;color:var(--ink);font-size:1.3rem;cursor:grab;touch-action:none;-webkit-touch-callout:none}
+.mx-greep:active{background:rgba(22,54,80,.08);cursor:grabbing}
 .mx-volgorde b{font-size:.75rem;color:var(--orange-ink);min-width:1.2em}
 .mx-vnm{flex:1}
 .mx-vknop{display:flex;gap:4px}
@@ -3188,7 +3190,7 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) toon
   const markeer = () => {
     wacht = null;
     document.querySelectorAll("[id^='view-'] tr, [id^='view-'] li").forEach(r => {
-      if (r.closest("dialog, .wrapped, .pred-list, .rad-hist")) return;
+      if (r.closest("dialog, .wrapped, .pred-list, .rad-hist, #view-mex, #view-race, #view-rad, #view-pong, #view-spellen")) { r.classList.remove("mij"); return; }
       const cellen = r.matches("tr") ? r.querySelectorAll(":scope > td, :scope > td > *") : r.querySelectorAll(":scope > span, :scope > b, :scope > div, :scope > button > span, :scope > button > span > span, :scope > .who > .nm, :scope > button .nm");
       const mij = [...cellen].some(c => c.textContent.trim() === ik);
       if (mij !== r.classList.contains("mij")) r.classList.toggle("mij", mij);
@@ -3339,9 +3341,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795488800"></script>
-<script src="toto.js?v=1795488800"></script>
-<script src="pong.js?v=1795488800"></script>
+<script src="mex.js?v=1795488900"></script>
+<script src="toto.js?v=1795488900"></script>
+<script src="pong.js?v=1795488900"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3350,14 +3352,14 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795488800"></script>
-<script src="statistieken.js?v=1795488800"></script>
-<script src="wrapped.js?v=1795488800"></script>
-<script src="race.js?v=1795488800"></script>
-<script src="rad.js?v=1795488800"></script>
-<script src="fotos.js?v=1795488800"></script>
-<script src="quotes.js?v=1795488800"></script>
-<script src="ideeen.js?v=1795488800"></script>
-<script src="push.js?v=1795488800"></script>
+<script src="stemmen.js?v=1795488900"></script>
+<script src="statistieken.js?v=1795488900"></script>
+<script src="wrapped.js?v=1795488900"></script>
+<script src="race.js?v=1795488900"></script>
+<script src="rad.js?v=1795488900"></script>
+<script src="fotos.js?v=1795488900"></script>
+<script src="quotes.js?v=1795488900"></script>
+<script src="ideeen.js?v=1795488900"></script>
+<script src="push.js?v=1795488900"></script>
 </body>
 </html>

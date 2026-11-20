@@ -165,8 +165,8 @@
   function renderSetup() {
     const roster = [...(typeof ROSTER !== "undefined" ? ROSTER : [])].filter(n => !S.spelers.includes(n));
     box.innerHTML = `<div class="mx-setup">
-      <p>Kies wie er meedoen. Sleep ze daarna in de volgorde van de beurten: de bovenste begint, daarna die eronder, enzovoort.</p>
-      ${S.spelers.length ? `<ol class="mx-volgorde" id="mx-volgorde">${S.spelers.map((n, i) => `<li data-i="${i}"><span class="mx-greep" aria-hidden="true">⠿</span><b>${i + 1}</b><span class="mx-vnm">${esc(n)}</span>
+      <p>Kies wie er meedoen. Zet ze daarna in de volgorde van de beurten door ze aan ☰ te slepen (of met ↑ ↓): de bovenste begint, daarna die eronder, enzovoort.</p>
+      ${S.spelers.length ? `<ol class="mx-volgorde" id="mx-volgorde">${S.spelers.map((n, i) => `<li data-i="${i}"><span class="mx-greep" title="Sleep om te verplaatsen" aria-hidden="true">☰</span><b>${i + 1}</b><span class="mx-vnm">${esc(n)}</span>
         <span class="mx-vknop"><button type="button" aria-label="${esc(n)} omhoog" data-mx="op" data-i="${i}" ${i === 0 ? "disabled" : ""}>↑</button><button type="button" aria-label="${esc(n)} omlaag" data-mx="neer" data-i="${i}" ${i === S.spelers.length - 1 ? "disabled" : ""}>↓</button><button type="button" aria-label="Verwijder ${esc(n)}" data-mx="weg" data-i="${i}">×</button></span></li>`).join("")}</ol>` : `<div class="mx-chips"><span class="mx-hint">Nog niemand gekozen</span></div>`}
       <div class="mx-add"><input type="text" id="mx-naam" placeholder="Naam toevoegen" autocomplete="off"><button type="button" class="btn sm" data-mx="voeg">Toevoegen</button></div>
       ${roster.length ? `<div class="mx-roster"><span class="mx-hint">Snel kiezen:</span>${roster.map(n => `<button type="button" class="mx-pick" data-mx="pick" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div>` : ""}
@@ -311,32 +311,41 @@
   }
   function stopSirene() { try { sireneOsc?.stop(); } catch {} sireneOsc = null; }
 
-  /* ---------- Beurtvolgorde slepen ---------- */
+  /* ---------- Beurtvolgorde slepen (aan het ☰-handvat; werkt met vinger en muis) ---------- */
   let sleep = null;
-  box.addEventListener("pointerdown", e => {
-    const li = e.target.closest("#mx-volgorde li"); if (!li || e.target.closest("button")) return;
-    e.preventDefault();
-    const lijst = li.parentElement, items = [...lijst.children];
-    sleep = { li, lijst, van: Number(li.dataset.i), y0: e.clientY, h: li.getBoundingClientRect().height + 6, naar: Number(li.dataset.i), n: items.length };
-    li.classList.add("sleept"); li.setPointerCapture?.(e.pointerId);
-  });
-  box.addEventListener("pointermove", e => {
+  function begin(li, y) {
+    const lijst = li.parentElement;
+    sleep = { li, lijst, van: Number(li.dataset.i), y0: y, h: li.getBoundingClientRect().height + 6, naar: Number(li.dataset.i), n: lijst.children.length };
+    li.classList.add("sleept"); lijst.classList.add("bezig");
+  }
+  function beweeg(y) {
     if (!sleep) return;
-    const dy = e.clientY - sleep.y0, naar = Math.max(0, Math.min(sleep.n - 1, sleep.van + Math.round(dy / sleep.h)));
+    const dy = y - sleep.y0, naar = Math.max(0, Math.min(sleep.n - 1, sleep.van + Math.round(dy / sleep.h)));
     sleep.li.style.transform = `translateY(${dy}px)`; sleep.naar = naar;
     [...sleep.lijst.children].forEach((x, i) => {
       if (x === sleep.li) return;
       const schuif = (i > sleep.van && i <= naar) ? -sleep.h : (i < sleep.van && i >= naar) ? sleep.h : 0;
       x.style.transform = schuif ? `translateY(${schuif}px)` : "";
     });
-  });
-  const loslaten = () => {
+  }
+  function los() {
     if (!sleep) return;
     const { van, naar } = sleep; sleep = null;
-    if (van !== naar) { const [n] = S.spelers.splice(van, 1); S.spelers.splice(naar, 0, n); save(); }
+    if (van !== naar) { const [n] = S.spelers.splice(van, 1); S.spelers.splice(naar, 0, n); save(); try { navigator.vibrate?.(15); } catch {} }
     render();
-  };
-  box.addEventListener("pointerup", loslaten); box.addEventListener("pointercancel", loslaten);
+  }
+  box.addEventListener("touchstart", e => {
+    const h = e.target.closest("#mx-volgorde .mx-greep"); if (!h || e.touches.length !== 1) return;
+    e.preventDefault(); begin(h.closest("li"), e.touches[0].clientY);
+  }, { passive: false });
+  box.addEventListener("touchmove", e => { if (!sleep) return; e.preventDefault(); beweeg(e.touches[0].clientY); }, { passive: false });
+  box.addEventListener("touchend", los); box.addEventListener("touchcancel", los);
+  box.addEventListener("mousedown", e => {
+    const h = e.target.closest("#mx-volgorde .mx-greep"); if (!h || e.button !== 0) return;
+    e.preventDefault(); begin(h.closest("li"), e.clientY);
+    const mv = ev => beweeg(ev.clientY), up = () => { removeEventListener("mousemove", mv); removeEventListener("mouseup", up); los(); };
+    addEventListener("mousemove", mv); addEventListener("mouseup", up);
+  });
 
   /* ---------- Animatie ---------- */
   function rolAnimatie(klaar) {
