@@ -1318,6 +1318,32 @@ body.design-proef .empty{text-align:center}
 @keyframes dp-muts{50%{transform:rotate(6deg) translateY(-2px)}}
 .dp-jarig-pil{display:inline-block;margin-top:8px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.88);color:var(--ink);font-size:.88rem}
 @media (prefers-reduced-motion:reduce){.dp-leeg-kameel,.dp-muts{animation:none}}
+/* ---------- Proef: wedstrijdblok in lichtblauw en goudgeel (?kleur=proef) ---------- */
+body.camel-proef .matchday .wrap{--cb-ink:#2f4f73;--cb-zacht:#5b7898;--cb-goud:#f0a51e;--cb-goud-donker:#c97c06;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='24'%3E%3Cpath d='M0 12 C 20 4 40 4 60 12 S 100 20 120 12' fill='none' stroke='%23ffffff' stroke-opacity='.35' stroke-width='1.2'/%3E%3C/svg%3E") 0 0/120px 24px,radial-gradient(120% 90% at 50% 20%,#e9f5fd 0%,#bfe0f6 55%,#9fcdef 100%)!important;color:var(--cb-ink)}
+body.camel-proef .matchday .md-label{color:var(--cb-goud-donker)}
+body.camel-proef .matchday .md-team{color:var(--cb-ink)}
+body.camel-proef .matchday .md-team.ours{color:var(--cb-goud)}
+body.camel-proef .matchday .md-vs{color:var(--cb-zacht)}
+body.camel-proef .matchday .tag{border-color:rgba(47,79,115,.25);background:rgba(255,255,255,.55);color:var(--cb-ink)}
+body.camel-proef .matchday .tag.hot{background:var(--cb-goud);border-color:var(--cb-goud);color:#3a2a05}
+body.camel-proef .matchday .cd > div{background:rgba(255,255,255,.6);border:1px solid rgba(47,79,115,.15)}
+body.camel-proef .matchday .cd .v{color:var(--cb-goud)}
+body.camel-proef .matchday .cd .l{color:var(--cb-zacht)}
+body.camel-proef .matchday .md-model{background:rgba(255,255,255,.55);border:1px solid rgba(47,79,115,.12)}
+body.camel-proef .matchday .md-model .k,body.camel-proef .matchday .mm-voet{color:var(--cb-zacht)}
+body.camel-proef .matchday .mm-score b{color:var(--cb-goud)}
+body.camel-proef .matchday .md-tabs{border-top-color:rgba(47,79,115,.18)}
+body.camel-proef .matchday .md-tabs button{background:rgba(255,255,255,.55);border-color:rgba(47,79,115,.2);color:var(--cb-ink)}
+body.camel-proef .matchday .md-tabs button[aria-selected="true"]{background:var(--cb-goud);border-color:var(--cb-goud);color:#3a2a05}
+body.camel-proef .matchday .md-venue{border-top-color:rgba(47,79,115,.18)}
+body.camel-proef .matchday .md-opp .k,body.camel-proef .matchday .md-opp .s,body.camel-proef .matchday .md-squad-head span{color:var(--cb-zacht)}
+body.camel-proef .matchday .md-opp-link,body.camel-proef .matchday a{color:var(--cb-goud-donker)}
+body.camel-proef .matchday .squad li{border-bottom-color:rgba(47,79,115,.12)}
+body.camel-proef .matchday .squad li::before{color:var(--cb-zacht)}
+body.camel-proef .matchday .md-opp-h2h{color:var(--cb-ink)}
+body.camel-proef .matchday .k,body.camel-proef .matchday .md-empty{color:var(--cb-zacht)}
+body.camel-proef .matchday .md-empty,body.camel-proef .matchday .card{background:rgba(255,255,255,.5);border-color:rgba(47,79,115,.15);color:var(--cb-ink)}
 /* Ideeënbox */
 .idee-form{padding:18px 20px;margin-bottom:18px}
 .idee-soorten{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
@@ -3329,6 +3355,20 @@ laadGegevens(false);
   } catch {}
 })();
 
+/* Proef: wedstrijdblok in andere kleuren, alleen met ?kleur=proef (onthouden in dit venster) */
+(() => {
+  try {
+    const q = new URLSearchParams(location.search).get("kleur");
+    if (q === "proef") sessionStorage.setItem("kamelen-kleur-proef", "1");
+    if (q === "uit") sessionStorage.removeItem("kamelen-kleur-proef");
+    if (sessionStorage.getItem("kamelen-kleur-proef") !== "1") return;
+    document.body.classList.add("camel-proef");
+    const l = document.createElement("div"); l.className = "proef-label"; l.style.bottom = "calc(104px + env(safe-area-inset-bottom))";
+    l.innerHTML = `<span>Kleurproef wedstrijdblok</span><a href="?kleur=uit#home">Uitzetten</a>`;
+    document.body.appendChild(l);
+  } catch {}
+})();
+
 /* ---------- Laatst bijgewerkt ---------- */
 function toonBijgewerkt(){
   const el = document.getElementById("bijgewerkt"), t = window._bijgewerktOm; if (!el || !t) return;
@@ -3496,9 +3536,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795490600"></script>
-<script src="toto.js?v=1795490600"></script>
-<script src="pong.js?v=1795490600"></script>
+<script src="mex.js?v=1795490700"></script>
+<script src="toto.js?v=1795490700"></script>
+<script src="pong.js?v=1795490700"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3507,15 +3547,15 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795490600"></script>
-<script src="statistieken.js?v=1795490600"></script>
-<script src="wrapped.js?v=1795490600"></script>
-<script src="race.js?v=1795490600"></script>
-<script src="rad.js?v=1795490600"></script>
-<script src="fotos.js?v=1795490600"></script>
-<script src="quotes.js?v=1795490600"></script>
-<script src="ideeen.js?v=1795490600"></script>
-<script src="design-proef.js?v=1795490600"></script>
-<script src="push.js?v=1795490600"></script>
+<script src="stemmen.js?v=1795490700"></script>
+<script src="statistieken.js?v=1795490700"></script>
+<script src="wrapped.js?v=1795490700"></script>
+<script src="race.js?v=1795490700"></script>
+<script src="rad.js?v=1795490700"></script>
+<script src="fotos.js?v=1795490700"></script>
+<script src="quotes.js?v=1795490700"></script>
+<script src="ideeen.js?v=1795490700"></script>
+<script src="design-proef.js?v=1795490700"></script>
+<script src="push.js?v=1795490700"></script>
 </body>
 </html>
