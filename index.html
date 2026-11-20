@@ -449,6 +449,25 @@ td.delta{color:var(--muted);font-size:.8rem}
 .zege-kameel{position:absolute;bottom:-4px;left:0;width:170px;transform:translateX(-180px);filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))}
 .zege-stof{position:absolute;bottom:0;border-radius:50%;background:radial-gradient(circle at 40% 40%,#f3dcae,#d9b679 70%,transparent 72%);pointer-events:none}
 .zege-proef{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));font-size:.8rem;color:rgba(255,255,255,.6);font-weight:600}
+.zege.verlies{background:radial-gradient(120% 80% at 50% 40%,#46525e,#262e36)}
+.zege.verlies .zege-k{color:#c9d3dc}
+.zege.verlies .zege-tekst{animation:zege-zak .8s ease-out .15s both}
+@keyframes zege-zak{from{transform:translateY(-30px);opacity:0}}
+.zege.verlies .zege-baan{border-bottom-color:rgba(255,255,255,.15)}
+.zege-loper{position:absolute;left:0;bottom:-4px;width:170px;height:240px;transform:translateX(-190px)}
+.zege-loper .zege-kameel{transform:none;left:0;bottom:0}
+.zege.verlies .zege-kameel{rotate:4deg;transform-origin:78% 96%;filter:saturate(.55) brightness(.85) drop-shadow(0 6px 8px rgba(0,0,0,.35))}
+.zege-wolk{position:absolute;left:84px;top:-6px;width:96px}
+.zege-drup{position:absolute;top:40px;width:3px;height:14px;border-radius:2px;background:#9fc6ea}
+/* Laadscherm met hoefspoor */
+#laad{position:fixed;inset:0;z-index:9500;background:var(--bg,#f2e6c9);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .4s}
+#laad.weg{opacity:0;pointer-events:none}
+html.op-slot #laad{display:none}
+.laad-spoor{position:relative;width:260px;height:150px}
+.laad-hoef{position:absolute;width:26px;height:31px;opacity:0;animation:laad-hoef 2.4s linear infinite}
+@keyframes laad-hoef{0%{opacity:0}6%{opacity:.85}55%{opacity:.55}80%,100%{opacity:0}}
+.laad-naam{font-family:var(--font-display);font-weight:800;font-size:1.7rem;color:var(--ink);margin-top:10px}
+@media (prefers-reduced-motion:reduce){.laad-hoef{animation:none;opacity:.6}}
 /* ---------- Seizoensgrafiek ---------- */
 .cmp{font-size:.85rem;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
 .cmp select{font:inherit;font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:#fff}
@@ -1454,6 +1473,7 @@ h1,h2,h3{font-family:var(--font-display)}
 </style>
 </head>
 <body>
+<div id="laad" aria-hidden="true"><div class="laad-spoor"><span class="laad-hoef" style="left:10px;top:103px;rotate:70deg;animation-delay:0.00s"><svg viewBox="0 0 20 24"><path d="M4 22 Q0 14 3 6 Q5 1 8 3 Q10 6 9 13 Q9 20 4 22 Z M16 22 Q11 20 11 13 Q10 6 12 3 Q15 1 17 6 Q20 14 16 22 Z" fill="#8a6a3e"/></svg></span><span class="laad-hoef" style="left:41px;top:112px;rotate:68deg;animation-delay:0.22s"><svg viewBox="0 0 20 24"><path d="M4 22 Q0 14 3 6 Q5 1 8 3 Q10 6 9 13 Q9 20 4 22 Z M16 22 Q11 20 11 13 Q10 6 12 3 Q15 1 17 6 Q20 14 16 22 Z" fill="#8a6a3e"/></svg></span><span class="laad-hoef" style="left:72px;top:90px;rotate:67deg;animation-delay:0.44s"><svg viewBox="0 0 20 24"><path d="M4 22 Q0 14 3 6 Q5 1 8 3 Q10 6 9 13 Q9 20 4 22 Z M16 22 Q11 20 11 13 Q10 6 12 3 Q15 1 17 6 Q20 14 16 22 Z" fill="#8a6a3e"/></svg></span><span class="laad-hoef" style="left:103px;top:95px;rotate:66deg;animation-delay:0.66s"><svg viewBox="0 0 20 24"><path d="M4 22 Q0 14 3 6 Q5 1 8 3 Q10 6 9 13 Q9 20 4 22 Z M16 22 Q11 20 11 13 Q10 6 12 3 Q15 1 17 6 Q20 14 16 22 Z" fill="#8a6a3e"/></svg></span><span class="laad-hoef" style="left:134px;top:68px;rotate:64deg;animation-delay:0.88s"><svg viewBox="0 0 20 24"><path d="M4 22 Q0 14 3 6 Q5 1 8 3 Q10 6 9 13 Q9 20 4 22 Z M16 22 Q11 20 11 13 Q10 6 12 3 Q15 1 17 6 Q20 14 16 22 Z" fill="#8a6a3e"/></svg></span><span class="laad-hoef" style="left:165px;top:67px;rotate:62deg;animation-delay:1.10s"><svg viewBox="0 0 20 24"><path d="M4 22 Q0 14 3 6 Q5 1 8 3 Q10 6 9 13 Q9 20 4 22 Z M16 22 Q11 20 11 13 Q10 6 12 3 Q15 1 17 6 Q20 14 16 22 Z" fill="#8a6a3e"/></svg></span><span class="laad-hoef" style="left:196px;top:38px;rotate:61deg;animation-delay:1.32s"><svg viewBox="0 0 20 24"><path d="M4 22 Q0 14 3 6 Q5 1 8 3 Q10 6 9 13 Q9 20 4 22 Z M16 22 Q11 20 11 13 Q10 6 12 3 Q15 1 17 6 Q20 14 16 22 Z" fill="#8a6a3e"/></svg></span><span class="laad-hoef" style="left:227px;top:40px;rotate:60deg;animation-delay:1.54s"><svg viewBox="0 0 20 24"><path d="M4 22 Q0 14 3 6 Q5 1 8 3 Q10 6 9 13 Q9 20 4 22 Z M16 22 Q11 20 11 13 Q10 6 12 3 Q15 1 17 6 Q20 14 16 22 Z" fill="#8a6a3e"/></svg></span></div><div class="laad-naam">Kamelen</div></div>
 <div id="slot">
   <form class="slot-kaart" id="slot-form">
     <img src="logo.png" alt="">
@@ -3377,7 +3397,16 @@ return Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJs
     document.querySelector("main").insertAdjacentHTML("afterbegin", `<div class="card wide">${empty("De gegevens konden niet worden geladen", "Ververs de pagina om het opnieuw te proberen.")}</div>`);
   });
 }
-laadGegevens(false);
+laadGegevens(false).finally(laadKlaar);
+/* Laadscherm: minstens even laten zien, nooit langer dan 6 seconden */
+function laadKlaar(){
+  const el = document.getElementById("laad"); if (!el || el.dataset.weg) return;
+  let proef = false; try { proef = new URLSearchParams(location.search).get("laad") === "proef"; } catch {}
+  el.dataset.weg = "1";
+  const rest = Math.max(0, (proef ? 9000 : 1300) - performance.now());
+  setTimeout(() => { el.classList.add("weg"); setTimeout(() => el.remove(), 450); }, rest);
+}
+setTimeout(() => { try { if (new URLSearchParams(location.search).get("laad") !== "proef") laadKlaar(); } catch { laadKlaar(); } }, 6000);
 /* ---------- Homepagina: elke keer dat de app opent een andere woestijnfoto ---------- */
 (() => {
   try {
@@ -3566,9 +3595,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795491300"></script>
-<script src="toto.js?v=1795491300"></script>
-<script src="pong.js?v=1795491300"></script>
+<script src="mex.js?v=1795491400"></script>
+<script src="toto.js?v=1795491400"></script>
+<script src="pong.js?v=1795491400"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3577,17 +3606,17 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795491300"></script>
-<script src="statistieken.js?v=1795491300"></script>
-<script src="wrapped.js?v=1795491300"></script>
-<script src="race.js?v=1795491300"></script>
-<script src="rad.js?v=1795491300"></script>
-<script src="fotos.js?v=1795491300"></script>
-<script src="quotes.js?v=1795491300"></script>
-<script src="ideeen.js?v=1795491300"></script>
-<script src="seizoen.js?v=1795491300"></script>
-<script src="zege.js?v=1795491300"></script>
-<script src="design-proef.js?v=1795491300"></script>
-<script src="push.js?v=1795491300"></script>
+<script src="stemmen.js?v=1795491400"></script>
+<script src="statistieken.js?v=1795491400"></script>
+<script src="wrapped.js?v=1795491400"></script>
+<script src="race.js?v=1795491400"></script>
+<script src="rad.js?v=1795491400"></script>
+<script src="fotos.js?v=1795491400"></script>
+<script src="quotes.js?v=1795491400"></script>
+<script src="ideeen.js?v=1795491400"></script>
+<script src="seizoen.js?v=1795491400"></script>
+<script src="zege.js?v=1795491400"></script>
+<script src="design-proef.js?v=1795491400"></script>
+<script src="push.js?v=1795491400"></script>
 </body>
 </html>
