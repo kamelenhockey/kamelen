@@ -468,6 +468,60 @@ html.op-slot #laad{display:none}
 @keyframes laad-hoef{0%{opacity:0}6%{opacity:.85}55%{opacity:.55}80%,100%{opacity:0}}
 .laad-naam{font-family:var(--font-display);font-weight:800;font-size:1.7rem;color:var(--ink);margin-top:10px}
 @media (prefers-reduced-motion:reduce){.laad-hoef{animation:none;opacity:.6}}
+/* Bierschuim-meter */
+.pint-wrap{position:relative;margin:14px auto 0;width:fit-content}
+.pint-wrap .pint{margin:0 auto}
+.podium:not(.giet) .pint .beer{height:0}
+.podium.giet .pint .beer{animation:bier-vul 1.8s cubic-bezier(.3,.6,.3,1) .1s both}
+.podium.giet .pod.p2 .beer{animation-delay:.35s}.podium.giet .pod.p3 .beer{animation-delay:.6s}
+@keyframes bier-vul{from{height:0}}
+.pint .beer::before{transition:height .3s}
+.pint-wrap.vol .pint .beer::before{top:-4px}
+.bel{position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.75);animation:bel 2.2s linear infinite;opacity:0}
+.bel.b1{left:22%}.bel.b2{left:48%;animation-delay:.6s;width:3px;height:3px}.bel.b3{left:66%;animation-delay:1.2s}.bel.b4{left:36%;animation-delay:1.7s;width:3px;height:3px}
+@keyframes bel{0%{transform:translateY(0);opacity:0}10%{opacity:.9}90%{opacity:.7}100%{transform:translateY(-90px);opacity:0}}
+.schuim-top{position:absolute;left:50%;top:-14px;width:calc(100% + 16px);height:26px;translate:-50% 0;border-radius:14px 14px 8px 8px;
+  background:radial-gradient(circle at 18% 60%,#fffdf6 9px,transparent 10px),radial-gradient(circle at 40% 35%,#fffdf6 12px,transparent 13px),radial-gradient(circle at 63% 45%,#fffdf6 11px,transparent 12px),radial-gradient(circle at 84% 62%,#fffdf6 9px,transparent 10px),linear-gradient(#fffaf0,#fffaf0) 50% 100%/86% 55% no-repeat;
+  filter:drop-shadow(0 1px 0 rgba(0,0,0,.12));transform-origin:50% 100%;transform:scale(0)}
+.podium.giet .schuim-top{animation:schuim-op .7s cubic-bezier(.2,1.5,.4,1) 1.7s forwards}
+@keyframes schuim-op{to{transform:scale(1)}}
+.drup{position:absolute;top:6px;width:9px;border-radius:0 0 6px 6px;background:#fffaf0;height:0;box-shadow:0 1px 0 rgba(0,0,0,.08)}
+.drup.d1{left:4px}.drup.d2{right:8px}
+.podium.giet .drup{animation:drup 3.6s ease-in 2.2s infinite}
+.podium.giet .drup.d2{animation-delay:3.3s}
+@keyframes drup{0%{height:0;opacity:1}55%{height:34px;opacity:1}85%{height:40px;opacity:0}100%{height:0;opacity:0}}
+.podium.zonder-anim .beer,.podium.zonder-anim .schuim-top{animation-duration:0s!important;animation-delay:0s!important}
+@media (prefers-reduced-motion:reduce){.podium .beer,.podium .schuim-top{animation:none!important;transform:none!important}.bel,.drup{display:none}}
+/* Karavaanroute (proef) */
+.karavaan{padding:6px 0 4px}
+.kr-kaart{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 18px 12px;overflow:hidden}
+.kr-kop h2{font-family:var(--font-display);font-size:1.5rem;margin:0}
+.kr-sub{margin:2px 0 0;color:var(--muted);font-size:.86rem}
+.kr-doek{overflow-x:auto;margin:6px -18px 0;padding:0 20px;scrollbar-width:none;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,transparent,rgba(240,200,140,.12))}
+.kr-doek::-webkit-scrollbar{display:none}
+.kr-doek svg{display:block}
+.kr-pad-rest{fill:none;stroke:#c9a46c;stroke-width:3;stroke-dasharray:2 8;stroke-linecap:round;opacity:.8}
+.kr-pad-gereisd{fill:none;stroke:#8a6a3e;stroke-width:3.5;stroke-linecap:round}
+.kr-punt{fill:#fff;stroke:#c9a46c;stroke-width:2.5}
+.kr-volgende{stroke:var(--orange);stroke-width:3;animation:kr-puls 1.6s ease-in-out infinite}
+@keyframes kr-puls{50%{stroke-width:6;stroke-opacity:.5}}
+.kr-stop{cursor:pointer;outline:none}
+.kr-stop:focus-visible circle:first-of-type{stroke:var(--ink);stroke-width:2}
+.kr-winter text{font-size:15px;fill:#5b8fbf}.kr-winter .kr-klein{font-size:10px;font-weight:700;font-family:var(--font-body)}
+.kr-kameel{filter:drop-shadow(0 3px 3px rgba(0,0,0,.25))}
+.kr-legenda{display:flex;flex-wrap:wrap;gap:4px 14px;margin:8px 0 0;font-size:.78rem;color:var(--muted);font-weight:600}
+body:not([data-page="home"]) .karavaan{display:none}
+/* Fata morgana (proef) */
+.fata{display:none}
+@media (max-width:760px){
+  body.home-proef[data-page="home"] .fata{display:block;position:absolute;z-index:1;left:22%;top:calc(min(74vw,310px) * .48);width:30px;pointer-events:none;opacity:.4;mix-blend-mode:screen;filter:blur(.9px)}
+}
+.fata svg{display:block;width:100%}
+.fata-beker{animation:fata-tril 2.8s ease-in-out infinite;transform-origin:50% 100%}
+.fata-spiegel{transform:scaleY(-.55);transform-origin:50% 0;opacity:.45;margin-top:-1px;animation:fata-spiegel 2.1s ease-in-out infinite;-webkit-mask:linear-gradient(180deg,transparent,#000);mask:linear-gradient(180deg,transparent,#000)}
+@keyframes fata-tril{0%,100%{transform:skewX(0) scaleY(1);opacity:.9}25%{transform:skewX(3deg) scaleY(1.04);opacity:.6}50%{transform:skewX(-2deg) scaleY(.97);opacity:1}75%{transform:skewX(2deg) scaleY(1.02);opacity:.55}}
+@keyframes fata-spiegel{0%,100%{transform:scaleY(-.55) skewX(0)}50%{transform:scaleY(-.48) skewX(-4deg)}}
+@media (prefers-reduced-motion:reduce){.fata-beker,.fata-spiegel,.kr-volgende{animation:none}}
 /* ---------- Seizoensgrafiek ---------- */
 .cmp{font-size:.85rem;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
 .cmp select{font:inherit;font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:#fff}
@@ -1561,6 +1615,11 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
     </div>
   </div>
 </section>
+<section class="karavaan" id="karavaan" hidden aria-labelledby="kr-h"><div class="wrap"><div class="kr-kaart">
+  <div class="kr-kop"><h2 id="kr-h">Karavaanroute</h2><p class="kr-sub"></p></div>
+  <div class="kr-doek"></div>
+  <p class="kr-legenda"><span>🌴 oase = gewonnen</span><span>⛺ tent = gelijk</span><span>🪨 rots = verloren</span><span>🏁 laatste speeldag</span></p>
+</div></div></section>
 
 <main class="wrap">
   <div class="seg-switch" id="comp-switch" hidden role="tablist" aria-label="Competitie"><a href="#wedstrijden" data-sw="wedstrijden" role="tab">Wedstrijden</a><a href="#stand" data-sw="stand" role="tab">Stand</a></div>
@@ -2539,8 +2598,15 @@ function renderLiters(){
     const h = Math.max(36, 36 + p.liters / max * 84);
     return `<div class="pod p${i+1}"><span class="medal">${p.pos}</span><div class="title">${titles[i]}</div>
       <div class="nm">${esc(p.naam)}</div><div class="amt">${fmtL(p.liters)} L ${p.stil ? `<small>· ${p.stil}× stil</small>` : ""}</div>
-      <div class="pint" style="height:${h}px" aria-hidden="true"><div class="beer" style="--h:86%"></div><span class="shine"></span></div></div>`;
+      <div class="pint-wrap${p.pos === 1 ? " vol" : ""}" aria-hidden="true"><div class="pint" style="height:${h}px"><div class="beer" style="--h:${p.pos === 1 ? 100 : Math.round(38 + p.liters / max * 50)}%"><i class="bel b1"></i><i class="bel b2"></i><i class="bel b3"></i><i class="bel b4"></i></div><span class="shine"></span></div>${p.pos === 1 ? `<span class="schuim-top"></span><span class="drup d1"></span><span class="drup d2"></span>` : ""}</div></div>`;
   }).join("");
+  /* Bierschuim-meter: glazen lopen vol zodra je ze ziet; de leider stroomt over */
+  const podium = document.getElementById("podium");
+  if (window._bierGegoten) podium.classList.add("giet", "zonder-anim");
+  else if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { window._bierGegoten = true; podium.classList.add("giet"); io.disconnect(); } }, { threshold: .4 });
+    io.observe(podium);
+  } else podium.classList.add("giet");
   const loser = [...list].filter(p => p.open > 0).sort((a, b) => b.open - a.open || b.liters - a.liters)[0], loserNaam = loser ? loser.naam : null;
   document.getElementById("rank").innerHTML = list.map((p, i) => {
     const id = `f${i}`;
@@ -3595,9 +3661,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795491400"></script>
-<script src="toto.js?v=1795491400"></script>
-<script src="pong.js?v=1795491400"></script>
+<script src="mex.js?v=1795491500"></script>
+<script src="toto.js?v=1795491500"></script>
+<script src="pong.js?v=1795491500"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3606,17 +3672,18 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795491400"></script>
-<script src="statistieken.js?v=1795491400"></script>
-<script src="wrapped.js?v=1795491400"></script>
-<script src="race.js?v=1795491400"></script>
-<script src="rad.js?v=1795491400"></script>
-<script src="fotos.js?v=1795491400"></script>
-<script src="quotes.js?v=1795491400"></script>
-<script src="ideeen.js?v=1795491400"></script>
-<script src="seizoen.js?v=1795491400"></script>
-<script src="zege.js?v=1795491400"></script>
-<script src="design-proef.js?v=1795491400"></script>
-<script src="push.js?v=1795491400"></script>
+<script src="stemmen.js?v=1795491500"></script>
+<script src="statistieken.js?v=1795491500"></script>
+<script src="wrapped.js?v=1795491500"></script>
+<script src="race.js?v=1795491500"></script>
+<script src="rad.js?v=1795491500"></script>
+<script src="fotos.js?v=1795491500"></script>
+<script src="quotes.js?v=1795491500"></script>
+<script src="ideeen.js?v=1795491500"></script>
+<script src="seizoen.js?v=1795491500"></script>
+<script src="zege.js?v=1795491500"></script>
+<script src="karavaan.js?v=1795491500"></script>
+<script src="design-proef.js?v=1795491500"></script>
+<script src="push.js?v=1795491500"></script>
 </body>
 </html>
