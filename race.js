@@ -127,9 +127,10 @@
       <div class="rc-baan" id="rc-baan">
         <div class="rc-lucht" aria-hidden="true"><span class="rc-zon"></span><span class="rc-wolk w1">☁️</span><span class="rc-wolk w2">☁️</span><span class="rc-cactus c1">🌵</span><span class="rc-cactus c2">🌵</span><span class="rc-cactus c3">🌴</span></div>
         ${S.kamelen.map((k, i) => `
-        <div class="rc-lane"><span class="rc-lnaam">${esc(k)}</span><div class="rc-zand"><span class="rc-start" aria-hidden="true"></span>
+        <div class="rc-lane"><span class="rc-lnaam">${esc(k)}</span><div class="rc-zand"><span class="rc-start" aria-hidden="true"><i></i><i></i></span>
           <span class="rc-kameel" id="rc-k${i}"><span class="rc-kroon" aria-hidden="true">👑</span><span class="rc-plek" aria-hidden="true"></span><span class="rc-sprong"><span class="rc-lijf">🐪</span></span><span class="rc-stof" aria-hidden="true"></span></span>
           <span class="rc-finish"><i class="rc-lint"></i></span></div></div>`).join("")}
+        <span class="rc-jager" id="rc-jager" aria-hidden="true"><span class="rc-jager-lijf"><span class="rc-jager-hoofd">🤠</span><span class="rc-geweer">🔫</span></span></span>
         <div class="rc-aftel" id="rc-aftel" aria-live="assertive"></div></div>
       <div class="rc-feed" id="rc-feed" aria-live="polite"></div>
       <div class="rc-knoppen" id="rc-afbreken"><button type="button" class="btn sm ghost" data-rc="afbreken">Race afbreken</button></div>
@@ -155,6 +156,15 @@
     const meet = () => { const z = baan.querySelector(".rc-zand"), k = els[0]; breedte = z && k ? z.clientWidth - k.offsetWidth - 6 : 300; };
     meet(); addEventListener("resize", meet);
     const rustig = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    /* De jager: rent achter de kamelen aan en schiet er altijd precies één neer */
+    const jager = document.getElementById("rc-jager"), lanes = [...baan.querySelectorAll(".rc-zand")];
+    let dood = -1, doelwit = r(N), jagerLaan = r(N), jagerFase = 0, aanleggenTot = 0, wisselOm = 1.5;
+    const schotMoment = .3 + Math.random() * .35;   // voortgang van de koploper waarop hij schiet
+    const levend = i => i !== dood;
+    const zetJager = (hx, laan) => {
+      const z = lanes[laan]; if (!z || !jager) return;
+      jager.style.transform = `translate3d(${(z.offsetLeft + hx / BAAN * breedte - 6).toFixed(1)}px,${(z.offsetTop + z.offsetHeight / 2).toFixed(1)}px,0) translateY(-50%)`;
+    };
 
     const melding = (t, soort = "") => { const p = document.createElement("p"); p.textContent = t; if (soort) p.className = soort; feed.prepend(p); while (feed.children.length > 4) feed.lastChild.remove(); };
     const ballon = (i, d) => {
@@ -165,14 +175,14 @@
       el.classList.remove("hop", "val"); void el.offsetWidth; el.classList.add(d > 0 ? "hop" : "val");
     };
     const teken = () => {
-      const rang = pos.map((p, i) => [p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => i);
+      const rang = pos.map((p, i) => [i === dood ? -1 : p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => i);
       els.forEach((el, i) => {
         if (!el) return;
         const x = Math.min(pos[i], BAAN) / BAAN * breedte;
         el.style.transform = `translate3d(${x.toFixed(1)}px,-50%,0)`;
         const plek = rang.indexOf(i) + 1;
-        el.classList.toggle("leider", plek === 1 && pos[i] > 3);
-        const pl = el.querySelector(".rc-plek"); if (pl) pl.textContent = pos[i] > 3 ? plek : "";
+        el.classList.toggle("leider", plek === 1 && pos[i] > 3 && i !== dood);
+        const pl = el.querySelector(".rc-plek"); if (pl) pl.textContent = i === dood ? "✝" : pos[i] > 3 ? plek : "";
       });
     };
 
@@ -193,14 +203,15 @@
       const frame = nu => {
         let dt = Math.min(.05, (nu - vorige) / 1000); vorige = nu;
         if (rustig) dt *= 6;
-        const voor = Math.max(...pos), voortgang = Math.min(1, voor / BAAN);
+        const voor = Math.max(...pos.filter((_, i) => levend(i))), voortgang = Math.min(1, voor / BAAN);
         /* Fotofinish in slow motion: koploper bijna binnen en de nummer twee zit er vlak achter */
-        const sorted = [...pos].sort((a, b) => b - a);
+        const sorted = pos.filter((_, i) => levend(i)).sort((a, b) => b - a);
         const spannend = voor > BAAN * .9 && sorted[0] - sorted[1] < 4;
         if (spannend !== slowmo) { slowmo = spannend; baan.classList.toggle("slowmo", slowmo); if (slowmo) melding("Fotofinish! Het is nek aan nek!", "groot"); }
         const sdt = slowmo ? dt * .35 : dt;
         tijd += sdt;
         for (let i = 0; i < N; i++) {
+          if (!levend(i)) continue;
           const golf = 1 + .18 * Math.sin(tijd * 2.1 + fase[i][0]) + .1 * Math.sin(tijd * 5.3 + fase[i][1]);
           const stap = Math.sign(duw[i]) * Math.min(Math.abs(duw[i]), 9 * sdt);    // duw wordt geleidelijk verwerkt
           duw[i] -= stap;
@@ -209,9 +220,35 @@
         /* Gebeurtenissen: hoe verder, hoe vaker en hoe groter */
         if (tijd >= volgendEvent) {
           volgendEvent = tijd + (1.15 - voortgang * .6) * (.8 + Math.random() * .4);
-          const i = r(N), [tekst, b] = kiesGebeurtenis(voortgang), d = Math.round(b * (1 + voortgang * .8));
+          let i = r(N); if (!levend(i)) i = (i + 1) % N;
+          const [tekst, b] = kiesGebeurtenis(voortgang), d = Math.round(b * (1 + voortgang * .8));
           duw[i] += d; ballon(i, d);
           melding(tekst(S.kamelen[i]), (d > 0 ? "plus" : "min") + (Math.abs(d) >= 7 ? " mega" : ""));
+        }
+        /* Jager */
+        if (jager && jagerFase < 3) {
+          const achter = Math.min(...pos.filter((_, i) => levend(i)));
+          if (jagerFase === 0) {
+            if (tijd > wisselOm) { wisselOm = tijd + 1.2 + Math.random() * 1.4; jagerLaan = r(N); }
+            if (voortgang >= schotMoment) {
+              jagerFase = 1; aanleggenTot = tijd + 1; jagerLaan = doelwit;
+              jager.classList.add("richt"); els[doelwit]?.classList.add("doelwit");
+              melding(`De jager legt aan op ${S.kamelen[doelwit]}…`, "min");
+            }
+            zetJager(Math.max(0, achter - 9), jagerLaan);
+          } else if (jagerFase === 1) {
+            zetJager(Math.max(0, Math.min(pos[doelwit] - 12, achter - 6)), jagerLaan);
+            if (tijd >= aanleggenTot) {
+              jagerFase = 2; dood = doelwit; duw[dood] = 0;
+              const el = els[dood]; el?.classList.remove("doelwit", "hop", "val", "leider"); el?.classList.add("dood");
+              const pang = document.createElement("span"); pang.className = "rc-pang"; pang.textContent = "💥"; el?.appendChild(pang);
+              jager.classList.remove("richt"); jager.classList.add("schiet");
+              baan.querySelectorAll(".rc-lane")[dood]?.classList.add("dood");
+              melding(`PANG! ${S.kamelen[dood]} is neergeschoten en blijft liggen.`, "min mega");
+              try { navigator.vibrate?.([60, 40, 200]); } catch {}
+              setTimeout(() => { jager.classList.add("weg"); jagerFase = 3; }, 1300);
+            }
+          }
         }
         const leider = pos.indexOf(voor);
         if (leider !== laatsteLeider && tijd > 2.5) { if (laatsteLeider >= 0) melding(`${S.kamelen[leider]} neemt de leiding!`, "leiding"); laatsteLeider = leider; }
@@ -221,15 +258,15 @@
           klaar = true; loper = null;
           removeEventListener("resize", meet);
           baan.classList.remove("rent", "finale", "slowmo"); baan.classList.add("flits");
-          const volgorde = pos.map((p, i) => [p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => S.kamelen[i]);
+          const volgorde = pos.map((p, i) => [i === dood ? -1 : p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => S.kamelen[i]);
           els[S.kamelen.indexOf(volgorde[0])]?.classList.add("winnaar");
           baan.querySelectorAll(".rc-lane")[S.kamelen.indexOf(volgorde[0])]?.classList.add("win");
-          const gs = [...pos].sort((a, b) => b - a), marge = gs[0] - gs[1];
+          const gs = pos.filter((_, i) => levend(i)).sort((a, b) => b - a), marge = gs[0] - gs[1];
           const verschil = marge < .6 ? "met een neuslengte" : marge < 1.5 ? "met een halve bult" : marge < 4 ? `met ${marge.toFixed(1).replace(".", ",")} meter voorsprong` : "met een straatlengte voorsprong";
           melding(`FINISH! ${volgorde[0]} wint ${verschil}!`, "groot");
           document.getElementById("rc-afbreken")?.remove();
           try { window.schietConfetti?.(); } catch {}
-          setTimeout(() => afrekenen(volgorde), 1100);
+          setTimeout(() => afrekenen(volgorde, dood >= 0 ? S.kamelen[dood] : null), 1100);
           return;
         }
         loper = requestAnimationFrame(frame);
@@ -240,7 +277,7 @@
   }
 
   /* ---------- 4. Afrekenen ---------- */
-  function afrekenen(volgorde) {
+  function afrekenen(volgorde, neer) {
     const winnaar = volgorde[0], n = S.kamelen.length;
     const regels = S.gokkers.filter(g => S.inzet[g]?.op).map(g => {
       const op = S.inzet[g].op, m = S.inzet[g].m || 1, t = S.tel[g] = S.tel[g] || { gedronken: 0, uitgedeeld: 0 };
@@ -252,7 +289,7 @@
     const el = document.getElementById("rc-uitslag");
     el.innerHTML = `<div class="rc-res">
       <div class="rc-win">🏆 <b>${esc(winnaar)}</b> wint de race!</div>
-      <ol class="rc-volg">${volgorde.map((k, i) => `<li>${i === 0 ? "🥇 " : i === 1 ? "🥈 " : i === 2 ? "🥉 " : ""}${esc(k)}</li>`).join("")}</ol>
+      <ol class="rc-volg">${volgorde.map((k, i) => `<li>${k === neer ? "✝ " : i === 0 ? "🥇 " : i === 1 ? "🥈 " : i === 2 ? "🥉 " : ""}${esc(k)}${k === neer ? " (neergeschoten)" : ""}</li>`).join("")}</ol>
       <table class="rc-tabel"><thead><tr><th>Gokker</th><th>Op</th><th class="r">Inzet</th><th class="r">Uitdelen</th><th class="r">Drinken</th></tr></thead><tbody>
       ${regels.map(x => `<tr><td>${esc(x.g)}</td><td>🐪 ${esc(x.op)}</td><td class="r">${x.m}</td><td class="r">${x.uitdelen ? `<b class="gd-pos">${x.uitdelen}</b>` : "–"}</td><td class="r">${x.drinken ? `<b class="gd-neg">${x.drinken}</b>` : "–"}</td></tr>`).join("")}</tbody></table>
       <p class="muted">Gewonnen: inzet × ${n} (het aantal kamelen) uitdelen. Verloren: je inzet zelf opdrinken.</p>

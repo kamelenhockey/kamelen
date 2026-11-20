@@ -956,6 +956,34 @@ body.pong-actief .tabbar{display:none}
 .rc-lane.win .rc-lint{animation:rcLint .6s ease-out forwards}
 @keyframes rcLint{to{height:0;opacity:0}}
 .rc-lane.win .rc-zand{background-color:rgba(242,194,48,.28);transition:background-color .4s}
+/* Startvak met hekjes */
+.rc-start{left:2.3rem;width:9px;top:3px;bottom:3px;background:none;border-radius:0;transform:none!important;z-index:1}
+.rc-start i{position:absolute;left:0;right:0;height:50%;background:repeating-linear-gradient(180deg,#c08a45 0 4px,#8f5f26 4px 6px);border:1.5px solid #6b4518;border-radius:2px;transition:transform .35s cubic-bezier(.5,0,.7,1)}
+.rc-start i:first-child{top:0;transform-origin:50% 0}
+.rc-start i:last-child{bottom:0;transform-origin:50% 100%}
+.rc-start i{transition:transform .35s cubic-bezier(.5,0,.7,1),opacity .4s .7s}
+.rc-baan.open .rc-start i{opacity:0}
+.rc-baan.open .rc-start i:first-child{transform:rotate(-88deg)}
+.rc-baan.open .rc-start i:last-child{transform:rotate(88deg)}
+/* De jager */
+.rc-jager{position:absolute;left:0;top:0;z-index:2;font-size:1.45rem;line-height:1;opacity:0;pointer-events:none;transition:transform .25s linear,opacity .4s;will-change:transform}
+.rc-baan.rent .rc-jager{opacity:1}
+.rc-jager.weg,.rc-baan:not(.rent) .rc-jager{opacity:0!important}
+.rc-jager-lijf{display:inline-flex;align-items:center;animation:rcJager .3s ease-in-out infinite}
+.rc-geweer{display:inline-block;transform:scaleX(-1);font-size:.85em;margin-left:-.2em}
+.rc-jager.richt .rc-jager-lijf{animation:none}
+.rc-jager.richt .rc-geweer{transform:scaleX(-1) rotate(8deg)}
+.rc-jager.schiet .rc-geweer{animation:rcTerugslag .3s ease-out}
+@keyframes rcJager{50%{transform:translateY(-3px)}}
+@keyframes rcTerugslag{30%{transform:scaleX(-1) translateX(5px) rotate(-14deg)}}
+.rc-kameel.doelwit::after{content:"🎯";position:absolute;right:-.2rem;top:-.9rem;font-size:.9rem;animation:rcRicht .5s ease-in-out infinite}
+@keyframes rcRicht{50%{transform:scale(1.25)}}
+.rc-kameel.dood .rc-lijf{animation:none!important;transform-origin:50% 55%;transform:scaleX(-1) rotate(180deg);filter:grayscale(.75) drop-shadow(0 2px 1px rgba(90,60,10,.3));transition:transform .4s cubic-bezier(.3,1.5,.5,1)}
+.rc-kameel.dood .rc-stof,.rc-kameel.dood .rc-kroon{display:none}
+.rc-kameel.dood .rc-plek{background:#5a3d10}
+.rc-lane.dood .rc-lnaam{text-decoration:line-through;opacity:.55}
+.rc-pang{position:absolute;left:50%;top:50%;translate:-50% -50%;font-size:2rem;pointer-events:none;animation:rcPang .8s ease-out forwards;z-index:3}
+@keyframes rcPang{0%{scale:.3;opacity:1}40%{scale:1.4;opacity:1}100%{scale:1.8;opacity:0}}
 @media (prefers-reduced-motion:reduce){.rc-lijf,.rc-stof,.rc-zand,.rc-wolk,.rc-cactus,.rc-baan.finale,.rc-aftel.toon,.rc-sprong{animation:none!important}}
 
 
@@ -3654,9 +3682,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795492300"></script>
-<script src="toto.js?v=1795492300"></script>
-<script src="pong.js?v=1795492300"></script>
+<script src="mex.js?v=1795492500"></script>
+<script src="toto.js?v=1795492500"></script>
+<script src="pong.js?v=1795492500"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3665,18 +3693,18 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795492300"></script>
-<script src="statistieken.js?v=1795492300"></script>
-<script src="wrapped.js?v=1795492300"></script>
-<script src="race.js?v=1795492300"></script>
-<script src="rad.js?v=1795492300"></script>
-<script src="fotos.js?v=1795492300"></script>
-<script src="quotes.js?v=1795492300"></script>
-<script src="ideeen.js?v=1795492300"></script>
-<script src="seizoen.js?v=1795492300"></script>
-<script src="zege.js?v=1795492300"></script>
-<script src="karavaan.js?v=1795492300"></script>
-<script src="design-proef.js?v=1795492300"></script>
-<script src="push.js?v=1795492300"></script>
+<script src="stemmen.js?v=1795492500"></script>
+<script src="statistieken.js?v=1795492500"></script>
+<script src="wrapped.js?v=1795492500"></script>
+<script src="race.js?v=1795492500"></script>
+<script src="rad.js?v=1795492500"></script>
+<script src="fotos.js?v=1795492500"></script>
+<script src="quotes.js?v=1795492500"></script>
+<script src="ideeen.js?v=1795492500"></script>
+<script src="seizoen.js?v=1795492500"></script>
+<script src="zege.js?v=1795492500"></script>
+<script src="karavaan.js?v=1795492500"></script>
+<script src="design-proef.js?v=1795492500"></script>
+<script src="push.js?v=1795492500"></script>
 </body>
 </html>
