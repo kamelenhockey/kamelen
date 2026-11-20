@@ -16,7 +16,8 @@
 (function () {
   const box = document.getElementById("bp-spel"); if (!box) return;
   const esc = s => String(s).replace(/[<>&"]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c]));
-  const TAFEL_B = 61, TAFEL_L = 244, BEKER_R = 4.6, RAAK_R = 4.1, BAL_R = 2;
+  const TAFEL_B = 61, TAFEL_L = 244, BEKER_R = 4.6, RAAK_R = 3.5, BAL_R = 2;
+  const ruisG = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;   // ongeveer normaal verdeeld, -1..1
   const KLEUR = ["#3f87ad", "#f08c1c"], LICHT = ["#d4ebf6", "#ffe2bd"];
   const rustig = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -109,7 +110,7 @@
     /* richten */
     if (mik) {
       const start = { x: W / 2, y: H - 46 };
-      const kracht = Math.min(1, mik.dy / 230), lengte = 40 + kracht * 150, hoek = Math.atan2(-mik.dx * .9, mik.dy);
+      const kracht = Math.min(1, mik.dy / 160), lengte = 40 + kracht * 150, hoek = Math.atan2(-mik.dx * .9, mik.dy) + Math.sin(performance.now() / 110) * .07;   // trillende hand
       ctx.strokeStyle = `rgba(255,255,255,${.5 + kracht * .5})`; ctx.lineWidth = 3; ctx.setLineDash([4, 7]);
       ctx.beginPath(); ctx.moveTo(start.x, start.y); ctx.lineTo(start.x + Math.sin(hoek) * lengte, start.y - Math.cos(hoek) * lengte); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = kracht > .97 ? "#e8384f" : "#f2c230"; ctx.fillRect(14, H - 20 - 110 * kracht, 10, 110 * kracht);
@@ -231,10 +232,11 @@
     if (!S || S.fase !== "gooien" || bal) return;
     if (S.stuiterKeuze) return kiesBeker(e);
     startPunt = { x: e.clientX, y: e.clientY }; mik = { dx: 0, dy: 0 }; cv.setPointerCapture(e.pointerId); teken();
+    const tril = () => { if (!mik) return; teken(); requestAnimationFrame(tril); }; requestAnimationFrame(tril);
   });
   cv.addEventListener("pointermove", e => { if (!mik) return; mik = { dx: e.clientX - startPunt.x, dy: Math.max(0, e.clientY - startPunt.y) }; teken(); });
   const los = e => {
-    if (!mik) return; const m = mik; mik = null; teken();
+    if (!mik) return; const m = { ...mik, tril: Math.sin(performance.now() / 110) * .07 }; mik = null; teken();
     if (m.dy < 18) return;
     gooi(m);
   };
@@ -242,8 +244,8 @@
 
   function gooi(m) {
     S.fase = "vlucht"; werkBord();
-    const afstand = 60 + m.dy * 1.02 + (Math.random() - .5) * 6;          // cm vanaf de gooier
-    const zij = TAFEL_B / 2 + (-m.dx / Math.max(40, m.dy)) * afstand * .55 + (Math.random() - .5) * 3;
+    const afstand = 60 + m.dy * 1.3 + ruisG() * 9;          // cm vanaf de gooier: gevoelig en met spreiding
+    const zij = TAFEL_B / 2 + (-m.dx / Math.max(40, m.dy)) * afstand * .7 + Math.tan(m.tril || 0) * afstand * .35 + ruisG() * 5;
     const doelY = afstand, doelX = zij;
     /* vlucht 1 */
     vlieg({ x: TAFEL_B / 2, y: 70 }, { x: doelX, y: doelY }, 34 + afstand * .1, 700, () => land(doelX, doelY, false));
@@ -259,7 +261,7 @@
     requestAnimationFrame(stap);
   }
   const bekerOp = (x, y) => doel().bekers.find(k => Math.hypot(k.x - x, (k.y - y) * .9) < RAAK_R);
-  const rand = (x, y) => doel().bekers.find(k => { const d = Math.hypot(k.x - x, (k.y - y) * .9); return d >= RAAK_R && d < BEKER_R + 1.6; });
+  const rand = (x, y) => doel().bekers.find(k => { const d = Math.hypot(k.x - x, (k.y - y) * .9); return d >= RAAK_R && d < BEKER_R + 2.4; });
 
   function land(x, y, naStuiter) {
     /* biertje vastgehouden? */
