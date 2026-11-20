@@ -156,7 +156,7 @@
     const top = `<div class="mx-top">
       <div><div class="k">${S.ronde?.verliezers ? "Verliezerspotje" : `Ronde ${S.rondeNr}`}</div><div class="v">${S.ronde ? `${S.ronde.mexen} × mex · straf ${bak((S.ronde.meegenomen || 0) + 0.5 + 0.5 * S.ronde.mexen)}` : ""}</div></div>
       <div><div class="k">100-man</div><div class="v">${H.main ? esc(H.main) + (H.extra ? ` <small>+ ${esc(H.extra)}</small>` : "") : "nog niemand"}</div></div>
-      <div class="mx-actions"><button type="button" class="btn sm ghost" data-mx="stop">Stoppen</button></div></div>`;
+      <div class="mx-actions"><button type="button" class="btn sm ghost" data-mx="beheer" aria-expanded="${!!beheerOpen}">Spelers</button><button type="button" class="btn sm ghost" data-mx="stop">Stoppen</button></div></div>${beheerOpen ? renderBeheer() : ""}`;
     if (S.fase === "spel") return box.innerHTML = top + renderSpel() + renderScore();
     if (S.fase === "battle") return box.innerHTML = top + renderBattle() + renderScore();
     if (S.fase === "einde") return box.innerHTML = top + renderEinde() + renderScore();
@@ -165,8 +165,9 @@
   function renderSetup() {
     const roster = [...(typeof ROSTER !== "undefined" ? ROSTER : [])].filter(n => !S.spelers.includes(n));
     box.innerHTML = `<div class="mx-setup">
-      <p>Kies wie er meedoen, in de volgorde waarin jullie zitten. De eerste speler begint.</p>
-      <div class="mx-chips">${S.spelers.length ? S.spelers.map((n, i) => `<span class="mx-chip"><b>${i + 1}</b> ${esc(n)} <button type="button" aria-label="Verwijder ${esc(n)}" data-mx="weg" data-i="${i}">×</button></span>`).join("") : `<span class="mx-hint">Nog niemand gekozen</span>`}</div>
+      <p>Kies wie er meedoen. Sleep ze daarna in de volgorde van de beurten: de bovenste begint, daarna die eronder, enzovoort.</p>
+      ${S.spelers.length ? `<ol class="mx-volgorde" id="mx-volgorde">${S.spelers.map((n, i) => `<li data-i="${i}"><span class="mx-greep" aria-hidden="true">⠿</span><b>${i + 1}</b><span class="mx-vnm">${esc(n)}</span>
+        <span class="mx-vknop"><button type="button" aria-label="${esc(n)} omhoog" data-mx="op" data-i="${i}" ${i === 0 ? "disabled" : ""}>↑</button><button type="button" aria-label="${esc(n)} omlaag" data-mx="neer" data-i="${i}" ${i === S.spelers.length - 1 ? "disabled" : ""}>↓</button><button type="button" aria-label="Verwijder ${esc(n)}" data-mx="weg" data-i="${i}">×</button></span></li>`).join("")}</ol>` : `<div class="mx-chips"><span class="mx-hint">Nog niemand gekozen</span></div>`}
       <div class="mx-add"><input type="text" id="mx-naam" placeholder="Naam toevoegen" autocomplete="off"><button type="button" class="btn sm" data-mx="voeg">Toevoegen</button></div>
       ${roster.length ? `<div class="mx-roster"><span class="mx-hint">Snel kiezen:</span>${roster.map(n => `<button type="button" class="mx-pick" data-mx="pick" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div>` : ""}
       <div class="mx-start"><button type="button" class="btn" data-mx="start" ${S.spelers.length < 2 ? "disabled" : ""}>Start Mex${S.spelers.length >= 2 ? ` met ${S.spelers.length} spelers` : ""}</button>
@@ -189,7 +190,7 @@
       <div class="mx-buttons">
         ${B.klaar ? `<button type="button" class="btn mx-big" data-mx="volgende">${R.beurt < R.volgorde.length - 1 ? `Volgende: ${esc(R.volgorde[R.beurt + 1])}` : "Uitslag ronde"}</button>`
                   : `<button type="button" class="btn mx-big" data-mx="gooi">Gooi</button>`}
-        ${!B.klaar && B.worpen === 2 && R.max === 3 ? `<button type="button" class="btn ghost ${B.huis ? "on" : ""}" data-mx="huis">${B.huis ? "Huis geroepen ✓" : "Huis roepen"}</button>` : ""}
+        ${!B.klaar && B.worpen === 2 && R.max === 3 && B.waarden[0] === B.waarden[1] ? `<button type="button" class="btn ghost ${B.huis ? "on" : ""}" data-mx="huis">${B.huis ? "Huis geroepen ✓" : "Huis roepen"}</button>` : ""}
       </div>
       <ol class="mx-list">${R.volgorde.map((n, i) => { const u = R.uitslagen[n]; return `<li class="${i === R.beurt ? "now" : ""}"><span>${esc(n)}</span><span>${u ? `<b>${esc(u.label)}</b>` : i < R.beurt ? "" : "–"}</span></li>`; }).join("")}</ol>
     </div>`;
@@ -219,6 +220,103 @@
       ${rows.map(([n, s]) => `<tr><td>${esc(n)}</td><td class="r">${s.verloren}</td><td class="r">${String(s.bakken).replace(".", ",")}</td><td class="r">${s.mex}</td><td class="r">${s.honderd}</td><td class="r">${s.slokken || 0}</td></tr>`).join("")}</tbody></table>
       <p class="mx-legenda">100: zo vaak 100 gegooid. Slokken: totaal gedronken als (extra) 100-man.</p></div>`;
   }
+
+  /* ---------- Spelers toevoegen en verwijderen tijdens een pot ---------- */
+  let beheerOpen = false;
+  function renderBeheer() {
+    const roster = [...(typeof ROSTER !== "undefined" ? ROSTER : [])].filter(n => !S.spelers.includes(n));
+    const H = S.honderd;
+    return `<div class="mx-beheer">
+      <h3 class="sub-h">Spelers in deze pot</h3>
+      <div class="mx-chips">${S.spelers.map(n => `<span class="mx-chip${n === H.main || n === H.extra ? " honderd" : ""}">${esc(n)}${n === H.main || n === H.extra ? " 💯" : ""} <button type="button" aria-label="${esc(n)} verlaat het spel" data-mx="verlaat" data-n="${esc(n)}">×</button></span>`).join("")}</div>
+      <div class="mx-add"><input type="text" id="mx-naam" placeholder="Iemand komt erbij" autocomplete="off"><button type="button" class="btn sm" data-mx="voeg">Toevoegen</button></div>
+      ${roster.length ? `<div class="mx-roster"><span class="mx-hint">Snel kiezen:</span>${roster.map(n => `<button type="button" class="mx-pick" data-mx="pick" data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div>` : ""}
+      <p class="mx-hint">Nieuwe spelers sluiten achteraan aan in de lopende ronde.</p>
+    </div>`;
+  }
+  function erbij(n) {
+    if (!n || S.spelers.includes(n)) return;
+    S.spelers.push(n);
+    const R = S.ronde;
+    if (S.fase === "spel" && R && !R.verliezers && !R.volgorde.includes(n)) R.volgorde.push(n);
+  }
+  function verlaat(n) {
+    const H = S.honderd;
+    if (n === H.main || n === H.extra) return honderdAlarm(n);
+    if (S.fase === "battle" && S.battle.spelers.includes(n)) return melding(`${esc(n)} zit midden in een battle en kan nu niet weg.`);
+    if (S.ronde?.verliezers && S.fase === "spel" && S.ronde.volgorde.includes(n)) return melding(`${esc(n)} zit in het verliezerspotje en moet dat eerst uitspelen.`);
+    if (S.spelers.length <= 2) return melding("Met minder dan 2 spelers valt er niks te mexen.");
+    S.spelers = S.spelers.filter(x => x !== n);
+    const R = S.ronde;
+    if (S.fase === "spel" && R) {
+      const i = R.volgorde.indexOf(n);
+      if (i >= 0) {
+        R.volgorde.splice(i, 1); delete R.uitslagen[n];
+        if (i < R.beurt) R.beurt--;
+        else if (i === R.beurt) { nieuweBeurt(); if (R.beurt >= R.volgorde.length) { R.beurt = R.volgorde.length - 1; save(); return eindeRonde(); } }
+      }
+    }
+    save(); render();
+  }
+  function melding(tekst) {
+    const R = S.ronde; if (R?.huidig) { R.huidig.berichten.push(tekst); render(); } else alert(tekst.replace(/<[^>]+>/g, ""));
+  }
+  /* Groot rood knipperend alarm: de 100-man mag niet weg */
+  function honderdAlarm(n) {
+    document.querySelector(".mx-alarm")?.remove();
+    const d = document.createElement("div");
+    d.className = "mx-alarm"; d.setAttribute("role", "alertdialog"); d.setAttribute("aria-modal", "true"); d.setAttribute("aria-labelledby", "mx-alarm-t");
+    d.innerHTML = `<div class="mx-alarm-in"><div class="mx-alarm-ic" aria-hidden="true">🚨</div>
+      <h2 id="mx-alarm-t">LET OP!<br>${esc(n).toUpperCase()}, JE BENT 100-MAN.<br>JE MAG NIET WEG!</h2>
+      <p>Eerst moet iemand anders 100 gooien. Tot die tijd blijf je zitten.</p>
+      <button type="button" class="mx-alarm-ok">Oké, ik blijf zitten</button></div>`;
+    document.body.appendChild(d);
+    const sluit = () => { stopSirene(); d.remove(); };
+    d.querySelector(".mx-alarm-ok").onclick = sluit;
+    d.querySelector(".mx-alarm-ok").focus();
+    try { navigator.vibrate?.([400, 150, 400, 150, 400, 150, 800]); } catch {}
+    sirene();
+    setTimeout(() => { if (d.isConnected) sluit(); }, 12000);
+  }
+  let ac = null, sireneOsc = null;
+  function sirene() {
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === "suspended") ac.resume();
+      const o = ac.createOscillator(), g = ac.createGain(), nu = ac.currentTime;
+      o.type = "sawtooth"; g.gain.value = .08;
+      for (let i = 0; i < 8; i++) { o.frequency.setValueAtTime(660, nu + i * .5); o.frequency.linearRampToValueAtTime(990, nu + i * .5 + .25); o.frequency.linearRampToValueAtTime(660, nu + i * .5 + .5); }
+      g.gain.setValueAtTime(.08, nu + 3.8); g.gain.linearRampToValueAtTime(0, nu + 4);
+      o.connect(g).connect(ac.destination); o.start(nu); o.stop(nu + 4); sireneOsc = o;
+    } catch {}
+  }
+  function stopSirene() { try { sireneOsc?.stop(); } catch {} sireneOsc = null; }
+
+  /* ---------- Beurtvolgorde slepen ---------- */
+  let sleep = null;
+  box.addEventListener("pointerdown", e => {
+    const li = e.target.closest("#mx-volgorde li"); if (!li || e.target.closest("button")) return;
+    e.preventDefault();
+    const lijst = li.parentElement, items = [...lijst.children];
+    sleep = { li, lijst, van: Number(li.dataset.i), y0: e.clientY, h: li.getBoundingClientRect().height + 6, naar: Number(li.dataset.i), n: items.length };
+    li.classList.add("sleept"); li.setPointerCapture?.(e.pointerId);
+  });
+  box.addEventListener("pointermove", e => {
+    if (!sleep) return;
+    const dy = e.clientY - sleep.y0, naar = Math.max(0, Math.min(sleep.n - 1, sleep.van + Math.round(dy / sleep.h)));
+    sleep.li.style.transform = `translateY(${dy}px)`; sleep.naar = naar;
+    [...sleep.lijst.children].forEach((x, i) => {
+      if (x === sleep.li) return;
+      const schuif = (i > sleep.van && i <= naar) ? -sleep.h : (i < sleep.van && i >= naar) ? sleep.h : 0;
+      x.style.transform = schuif ? `translateY(${schuif}px)` : "";
+    });
+  });
+  const loslaten = () => {
+    if (!sleep) return;
+    const { van, naar } = sleep; sleep = null;
+    if (van !== naar) { const [n] = S.spelers.splice(van, 1); S.spelers.splice(naar, 0, n); save(); }
+    render();
+  };
+  box.addEventListener("pointerup", loslaten); box.addEventListener("pointercancel", loslaten);
 
   /* ---------- Animatie ---------- */
   function rolAnimatie(klaar) {
@@ -270,7 +368,10 @@
   box.addEventListener("click", e => {
     const b = e.target.closest("[data-mx]"); if (!b) return;
     const a = b.dataset.mx;
-    if (a === "pick") { S.spelers.push(b.dataset.n); save(); render(); }
+    if (a === "pick") { if (S.fase === "setup") S.spelers.push(b.dataset.n); else erbij(b.dataset.n); save(); render(); }
+    if (a === "op" || a === "neer") { const i = Number(b.dataset.i), j = i + (a === "op" ? -1 : 1); [S.spelers[i], S.spelers[j]] = [S.spelers[j], S.spelers[i]]; save(); render(); }
+    if (a === "beheer") { beheerOpen = !beheerOpen; render(); }
+    if (a === "verlaat") verlaat(b.dataset.n);
     if (a === "weg") { S.spelers.splice(Number(b.dataset.i), 1); save(); render(); }
     if (a === "voeg") { voegToe(); }
     if (a === "start") { if (S.spelers.length >= 2) { S.rondeNr = 0; startRonde(S.spelers, S.spelers[0]); save(); render(); } }
@@ -288,7 +389,7 @@
   box.addEventListener("keydown", e => { if (e.target.id === "mx-naam" && e.key === "Enter") voegToe(); });
   function voegToe() {
     const inp = document.getElementById("mx-naam"); const n = (typeof canon === "function" ? canon(inp.value) : inp.value.trim());
-    if (n && !S.spelers.includes(n)) S.spelers.push(n);
+    if (n && !S.spelers.includes(n)) { if (S.fase === "setup") S.spelers.push(n); else erbij(n); }
     save(); render(); document.getElementById("mx-naam")?.focus();
   }
 

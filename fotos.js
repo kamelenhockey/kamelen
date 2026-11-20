@@ -34,7 +34,7 @@
       </form>
       ${FOTOS.length ? `<div class="foto-grid">${FOTOS.map((f, i) => `
         <figure class="foto${f.soort === "video" ? " is-video" : ""}"><button type="button" class="foto-open" data-i="${i}" aria-label="${f.soort === "video" ? "Video afspelen" : "Foto openen"}${f.bijschrift ? `: ${esc(f.bijschrift)}` : ""}"><img src="${url(f.id, 700)}" alt="${esc(f.bijschrift || (f.soort === "video" ? "Video van de Kamelen" : "Foto van de Kamelen"))}" loading="lazy" referrerpolicy="no-referrer"${f.soort === "video" ? ` onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'video-leeg',textContent:'Video wordt nog verwerkt'}))"` : ""}>${f.soort === "video" ? `<span class="video-play" aria-hidden="true">▶</span>` : ""}</button>
-          ${f.bijschrift || f.door ? `<figcaption>${f.bijschrift ? esc(f.bijschrift) : ""}<small>${f.door ? `${esc(f.door)}, ` : ""}${datum(f.tijd)}</small></figcaption>` : ""}
+          ${f.bijschrift || f.door ? `<figcaption>${f.bijschrift ? esc(f.bijschrift) : ""}<small>${f.door ? `${esc(f.door)}, ` : ""}${datum(f.tijd)}${reactiesVan(f.id).length ? ` · 💬 ${reactiesVan(f.id).length}` : ""}</small></figcaption>` : ""}
           ${beheer ? `<button type="button" class="foto-weg" data-weg="${esc(f.id)}">Verwijderen</button>` : ""}
         </figure>`).join("")}</div>` : `<div class="card empty">Nog geen foto's. Voeg de eerste toe!</div>`}`;
 
@@ -110,25 +110,60 @@
   }
 
   /* Grote weergave met vorige/volgende en vegen */
+  let REACTIES = [];
+  const reactiesVan = id => REACTIES.filter(r => r.foto === id).sort((a, b) => new Date(a.tijd) - new Date(b.tijd));
+  const verversStil = () => window.kamelenApi(true).then(api => { if (api && api.reacties) REACTIES = api.reacties; render(); }).catch(() => {});
   function open(i) {
-    let k = i;
+    let k = i, bewerk = false;
     const dlg = document.createElement("dialog"); dlg.className = "lightbox";
     const toon = () => {
       const f = FOTOS[k];
       dlg.innerHTML = `<button type="button" class="lb-sluit" aria-label="Sluiten">✕</button>
         ${f.soort === "video" ? `<iframe class="lb-video" src="https://drive.google.com/file/d/${encodeURIComponent(f.id)}/preview" allow="autoplay; fullscreen" allowfullscreen title="${esc(f.bijschrift || "Video")}"></iframe>` : `<img src="${url(f.id, 1600)}" alt="${esc(f.bijschrift || "Foto")}" referrerpolicy="no-referrer">`}
-        <div class="lb-tekst">${f.bijschrift ? `<b>${esc(f.bijschrift)}</b>` : ""}<span>${f.door ? `${esc(f.door)}, ` : ""}${datum(f.tijd)} · ${k + 1} van ${FOTOS.length}</span></div>
+        <div class="lb-info">
+          <div class="lb-tekst">${bewerk ? `<form class="lb-bewerk" data-bewerk="${esc(f.id)}"><input type="text" maxlength="200" value="${esc(f.bijschrift || "")}" placeholder="Bijschrift" aria-label="Bijschrift"><button type="submit">Opslaan</button><button type="button" data-lb="annuleer">Annuleren</button></form>`
+            : f.bijschrift ? `<b>${esc(f.bijschrift)}</b>` : ""}<span>${f.door ? `${esc(f.door)}, ` : ""}${datum(f.tijd)} · ${k + 1} van ${FOTOS.length}${f.door && f.door === (window.IK || {}).naam && !bewerk ? ` · <button type="button" class="lb-link" data-lb="bewerk">✏️ ${f.bijschrift ? "bijschrift aanpassen" : "bijschrift toevoegen"}</button>` : ""}</span></div>
+          <div class="lb-reacties">
+            ${reactiesVan(f.id).map(r => `<div class="lb-reactie"><b>${esc(r.door)}</b> ${esc(r.tekst)}${r.door === (window.IK || {}).naam ? ` <button type="button" class="lb-link" data-rweg="${esc(r.id)}" aria-label="Reactie verwijderen">✕</button>` : beheercode() ? ` <button type="button" class="lb-link" data-rbweg="${esc(r.id)}" aria-label="Reactie verwijderen">✕</button>` : ""}</div>`).join("")}
+            <form class="lb-nieuw" data-reageer="${esc(f.id)}"><input type="text" maxlength="400" placeholder="Reageer…" aria-label="Reactie"><button type="submit">Plaats</button></form>
+          </div>
+        </div>
         ${FOTOS.length > 1 ? `<button type="button" class="lb-pijl vorige" aria-label="Vorige">‹</button><button type="button" class="lb-pijl volgende" aria-label="Volgende">›</button>` : ""}`;
     };
-    const stap = d => { k = (k + d + FOTOS.length) % FOTOS.length; toon(); };
+    const stap = d => { bewerk = false; k = (k + d + FOTOS.length) % FOTOS.length; toon(); };
+    const post = body => fetch(CFG.api, { method: "POST", body: JSON.stringify({ code: CFG.teamcode, ...body }) }).then(r => r.json()).catch(() => ({ ok: false }));
+    dlg.addEventListener("submit", async e => {
+      e.preventDefault();
+      const f = FOTOS[k], inp = e.target.querySelector("input"), tekst = inp.value.trim();
+      if (e.target.dataset.reageer) {
+        if (!tekst) return;
+        const tijdelijk = { id: "nieuw-" + Date.now(), foto: f.id, door: (window.IK || {}).naam, tekst, tijd: new Date().toISOString() };
+        REACTIES.push(tijdelijk); toon(); dlg.querySelector(".lb-nieuw input")?.focus();
+        const r = await post({ type: "reactie", foto: f.id, tekst });
+        if (!r.ok) { REACTIES = REACTIES.filter(x => x !== tijdelijk); toon(); alert("Reageren lukte niet. Misschien moet het script nog bijgewerkt worden."); }
+        else verversStil();
+      }
+      if (e.target.dataset.bewerk) {
+        const oud = f.bijschrift; f.bijschrift = tekst; bewerk = false; toon(); render();
+        const r = await post({ type: "bijschrift", id: f.id, tekst });
+        if (!r.ok) { f.bijschrift = oud; toon(); render(); alert(r.fout === "niet van jou" ? "Alleen wie de foto uploadde kan het bijschrift aanpassen." : "Opslaan lukte niet. Misschien moet het script nog bijgewerkt worden."); }
+      }
+    });
     dlg.addEventListener("click", e => {
       if (e.target.closest(".lb-sluit") || e.target === dlg) dlg.close();
+      else if (e.target.closest('[data-lb="bewerk"]')) { bewerk = true; toon(); dlg.querySelector(".lb-bewerk input")?.focus(); }
+      else if (e.target.closest('[data-lb="annuleer"]')) { bewerk = false; toon(); }
+      else if (e.target.closest("[data-rweg], [data-rbweg]")) {
+        const b = e.target.closest("[data-rweg], [data-rbweg]"), id = b.dataset.rweg || b.dataset.rbweg;
+        REACTIES = REACTIES.filter(x => x.id !== id); toon(); render();
+        post(b.dataset.rweg ? { type: "reactie-weg", id } : { type: "beheer", actie: "verwijder-reactie", beheercode: beheercode(), id });
+      }
       else if (e.target.closest(".vorige")) stap(-1);
       else if (e.target.closest(".volgende")) stap(1);
     });
-    dlg.addEventListener("keydown", e => { if (e.key === "ArrowLeft") stap(-1); if (e.key === "ArrowRight") stap(1); });
+    dlg.addEventListener("keydown", e => { if (e.target.matches("input")) return; if (e.key === "ArrowLeft") stap(-1); if (e.key === "ArrowRight") stap(1); });
     let x0 = null;
-    dlg.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+    dlg.addEventListener("touchstart", e => { x0 = e.target.closest("input, form, iframe") ? null : e.touches[0].clientX; }, { passive: true });
     dlg.addEventListener("touchend", e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 50) stap(dx < 0 ? 1 : -1); x0 = null; });
     dlg.addEventListener("close", () => dlg.remove());
     toon(); document.body.appendChild(dlg); dlg.showModal();
@@ -148,6 +183,7 @@
     if (!api || !("fotos" in api)) { box.innerHTML = `<div class="card empty">De foto's konden niet worden geladen. Ververs de pagina (Ctrl+Shift+R).</div>`; return; }
     FOTOS = (api.fotos || []).slice().sort((a, b) => new Date(b.tijd) - new Date(a.tijd));
     DATA.fotos = FOTOS;
+    REACTIES = api.reacties || [];
     if (api.profielfotos && typeof zetProfielfotos === "function") zetProfielfotos(api.profielfotos);
     render(); try { renderPlayers(); } catch {}
   }

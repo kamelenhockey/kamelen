@@ -12,7 +12,7 @@ const SPELERCODES = {
 const COACHCODES = {
   // "CoachNaam": "Naam",
 };
-/* Invallers en oud-Kamelen: mogen stemmen (als ze meespeelden), foto's en quotes toevoegen, maar niet meedoen aan de Kamelen-Scorito.
+/* Invallers en oud-Kamelen: mogen stemmen (als ze meespeelden), foto's en quotes toevoegen en meedoen aan de Kamelen-Scorito.
    De naam moet hetzelfde zijn als in de invaller-rijen van het afwezigheidsblad. */
 const INVALLERCODES = {
   // "InvallerNaam": "Naam",
@@ -33,6 +33,7 @@ const pushTab_ = () => tab_("Push", ["Tijdstempel", "Endpoint", "Abonnement", "N
 const fotoTab_ = () => tab_("Fotos", ["Tijdstempel", "Bestand-id", "Bijschrift", "Door"]);
 const profielTab_ = () => tab_("Profielfotos", ["Naam", "Bestand-id", "Tijdstempel"]);
 const quoteTab_ = () => tab_("Quotes", ["Tijdstempel", "Id", "Wie", "Quote", "Context", "Door"]);
+const reactieTab_ = () => tab_("Reacties", ["Tijdstempel", "Id", "Foto-id", "Door", "Reactie"]);
 const ideeTab_ = () => tab_("Ideeen", ["Tijdstempel", "Id", "Door", "Idee", "Soort", "Stemmen", "Status", "Reactie"]);
 function fotoMap_() {
   const props = PropertiesService.getScriptProperties();
@@ -210,8 +211,9 @@ function doGet(e) {
   const quotes = quoteTab_().getDataRange().getValues().slice(1).map(r => ({ tijd: r[0], id: r[1], wie: r[2], tekst: r[3], context: r[4], door: r[5] }));
   const profielfotos = {};
   profielTab_().getDataRange().getValues().slice(1).forEach(r => { if (r[0] && r[1]) profielfotos[r[0]] = r[1]; });
+  const reacties = reactieTab_().getDataRange().getValues().slice(1).filter(r => r[1]).map(r => ({ tijd: r[0], id: r[1], foto: r[2], door: r[3], tekst: r[4] }));
   const ideeen = ideeTab_().getDataRange().getValues().slice(1).filter(r => r[1]).map(r => ({ tijd: r[0], id: r[1], door: r[2], tekst: r[3], soort: r[4], stemmen: String(r[5] || "").split(",").filter(String), status: r[6] || "nieuw", reactie: r[7] || "" }));
-  return json_({ ok: true, voorspellingen, stemmen, gesloten: dicht, fotos, quotes, profielfotos, ideeen });
+  return json_({ ok: true, voorspellingen, stemmen, gesloten: dicht, fotos, quotes, profielfotos, ideeen, reacties });
 }
 
 function doPost(e) {
@@ -235,6 +237,11 @@ function doPost(e) {
             if (["nieuw", "gepland", "gedaan", "afgewezen"].indexOf(d.status) >= 0) ideeTab_().getRange(rij, 7).setValue(d.status);
             if (typeof d.reactie === "string") ideeTab_().getRange(rij, 8).setValue(d.reactie.slice(0, 300));
           }
+          return json_({ ok: true });
+        }
+        if (d.actie === "verwijder-reactie") {
+          const rij = rijMetId_(reactieTab_(), 1, d.id);
+          if (rij) reactieTab_().deleteRow(rij);
           return json_({ ok: true });
         }
         if (d.actie === "verwijder-idee") {
@@ -330,6 +337,26 @@ function doPost(e) {
         return json_({ ok: true, id: bestand.getId() });
       }
       /* Quote toevoegen */
+      /* Reacties op foto's en video's */
+      if (d.type === "reactie") {
+        const foto = String(d.foto || ""), tekst = String(d.tekst || "").trim().slice(0, 400);
+        if (!tekst || !rijMetId_(fotoTab_(), 1, foto)) return json_({ ok: false, fout: "invoer" });
+        reactieTab_().appendRow([new Date(), Utilities.getUuid().slice(0, 8), foto, ik, tekst]);
+        return json_({ ok: true });
+      }
+      if (d.type === "reactie-weg") {
+        const sh = reactieTab_(), rij = rijMetId_(sh, 1, d.id);
+        if (rij && sh.getRange(rij, 4).getValue() === ik) sh.deleteRow(rij);
+        return json_({ ok: true });
+      }
+      /* Bijschrift aanpassen: alleen door wie de foto of video heeft geüpload */
+      if (d.type === "bijschrift") {
+        const sh = fotoTab_(), rij = rijMetId_(sh, 1, d.id);
+        if (!rij) return json_({ ok: false, fout: "weg" });
+        if (sh.getRange(rij, 4).getValue() !== ik) return json_({ ok: false, fout: "niet van jou" });
+        sh.getRange(rij, 3).setValue(String(d.tekst || "").trim().slice(0, 200));
+        return json_({ ok: true });
+      }
       /* Ideeënbox: idee toevoegen, (on)stemmen, eigen idee weghalen */
       if (d.type === "idee") {
         const tekst = String(d.tekst || "").trim().slice(0, 600);
@@ -377,7 +404,7 @@ function doPost(e) {
         stemTab_().appendRow([new Date(), stemmer, kameel, ezel, w, ""]);
         return json_({ ok: true });
       }
-      if (rol_(d.code) === "invaller") return json_({ ok: false, fout: "invaller" });
+      /* Iedereen met een code (ook invallers en oud-Kamelen) mag meedoen aan de Kamelen-Scorito */
       const naam = ik, voor = Number(d.voor), tegen = Number(d.tegen), aftrap = new Date(d.aftrap);
       if (!naam || !Number.isInteger(voor) || !Number.isInteger(tegen) || voor < 0 || tegen < 0 || voor > 40 || tegen > 40) return json_({ ok: false, fout: "invoer" });
       if (isNaN(aftrap) || aftrap <= new Date()) return json_({ ok: false, fout: "te laat" });

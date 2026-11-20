@@ -486,6 +486,29 @@ td.delta{color:var(--muted);font-size:.8rem}
 .mx-card{border-color:#f3c98f}
 .mx-setup p{margin:0 0 10px;color:var(--ink-2)}
 .mx-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;margin-bottom:10px}
+.mx-volgorde{list-style:none;margin:10px 0 14px;padding:0;display:grid;gap:6px}
+.mx-volgorde li{display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--orange-soft);border:1px solid #f3c98f;border-radius:12px;font-weight:600;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;transition:transform .15s}
+.mx-volgorde li.sleept{transition:none;z-index:2;position:relative;box-shadow:0 10px 24px -10px rgba(22,54,80,.6);cursor:grabbing;background:#fff}
+.mx-volgorde li:first-child{border-color:var(--orange)}
+.mx-volgorde li:first-child .mx-vnm::after{content:" · begint";font-weight:500;color:var(--orange-ink);font-size:.8rem}
+.mx-greep{color:var(--muted);font-size:1.1rem}
+.mx-volgorde b{font-size:.75rem;color:var(--orange-ink);min-width:1.2em}
+.mx-vnm{flex:1}
+.mx-vknop{display:flex;gap:4px}
+.mx-vknop button{all:unset;cursor:pointer;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:#fff;font-weight:700}
+.mx-vknop button:disabled{opacity:.3;cursor:default}
+.mx-beheer{margin:0 0 14px;padding:14px;border:1px dashed var(--line);border-radius:14px;background:var(--surface)}
+.mx-beheer .mx-chips{margin-bottom:10px}
+.mx-chip.honderd{background:#fde2df;border-color:#e9a39b}
+.mx-alarm{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:24px;color:#fff;text-align:center;animation:mx-knipper .45s steps(1) infinite}
+@keyframes mx-knipper{0%{background:#d0021b}50%{background:#5c0008}}
+.mx-alarm-in{max-width:560px}
+.mx-alarm-ic{font-size:5rem;animation:mx-schud .3s linear infinite}
+@keyframes mx-schud{25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+.mx-alarm h2{font-family:var(--font-display);font-weight:400;font-size:clamp(2.2rem,10vw,4.2rem);line-height:1.05;margin:10px 0 14px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
+.mx-alarm p{font-size:1.1rem;margin:0 0 22px}
+.mx-alarm-ok{border:0;border-radius:999px;padding:14px 24px;font:700 1.05rem var(--font-body,inherit);background:#fff;color:#a00012;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.mx-alarm{animation:none;background:#b00018}.mx-alarm-ic{animation:none}}
 .mx-chip{display:inline-flex;align-items:center;gap:6px;background:var(--orange-soft);border:1px solid #f3c98f;border-radius:999px;padding:4px 6px 4px 10px;font-weight:600}
 .mx-chip b{font-size:.72rem;color:var(--orange-ink)}
 .mx-chip button{all:unset;cursor:pointer;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#fff;font-weight:700}
@@ -854,14 +877,24 @@ body.pong-actief .tabbar{display:none}
 .foto figcaption{padding:10px 12px;font-size:.92rem}
 .foto figcaption small,.quote figcaption small{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
 .foto-weg{margin:0 12px 12px;background:none;border:1px solid var(--line);border-radius:8px;padding:4px 10px;font:inherit;font-size:.8rem;color:#b3261e;cursor:pointer}
-dialog.lightbox{padding:0;border:0;background:rgba(10,24,36,.96);color:#fff;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;display:grid;place-items:center}
+dialog.lightbox{padding:0;border:0;background:rgba(10,24,36,.96);color:#fff;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;display:grid;place-items:center;align-content:center;gap:4px}
 dialog.lightbox::backdrop{background:rgba(10,24,36,.9)}
-.lightbox img{max-width:94vw;max-height:78vh;border-radius:8px}
-.lb-video{width:min(94vw,1000px);aspect-ratio:16/9;max-height:78vh;border:0;border-radius:8px;background:#000}
+.lightbox img{max-width:94vw;max-height:62vh;border-radius:8px}
+.lb-video{width:min(94vw,1000px);aspect-ratio:16/9;max-height:62vh;border:0;border-radius:8px;background:#000}
 .foto.is-video .foto-open{position:relative;cursor:pointer;min-height:140px}
 .video-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:rgba(22,54,80,.82);color:#fff;font-size:1.4rem;padding-left:4px;box-shadow:0 6px 18px -6px rgba(0,0,0,.6)}
 .video-leeg{display:grid;place-items:center;min-height:180px;color:var(--muted);font-size:.85rem;background:#dfe7ec}
-.lb-tekst{text-align:center;padding:12px 16px;max-width:60ch}
+.lb-tekst{text-align:center;padding:12px 16px 6px;max-width:60ch;margin:0 auto}
+.lb-info{width:min(94vw,640px);max-height:30vh;overflow-y:auto}
+.lb-link{background:none;border:0;padding:0;color:inherit;opacity:.85;font:inherit;text-decoration:underline;cursor:pointer}
+.lb-bewerk,.lb-nieuw{display:flex;gap:6px;margin:4px 0 8px}
+.lb-bewerk input,.lb-nieuw input{flex:1;min-width:0;padding:9px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font:inherit;font-size:16px}
+.lb-bewerk input::placeholder,.lb-nieuw input::placeholder{color:rgba(255,255,255,.55)}
+.lb-bewerk button,.lb-nieuw button{border:0;border-radius:10px;padding:0 14px;background:var(--orange);color:var(--ink);font:600 .9rem inherit;cursor:pointer}
+.lb-bewerk button[data-lb]{background:rgba(255,255,255,.15);color:#fff}
+.lb-reacties{padding:0 16px 12px}
+.lb-reactie{font-size:.92rem;padding:5px 0;border-top:1px solid rgba(255,255,255,.1)}
+.lb-reactie b{margin-right:4px}
 .lb-tekst b{display:block;font-weight:600}
 .lb-tekst span{font-size:.85rem;opacity:.7}
 .lb-sluit{position:fixed;top:14px;right:14px;background:rgba(255,255,255,.12);border:0;color:#fff;width:42px;height:42px;border-radius:50%;font-size:1.1rem;cursor:pointer}
@@ -921,6 +954,9 @@ dialog.lightbox::backdrop{background:rgba(10,24,36,.9)}
 .kz-chip{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-weight:600;font-size:.9rem;background:#fff}
 .kz-chip:hover{background:var(--bg)}
 .kz-chip:focus-visible{outline:2px solid var(--orange)}
+.kz-chip.on{background:var(--orange);border-color:var(--orange);color:var(--ink)}
+.kz-chip.on::before{content:"✓ "}
+.kz-chip[data-kies="gokkers"].on{background:var(--ink);border-color:var(--ink);color:#fff}
 [data-veld="kameel"] .kz-chip.on{background:var(--orange);border-color:var(--orange);color:var(--ink)}
 [data-veld="ezel"] .kz-chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
 .kz-win{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 0 calc(4.6rem + 10px)}
@@ -1159,6 +1195,20 @@ body.wrapped-open{overflow:hidden}
 .wr-lijst b{font-family:var(--font-display);font-weight:400;font-size:1.6rem;line-height:1.15}
 .wr-quote{margin:4px 0 0;font-family:var(--font-display);font-size:1.5rem;line-height:1.25;max-width:26ch}
 .wr-start{display:inline-flex;align-items:center;gap:8px;margin-top:12px}
+/* Schakelaar binnen een tabje (Wedstrijden/Stand, Spellen) */
+.seg-switch{display:flex;gap:4px;padding:4px;margin:0 0 14px;background:#e3eaf0;border-radius:12px;overflow-x:auto;scrollbar-width:none}
+.seg-switch::-webkit-scrollbar{display:none}
+.seg-switch a{flex:1;text-align:center;white-space:nowrap;padding:9px 12px;border-radius:9px;font-weight:600;font-size:.92rem;color:var(--ink);text-decoration:none}
+.seg-switch a[aria-selected="true"]{background:#fff;box-shadow:0 1px 3px rgba(22,54,80,.18)}
+.seg-switch[hidden]{display:none!important}
+#comp-switch{grid-column:1/-1}
+@media (min-width:761px){#comp-switch{display:none}}
+.spel-tegels{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--gap)}
+.spel-tegel{display:grid;gap:4px;padding:20px;text-decoration:none;color:var(--ink);transition:transform .15s}
+.spel-tegel:hover{transform:translateY(-2px)}
+.spel-tegel .st-ic{font-size:2.4rem;line-height:1}
+.spel-tegel b{font-family:var(--font-display);font-weight:400;font-size:1.4rem}
+.spel-tegel span:last-child{color:var(--muted);font-size:.9rem}
 /* Ideeënbox */
 .idee-form{padding:18px 20px;margin-bottom:18px}
 .idee-soorten{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
@@ -1328,6 +1378,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
 </section>
 
 <main class="wrap">
+  <div class="seg-switch" id="comp-switch" hidden role="tablist" aria-label="Competitie"><a href="#wedstrijden" data-sw="wedstrijden" role="tab">Wedstrijden</a><a href="#stand" data-sw="stand" role="tab">Stand</a></div>
   <section class="dash" id="dash" data-page="home" aria-label="Overzicht"></section>
   <section class="card quote-home" id="quote-home" data-page="home" aria-label="Quote"></section>
   <section class="card push-card" id="push-card" data-page="home" aria-label="Meldingen"></section>
@@ -1463,6 +1514,21 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
 </div>
 
 <!-- ================= QUOTES ================= -->
+<div id="view-spellen" class="view" hidden>
+  <div class="wrap page">
+    <header class="page-head">
+      <h1>Spellen</h1>
+      <p>Voor op het veld, in de kantine en tijdens de derde helft.</p>
+    </header>
+    <div class="spel-tegels">
+      <a class="card spel-tegel" href="#rad"><span class="st-ic" aria-hidden="true">🎡</span><b>Kamelen-rad</b><span>Draai en kijk wat je moet doen</span></a>
+      <a class="card spel-tegel" href="#race"><span class="st-ic" aria-hidden="true">🐪</span><b>Kamelen-racen</b><span>Zet slokken in op je kameel</span></a>
+      <a class="card spel-tegel" href="#mex"><span class="st-ic" aria-hidden="true">🎲</span><b>Mex</b><span>Dobbelen tot er een 100-man is</span></a>
+      <a class="card spel-tegel" href="#pong"><span class="st-ic" aria-hidden="true">🏓</span><b>Pong teams</b><span>Eerlijke teams voor bierpong</span></a>
+    </div>
+  </div>
+</div>
+<div class="seg-switch spel-switch" id="spel-switch" hidden role="tablist" aria-label="Spellen"><a href="#spellen" data-sw="spellen">Alle</a><a href="#rad" data-sw="rad">🎡 Rad</a><a href="#race" data-sw="race">🐪 Race</a><a href="#mex" data-sw="mex">🎲 Mex</a><a href="#pong" data-sw="pong">🏓 Pong</a></div>
 <div id="view-ideeen" class="view" hidden>
   <div class="wrap page">
     <header class="page-head">
@@ -1686,9 +1752,9 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
 
 <nav class="tabbar" aria-label="Snelmenu">
   <a href="#home" data-view-link="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg><span>Home</span></a>
-  <a href="#wedstrijden" data-view-link="wedstrijden"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span>Wedstrijden</span></a>
-  <a href="#stand" data-view-link="stand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span>Stand</span></a>
+  <a href="#wedstrijden" id="tab-competitie" data-tab-groep="wedstrijden stand"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3M8 17h6"/></svg><span>Competitie</span></a>
   <a href="#toto" data-view-link="toto"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4l2.4 4.6-2.4 3.4-2.4-3.4zM4.6 10l4.8.6M19.4 10l-4.8.6M7 18.5l3-3.5M17 18.5l-3-3.5"/></svg><span>Scorito</span></a>
+  <a href="#spellen" data-tab-groep="spellen rad race mex pong"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="11" height="11" rx="2.2"/><path d="M14.5 9.5h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-4"/><circle cx="7" cy="7" r=".9"/><circle cx="11" cy="11" r=".9"/><circle cx="15.5" cy="17.5" r=".9"/></svg><span>Spellen</span></a>
   <button type="button" id="more-btn" aria-expanded="false" aria-controls="more-sheet"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>Meer</span></button>
 </nav>
 <div class="more-sheet" id="more-sheet" hidden>
@@ -2961,7 +3027,7 @@ document.querySelectorAll("[data-dice]").forEach(el => {
 });
 
 /* ---------- Pagina's: home, regels, mex ---------- */
-const VIEWS = ["spelers", "statistieken", "toto", "stemmen", "fotos", "quotes", "ideeen", "rad", "race", "voorspeller", "regels", "mex", "pong"];
+const VIEWS = ["spelers", "statistieken", "toto", "stemmen", "fotos", "quotes", "ideeen", "spellen", "rad", "race", "voorspeller", "regels", "mex", "pong"];
 const HOME_PAGES = ["home", "wedstrijden", "stand", "topscorers", "liters"];
 /* Oude links (#programma, #uitslagen, #seizoen, #wedstrijd) blijven werken */
 const PAGE_OF = { "": "home", home: "home", wedstrijd: "home", programma: "wedstrijden", uitslagen: "wedstrijden", wedstrijden: "wedstrijden", stand: "stand", seizoen: "stand", topscorers: "topscorers", liters: "liters" };
@@ -2979,6 +3045,19 @@ function showView(){
   const nm = document.getElementById("nav-more-menu"); if (nm){ nm.hidden = true; document.getElementById("nav-more-btn").setAttribute("aria-expanded", "false"); }
   document.querySelectorAll("main [data-page]").forEach(el => { el.hidden = el.dataset.page !== page; });
   document.querySelectorAll("[data-view-link]").forEach(a => a.dataset.viewLink === page ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
+  /* Tabbalk: groepen (Competitie = wedstrijden + stand, Spellen = alle spellen) */
+  document.querySelectorAll("[data-tab-groep]").forEach(a => a.dataset.tabGroep.split(" ").includes(page) ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"));
+  if (page === "wedstrijden" || page === "stand") { document.getElementById("tab-competitie").setAttribute("href", "#" + page); }
+  const cs = document.getElementById("comp-switch");
+  cs.hidden = !(page === "wedstrijden" || page === "stand");
+  cs.querySelectorAll("[data-sw]").forEach(a => a.setAttribute("aria-selected", a.dataset.sw === page));
+  const ss = document.getElementById("spel-switch"), spel = ["spellen", "rad", "race", "mex", "pong"].includes(page);
+  ss.hidden = !spel;
+  if (spel) {
+    const doel = document.querySelector(`#view-${page} .page`);
+    if (doel && ss.parentElement !== doel) doel.prepend(ss);
+    ss.querySelectorAll("[data-sw]").forEach(a => a.setAttribute("aria-selected", a.dataset.sw === page));
+  }
   document.getElementById("more-sheet").hidden = true; document.getElementById("more-btn").setAttribute("aria-expanded", "false"); document.body.classList.remove("sheet-open");
   const sub = h && h !== page ? document.getElementById(h) : null;   /* bv. #uitslagen binnen Wedstrijden */
   if (sub && !sub.hidden) sub.scrollIntoView({ behavior: "instant", block: "start" });
@@ -3250,9 +3329,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795488600"></script>
-<script src="toto.js?v=1795488600"></script>
-<script src="pong.js?v=1795488600"></script>
+<script src="mex.js?v=1795488700"></script>
+<script src="toto.js?v=1795488700"></script>
+<script src="pong.js?v=1795488700"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3261,14 +3340,14 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795488600"></script>
-<script src="statistieken.js?v=1795488600"></script>
-<script src="wrapped.js?v=1795488600"></script>
-<script src="race.js?v=1795488600"></script>
-<script src="rad.js?v=1795488600"></script>
-<script src="fotos.js?v=1795488600"></script>
-<script src="quotes.js?v=1795488600"></script>
-<script src="ideeen.js?v=1795488600"></script>
-<script src="push.js?v=1795488600"></script>
+<script src="stemmen.js?v=1795488700"></script>
+<script src="statistieken.js?v=1795488700"></script>
+<script src="wrapped.js?v=1795488700"></script>
+<script src="race.js?v=1795488700"></script>
+<script src="rad.js?v=1795488700"></script>
+<script src="fotos.js?v=1795488700"></script>
+<script src="quotes.js?v=1795488700"></script>
+<script src="ideeen.js?v=1795488700"></script>
+<script src="push.js?v=1795488700"></script>
 </body>
 </html>

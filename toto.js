@@ -112,7 +112,7 @@
     if (sb) {
       const v = volgende && perMatch.get(sleutel(volgende)).voorsp;
       const dagen = volgende ? (aftrap(volgende) - nu) / 864e5 : 99;
-      if (volgende && ik && (window.IK || {}).rol !== "invaller" && dagen <= 7 && !v.has(ik)) {
+      if (volgende && ik && dagen <= 7 && !v.has(ik)) {
         const tijd = aftrap(volgende).toLocaleString("nl-NL", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
         sb.innerHTML = `<a class="kz-banner todo" href="#toto"><span>🔮</span><span><b>Je hebt de Kamelen-Scorito nog niet ingevuld</b><br><small>${isUs(volgende.thuis) ? "Thuis" : "Uit"} tegen ${esc(isUs(volgende.thuis) ? volgende.uit : volgende.thuis)} · sluit ${tijd}</small></span><span class="kz-go">Invullen</span></a>`;
       } else sb.innerHTML = "";
@@ -149,7 +149,6 @@
   const eigen = () => { try { return JSON.parse(localStorage.getItem(LS) || "{}"); } catch { return {}; } };
   const bewaarEigen = o => { try { localStorage.setItem(LS, JSON.stringify(o)); } catch {} };
   function formulier(m) {
-    if ((window.IK || {}).rol === "invaller") return `<div class="tt-mine">Invallers en oud-Kamelen doen niet mee aan de Kamelen-Scorito. Je kunt wel meekijken.</div>`;
     const e = eigen(), al = e.voorsp?.[sleutel(m)];
     const namen = [...(typeof ROSTER !== "undefined" ? ROSTER : [])];
     const tegen = tegenstander(m);
@@ -187,7 +186,7 @@
       const r = await fetch(CFG.api, { method: "POST", body: JSON.stringify({ code, naam, voor, tegen, wedstrijd: `${m.thuis} – ${m.uit}`, aftrap: aftrap(m).toISOString() }) });
       const res = await r.json();
       if (!res.ok) {
-        st.textContent = res.fout === "invaller" ? "Invallers doen niet mee aan de Kamelen-Scorito." : res.fout === "code" ? "Je inlogcode klopt niet meer. Log opnieuw in." : res.fout === "te laat" ? "De wedstrijd is al begonnen." : "Opslaan lukte niet, probeer het opnieuw.";
+        st.textContent = res.fout === "invaller" ? "Het script moet nog bijgewerkt worden voordat invallers mee kunnen doen." : res.fout === "code" ? "Je inlogcode klopt niet meer. Log opnieuw in." : res.fout === "te laat" ? "De wedstrijd is al begonnen." : "Opslaan lukte niet, probeer het opnieuw.";
         if (res.fout === "code") { delete e.code; bewaarEigen(e); }
         knop.disabled = false; return;
       }
