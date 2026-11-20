@@ -51,7 +51,7 @@
     /* Elleboog achter de tafelrand */
     elleboog: () => {
       const arm = (ox, okKleur, voor) => `
-        <rect x="${ox + 70}" y="70" width="120" height="10" fill="#8b5a2b"/><rect x="${ox + 175}" y="80" width="8" height="45" fill="#6b4518"/>
+        <rect x="${ox + 70}" y="70" width="120" height="10" fill="#8b5a2b"/><rect x="${ox + 77}" y="80" width="8" height="45" fill="#6b4518"/><rect x="${ox + 175}" y="80" width="8" height="45" fill="#6b4518"/>
         <line x1="${ox + 70}" y1="40" x2="${ox + 70}" y2="128" stroke="${okKleur}" stroke-width="2" stroke-dasharray="4 3"/>
         <circle cx="${ox + 30}" cy="40" r="11" fill="#f2c29b" stroke="${INK}" stroke-width="1.5"/>
         <path d="M${ox + 30} 51 L${ox + 30} 105 M${ox + 30} 105 L${ox + 20} 128 M${ox + 30} 105 L${ox + 40} 128" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
@@ -76,6 +76,37 @@
         "Drie mogelijkheden na een raak worp: gemist, zelfde beker (bom) of andere beker");
     },
 
+    /* Stuiterbal: tegenstander mag hem wegslaan; gaat hij toch in, dan extra beker weg */
+    stuiter: () => svg(340, 140, `
+      <rect x="30" y="80" width="280" height="10" fill="#8b5a2b"/><rect x="40" y="90" width="8" height="40" fill="#6b4518"/><rect x="292" y="90" width="8" height="40" fill="#6b4518"/>
+      ${[0, 1, 2].map(k => `<rect x="${236 + k * 18}" y="60" width="15" height="20" rx="2" fill="#ffd9a8" stroke="${INK}" stroke-width="1.5"/>`).join("")}
+      <path d="M40 40 Q100 10 150 78 Q190 30 243 58" fill="none" stroke="${INK}" stroke-width="2.2" stroke-dasharray="5 5"/>
+      <ellipse cx="150" cy="79" rx="9" ry="2.5" fill="none" stroke="${ORANJE}" stroke-width="2"/>
+      <text x="196" y="40" font-size="22">✋</text>
+      ${tekst(150, 112, "stuiter")}
+      ${tekst(212, 22, "mag weggeslagen worden", `fill="${ROOD}"`)}
+      ${tekst(170, 136, "toch raak? +1 beker naar keuze weg", `fill="${GROEN}"`)}`, "Een stuiterbal mag de tegenstander wegslaan; gaat hij toch in een beker, dan mag er een extra beker naar keuze weg"),
+
+    /* Omgestoten glas */
+    omgestoten: () => svg(340, 110, `
+      ${piramide(70, 56, 9, "op", {})}
+      <path d="M140 56 h40" stroke="${INK}" stroke-width="2.5" marker-end="url(#bpPijl2)"/>
+      <defs><marker id="bpPijl2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="${INK}"/></marker></defs>
+      <g transform="translate(232 62) rotate(-75)"><path d="M-12 -16 L12 -16 L9 16 L-9 16 Z" fill="${BLAUW}" stroke="${INK}" stroke-width="2"/></g>
+      <path d="M248 70 q14 6 30 2 q10 4 22 0" fill="none" stroke="#8fc3e3" stroke-width="5" stroke-linecap="round"/>
+      <text x="258" y="44" font-size="20">❌</text>
+      ${tekst(200, 104, "omgestoten = echt weg, pech gehad")}`, "Een omgestoten glas gaat gewoon weg"),
+
+    /* In iemands bier terwijl hij het vasthoudt */
+    biertje: () => svg(340, 130, `
+      <path d="M200 30 L250 30 L244 104 L206 104 Z" fill="#f6bd45" stroke="${INK}" stroke-width="2.5"/>
+      <path d="M200 30 L250 30 L249 42 L201 42 Z" fill="#fffaf0" stroke="${INK}" stroke-width="2"/>
+      <path d="M250 50 q22 4 20 24 q-2 18 -22 18" fill="none" stroke="${INK}" stroke-width="5"/>
+      <path d="M180 70 q14 -6 22 2 v26 q-10 6 -22 0 z" fill="#f2c29b" stroke="${INK}" stroke-width="2"/>
+      <circle cx="225" cy="38" r="6" fill="#fff" stroke="${INK}" stroke-width="1.5"/>
+      <path d="M40 70 Q120 -10 222 34" fill="none" stroke="${GROEN}" stroke-width="2.5" stroke-dasharray="6 5"/>
+      <text x="282" y="60" font-size="30">🏆</text>
+      ${tekst(170, 124, "raak in een vastgehouden biertje = gewonnen", `fill="${GROEN}"`)}`, "Gooi je in het biertje dat iemand vasthoudt, dan heb je meteen gewonnen"),
     /* Bal volledig over de tafel */
     over: () => svg(340, 130, `
       <rect x="40" y="80" width="240" height="10" fill="#8b5a2b"/><rect x="50" y="90" width="8" height="34" fill="#6b4518"/><rect x="262" y="90" width="8" height="34" fill="#6b4518"/>
