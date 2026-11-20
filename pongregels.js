@@ -11,8 +11,10 @@
   };
   knoppen.forEach(k => k.addEventListener("click", () => kies(k.dataset.bpTab)));
   view.querySelectorAll("[data-bp-naar]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); kies(a.dataset.bpNaar); view.scrollIntoView({ behavior: "smooth" }); }));
-  let start = "regels"; try { start = sessionStorage.getItem("kamelen-pong-tab") || "regels"; } catch {}
-  kies(start);
+  /* Bij openen van Pongen altijd eerst de minigame */
+  const openen = () => { if (location.hash === "#pong") kies("spelen"); };
+  addEventListener("hashchange", openen);
+  kies("spelen");
 
   /* ---------- Tekeningen ---------- */
   const BLAUW = "#b9d8e8", ORANJE = "#f08c1c", INK = "#163650", ROOD = "#d93a2b", GROEN = "#2f8a57";
