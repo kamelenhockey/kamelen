@@ -125,17 +125,15 @@
   const KLEUREN = ["#e8384f", "#2f7fd8", "#2f9e57", "#f2a516", "#8a4fd0", "#16a3a3", "#e86a1c", "#d6409f"];
   function renderBaan() {
     box.innerHTML = `
-      <div class="rc-bord" id="rc-bord" aria-label="Tussenstand">${S.kamelen.map((k, i) => `<span class="rc-bord-k" data-i="${i}" style="--c:${KLEUREN[i]}"><i>${i + 1}</i>${esc(k)}</span>`).join("")}</div>
       <div class="rc-baan" id="rc-baan">
-        <div class="rc-lucht" aria-hidden="true"><span class="rc-zon"></span><span class="rc-duin ver"></span><span class="rc-duin nab"></span><span class="rc-tribune"></span></div>
+        <div class="rc-schaal" aria-hidden="true"><span style="left:0">start</span><span style="left:25%">25 m</span><span style="left:50%">50 m</span><span style="left:75%">75 m</span><span style="left:100%">finish</span></div>
         ${S.kamelen.map((k, i) => `
-        <div class="rc-lane"><span class="rc-lnaam"><i style="background:${KLEUREN[i]}">${i + 1}</i>${esc(k)}</span><div class="rc-zand"><span class="rc-start" aria-hidden="true"></span>
-          <span class="rc-kameel" id="rc-k${i}" style="--c:${KLEUREN[i]}"><span class="rc-kroon" aria-hidden="true">👑</span><span class="rc-plek" aria-hidden="true"></span><span class="rc-schaduw" aria-hidden="true"></span><span class="rc-sprong"><span class="rc-lijf"><img src="logo.png" alt=""><i class="rc-dek">${i + 1}</i></span></span></span>
+        <div class="rc-lane" style="--c:${KLEUREN[i]}"><span class="rc-lnaam"><i>${i + 1}</i>${esc(k)}</span><div class="rc-zand"><span class="rc-start" aria-hidden="true"></span>
+          <span class="rc-kameel" id="rc-k${i}"><span class="rc-plek" aria-hidden="true"></span><span class="rc-sprong"><span class="rc-lijf"><img src="logo.png" alt=""><i class="rc-dek">${i + 1}</i></span></span></span>
           <span class="rc-finish"></span></div></div>`).join("")}
-        <div class="rc-aftel" id="rc-aftel" aria-live="assertive"></div>
-        <button type="button" class="rc-geluid" data-rc="geluid" aria-label="Geluid aan of uit">${geluidAan() ? "🔊" : "🔇"}</button></div>
+        <div class="rc-aftel" id="rc-aftel" aria-live="assertive"></div></div>
       <div class="rc-feed" id="rc-feed" aria-live="polite"></div>
-      <div class="rc-knoppen" id="rc-afbreken"><button type="button" class="btn sm ghost" data-rc="afbreken">Race afbreken</button></div>
+      <div class="rc-knoppen" id="rc-afbreken"><button type="button" class="btn sm ghost" data-rc="afbreken">Race afbreken</button><button type="button" class="btn sm ghost rc-geluid" data-rc="geluid">${geluidAan() ? "🔊 Geluid aan" : "🔇 Geluid uit"}</button></div>
       <div id="rc-uitslag"></div>`;
   }
 
@@ -145,20 +143,13 @@
   const ac = () => { if (!geluidAan()) return null; try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === "suspended") AC.resume(); return AC; } catch { return null; } };
   const ruis = (c, sec) => { const b = c.createBuffer(1, c.sampleRate * sec, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; const s = c.createBufferSource(); s.buffer = b; return s; };
   const SND = {
-    hoef(vol = .25) { const c = ac(); if (!c) return; const t = c.currentTime, o = c.createOscillator(), g = c.createGain();
-      o.type = "triangle"; o.frequency.setValueAtTime(170 + Math.random() * 40, t); o.frequency.exponentialRampToValueAtTime(60, t + .07);
-      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + .09); o.connect(g).connect(c.destination); o.start(t); o.stop(t + .1); },
-    schot() { const c = ac(); if (!c) return; const t = c.currentTime, s = ruis(c, .4), g = c.createGain(), f = c.createBiquadFilter();
-      f.type = "lowpass"; f.frequency.value = 2400; g.gain.setValueAtTime(.9, t); g.gain.exponentialRampToValueAtTime(.001, t + .35); s.connect(f).connect(g).connect(c.destination); s.start(t); },
-    piep(hoog) { const c = ac(); if (!c) return; const t = c.currentTime, o = c.createOscillator(), g = c.createGain();
-      o.type = "square"; o.frequency.value = hoog ? 1046 : 660; g.gain.setValueAtTime(.12, t); g.gain.exponentialRampToValueAtTime(.001, t + (hoog ? .45 : .18)); o.connect(g).connect(c.destination); o.start(t); o.stop(t + .5); },
-    juich(sec = 2.4, sterk = .5) { const c = ac(); if (!c) return; const t = c.currentTime, s = ruis(c, sec), g = c.createGain(), f = c.createBiquadFilter();
-      f.type = "bandpass"; f.frequency.value = 1100; f.Q.value = .6; g.gain.setValueAtTime(.001, t); g.gain.linearRampToValueAtTime(sterk, t + .25); g.gain.linearRampToValueAtTime(sterk * .7, t + sec * .6); g.gain.linearRampToValueAtTime(.001, t + sec);
-      s.connect(f).connect(g).connect(c.destination); s.start(t); },
-    boost(op) { const c = ac(); if (!c) return; const t = c.currentTime, o = c.createOscillator(), g = c.createGain();
-      o.type = "sawtooth"; o.frequency.setValueAtTime(op ? 300 : 500, t); o.frequency.exponentialRampToValueAtTime(op ? 900 : 140, t + .25);
-      g.gain.setValueAtTime(.07, t); g.gain.exponentialRampToValueAtTime(.001, t + .28); o.connect(g).connect(c.destination); o.start(t); o.stop(t + .3); }
+    schot() { const c = ac(); if (!c) return; const t = c.currentTime, s = ruis(c, .3), g = c.createGain(), f = c.createBiquadFilter();
+      f.type = "lowpass"; f.frequency.value = 1800; g.gain.setValueAtTime(.5, t); g.gain.exponentialRampToValueAtTime(.001, t + .25); s.connect(f).connect(g).connect(c.destination); s.start(t); },
+    applaus() { const c = ac(); if (!c) return; const t = c.currentTime, sec = 2.2, s = ruis(c, sec), g = c.createGain(), f = c.createBiquadFilter();
+      f.type = "bandpass"; f.frequency.value = 1300; f.Q.value = .7; g.gain.setValueAtTime(.001, t); g.gain.linearRampToValueAtTime(.22, t + .2); g.gain.linearRampToValueAtTime(.001, t + sec);
+      s.connect(f).connect(g).connect(c.destination); s.start(t); }
   };
+
 
   let loper = null, teller = null;
   function stopTimers() { cancelAnimationFrame(loper); clearTimeout(teller); loper = teller = null; }
@@ -180,26 +171,6 @@
     meet(); addEventListener("resize", meet);
     const rustig = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const bord = document.getElementById("rc-bord"), bordEls = [...bord.children];
-    let bordTik = 0, hoefTik = 0, stofTik = 0;
-    const stof = () => {
-      els.forEach((el, i) => {
-        if (!el || Math.random() < .35) return;
-        const p = document.createElement("span"); p.className = "rc-puf";
-        const s = 6 + Math.random() * 9; p.style.width = p.style.height = s + "px";
-        p.style.left = (parseFloat(el.dataset.x || 0) + 4 + Math.random() * 6) + "px";
-        el.parentElement.appendChild(p);
-        p.animate([{ transform: "translate(0,0) scale(.5)", opacity: .8 }, { transform: `translate(${-18 - Math.random() * 26}px,${-6 - Math.random() * 10}px) scale(1.7)`, opacity: 0 }],
-          { duration: 600 + Math.random() * 400, easing: "ease-out", fill: "forwards" }).onfinish = () => p.remove();
-      });
-    };
-    const werkBord = rang => {
-      /* FLIP: chips schuiven soepel naar hun nieuwe plek */
-      const voor = bordEls.map(e => e.getBoundingClientRect().left);
-      rang.forEach(i => bord.appendChild(bordEls[i]));
-      bordEls.forEach((e, k) => { const dx = voor[k] - e.getBoundingClientRect().left; if (Math.abs(dx) > 1) e.animate([{ transform: `translateX(${dx}px)` }, { transform: "none" }], { duration: 350, easing: "ease-out" }); });
-      bordEls.forEach(e => e.classList.toggle("eerste", bord.firstElementChild === e));
-    };
     const melding = (t, soort = "") => { const p = document.createElement("p"); p.textContent = t; if (soort) p.className = soort; feed.prepend(p); while (feed.children.length > 4) feed.lastChild.remove(); };
     const ballon = (i, d) => {
       const el = els[i]; if (!el) return;
@@ -207,7 +178,6 @@
       b.textContent = (d > 0 ? "+" : "−") + Math.abs(d) + "m " + (d > 0 ? "⚡" : "💥"); el.appendChild(b);
       setTimeout(() => b.remove(), 1100);
       el.classList.remove("hop", "val"); void el.offsetWidth; el.classList.add(d > 0 ? "hop" : "val");
-      SND.boost(d > 0);
     };
     const teken = () => {
       const rang = pos.map((p, i) => [p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => i);
@@ -227,7 +197,7 @@
     const tel = () => {
       if (rustig || k >= tellen.length) { aftel.className = "rc-aftel"; aftel.textContent = ""; return lopen(); }
       aftel.textContent = tellen[k]; aftel.className = "rc-aftel"; void aftel.offsetWidth; aftel.className = "rc-aftel toon" + (k === 3 ? " go" : "");
-      if (k === 3) { baan.classList.add("open"); SND.schot(); SND.juich(1.6, .35); } else SND.piep(false);
+      if (k === 3) { baan.classList.add("open"); SND.schot(); }
       try { navigator.vibrate?.(k === 3 ? 120 : 30); } catch {}
       k++; teller = setTimeout(tel, 700);
     };
@@ -261,25 +231,19 @@
         }
         const leider = pos.indexOf(voor);
         if (leider !== laatsteLeider && tijd > 2.5) { if (laatsteLeider >= 0) melding(`${S.kamelen[leider]} neemt de leiding!`, "leiding"); laatsteLeider = leider; }
-        if (!finale && voortgang > .8) { finale = true; baan.classList.add("finale"); melding("De laatste meters! Wie pakt het?", "groot"); SND.juich(3.5, .45); }
+        if (!finale && voortgang > .8) { finale = true; baan.classList.add("finale"); melding("De laatste meters! Wie pakt het?", "groot"); }
         const rang = teken();
-        if ((bordTik += dt) > .3) { bordTik = 0; werkBord(rang); }
-        if ((stofTik += dt) > (slowmo ? .2 : .09)) { stofTik = 0; if (!rustig) stof(); }
-        if ((hoefTik += sdt) > .11) { hoefTik = 0; SND.hoef(slowmo ? .12 : .06 + Math.random() * .06); }
         if (voor >= BAAN && !klaar) {
           klaar = true; loper = null;
           removeEventListener("resize", meet);
-          baan.classList.remove("rent", "finale", "slowmo"); baan.classList.add("flits");
+          baan.classList.remove("rent", "finale", "slowmo");
           const volgorde = pos.map((p, i) => [p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => S.kamelen[i]);
           els[S.kamelen.indexOf(volgorde[0])]?.classList.add("winnaar");
-          melding(`FINISH! ${volgorde[0]} wint!`, "groot");
-          werkBord(pos.map((p, i) => [p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => i));
-          SND.juich(3, .6); SND.piep(true);
-          /* Fotofinish: bevroren beeld met het verschil tussen nummer 1 en 2 */
+          SND.applaus();
           const gs = [...pos].sort((a, b) => b - a), marge = gs[0] - gs[1];
-          const verschil = marge < .6 ? "met een neuslengte" : marge < 1.5 ? "met een halve bult" : marge < 4 ? `met ${marge.toFixed(1).replace(".", ",")} meter` : "met een straatlengte voorsprong";
-          baan.insertAdjacentHTML("beforeend", `<div class="rc-foto"><span class="rc-foto-k">📸 Fotofinish</span><b>${esc(volgorde[0])}</b><span>wint ${verschil}</span></div>`);
-          baan.classList.add("bevroren");
+          const verschil = marge < .6 ? "met een neuslengte" : marge < 1.5 ? "met een halve bult" : marge < 4 ? `met ${marge.toFixed(1).replace(".", ",")} meter voorsprong` : "met een straatlengte voorsprong";
+          baan.querySelectorAll(".rc-lane").forEach((l, i) => l.classList.add(S.kamelen[i] === volgorde[0] ? "win" : "uit"));
+          melding(`${volgorde[0]} wint ${verschil}!`, "groot");
           document.getElementById("rc-afbreken")?.remove();
           try { window.schietConfetti?.(); } catch {}
           setTimeout(() => afrekenen(volgorde), 1900);
@@ -332,7 +296,7 @@
     if (a === "naar-inzet") S.fase = "inzet";
     if (a === "terug" || a === "setup") S.fase = "setup";
     if (a === "start") { ac(); return race(); }
-    if (a === "geluid") { try { localStorage.setItem("kamelen-race-geluid", geluidAan() ? "uit" : "aan"); } catch {} b.textContent = geluidAan() ? "🔊" : "🔇"; return; }
+    if (a === "geluid") { try { localStorage.setItem("kamelen-race-geluid", geluidAan() ? "uit" : "aan"); } catch {} b.textContent = geluidAan() ? "🔊 Geluid aan" : "🔇 Geluid uit"; return; }
     if (a === "afbreken") { stopTimers(); S.fase = "inzet"; }
     if (a === "opnieuw") { S.inzet = {}; S.fase = "inzet"; }
     if (a === "reset") { S.tel = {}; S.races = 0; S.inzet = {}; }
