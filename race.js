@@ -130,6 +130,7 @@
         <div class="rc-lane"><span class="rc-lnaam">${esc(k)}</span><div class="rc-zand"><span class="rc-start" aria-hidden="true"><i></i><i></i></span>
           <span class="rc-kameel" id="rc-k${i}"><span class="rc-kroon" aria-hidden="true">👑</span><span class="rc-plek" aria-hidden="true"></span><span class="rc-sprong"><span class="rc-lijf">🐪</span></span><span class="rc-stof" aria-hidden="true"></span></span>
           <span class="rc-finish"><i class="rc-lint"></i></span></div></div>`).join("")}
+        <span class="rc-leeuw" id="rc-leeuw" aria-hidden="true"><span class="rc-leeuw-lijf"><svg viewBox="0 0 84 54" class="rc-leeuw-svg"><path d="M18 26 Q8 26 6 16 Q5 11 8 9" stroke="#d99a3e" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M8 9 q-4 -3 -2 -6 q3 1 4 -1 q2 3 0 6 z" fill="#7a3c0e" stroke="#4e2408" stroke-width=".8"/><g class="lw-achter"><path d="M24 32 L18 44 L14 50" stroke="#c98a34" stroke-width="6.5" stroke-linecap="round" fill="none"/><ellipse cx="13" cy="50.5" rx="4" ry="2.2" fill="#c98a34" stroke="#7a4a14" stroke-width="1"/></g><g class="lw-voor"><path d="M50 33 L56 43 L60 49" stroke="#c98a34" stroke-width="6.5" stroke-linecap="round" fill="none"/><ellipse cx="61" cy="49.5" rx="4" ry="2.2" fill="#c98a34" stroke="#7a4a14" stroke-width="1"/></g><ellipse cx="36" cy="27" rx="21" ry="10.5" fill="#e8ad52" stroke="#8a5a1c" stroke-width="1.4"/><path d="M22 30 Q34 36 50 31" stroke="#f6d08a" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/><g class="lw-achter2"><path d="M30 33 L28 45 L25 51" stroke="#e8ad52" stroke-width="7" stroke-linecap="round" fill="none"/><ellipse cx="25" cy="51.2" rx="4.4" ry="2.3" fill="#e8ad52" stroke="#8a5a1c" stroke-width="1"/></g><g class="lw-voor2"><path d="M45 33 L46 45 L49 51" stroke="#e8ad52" stroke-width="7" stroke-linecap="round" fill="none"/><ellipse cx="50" cy="51.2" rx="4.4" ry="2.3" fill="#e8ad52" stroke="#8a5a1c" stroke-width="1"/></g><path d="M60 4 L64 8 L69 5 L70 10 L76 10 L74 15 L79 18 L74 21 L77 26 L71 27 L71 33 L66 30 L62 35 L59 30 L53 32 L54 26 L48 24 L53 20 L49 15 L55 14 L54 8 L59 10 Z" fill="#a8571c" stroke="#5e2e0a" stroke-width="1.3" stroke-linejoin="round"/><circle cx="62" cy="11.5" r="3" fill="#e8ad52" stroke="#8a5a1c" stroke-width="1"/><circle cx="62" cy="11.5" r="1.3" fill="#c98a34"/><path d="M58 19 Q58 11 66 12 Q74 13 74 20 Q74 27 66 27 Q58 27 58 19 Z" fill="#f0b85c" stroke="#8a5a1c" stroke-width="1.2"/><path d="M70 18 Q76 18 76.5 21 Q76 24.5 70 24.5 Z" fill="#f6d08a" stroke="#8a5a1c" stroke-width="1"/><path d="M74.6 18.8 l2.2 .6 -1.6 1.8 z" fill="#3a1e08"/><g class="lw-bek"><path d="M70 23.4 Q74 26.5 77 23.6 L77 27 Q73 30 69.5 26 Z" fill="#7a1e1e" stroke="#4e1208" stroke-width=".8"/><path d="M71.5 24.6 l.8 1.4 .8-1.2 M74 24.9 l.7 1.3 .8-1.4" stroke="#fff" stroke-width=".9" fill="none"/></g><path d="M65 16.6 q1.6 -1.6 3.4 -.4" stroke="#5e2e0a" stroke-width="1.2" fill="none" stroke-linecap="round"/><circle cx="67" cy="18.4" r="1.3" fill="#2a1606"/><circle cx="67.4" cy="18" r=".4" fill="#fff"/></svg></span></span>
         <span class="rc-jager" id="rc-jager" aria-hidden="true"><span class="rc-jager-lijf"><svg viewBox="0 0 72 64" class="rc-jager-svg"><g class="jg-been2"><path d="M26 38 L22 50 L19 58" stroke="#5f6b30" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M14 57 h10 q3 0 3 3 v1 h-14 z" fill="#8a6a3e" stroke="#4a3418" stroke-width="1.2"/></g><path d="M22 24 Q30 21 37 24 L38 40 Q30 42 23 40 Z" fill="#8f9a52" stroke="#4d5426" stroke-width="1.4"/><path d="M26 27 h5 v5 h-5 z M33 27 h4 v5 h-4z" fill="#7c8746" stroke="#4d5426" stroke-width=".8"/><rect x="22.5" y="37" width="15.5" height="3.2" fill="#4a3418"/><rect x="29" y="37" width="3" height="3.2" fill="#c9a14a"/><g class="jg-been1"><path d="M33 38 L37 49 L36 58" stroke="#6d7a3a" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M33 57 h10 q3 0 3 3 v1 h-14 z" fill="#a07a48" stroke="#4a3418" stroke-width="1.2"/></g><g class="jg-geweer"><path d="M24 31 L40 28 L41 31 L28 34 Q25 35 24 33 Z" fill="#8b5a2b" stroke="#4a2e12" stroke-width="1"/><rect x="39" y="27.2" width="31" height="2.6" rx="1" fill="#2d2d2d"/><rect x="42" y="23" width="12" height="3.4" rx="1.6" fill="#1e1e1e"/><rect x="45" y="26" width="2" height="1.8" fill="#1e1e1e"/><rect x="40" y="29.5" width="12" height="2.2" rx="1" fill="#8b5a2b"/></g><path d="M27 26 Q24 31 30 32 L38 31" stroke="#8f9a52" stroke-width="5" stroke-linecap="round" fill="none"/><path d="M35 25 Q42 27 46 29" stroke="#7c8746" stroke-width="4.6" stroke-linecap="round" fill="none"/><circle cx="38.5" cy="31" r="2.4" fill="#eab48c"/><circle cx="46.5" cy="29.6" r="2.3" fill="#eab48c"/><path d="M27 18 Q27 10 33 10 Q39 10 39 17 Q39 23 33 23 Q28 23 27 18 Z" fill="#f2c29b" stroke="#a8724a" stroke-width="1"/><path d="M33.5 19.6 Q36.5 17.8 39.4 19.2 Q41.4 20 42 18.4 Q42.2 21.6 38.8 21.2 Q36.6 20.8 34.6 21.6 Q32.6 21.6 33.5 19.6 Z" fill="#b8742a" stroke="#6e420f" stroke-width=".7"/><circle cx="36" cy="15.6" r="1.2" fill="#2b4a7a"/><path d="M34.2 13.6 l3.6 -.6" stroke="#6b4518" stroke-width="1.2" stroke-linecap="round"/><path d="M39 16.5 q1.6 .8 0 2" stroke="#a8724a" stroke-width="1" fill="none"/><ellipse cx="32.5" cy="11.2" rx="11" ry="2.6" fill="#e3d6b4" stroke="#8a7a52" stroke-width="1"/><path d="M25 11 Q25 2 32.5 2 Q40 2 40 11 Z" fill="#efe4c6" stroke="#8a7a52" stroke-width="1"/><path d="M25.3 9.4 Q32.5 7.6 39.7 9.4 L39.9 10.8 Q32.5 9.2 25.1 10.8 Z" fill="#8a6a3e"/></svg></span></span>
         <div class="rc-aftel" id="rc-aftel" aria-live="assertive"></div></div>
       <div class="rc-feed" id="rc-feed" aria-live="polite"></div>
@@ -158,12 +159,26 @@
     const rustig = matchMedia("(prefers-reduced-motion: reduce)").matches;
     /* De jager: rent achter de kamelen aan en schiet er altijd precies één neer */
     const jager = document.getElementById("rc-jager"), lanes = [...baan.querySelectorAll(".rc-zand")];
-    let dood = -1, doelwit = r(N), jagerLaan = r(N), jagerFase = 0, aanleggenTot = 0, wisselOm = 1.5;
+    let doelwit = r(N), jagerLaan = r(N), jagerFase = 0, aanleggenTot = 0, wisselOm = 1.5;
+    const doden = new Map();   // index -> "neergeschoten" | "doodgebeten"
     const schotMoment = .3 + Math.random() * .35;   // voortgang van de koploper waarop hij schiet
-    const levend = i => i !== dood;
-    const zetJager = (hx, laan) => {
-      const z = lanes[laan]; if (!z || !jager) return;
-      jager.style.transform = `translate3d(${(z.offsetLeft + hx / BAAN * breedte - 6).toFixed(1)}px,${(z.offsetTop + z.offsetHeight / 2).toFixed(1)}px,0) translateY(-50%)`;
+    const levend = i => !doden.has(i);
+    /* De leeuw: komt alleen soms mee, vaker naarmate er meer kamelen racen (3: 20%, 5: ~45%, 6: ~55%, 8: ~80%) */
+    const leeuw = document.getElementById("rc-leeuw");
+    const leeuwKomt = Math.random() < Math.min(.82, .2 + (N - 3) * .12);
+    const leeuwMoment = .22 + Math.random() * .5;
+    let leeuwFase = leeuwKomt ? 0 : 9, leeuwLaan = r(N), leeuwWissel = 2, leeuwProoi = -1, leeuwX = 0, sprongTot = 0;
+    if (!leeuwKomt && leeuw) leeuw.remove();
+    const dood = (i, hoe) => {
+      doden.set(i, hoe); duw[i] = 0;
+      const el = els[i]; el?.classList.remove("doelwit", "hop", "val", "leider"); el?.classList.add("dood", hoe === "doodgebeten" ? "gebeten" : "geschoten");
+      const fx = document.createElement("span"); fx.className = "rc-pang"; fx.textContent = hoe === "doodgebeten" ? "🩸" : "💥"; el?.appendChild(fx);
+      baan.querySelectorAll(".rc-lane")[i]?.classList.add("dood");
+      try { navigator.vibrate?.([60, 40, 200]); } catch {}
+    };
+    const zetDier = (wie, hx, laan) => {
+      const z = lanes[laan]; if (!z || !wie) return;
+      wie.style.transform = `translate3d(${(z.offsetLeft + hx / BAAN * breedte - 6).toFixed(1)}px,${(z.offsetTop + z.offsetHeight / 2).toFixed(1)}px,0) translateY(-50%)`;
     };
 
     const melding = (t, soort = "") => { const p = document.createElement("p"); p.textContent = t; if (soort) p.className = soort; feed.prepend(p); while (feed.children.length > 4) feed.lastChild.remove(); };
@@ -175,14 +190,14 @@
       el.classList.remove("hop", "val"); void el.offsetWidth; el.classList.add(d > 0 ? "hop" : "val");
     };
     const teken = () => {
-      const rang = pos.map((p, i) => [i === dood ? -1 : p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => i);
+      const rang = pos.map((p, i) => [doden.has(i) ? -1 : p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => i);
       els.forEach((el, i) => {
         if (!el) return;
         const x = Math.min(pos[i], BAAN) / BAAN * breedte;
         el.style.transform = `translate3d(${x.toFixed(1)}px,-50%,0)`;
         const plek = rang.indexOf(i) + 1;
-        el.classList.toggle("leider", plek === 1 && pos[i] > 3 && i !== dood);
-        const pl = el.querySelector(".rc-plek"); if (pl) pl.textContent = i === dood ? "✝" : pos[i] > 3 ? plek : "";
+        el.classList.toggle("leider", plek === 1 && pos[i] > 3 && levend(i));
+        const pl = el.querySelector(".rc-plek"); if (pl) pl.textContent = doden.has(i) ? "✝" : pos[i] > 3 ? plek : "";
       });
     };
 
@@ -220,7 +235,7 @@
         /* Gebeurtenissen: hoe verder, hoe vaker en hoe groter */
         if (tijd >= volgendEvent) {
           volgendEvent = tijd + (1.15 - voortgang * .6) * (.8 + Math.random() * .4);
-          let i = r(N); if (!levend(i)) i = (i + 1) % N;
+          const alive = [...Array(N).keys()].filter(levend), i = alive[r(alive.length)];
           const [tekst, b] = kiesGebeurtenis(voortgang), d = Math.round(b * (1 + voortgang * .8));
           duw[i] += d; ballon(i, d);
           melding(tekst(S.kamelen[i]), (d > 0 ? "plus" : "min") + (Math.abs(d) >= 7 ? " mega" : ""));
@@ -230,23 +245,45 @@
           const achter = Math.min(...pos.filter((_, i) => levend(i)));
           if (jagerFase === 0) {
             if (tijd > wisselOm) { wisselOm = tijd + 1.2 + Math.random() * 1.4; jagerLaan = r(N); }
-            if (voortgang >= schotMoment) {
+            if (voortgang >= schotMoment && leeuwFase !== 1) {
+              if (!levend(doelwit)) doelwit = [...Array(N).keys()].filter(levend)[r(N - doden.size)];
               jagerFase = 1; aanleggenTot = tijd + 1; jagerLaan = doelwit;
               jager.classList.add("richt"); els[doelwit]?.classList.add("doelwit");
               melding(`De jager legt aan op ${S.kamelen[doelwit]}…`, "min");
             }
-            zetJager(Math.max(0, achter - 9), jagerLaan);
+            zetDier(jager, Math.max(0, achter - 9), jagerLaan);
           } else if (jagerFase === 1) {
-            zetJager(Math.max(0, Math.min(pos[doelwit] - 12, achter - 6)), jagerLaan);
+            zetDier(jager, Math.max(0, Math.min(pos[doelwit] - 12, achter - 6)), jagerLaan);
             if (tijd >= aanleggenTot) {
-              jagerFase = 2; dood = doelwit; duw[dood] = 0;
-              const el = els[dood]; el?.classList.remove("doelwit", "hop", "val", "leider"); el?.classList.add("dood");
-              const pang = document.createElement("span"); pang.className = "rc-pang"; pang.textContent = "💥"; el?.appendChild(pang);
+              jagerFase = 2; dood(doelwit, "neergeschoten");
               jager.classList.remove("richt"); jager.classList.add("schiet");
-              baan.querySelectorAll(".rc-lane")[dood]?.classList.add("dood");
-              melding(`PANG! ${S.kamelen[dood]} is neergeschoten en blijft liggen.`, "min mega");
-              try { navigator.vibrate?.([60, 40, 200]); } catch {}
+              melding(`PANG! ${S.kamelen[doelwit]} is neergeschoten en blijft liggen.`, "min mega");
               setTimeout(() => { jager.classList.add("weg"); jagerFase = 3; }, 1300);
+            }
+          }
+        }
+        /* Leeuw */
+        if (leeuw && leeuwFase < 3) {
+          const achter = Math.min(...pos.filter((_, i) => levend(i)));
+          if (leeuwFase === 0) {
+            if (tijd > leeuwWissel) { leeuwWissel = tijd + 1 + Math.random() * 1.5; leeuwLaan = r(N); }
+            leeuwX = Math.max(0, achter - 14);
+            const kandidaten = [...Array(N).keys()].filter(i => levend(i) && !(jagerFase === 1 && i === doelwit));
+            if (voortgang >= leeuwMoment && jagerFase !== 1 && kandidaten.length > 1) {
+              leeuwFase = 1; leeuwProoi = kandidaten[r(kandidaten.length)]; leeuwLaan = leeuwProoi; sprongTot = tijd + .8;
+              leeuw.classList.add("sprint");
+              melding(`Er rent een leeuw achter ${S.kamelen[leeuwProoi]} aan!`, "min");
+            }
+            zetDier(leeuw, leeuwX, leeuwLaan);
+          } else if (leeuwFase === 1) {
+            const doelX = pos[leeuwProoi] - 4;
+            leeuwX += (doelX - leeuwX) * Math.min(1, sdt * 6);
+            zetDier(leeuw, Math.max(0, leeuwX), leeuwLaan);
+            if (tijd >= sprongTot) {
+              leeuwFase = 2; dood(leeuwProoi, "doodgebeten");
+              leeuw.classList.remove("sprint"); leeuw.classList.add("bijt");
+              melding(`GRAUW! De leeuw bijt ${S.kamelen[leeuwProoi]} dood.`, "min mega");
+              setTimeout(() => { leeuw.classList.add("weg"); leeuwFase = 3; }, 1400);
             }
           }
         }
@@ -258,15 +295,15 @@
           klaar = true; loper = null;
           removeEventListener("resize", meet);
           baan.classList.remove("rent", "finale", "slowmo"); baan.classList.add("flits");
-          const volgorde = pos.map((p, i) => [i === dood ? -1 : p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => S.kamelen[i]);
+          const volgorde = pos.map((p, i) => [doden.has(i) ? -1 : p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => S.kamelen[i]);
           els[S.kamelen.indexOf(volgorde[0])]?.classList.add("winnaar");
           baan.querySelectorAll(".rc-lane")[S.kamelen.indexOf(volgorde[0])]?.classList.add("win");
-          const gs = pos.filter((_, i) => levend(i)).sort((a, b) => b - a), marge = gs[0] - gs[1];
+          const gs = pos.filter((_, i) => levend(i)).sort((a, b) => b - a), marge = gs.length > 1 ? gs[0] - gs[1] : 99;
           const verschil = marge < .6 ? "met een neuslengte" : marge < 1.5 ? "met een halve bult" : marge < 4 ? `met ${marge.toFixed(1).replace(".", ",")} meter voorsprong` : "met een straatlengte voorsprong";
           melding(`FINISH! ${volgorde[0]} wint ${verschil}!`, "groot");
           document.getElementById("rc-afbreken")?.remove();
           try { window.schietConfetti?.(); } catch {}
-          setTimeout(() => afrekenen(volgorde, dood >= 0 ? S.kamelen[dood] : null), 1100);
+          setTimeout(() => afrekenen(volgorde, Object.fromEntries([...doden].map(([i, hoe]) => [S.kamelen[i], hoe]))), 1100);
           return;
         }
         loper = requestAnimationFrame(frame);
@@ -277,7 +314,7 @@
   }
 
   /* ---------- 4. Afrekenen ---------- */
-  function afrekenen(volgorde, neer) {
+  function afrekenen(volgorde, neer = {}) {
     const winnaar = volgorde[0], n = S.kamelen.length;
     const regels = S.gokkers.filter(g => S.inzet[g]?.op).map(g => {
       const op = S.inzet[g].op, m = S.inzet[g].m || 1, t = S.tel[g] = S.tel[g] || { gedronken: 0, uitgedeeld: 0 };
@@ -289,7 +326,7 @@
     const el = document.getElementById("rc-uitslag");
     el.innerHTML = `<div class="rc-res">
       <div class="rc-win">🏆 <b>${esc(winnaar)}</b> wint de race!</div>
-      <ol class="rc-volg">${volgorde.map((k, i) => `<li>${k === neer ? "✝ " : i === 0 ? "🥇 " : i === 1 ? "🥈 " : i === 2 ? "🥉 " : ""}${esc(k)}${k === neer ? " (neergeschoten)" : ""}</li>`).join("")}</ol>
+      <ol class="rc-volg">${volgorde.map((k, i) => `<li>${neer[k] ? "✝ " : i === 0 ? "🥇 " : i === 1 ? "🥈 " : i === 2 ? "🥉 " : ""}${esc(k)}${neer[k] ? ` (${neer[k]})` : ""}</li>`).join("")}</ol>
       <table class="rc-tabel"><thead><tr><th>Gokker</th><th>Op</th><th class="r">Inzet</th><th class="r">Uitdelen</th><th class="r">Drinken</th></tr></thead><tbody>
       ${regels.map(x => `<tr><td>${esc(x.g)}</td><td>🐪 ${esc(x.op)}</td><td class="r">${x.m}</td><td class="r">${x.uitdelen ? `<b class="gd-pos">${x.uitdelen}</b>` : "–"}</td><td class="r">${x.drinken ? `<b class="gd-neg">${x.drinken}</b>` : "–"}</td></tr>`).join("")}</tbody></table>
       <p class="muted">Gewonnen: inzet × ${n} (het aantal kamelen) uitdelen. Verloren: je inzet zelf opdrinken.</p>

@@ -981,6 +981,21 @@ body.pong-actief .tabbar{display:none}
 .rc-jager.schiet .jg-geweer{animation:rcTerugslag .35s ease-out}
 @keyframes rcTerugslag{30%{transform:translateX(-4px) rotate(-10deg)}}
 @media (max-width:560px){.rc-jager{width:40px}}
+.rc-leeuw{position:absolute;left:0;top:0;z-index:2;width:54px;line-height:0;opacity:0;pointer-events:none;transition:transform .25s linear,opacity .4s;will-change:transform}
+.rc-leeuw.sprint{transition:transform .06s linear}
+.rc-leeuw-svg{display:block;width:100%;height:auto;overflow:visible;filter:drop-shadow(0 2px 1px rgba(90,60,10,.3))}
+.rc-baan.rent .rc-leeuw{opacity:1}
+.rc-leeuw.weg,.rc-baan:not(.rent) .rc-leeuw{opacity:0!important}
+.rc-leeuw-lijf{display:block;animation:rcJager .28s ease-in-out infinite}
+.rc-leeuw :is(.lw-voor,.lw-voor2,.lw-achter,.lw-achter2){transform-box:fill-box;transform-origin:50% 0}
+.rc-baan.rent .rc-leeuw :is(.lw-voor,.lw-achter2){animation:rcPoot .28s ease-in-out infinite alternate}
+.rc-baan.rent .rc-leeuw :is(.lw-voor2,.lw-achter){animation:rcPoot .28s ease-in-out infinite alternate-reverse}
+.rc-leeuw.sprint .rc-leeuw-lijf,.rc-leeuw.sprint :is(.lw-voor,.lw-voor2,.lw-achter,.lw-achter2){animation-duration:.16s!important}
+@keyframes rcPoot{from{transform:rotate(-28deg)}to{transform:rotate(24deg)}}
+.rc-leeuw.bijt .rc-leeuw-lijf{animation:rcBijt .25s ease-in-out 4}
+.rc-leeuw.bijt :is(.lw-voor,.lw-voor2,.lw-achter,.lw-achter2){animation:none!important}
+@keyframes rcBijt{50%{transform:translateX(5px) rotate(6deg)}}
+@media (max-width:560px){.rc-leeuw{width:48px}}
 .rc-kameel.doelwit::after{content:"🎯";position:absolute;right:-.2rem;top:-.9rem;font-size:.9rem;animation:rcRicht .5s ease-in-out infinite}
 @keyframes rcRicht{50%{transform:scale(1.25)}}
 .rc-kameel.dood .rc-lijf{animation:none!important;transform-origin:50% 55%;transform:scaleX(-1) rotate(180deg);filter:grayscale(.75) drop-shadow(0 2px 1px rgba(90,60,10,.3));transition:transform .4s cubic-bezier(.3,1.5,.5,1)}
@@ -3687,9 +3702,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795492600"></script>
-<script src="toto.js?v=1795492600"></script>
-<script src="pong.js?v=1795492600"></script>
+<script src="mex.js?v=1795492700"></script>
+<script src="toto.js?v=1795492700"></script>
+<script src="pong.js?v=1795492700"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3698,18 +3713,18 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795492600"></script>
-<script src="statistieken.js?v=1795492600"></script>
-<script src="wrapped.js?v=1795492600"></script>
-<script src="race.js?v=1795492600"></script>
-<script src="rad.js?v=1795492600"></script>
-<script src="fotos.js?v=1795492600"></script>
-<script src="quotes.js?v=1795492600"></script>
-<script src="ideeen.js?v=1795492600"></script>
-<script src="seizoen.js?v=1795492600"></script>
-<script src="zege.js?v=1795492600"></script>
-<script src="karavaan.js?v=1795492600"></script>
-<script src="design-proef.js?v=1795492600"></script>
-<script src="push.js?v=1795492600"></script>
+<script src="stemmen.js?v=1795492700"></script>
+<script src="statistieken.js?v=1795492700"></script>
+<script src="wrapped.js?v=1795492700"></script>
+<script src="race.js?v=1795492700"></script>
+<script src="rad.js?v=1795492700"></script>
+<script src="fotos.js?v=1795492700"></script>
+<script src="quotes.js?v=1795492700"></script>
+<script src="ideeen.js?v=1795492700"></script>
+<script src="seizoen.js?v=1795492700"></script>
+<script src="zege.js?v=1795492700"></script>
+<script src="karavaan.js?v=1795492700"></script>
+<script src="design-proef.js?v=1795492700"></script>
+<script src="push.js?v=1795492700"></script>
 </body>
 </html>
