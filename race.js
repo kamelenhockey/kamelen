@@ -197,10 +197,33 @@
     const leeuwValtAan = Math.random() < Math.min(.82, .2 + (N - 3) * .12);
     const leeuwMoment = leeuwValtAan ? .66 + Math.random() * .2 : 2;   // 2 = nooit
     let leeuwFase = 0, leeuwLaan = r(N), leeuwWissel = 2, leeuwProoi = -1, leeuwX = 0, sprongTot = 0;
+    /* De leeuw scheurt zijn prooi in stukken en blijft eten, ook als de race al voorbij is */
+    const verscheur = i => {
+      const el = els[i]; if (!el) return;
+      el.classList.add("verscheurd");
+      el.insertAdjacentHTML("beforeend", `<span class="rc-plas" aria-hidden="true"></span><span class="rc-stukken" aria-hidden="true"><span class="rc-stuk s1">🐪</span><span class="rc-stuk s2">🐪</span><span class="rc-stuk s3">🐪</span></span>`);
+      leeuw.classList.remove("bijt"); leeuw.classList.add("eet");
+      let vlekken = 0;
+      const spat = (veel) => {
+        if (!el.isConnected) return clearInterval(tik);
+        for (let k = 0; k < (veel ? 7 : 2); k++) {
+          const d = document.createElement("span"); d.className = "rc-spat";
+          const s = 3 + Math.random() * 5; d.style.width = d.style.height = s + "px";
+          el.appendChild(d);
+          const hoek = Math.random() * Math.PI * 2, afst = 14 + Math.random() * 30, dx = Math.cos(hoek) * afst, dy = Math.sin(hoek) * afst * .6 - 6;
+          d.animate([{ transform: "translate(0,0) scale(1)", opacity: 1 }, { transform: `translate(${dx}px,${dy - 10}px) scale(1.1)`, offset: .5 }, { transform: `translate(${dx * 1.2}px,${dy + 8}px) scale(.9)`, opacity: .9 }],
+            { duration: 500 + Math.random() * 300, easing: "ease-out", fill: "forwards" }).onfinish = () => {
+              if (vlekken < 40) { vlekken++; d.classList.add("vlek"); } else d.remove();
+            };
+        }
+      };
+      spat(true);
+      const tik = setInterval(() => spat(false), 260);
+    };
     const dood = (i, hoe) => {
       doden.set(i, hoe); duw[i] = 0;
-      const el = els[i]; el?.classList.remove("doelwit", "hop", "val", "leider"); el?.classList.add("dood", hoe === "doodgebeten" ? "gebeten" : "geschoten");
-      const fx = document.createElement("span"); fx.className = "rc-pang"; fx.textContent = hoe === "doodgebeten" ? "🩸" : "💥"; el?.appendChild(fx);
+      const el = els[i]; el?.classList.remove("doelwit", "hop", "val", "leider"); el?.classList.add("dood", hoe.startsWith("verscheurd") ? "gebeten" : "geschoten");
+      const fx = document.createElement("span"); fx.className = "rc-pang"; fx.textContent = hoe.startsWith("verscheurd") ? "🩸" : "💥"; el?.appendChild(fx);
       baan.querySelectorAll(".rc-lane")[i]?.classList.add("dood");
       try { navigator.vibrate?.([60, 40, 200]); } catch {}
     };
@@ -308,10 +331,10 @@
             leeuwX += (doelX - leeuwX) * Math.min(1, sdt * 6);
             zetDier(leeuw, Math.max(0, leeuwX), leeuwLaan);
             if (tijd >= sprongTot) {
-              leeuwFase = 2; dood(leeuwProoi, "doodgebeten"); brulGeluid();
+              leeuwFase = 2; dood(leeuwProoi, "verscheurd door de leeuw"); brulGeluid(); zetDier(leeuw, Math.max(0, pos[leeuwProoi] - 3), leeuwLaan);
               leeuw.classList.remove("sprint"); leeuw.classList.add("bijt");
-              melding(`GRAUW! De leeuw bijt ${S.kamelen[leeuwProoi]} dood.`, "min mega");
-              setTimeout(() => { leeuw.classList.add("weg"); leeuwFase = 3; }, 1400);
+              melding(`GRAUW! De leeuw grijpt ${S.kamelen[leeuwProoi]} en scheurt hem aan stukken.`, "min mega");
+              leeuwFase = 3; verscheur(leeuwProoi);
             }
           }
         }
