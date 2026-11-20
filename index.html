@@ -1344,6 +1344,34 @@ body.camel-proef .matchday .squad li::before{color:var(--cb-zacht)}
 body.camel-proef .matchday .md-opp-h2h{color:var(--cb-ink)}
 body.camel-proef .matchday .k,body.camel-proef .matchday .md-empty{color:var(--cb-zacht)}
 body.camel-proef .matchday .md-empty,body.camel-proef .matchday .card{background:rgba(255,255,255,.5);border-color:rgba(47,79,115,.15);color:var(--cb-ink)}
+/* Proef: hele app in lichtblauw en goudgeel */
+body.camel-proef{--orange:#f0a51e;--orange-ink:#a8690a;--orange-soft:#fff3d6}
+body.camel-proef nav.bar,body.camel-proef .tabbar,body.camel-proef.design-proef .dp-mini{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='24'%3E%3Cpath d='M0 12 C 20 4 40 4 60 12 S 100 20 120 12' fill='none' stroke='%23ffffff' stroke-opacity='.35' stroke-width='1.2'/%3E%3C/svg%3E") 0 0/120px 24px,linear-gradient(180deg,#d9eefb 0%,#b5dbf4 100%)!important;border-top-color:#9fcdef}
+body.camel-proef nav.bar{box-shadow:0 1px 0 #9fcdef}
+body.camel-proef nav.bar a{color:#2f4f73}
+body.camel-proef nav.bar a:hover,body.camel-proef nav.bar a[aria-current="page"]{color:#1f3a59}
+body.camel-proef .tabbar a,body.camel-proef .tabbar button{color:#5b7898}
+body.camel-proef .tabbar [aria-current="page"],body.camel-proef .tabbar button[aria-expanded="true"]{color:#c97c06}
+body.camel-proef.design-proef .dp-mini{color:#2f4f73;box-shadow:0 4px 14px -10px rgba(47,79,115,.6)}
+body.camel-proef .btn:not(.ghost){background:#3b6a96}
+body.camel-proef .pred-model,body.camel-proef .wm-model{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='24'%3E%3Cpath d='M0 12 C 20 4 40 4 60 12 S 100 20 120 12' fill='none' stroke='%23ffffff' stroke-opacity='.35' stroke-width='1.2'/%3E%3C/svg%3E") 0 0/120px 24px,linear-gradient(180deg,#d9eefb 0%,#b5dbf4 100%)!important;color:#2f4f73}
+body.camel-proef .pred-model .pmod-tekst span,body.camel-proef .wm-model .k,body.camel-proef .wm-kansen,body.camel-proef .wm-model .mm-voet{color:#5b7898}
+body.camel-proef .pred-model .btn.ghost{color:#2f4f73;border-color:rgba(47,79,115,.3)}
+body.camel-proef .dlg-head.ours-team{background:#d9eefb}
+body.camel-proef .kz-banner:not(.jarig){background:#f5c04a}
+body.camel-proef .seg-switch{background:#cfe6f7}
+body.camel-proef .hero:not(.x){border-bottom-color:#9fcdef}
+@media (min-width:761px){body.camel-proef.home-proef[data-page="home"] .hero::after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 46' preserveAspectRatio='none'%3E%3Cpath d='M0 30 C 180 6 360 6 560 22 S 940 44 1140 22 S 1360 10 1440 18 V46 H0Z' fill='%23d9eefb'/%3E%3C/svg%3E") bottom/100% 100% no-repeat}}
+body.camel-proef :is(.pred-summary,.mx-board,.tt-next,.kz-head,.stat-strip,.fine.big){background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='24'%3E%3Cpath d='M0 12 C 20 4 40 4 60 12 S 100 20 120 12' fill='none' stroke='%23ffffff' stroke-opacity='.35' stroke-width='1.2'/%3E%3C/svg%3E") 0 0/120px 24px,linear-gradient(180deg,#d9eefb 0%,#b5dbf4 100%)!important;color:#2f4f73!important;border:1px solid #a9d3f1}
+body.camel-proef :is(.pred-summary,.mx-board,.tt-next,.kz-head,.stat-strip,.fine.big) :is(.k,.s,.l,small,.mx-hint,p){color:#5b7898!important}
+body.camel-proef :is(.pred-summary,.mx-board,.tt-next,.kz-head,.stat-strip,.fine.big) > div + div{border-color:rgba(47,79,115,.15)!important}
+body.camel-proef :is(.pred-summary,.mx-board,.tt-next,.kz-head,.stat-strip,.fine.big) :is(.v,.big,b,strong,h2,h3){color:#2f4f73}
+body.camel-proef .pred-summary .v.up{color:#2f8a57}body.camel-proef .pred-summary .v.down{color:#c94430}
+body.camel-proef :is(.pred-summary,.mx-board,.tt-next,.kz-head,.stat-strip,.fine.big) *{color:#2f4f73!important}
+body.camel-proef :is(.pred-summary,.mx-board,.tt-next,.kz-head,.stat-strip,.fine.big) :is(.k,.s,.l,small,.mx-hint,p,.sub,.meta){color:#5b7898!important}
+body.camel-proef .tt-next .tt-when{color:#5b7898!important}body.camel-proef .tt-next .team-link.ours,body.camel-proef .tt-next .k{color:#c97c06!important}
+body.camel-proef .pred-summary .v.up{color:#2f8a57!important}body.camel-proef .pred-summary .v.down{color:#c94430!important}
+body.camel-proef :is(.seg button[aria-pressed=true],.q-filter button[aria-pressed=true],.tt-chip.tt-model,.tt-bot,.rc-k.on){background:#3b6a96!important;color:#fff!important}
 /* Ideeënbox */
 .idee-form{padding:18px 20px;margin-bottom:18px}
 .idee-soorten{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
@@ -3347,7 +3375,7 @@ laadGegevens(false);
     let i = 0; try { i = (Number(localStorage.getItem("kamelen-hero-foto")) + 1) % FOTOS.length || 0; localStorage.setItem("kamelen-hero-foto", i); } catch {}
     const zet = n => {
       const f = FOTOS[n], img = document.querySelector(".hero .hero-foto"), hero = document.querySelector(".hero");
-      hero.style.setProperty("--fd", f.d); hero.style.setProperty("--fm", f.m); document.documentElement.style.setProperty("--tint", f.bg || "#f2f5f7");
+      hero.style.setProperty("--fd", f.d); hero.style.setProperty("--fm", f.m); document.documentElement.style.setProperty("--tint", f.bg || "#f2f5f7"); document.documentElement.style.setProperty("--bg", f.bg || "#f2f5f7");
       img.style.animation = "none"; void img.offsetWidth; img.style.animation = ""; img.src = f.src;
     };
     zet(i);
@@ -3364,7 +3392,7 @@ laadGegevens(false);
     if (sessionStorage.getItem("kamelen-kleur-proef") !== "1") return;
     document.body.classList.add("camel-proef");
     const l = document.createElement("div"); l.className = "proef-label"; l.style.bottom = "calc(104px + env(safe-area-inset-bottom))";
-    l.innerHTML = `<span>Kleurproef wedstrijdblok</span><a href="?kleur=uit#home">Uitzetten</a>`;
+    l.innerHTML = `<span>Kleurproef</span><a href="?kleur=uit#home">Uitzetten</a>`;
     document.body.appendChild(l);
   } catch {}
 })();
@@ -3536,9 +3564,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795490700"></script>
-<script src="toto.js?v=1795490700"></script>
-<script src="pong.js?v=1795490700"></script>
+<script src="mex.js?v=1795491000"></script>
+<script src="toto.js?v=1795491000"></script>
+<script src="pong.js?v=1795491000"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3547,15 +3575,15 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795490700"></script>
-<script src="statistieken.js?v=1795490700"></script>
-<script src="wrapped.js?v=1795490700"></script>
-<script src="race.js?v=1795490700"></script>
-<script src="rad.js?v=1795490700"></script>
-<script src="fotos.js?v=1795490700"></script>
-<script src="quotes.js?v=1795490700"></script>
-<script src="ideeen.js?v=1795490700"></script>
-<script src="design-proef.js?v=1795490700"></script>
-<script src="push.js?v=1795490700"></script>
+<script src="stemmen.js?v=1795491000"></script>
+<script src="statistieken.js?v=1795491000"></script>
+<script src="wrapped.js?v=1795491000"></script>
+<script src="race.js?v=1795491000"></script>
+<script src="rad.js?v=1795491000"></script>
+<script src="fotos.js?v=1795491000"></script>
+<script src="quotes.js?v=1795491000"></script>
+<script src="ideeen.js?v=1795491000"></script>
+<script src="design-proef.js?v=1795491000"></script>
+<script src="push.js?v=1795491000"></script>
 </body>
 </html>
