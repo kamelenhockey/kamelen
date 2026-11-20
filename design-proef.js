@@ -11,16 +11,6 @@
   document.body.classList.add("design-proef");
   const rustig = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- 1. Glazen kaarten: de foto blijft vast achter de pagina staan ---------- */
-  const achter = document.createElement("div");
-  achter.className = "dp-achter"; achter.setAttribute("aria-hidden", "true");
-  document.body.prepend(achter);
-  const zetAchter = () => {
-    const src = document.querySelector(".hero .hero-foto")?.getAttribute("src");
-    if (src) achter.style.backgroundImage = `url("${src}")`;
-  };
-  zetAchter(); new MutationObserver(zetAchter).observe(document.querySelector(".hero .hero-foto") || document.body, { attributes: true, attributeFilter: ["src"] });
-
   /* ---------- 2. Kop die meeschuift + compacte balk ---------- */
   const mini = document.createElement("div");
   mini.className = "dp-mini"; mini.setAttribute("aria-hidden", "true");
@@ -34,7 +24,7 @@
     const h = hero ? hero.offsetHeight : 200;
     if (foto && !rustig && document.body.dataset.page === "home") {
       const t = Math.min(y, h);
-      foto.style.transform = `translateY(${t * .45}px) scale(${1 + t / 1600})`;
+      foto.style.transform = `translate3d(0,${Math.round(t * .4)}px,0)`;
     }
     mini.classList.toggle("zicht", y > h - 50);
   };
@@ -51,9 +41,11 @@
   const loop = () => {
     if (!tabbar) return;
     const actief = tabbar.querySelector('[aria-current="page"]') || tabbar.querySelector('button[aria-expanded="true"]');
-    if (!actief) { kameel.style.opacity = 0; return; }
+    /* Alleen tonen als er onder de tabjes ruimte is (iPhone met thuisbalk), zodat hij nergens overheen loopt */
+    const ruimte = parseFloat(getComputedStyle(tabbar).paddingBottom) || 0;
+    if (!actief || ruimte < 22) { kameel.style.opacity = 0; return; }
     const tb = tabbar.getBoundingClientRect(), r = actief.getBoundingClientRect();
-    const x = r.left - tb.left + r.width / 2 - 14;
+    const x = r.left - tb.left + r.width / 2 - 11;
     kameel.style.opacity = 1;
     if (vorigeX !== null && Math.abs(x - vorigeX) > 2 && !rustig) {
       kameel.classList.toggle("links", x < vorigeX);

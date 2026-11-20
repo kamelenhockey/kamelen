@@ -1266,25 +1266,20 @@ body:not([data-page="home"]) .proef-label{display:none}
   body.home-proef[data-page="home"] .hero::before{background:linear-gradient(180deg,rgba(22,54,80,.25) 0%,rgba(22,54,80,0) 25%)}
   body.home-proef[data-page="home"] .hero .wrap{padding-top:calc(min(68vw,290px) - 34px)!important;padding-bottom:44px!important}
   body.home-proef[data-page="home"] .hero .wrap > img{width:76px!important}
-  body.home-proef[data-page="home"] .hero::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 46' preserveAspectRatio='none'%3E%3Cpath d='M0 30 C 180 6 360 6 560 22 S 940 44 1140 22 S 1360 10 1440 18 V46 H0Z' fill='%23b9d8e8'/%3E%3C/svg%3E")}
+  body.home-proef[data-page="home"] .hero::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 46' preserveAspectRatio='none'%3E%3Cpath d='M0 30 C 180 6 360 6 560 22 S 940 44 1140 22 S 1360 10 1440 18 V46 H0Z' fill='%23f2f5f7'/%3E%3C/svg%3E")}
 }
 /* ---------- Design-proef (?design=proef) ---------- */
 .dp-achter,.dp-mini,.dp-zand,.dp-tabkameel{display:none}
 body.design-proef .dp-label{bottom:calc(104px + env(safe-area-inset-bottom))}
 body.design-proef:not([data-page="home"]) .dp-label{display:flex}
-/* 1. glazen kaarten op home */
-body.design-proef[data-page="home"] .dp-achter{display:block;position:fixed;inset:-30px;z-index:-1;background:var(--ink) center/cover no-repeat;filter:blur(14px) saturate(1.1);transform:scale(1.05)}
-body.design-proef[data-page="home"] .dp-achter::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(242,245,247,.35),rgba(242,245,247,.62))}
-body.design-proef[data-page="home"]{background:transparent}
-body.design-proef[data-page="home"] .home-banners,body.design-proef[data-page="home"] .matchday,body.design-proef[data-page="home"] main.wrap,body.design-proef[data-page="home"] #view-home{background:transparent!important}
-body.design-proef[data-page="home"] .card,body.design-proef[data-page="home"] .tile{background:rgba(255,255,255,.62);border-color:rgba(255,255,255,.7);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);box-shadow:0 10px 30px -18px rgba(22,54,80,.45)}
-body.design-proef[data-page="home"] .kz-banner{-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
-body.design-proef[data-page="home"] .kz-banner.jarig{background:rgba(255,255,255,.62)}
-body.design-proef[data-page="home"] .kz-banner:not(.jarig){background:rgba(240,140,28,.82)}
-body.design-proef[data-page="home"] .matchday .wrap{background:rgba(22,54,80,.78);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-radius:22px;margin-top:14px;margin-bottom:14px;box-shadow:0 20px 40px -24px rgba(0,0,0,.6)}
+/* 1. lichte "glazen" kaarten op home (zonder zware vervaging: soepel op iPhone) */
+body.design-proef[data-page="home"] .home-banners,body.design-proef[data-page="home"] .matchday{background:var(--bg)!important}
+body.design-proef[data-page="home"] .card,body.design-proef[data-page="home"] .tile{background:rgba(255,255,255,.86);border-color:rgba(22,54,80,.08);box-shadow:0 10px 26px -20px rgba(22,54,80,.55)}
+body.design-proef[data-page="home"] .matchday .wrap{border-radius:22px;margin-top:14px;margin-bottom:14px;box-shadow:0 20px 40px -26px rgba(0,0,0,.55)}
+@media (max-width:760px){body.design-proef[data-page="home"] .matchday .wrap{background:var(--ink)}}
 /* 2. kop die meeschuift + compacte balk */
 body.design-proef .hero .hero-foto{will-change:transform;transform-origin:50% 0}
-body.design-proef .dp-mini{display:flex;position:fixed;left:0;right:0;top:0;z-index:70;align-items:center;gap:10px;padding:calc(6px + env(safe-area-inset-top)) 16px 6px;background:rgba(22,54,80,.82);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;transform:translateY(-110%);transition:transform .25s ease;cursor:pointer}
+body.design-proef .dp-mini{display:flex;position:fixed;left:0;right:0;top:0;z-index:70;align-items:center;gap:10px;padding:calc(6px + env(safe-area-inset-top)) 16px 6px;background:var(--ink);color:#fff;box-shadow:0 6px 16px -10px rgba(0,0,0,.5);transform:translateY(-110%);transition:transform .25s ease;cursor:pointer}
 body.design-proef .dp-mini.zicht{transform:none}
 body.design-proef .dp-mini img{width:30px;height:auto}
 body.design-proef .dp-mini b{font-family:var(--font-display);font-weight:400;font-size:1.25rem;flex:1}
@@ -1293,18 +1288,16 @@ body.design-proef .dp-mini .avatar img{width:100%;height:100%;object-fit:cover}
 @media (min-width:761px){body.design-proef .dp-mini{display:none}}
 /* 3. kameeltje in de tabbalk */
 body.design-proef .tabbar{overflow:visible}
-body.design-proef .dp-tabkameel{display:block;position:absolute;left:0;top:-19px;width:28px;line-height:0;transition:transform .6s cubic-bezier(.4,.1,.3,1),opacity .2s;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+body.design-proef .dp-tabkameel{display:block;position:absolute;left:0;bottom:max(2px,calc(env(safe-area-inset-bottom) - 20px));width:22px;line-height:0;transition:transform .6s cubic-bezier(.4,.1,.3,1),opacity .2s;pointer-events:none;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
 body.design-proef .dp-tabkameel img{width:100%;height:auto;display:block}
 body.design-proef .dp-tabkameel.links img{transform:scaleX(-1)}
 body.design-proef .dp-tabkameel.loopt{animation:dp-hobbel .15s ease-in-out 4 alternate}
 @keyframes dp-hobbel{to{translate:0 -4px;rotate:-6deg}}
 /* 4. zandvlaag */
-body.design-proef .dp-zand{display:block;position:fixed;inset:0;z-index:90;pointer-events:none;opacity:0;
-  background:linear-gradient(100deg,transparent 0%,rgba(236,186,118,.0) 18%,rgba(233,178,104,.55) 42%,rgba(244,206,150,.45) 55%,rgba(236,186,118,0) 78%,transparent 100%),
-  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .38 0 0 0 0 .16 0 0 0 1.1 -.35'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:100% 100%,160px 160px;transform:translateX(-100%)}
+body.design-proef .dp-zand{display:block;position:fixed;top:0;bottom:0;left:0;width:100%;z-index:90;pointer-events:none;opacity:0;will-change:transform,opacity;
+  background:linear-gradient(100deg,rgba(236,186,118,0) 10%,rgba(233,178,104,.45) 42%,rgba(244,206,150,.35) 55%,rgba(236,186,118,0) 85%);transform:translate3d(-100%,0,0)}
 body.design-proef .dp-zand.waai{animation:dp-waai .55s ease-out}
-@keyframes dp-waai{0%{opacity:0;transform:translateX(-80%)}25%{opacity:1}100%{opacity:0;transform:translateX(80%)}}
+@keyframes dp-waai{0%{opacity:0;transform:translate3d(-80%,0,0)}25%{opacity:1}100%{opacity:0;transform:translate3d(80%,0,0)}}
 /* 5. lege schermen met humor */
 .dp-leeg-kameel{display:block;margin:0 auto 8px;width:64px;opacity:.85;animation:dp-wiebel 3s ease-in-out infinite}
 .dp-leeg-kameel img{width:100%;height:auto;display:block}
@@ -3455,9 +3448,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795489700"></script>
-<script src="toto.js?v=1795489700"></script>
-<script src="pong.js?v=1795489700"></script>
+<script src="mex.js?v=1795489900"></script>
+<script src="toto.js?v=1795489900"></script>
+<script src="pong.js?v=1795489900"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3466,15 +3459,15 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795489700"></script>
-<script src="statistieken.js?v=1795489700"></script>
-<script src="wrapped.js?v=1795489700"></script>
-<script src="race.js?v=1795489700"></script>
-<script src="rad.js?v=1795489700"></script>
-<script src="fotos.js?v=1795489700"></script>
-<script src="quotes.js?v=1795489700"></script>
-<script src="ideeen.js?v=1795489700"></script>
-<script src="design-proef.js?v=1795489700"></script>
-<script src="push.js?v=1795489700"></script>
+<script src="stemmen.js?v=1795489900"></script>
+<script src="statistieken.js?v=1795489900"></script>
+<script src="wrapped.js?v=1795489900"></script>
+<script src="race.js?v=1795489900"></script>
+<script src="rad.js?v=1795489900"></script>
+<script src="fotos.js?v=1795489900"></script>
+<script src="quotes.js?v=1795489900"></script>
+<script src="ideeen.js?v=1795489900"></script>
+<script src="design-proef.js?v=1795489900"></script>
+<script src="push.js?v=1795489900"></script>
 </body>
 </html>
