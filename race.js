@@ -142,6 +142,13 @@
   let AC = null;
   const ac = () => { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === "suspended") AC.resume(); return AC; } catch { return null; } };
   const ruis = (c, sec) => { const b = c.createBuffer(1, Math.floor(c.sampleRate * sec), c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; const s = c.createBufferSource(); s.buffer = b; return s; };
+  function piep(lang) {
+    const c = ac(); if (!c) return; const t = c.currentTime, d = lang ? .9 : .2;
+    const o = c.createOscillator(), g = c.createGain(); o.type = "square"; o.frequency.value = lang ? 880 : 587;
+    const f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 2200;
+    g.gain.setValueAtTime(.001, t); g.gain.linearRampToValueAtTime(.16, t + .01); g.gain.setValueAtTime(.16, t + d - .05); g.gain.linearRampToValueAtTime(.001, t + d);
+    o.connect(f).connect(g).connect(c.destination); o.start(t); o.stop(t + d + .02);
+  }
   function schotGeluid() {
     const c = ac(); if (!c) return; const t = c.currentTime;
     const s = ruis(c, .6), f = c.createBiquadFilter(), g = c.createGain();
@@ -220,6 +227,15 @@
       spat(true);
       const tik = setInterval(() => spat(false), 260);
     };
+    /* Kogelspoor van de jager (aan de start) naar de kameel */
+    const kogel = i => {
+      const b = baan.getBoundingClientRect(), j = jager.getBoundingClientRect(), k = els[i]?.getBoundingClientRect(); if (!k) return;
+      const x1 = j.right - b.left - 2, y1 = j.top - b.top + j.height * .46, x2 = k.left - b.left + k.width * .5, y2 = k.top - b.top + k.height * .5;
+      const l = document.createElement("span"); l.className = "rc-kogel";
+      l.style.left = x1 + "px"; l.style.top = y1 + "px"; l.style.width = Math.hypot(x2 - x1, y2 - y1) + "px"; l.style.rotate = Math.atan2(y2 - y1, x2 - x1) + "rad";
+      baan.appendChild(l); setTimeout(() => l.remove(), 450);
+      const f = document.createElement("span"); f.className = "rc-mondvuur"; f.style.left = x1 + "px"; f.style.top = y1 + "px"; baan.appendChild(f); setTimeout(() => f.remove(), 300);
+    };
     const dood = (i, hoe) => {
       doden.set(i, hoe); duw[i] = 0;
       const el = els[i]; el?.classList.remove("doelwit", "hop", "val", "leider"); el?.classList.add("dood", hoe.startsWith("verscheurd") ? "gebeten" : "geschoten");
@@ -258,8 +274,9 @@
       if (rustig || k >= tellen.length) { aftel.className = "rc-aftel"; aftel.textContent = ""; return lopen(); }
       aftel.textContent = tellen[k]; aftel.className = "rc-aftel"; void aftel.offsetWidth; aftel.className = "rc-aftel toon" + (k === 3 ? " go" : "");
       if (k === 3) baan.classList.add("open");
+      piep(k === 3);
       try { navigator.vibrate?.(k === 3 ? 120 : 30); } catch {}
-      k++; teller = setTimeout(tel, 700);
+      k++; teller = setTimeout(tel, k === 4 ? 250 : 1000);
     };
 
     const lopen = () => {
@@ -295,18 +312,18 @@
         if (jager && jagerFase < 3) {
           const achter = Math.min(...pos.filter((_, i) => levend(i)));
           if (jagerFase === 0) {
-            if (tijd > wisselOm) { wisselOm = tijd + 1.2 + Math.random() * 1.4; jagerLaan = r(N); }
+            if (tijd > wisselOm) { wisselOm = tijd + 1.6 + Math.random() * 1.6; jagerLaan = r(N); }
             if (voortgang >= schotMoment && leeuwFase !== 1) {
               if (!levend(doelwit)) doelwit = [...Array(N).keys()].filter(levend)[r(N - doden.size)];
               jagerFase = 1; aanleggenTot = tijd + 1; jagerLaan = doelwit;
               jager.classList.add("richt"); els[doelwit]?.classList.add("doelwit");
               melding(`De jager legt aan op ${S.kamelen[doelwit]}…`, "min");
             }
-            zetDier(jager, Math.max(0, achter - 9), jagerLaan);
+            zetDier(jager, 0, jagerLaan);
           } else if (jagerFase === 1) {
-            zetDier(jager, Math.max(0, Math.min(pos[doelwit] - 12, achter - 6)), jagerLaan);
+            zetDier(jager, 0, jagerLaan);
             if (tijd >= aanleggenTot) {
-              jagerFase = 2; dood(doelwit, "neergeschoten"); schotGeluid();
+              jagerFase = 2; kogel(doelwit); dood(doelwit, "neergeschoten"); schotGeluid();
               jager.classList.remove("richt"); jager.classList.add("schiet");
               melding(`PANG! ${S.kamelen[doelwit]} is neergeschoten en blijft liggen.`, "min mega");
               setTimeout(() => { jager.classList.add("weg"); jagerFase = 3; }, 1300);
