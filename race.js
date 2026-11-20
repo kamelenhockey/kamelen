@@ -138,6 +138,35 @@
       <div id="rc-uitslag"></div>`;
   }
 
+  /* Geluid: alleen een schot en een brul, zelf gemaakt met Web Audio */
+  let AC = null;
+  const ac = () => { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === "suspended") AC.resume(); return AC; } catch { return null; } };
+  const ruis = (c, sec) => { const b = c.createBuffer(1, Math.floor(c.sampleRate * sec), c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; const s = c.createBufferSource(); s.buffer = b; return s; };
+  function schotGeluid() {
+    const c = ac(); if (!c) return; const t = c.currentTime;
+    const s = ruis(c, .6), f = c.createBiquadFilter(), g = c.createGain();
+    f.type = "lowpass"; f.frequency.setValueAtTime(5000, t); f.frequency.exponentialRampToValueAtTime(300, t + .5);
+    g.gain.setValueAtTime(1, t); g.gain.exponentialRampToValueAtTime(.001, t + .55);
+    s.connect(f).connect(g).connect(c.destination); s.start(t);
+    const o = c.createOscillator(), g2 = c.createGain(); o.type = "sine"; o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(40, t + .2);
+    g2.gain.setValueAtTime(.9, t); g2.gain.exponentialRampToValueAtTime(.001, t + .25); o.connect(g2).connect(c.destination); o.start(t); o.stop(t + .3);
+  }
+  function brulGeluid() {
+    const c = ac(); if (!c) return; const t = c.currentTime, d = 1.5;
+    const o = c.createOscillator(), o2 = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain(), lfo = c.createOscillator(), lg = c.createGain();
+    o.type = "sawtooth"; o2.type = "sawtooth";
+    o.frequency.setValueAtTime(95, t); o.frequency.linearRampToValueAtTime(150, t + .35); o.frequency.exponentialRampToValueAtTime(60, t + d);
+    o2.frequency.setValueAtTime(97, t); o2.frequency.linearRampToValueAtTime(146, t + .35); o2.frequency.exponentialRampToValueAtTime(58, t + d);
+    lfo.frequency.value = 26; lg.gain.value = 14; lfo.connect(lg); lg.connect(o.frequency); lg.connect(o2.frequency);   // ruw grommen
+    f.type = "lowpass"; f.frequency.setValueAtTime(500, t); f.frequency.linearRampToValueAtTime(1100, t + .3); f.frequency.exponentialRampToValueAtTime(250, t + d);
+    g.gain.setValueAtTime(.001, t); g.gain.linearRampToValueAtTime(.55, t + .12); g.gain.linearRampToValueAtTime(.4, t + d * .6); g.gain.exponentialRampToValueAtTime(.001, t + d);
+    o.connect(f); o2.connect(f); f.connect(g).connect(c.destination);
+    const s = ruis(c, d), nf = c.createBiquadFilter(), ng = c.createGain(); nf.type = "bandpass"; nf.frequency.value = 700; nf.Q.value = .8;
+    ng.gain.setValueAtTime(.001, t); ng.gain.linearRampToValueAtTime(.25, t + .15); ng.gain.exponentialRampToValueAtTime(.001, t + d);
+    s.connect(nf).connect(ng).connect(c.destination);
+    [o, o2, lfo].forEach(x => { x.start(t); x.stop(t + d + .05); }); s.start(t);
+  }
+
   let loper = null, teller = null;
   function stopTimers() { cancelAnimationFrame(loper); clearTimeout(teller); loper = teller = null; }
 
@@ -161,14 +190,13 @@
     const jager = document.getElementById("rc-jager"), lanes = [...baan.querySelectorAll(".rc-zand")];
     let doelwit = r(N), jagerLaan = r(N), jagerFase = 0, aanleggenTot = 0, wisselOm = 1.5;
     const doden = new Map();   // index -> "neergeschoten" | "doodgebeten"
-    const schotMoment = .3 + Math.random() * .35;   // voortgang van de koploper waarop hij schiet
+    const schotMoment = .62 + Math.random() * .18;   // in het laatste derde van de race
     const levend = i => !doden.has(i);
-    /* De leeuw: komt alleen soms mee, vaker naarmate er meer kamelen racen (3: 20%, 5: ~45%, 6: ~55%, 8: ~80%) */
+    /* De leeuw rent altijd mee, maar valt alleen soms aan: vaker naarmate er meer kamelen racen (3: 20%, 5: ~45%, 6: ~55%, 8: ~80%) */
     const leeuw = document.getElementById("rc-leeuw");
-    const leeuwKomt = Math.random() < Math.min(.82, .2 + (N - 3) * .12);
-    const leeuwMoment = .22 + Math.random() * .5;
-    let leeuwFase = leeuwKomt ? 0 : 9, leeuwLaan = r(N), leeuwWissel = 2, leeuwProoi = -1, leeuwX = 0, sprongTot = 0;
-    if (!leeuwKomt && leeuw) leeuw.remove();
+    const leeuwValtAan = Math.random() < Math.min(.82, .2 + (N - 3) * .12);
+    const leeuwMoment = leeuwValtAan ? .66 + Math.random() * .2 : 2;   // 2 = nooit
+    let leeuwFase = 0, leeuwLaan = r(N), leeuwWissel = 2, leeuwProoi = -1, leeuwX = 0, sprongTot = 0;
     const dood = (i, hoe) => {
       doden.set(i, hoe); duw[i] = 0;
       const el = els[i]; el?.classList.remove("doelwit", "hop", "val", "leider"); el?.classList.add("dood", hoe === "doodgebeten" ? "gebeten" : "geschoten");
@@ -255,7 +283,7 @@
           } else if (jagerFase === 1) {
             zetDier(jager, Math.max(0, Math.min(pos[doelwit] - 12, achter - 6)), jagerLaan);
             if (tijd >= aanleggenTot) {
-              jagerFase = 2; dood(doelwit, "neergeschoten");
+              jagerFase = 2; dood(doelwit, "neergeschoten"); schotGeluid();
               jager.classList.remove("richt"); jager.classList.add("schiet");
               melding(`PANG! ${S.kamelen[doelwit]} is neergeschoten en blijft liggen.`, "min mega");
               setTimeout(() => { jager.classList.add("weg"); jagerFase = 3; }, 1300);
@@ -280,7 +308,7 @@
             leeuwX += (doelX - leeuwX) * Math.min(1, sdt * 6);
             zetDier(leeuw, Math.max(0, leeuwX), leeuwLaan);
             if (tijd >= sprongTot) {
-              leeuwFase = 2; dood(leeuwProoi, "doodgebeten");
+              leeuwFase = 2; dood(leeuwProoi, "doodgebeten"); brulGeluid();
               leeuw.classList.remove("sprint"); leeuw.classList.add("bijt");
               melding(`GRAUW! De leeuw bijt ${S.kamelen[leeuwProoi]} dood.`, "min mega");
               setTimeout(() => { leeuw.classList.add("weg"); leeuwFase = 3; }, 1400);
@@ -352,7 +380,7 @@
     const a = b.dataset.rc;
     if (a === "naar-inzet") S.fase = "inzet";
     if (a === "terug" || a === "setup") S.fase = "setup";
-    if (a === "start") return race();
+    if (a === "start") { ac(); return race(); }
     if (a === "afbreken") { stopTimers(); S.fase = "inzet"; }
     if (a === "opnieuw") { S.inzet = {}; S.fase = "inzet"; }
     if (a === "reset") { S.tel = {}; S.races = 0; S.inzet = {}; }
