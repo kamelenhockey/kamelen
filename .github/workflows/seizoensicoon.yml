@@ -1,0 +1,31 @@
+name: App-icoon per seizoen
+
+on:
+  schedule:
+    # Elke nacht kort na middernacht (NL)
+    - cron: "5 23 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-update
+  cancel-in-progress: false
+
+jobs:
+  icoon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/seizoensicoon.mjs
+      - name: Wijzigingen opslaan
+        run: |
+          git config user.name "kamelen-bot"
+          git config user.email "kamelen-bot@users.noreply.github.com"
+          git add icon-192.png icon-512.png icon-maskable-512.png apple-touch-icon.png
+          git diff --staged --quiet || (git commit -m "App-icoon voor het seizoen" && git pull --rebase && git push)

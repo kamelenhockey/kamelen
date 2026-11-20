@@ -100,10 +100,11 @@
     const wie = jarigVandaag(); if (!wie.length) return;
     jarigKlaar = true;
     document.body.classList.add("dp-jarig");
-    const logo = document.querySelector(".hero .wrap > img");
+    document.querySelector(".dp-seizoen")?.remove();
+    const logo = document.querySelector(".hero .wrap > img") || document.querySelector(".hero .dp-logo-box > img");
     if (logo && !document.querySelector(".dp-muts")) {
-      const box = document.createElement("span"); box.className = "dp-logo-box";
-      logo.replaceWith(box); box.appendChild(logo);
+      let box = logo.parentElement.classList.contains("dp-logo-box") ? logo.parentElement : null;
+      if (!box) { box = document.createElement("span"); box.className = "dp-logo-box"; logo.replaceWith(box); box.appendChild(logo); }
       box.insertAdjacentHTML("beforeend", `<svg class="dp-muts" viewBox="0 0 40 52" aria-hidden="true"><defs><clipPath id="dpm"><path d="M20 4 L36 46 Q20 52 4 46 Z"/></clipPath></defs><path d="M20 4 L36 46 Q20 52 4 46 Z" fill="#e8384f"/><g clip-path="url(#dpm)" fill="#ffd400"><rect x="-10" y="14" width="60" height="5" transform="rotate(-18 20 16)"/><rect x="-10" y="28" width="60" height="5" transform="rotate(-18 20 30)"/><rect x="-10" y="42" width="60" height="5" transform="rotate(-18 20 44)"/></g><circle cx="20" cy="5" r="5" fill="#fff"/></svg>`);
     }
     const lig = document.querySelector(".hero .league");

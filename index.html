@@ -433,6 +433,22 @@ td.delta{color:var(--muted);font-size:.8rem}
 .tag-btn{cursor:pointer;color:#fff;font-family:inherit}
 .tag-btn:hover{background:rgba(255,255,255,.16)}
 
+.pos-wrap{display:inline-flex;align-items:center;justify-content:flex-end;gap:6px}
+.trend{font-style:normal;font-size:.68rem;font-weight:800;min-width:20px;text-align:left;line-height:1}
+.trend.op{color:#1f8a4c}.trend.neer{color:#c9402c}.trend.gelijk{color:var(--muted);opacity:.6}
+/* Overwinningsmoment */
+.zege{position:fixed;inset:0;z-index:9000;background:radial-gradient(120% 80% at 50% 40%,#1d4566,#102a40);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;animation:zege-in .35s ease-out}
+.zege.weg{opacity:0;transition:opacity .45s}
+@keyframes zege-in{from{opacity:0}}
+.zege-tekst{text-align:center;color:#fff;margin-top:-18vh;animation:zege-pop .7s cubic-bezier(.2,1.4,.4,1) .15s both}
+@keyframes zege-pop{from{transform:scale(.4);opacity:0}}
+.zege-k{font-family:var(--font-display);font-weight:800;font-size:clamp(2.6rem,12vw,4.6rem);color:var(--orange);line-height:1}
+.zege-score{font-family:var(--font-display);font-weight:800;font-size:clamp(3.4rem,18vw,6rem);line-height:1.05}
+.zege-tegen{font-weight:600;opacity:.8;font-size:1rem}
+.zege-baan{position:absolute;left:0;right:0;bottom:16vh;height:150px;border-bottom:3px solid rgba(240,140,28,.35)}
+.zege-kameel{position:absolute;bottom:-4px;left:0;width:170px;transform:translateX(-180px);filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))}
+.zege-stof{position:absolute;bottom:0;border-radius:50%;background:radial-gradient(circle at 40% 40%,#f3dcae,#d9b679 70%,transparent 72%);pointer-events:none}
+.zege-proef{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));font-size:.8rem;color:rgba(255,255,255,.6);font-weight:600}
 /* ---------- Seizoensgrafiek ---------- */
 .cmp{font-size:.85rem;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
 .cmp select{font:inherit;font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:#fff}
@@ -1314,6 +1330,7 @@ body.design-proef .dp-zand.waai{animation:dp-waai .55s ease-out}
 body.design-proef .empty{text-align:center}
 /* 6. jarige-modus */
 .dp-logo-box{position:relative;display:inline-block;line-height:0}
+.dp-seizoen{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}
 .dp-muts{position:absolute;width:22%;right:12%;top:-27%;transform:rotate(12deg);filter:drop-shadow(0 3px 4px rgba(0,0,0,.25));animation:dp-muts 2.4s ease-in-out infinite}
 @keyframes dp-muts{50%{transform:rotate(6deg) translateY(-2px)}}
 .dp-jarig-pil{display:inline-block;margin-top:8px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.88);color:var(--ink);font-size:.88rem}
@@ -2290,8 +2307,8 @@ function renderStandings(){
       <th class="r hide-sm" title="Gewonnen">W</th><th class="r hide-sm" title="Gelijk">G</th><th class="r hide-sm" title="Verloren">V</th>
       <th class="r hide-sm" title="Doelpunten voor">DV</th><th class="r hide-sm" title="Doelpunten tegen">DT</th>
       <th class="r" title="Doelsaldo">DS</th><th class="r" title="Punten">PT</th><th class="hide-sm">Vorm</th></tr></thead><tbody>
-    ${s.map(t => { const x = teamStats(t.team);
-      return `<tr class="${isUs(t.team)?"us":""}"><td class="r pos">${t.positie}</td><td>${teamLink(t.team)}</td><td class="r">${t.gespeeld}</td>
+    ${s.map(t => { const x = teamStats(t.team), tr = standTrend(t.team, t.positie);
+      return `<tr class="${isUs(t.team)?"us":""}"><td class="r pos"><span class="pos-wrap">${tr}${t.positie}</span></td><td>${teamLink(t.team)}</td><td class="r">${t.gespeeld}</td>
         <td class="r hide-sm">${x.w}</td><td class="r hide-sm">${x.g}</td><td class="r hide-sm">${x.v}</td>
         <td class="r hide-sm">${x.dv}</td><td class="r hide-sm">${x.dt}</td>
         <td class="r ${t.doelsaldo>0?"gd-pos":t.doelsaldo<0?"gd-neg":""}">${t.doelsaldo>0?"+":""}${t.doelsaldo}</td>
@@ -2756,6 +2773,26 @@ function downloadNextIcs(m){
   a.download = `kamelen-${m.datum}.ics`; document.body.appendChild(a); a.click(); a.remove();
 }
 
+/* Trendpijltje: positie nu tegenover vóór de laatste speelronde */
+let _trendVorig = null;
+function standTrend(team, nu){
+  try {
+    if (!_trendVorig) {
+      const r = seasonPositions().rounds; _trendVorig = {};
+      if (r.length > 1) {
+        const L = new Date(r[r.length-1].datum); L.setDate(L.getDate() - 5);
+        const grens = L.toISOString().slice(0,10);
+        const v = [...r].reverse().find(x => x.datum <= grens);
+        if (v) _trendVorig = v.pos;
+      }
+    }
+    const was = _trendVorig[team]; if (!was) return `<i class="trend"></i>`;
+    const d = was - nu;
+    if (d > 0) return `<i class="trend op" title="${d} ${d===1?"plek":"plekken"} gestegen sinds vorige speelronde">▲${d}</i>`;
+    if (d < 0) return `<i class="trend neer" title="${-d} ${d===-1?"plek":"plekken"} gezakt sinds vorige speelronde">▼${-d}</i>`;
+    return `<i class="trend gelijk" title="Zelfde plek als vorige speelronde">–</i>`;
+  } catch { return ""; }
+}
 /* ---------- Seizoensverloop ---------- */
 const C_US = "#d06a00", C_CMP = "#1f6fb2";
 function seasonPositions(){
@@ -3311,7 +3348,7 @@ const y = window.scrollY, pagina = document.body.dataset.page;
 return Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("opstelling.json"), loadLitersLive().catch(() => null), loadDoelpunten(), loadJson("spelers.json")])
   .then(([comp, lit, ops, live, doelpunten, roster]) => {
     initRoster(roster);
-    DATA = { aftrekMoment: { "GCHC H13": "2026-10-18" }, ...comp, ...lit, ...(live ? {liters: live} : {}), opstelling: ops.spelers || [], opstellingWedstrijd: ops.wedstrijd || null, doelpunten };
+    DATA = { aftrekMoment: { "GCHC H13": "2026-10-18" }, ...comp, ...lit, ...(live ? {liters: live} : {}), opstelling: ops.spelers || [], opstellingWedstrijd: ops.wedstrijd || null, doelpunten }; _trendVorig = null;
     (DATA.doelpunten || []).forEach(w => w.goals.forEach(g => { g.wie = canon(g.wie); }));
     if (!comp.programma && !DATA.liters) throw new Error("geen gegevens");
     if (DATA.competitie) document.getElementById("league").textContent = DATA.competitie;
@@ -3529,9 +3566,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795491200"></script>
-<script src="toto.js?v=1795491200"></script>
-<script src="pong.js?v=1795491200"></script>
+<script src="mex.js?v=1795491300"></script>
+<script src="toto.js?v=1795491300"></script>
+<script src="pong.js?v=1795491300"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3540,15 +3577,17 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795491200"></script>
-<script src="statistieken.js?v=1795491200"></script>
-<script src="wrapped.js?v=1795491200"></script>
-<script src="race.js?v=1795491200"></script>
-<script src="rad.js?v=1795491200"></script>
-<script src="fotos.js?v=1795491200"></script>
-<script src="quotes.js?v=1795491200"></script>
-<script src="ideeen.js?v=1795491200"></script>
-<script src="design-proef.js?v=1795491200"></script>
-<script src="push.js?v=1795491200"></script>
+<script src="stemmen.js?v=1795491300"></script>
+<script src="statistieken.js?v=1795491300"></script>
+<script src="wrapped.js?v=1795491300"></script>
+<script src="race.js?v=1795491300"></script>
+<script src="rad.js?v=1795491300"></script>
+<script src="fotos.js?v=1795491300"></script>
+<script src="quotes.js?v=1795491300"></script>
+<script src="ideeen.js?v=1795491300"></script>
+<script src="seizoen.js?v=1795491300"></script>
+<script src="zege.js?v=1795491300"></script>
+<script src="design-proef.js?v=1795491300"></script>
+<script src="push.js?v=1795491300"></script>
 </body>
 </html>
