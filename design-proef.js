@@ -41,11 +41,9 @@
   const loop = () => {
     if (!tabbar) return;
     const actief = tabbar.querySelector('[aria-current="page"]') || tabbar.querySelector('button[aria-expanded="true"]');
-    /* Alleen tonen als er onder de tabjes ruimte is (iPhone met thuisbalk), zodat hij nergens overheen loopt */
-    const ruimte = parseFloat(getComputedStyle(tabbar).paddingBottom) || 0;
-    if (!actief || ruimte < 22) { kameel.style.opacity = 0; return; }
+    if (!actief) { kameel.style.opacity = 0; return; }
     const tb = tabbar.getBoundingClientRect(), r = actief.getBoundingClientRect();
-    const x = r.left - tb.left + r.width / 2 - 11;
+    const x = r.left - tb.left + r.width / 2 - 14;
     kameel.style.opacity = 1;
     if (vorigeX !== null && Math.abs(x - vorigeX) > 2 && !rustig) {
       kameel.classList.toggle("links", x < vorigeX);
