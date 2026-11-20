@@ -1,35 +1,9 @@
-/* Proeven op Home
-   - ?route=proef : seizoen als karavaanroute (oase = winst, tent = gelijk, rots = verlies)
-   - ?fata=proef  : fata morgana van de beker op de homefoto (live alleen bij een top 3-plek)
-   De keuze wordt onthouden in dit venster; uitzetten met ?route=uit / ?fata=uit. */
+/* Karavaanroute op Home: het seizoen als tocht door de woestijn
+   (oase = winst, tent = gelijk, rots = verlies; de kameel staat bij de laatste uitslag) */
 (() => {
-  const vlag = (naam) => {
-    try {
-      const q = new URLSearchParams(location.search).get(naam), k = "kamelen-proef-" + naam;
-      if (q === "proef") sessionStorage.setItem(k, "1");
-      if (q === "uit") sessionStorage.removeItem(k);
-      return sessionStorage.getItem(k) === "1";
-    } catch { return false; }
-  };
-  const ROUTE = vlag("route"), FATA = vlag("fata");
-  if (!ROUTE && !FATA) return;
   const esc = s => String(s).replace(/[<>&"]/g, "");
 
-  if (ROUTE || FATA) {
-    const l = document.createElement("div"); l.className = "proef-label"; l.style.bottom = "calc(104px + env(safe-area-inset-bottom))";
-    l.innerHTML = `<span>Proef: ${[ROUTE && "karavaanroute", FATA && "fata morgana"].filter(Boolean).join(" + ")}</span><a href="?route=uit&fata=uit#home">Uitzetten</a>`;
-    document.body.appendChild(l);
-  }
-
-  /* ---------- Fata morgana ---------- */
-  const BEKER = `<svg viewBox="0 0 60 70" aria-hidden="true"><path d="M14 6 H46 V22 Q46 40 30 42 Q14 40 14 22 Z" fill="#f2c230"/><path d="M14 10 Q2 10 4 20 Q6 28 15 29" fill="none" stroke="#f2c230" stroke-width="4"/><path d="M46 10 Q58 10 56 20 Q54 28 45 29" fill="none" stroke="#f2c230" stroke-width="4"/><rect x="27" y="41" width="6" height="12" fill="#e0a91c"/><rect x="18" y="52" width="24" height="7" rx="2" fill="#c98f12"/><rect x="14" y="58" width="32" height="7" rx="2" fill="#a8740b"/><path d="M20 10 Q20 30 28 36" stroke="#fff6c8" stroke-width="3" fill="none" opacity=".7"/></svg>`;
-  if (FATA) {
-    const hero = document.querySelector(".hero");
-    if (hero) hero.insertAdjacentHTML("beforeend", `<div class="fata" aria-hidden="true"><div class="fata-beker">${BEKER}</div><div class="fata-spiegel">${BEKER}</div></div>`);
-  }
-
   /* ---------- Karavaanroute ---------- */
-  if (!ROUTE) return;
   const sec = document.getElementById("karavaan"); if (!sec) return;
   const ICOON = {
     zege: `<ellipse cx="0" cy="6" rx="14" ry="4.5" fill="#5fb3e0"/><path d="M-2 6 Q-4 -6 1 -18" stroke="#7a4a1e" stroke-width="3" fill="none" stroke-linecap="round"/><g fill="#2e9e4f"><path d="M1 -18 Q-10 -24 -16 -14 Q-8 -18 1 -16Z"/><path d="M1 -18 Q12 -24 17 -13 Q9 -18 1 -16Z"/><path d="M1 -18 Q-2 -30 -10 -30 Q-3 -25 0 -17Z"/><path d="M1 -18 Q6 -30 13 -28 Q6 -25 2 -17Z"/></g>`,
@@ -50,7 +24,7 @@
     while (alle.length < totaal) alle.push({ m: null, soort: "komt" });
     const N = alle.length; if (N < 2) return true;
 
-    const breedte = Math.max(sec.querySelector(".wrap").clientWidth - 40, N * 44), H = 200, mid = 112;
+    const breedte = Math.max(sec.clientWidth, N * 44), H = 200, mid = 112;
     const pts = alle.map((_, i) => [34 + i * (breedte - 68) / (N - 1), mid + Math.sin(i * .85) * 42 + Math.sin(i * .31) * 12]);
     const pad = pts.reduce((d, p, i) => {
       if (!i) return `M${p[0]} ${p[1]}`;
@@ -96,7 +70,6 @@
     doek.scrollLeft = Math.max(0, wijPt[0] - doek.clientWidth / 2);
     return true;
   };
-  sec.hidden = false;
   let n = 0; const w = setInterval(() => { if (teken() || ++n > 40) clearInterval(w); }, 400);
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(teken, 200); });
 })();

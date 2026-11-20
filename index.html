@@ -492,12 +492,11 @@ html.op-slot #laad{display:none}
 @keyframes drup{0%{height:0;opacity:1}55%{height:34px;opacity:1}85%{height:40px;opacity:0}100%{height:0;opacity:0}}
 .podium.zonder-anim .beer,.podium.zonder-anim .schuim-top{animation-duration:0s!important;animation-delay:0s!important}
 @media (prefers-reduced-motion:reduce){.podium .beer,.podium .schuim-top{animation:none!important;transform:none!important}.bel,.drup{display:none}}
-/* Karavaanroute (proef) */
-.karavaan{padding:6px 0 4px}
-.kr-kaart{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 18px 12px;overflow:hidden}
+/* Karavaanroute */
+.karavaan{overflow:hidden}
 .kr-kop h2{font-family:var(--font-display);font-size:1.5rem;margin:0}
 .kr-sub{margin:2px 0 0;color:var(--muted);font-size:.86rem}
-.kr-doek{overflow-x:auto;margin:6px -18px 0;padding:0 20px;scrollbar-width:none;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,transparent,rgba(240,200,140,.12))}
+.kr-doek{overflow-x:auto;margin:6px -24px 0;padding:0 22px;scrollbar-width:none;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,transparent,rgba(240,200,140,.12))}
 .kr-doek::-webkit-scrollbar{display:none}
 .kr-doek svg{display:block}
 .kr-pad-rest{fill:none;stroke:#c9a46c;stroke-width:3;stroke-dasharray:2 8;stroke-linecap:round;opacity:.8}
@@ -510,18 +509,7 @@ html.op-slot #laad{display:none}
 .kr-winter text{font-size:15px;fill:#5b8fbf}.kr-winter .kr-klein{font-size:10px;font-weight:700;font-family:var(--font-body)}
 .kr-kameel{filter:drop-shadow(0 3px 3px rgba(0,0,0,.25))}
 .kr-legenda{display:flex;flex-wrap:wrap;gap:4px 14px;margin:8px 0 0;font-size:.78rem;color:var(--muted);font-weight:600}
-body:not([data-page="home"]) .karavaan{display:none}
-/* Fata morgana (proef) */
-.fata{display:none}
-@media (max-width:760px){
-  body.home-proef[data-page="home"] .fata{display:block;position:absolute;z-index:1;left:22%;top:calc(min(74vw,310px) * .48);width:30px;pointer-events:none;opacity:.4;mix-blend-mode:screen;filter:blur(.9px)}
-}
-.fata svg{display:block;width:100%}
-.fata-beker{animation:fata-tril 2.8s ease-in-out infinite;transform-origin:50% 100%}
-.fata-spiegel{transform:scaleY(-.55);transform-origin:50% 0;opacity:.45;margin-top:-1px;animation:fata-spiegel 2.1s ease-in-out infinite;-webkit-mask:linear-gradient(180deg,transparent,#000);mask:linear-gradient(180deg,transparent,#000)}
-@keyframes fata-tril{0%,100%{transform:skewX(0) scaleY(1);opacity:.9}25%{transform:skewX(3deg) scaleY(1.04);opacity:.6}50%{transform:skewX(-2deg) scaleY(.97);opacity:1}75%{transform:skewX(2deg) scaleY(1.02);opacity:.55}}
-@keyframes fata-spiegel{0%,100%{transform:scaleY(-.55) skewX(0)}50%{transform:scaleY(-.48) skewX(-4deg)}}
-@media (prefers-reduced-motion:reduce){.fata-beker,.fata-spiegel,.kr-volgende{animation:none}}
+@media (prefers-reduced-motion:reduce){.kr-volgende{animation:none}}
 /* ---------- Seizoensgrafiek ---------- */
 .cmp{font-size:.85rem;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
 .cmp select{font:inherit;font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:#fff}
@@ -1615,15 +1603,15 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
     </div>
   </div>
 </section>
-<section class="karavaan" id="karavaan" hidden aria-labelledby="kr-h"><div class="wrap"><div class="kr-kaart">
-  <div class="kr-kop"><h2 id="kr-h">Karavaanroute</h2><p class="kr-sub"></p></div>
-  <div class="kr-doek"></div>
-  <p class="kr-legenda"><span>🌴 oase = gewonnen</span><span>⛺ tent = gelijk</span><span>🪨 rots = verloren</span><span>🏁 laatste speeldag</span></p>
-</div></div></section>
 
 <main class="wrap">
   <div class="seg-switch" id="comp-switch" hidden role="tablist" aria-label="Competitie"><a href="#wedstrijden" data-sw="wedstrijden" role="tab">Wedstrijden</a><a href="#stand" data-sw="stand" role="tab">Stand</a></div>
   <section class="dash" id="dash" data-page="home" aria-label="Overzicht"></section>
+  <section class="card karavaan" id="karavaan" data-page="home" aria-labelledby="kr-h">
+    <div class="kr-kop"><h2 id="kr-h">Karavaanroute</h2><p class="kr-sub"></p></div>
+    <div class="kr-doek"></div>
+    <p class="kr-legenda"><span>🌴 oase = gewonnen</span><span>⛺ tent = gelijk</span><span>🪨 rots = verloren</span><span>🏁 laatste speeldag</span></p>
+  </section>
   <section class="card quote-home" id="quote-home" data-page="home" aria-label="Quote"></section>
   <section class="card push-card" id="push-card" data-page="home" aria-label="Meldingen"></section>
   <section class="card" id="programma" data-page="wedstrijden" aria-labelledby="h-programma">
@@ -3661,9 +3649,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795491500"></script>
-<script src="toto.js?v=1795491500"></script>
-<script src="pong.js?v=1795491500"></script>
+<script src="mex.js?v=1795491600"></script>
+<script src="toto.js?v=1795491600"></script>
+<script src="pong.js?v=1795491600"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3672,18 +3660,18 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795491500"></script>
-<script src="statistieken.js?v=1795491500"></script>
-<script src="wrapped.js?v=1795491500"></script>
-<script src="race.js?v=1795491500"></script>
-<script src="rad.js?v=1795491500"></script>
-<script src="fotos.js?v=1795491500"></script>
-<script src="quotes.js?v=1795491500"></script>
-<script src="ideeen.js?v=1795491500"></script>
-<script src="seizoen.js?v=1795491500"></script>
-<script src="zege.js?v=1795491500"></script>
-<script src="karavaan.js?v=1795491500"></script>
-<script src="design-proef.js?v=1795491500"></script>
-<script src="push.js?v=1795491500"></script>
+<script src="stemmen.js?v=1795491600"></script>
+<script src="statistieken.js?v=1795491600"></script>
+<script src="wrapped.js?v=1795491600"></script>
+<script src="race.js?v=1795491600"></script>
+<script src="rad.js?v=1795491600"></script>
+<script src="fotos.js?v=1795491600"></script>
+<script src="quotes.js?v=1795491600"></script>
+<script src="ideeen.js?v=1795491600"></script>
+<script src="seizoen.js?v=1795491600"></script>
+<script src="zege.js?v=1795491600"></script>
+<script src="karavaan.js?v=1795491600"></script>
+<script src="design-proef.js?v=1795491600"></script>
+<script src="push.js?v=1795491600"></script>
 </body>
 </html>
