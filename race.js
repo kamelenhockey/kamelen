@@ -129,7 +129,7 @@
         ${S.kamelen.map((k, i) => `
         <div class="rc-lane"><span class="rc-lnaam">${esc(k)}</span><div class="rc-zand"><span class="rc-start" aria-hidden="true"></span>
           <span class="rc-kameel" id="rc-k${i}"><span class="rc-kroon" aria-hidden="true">👑</span><span class="rc-plek" aria-hidden="true"></span><span class="rc-sprong"><span class="rc-lijf">🐪</span></span><span class="rc-stof" aria-hidden="true"></span></span>
-          <span class="rc-finish"></span></div></div>`).join("")}
+          <span class="rc-finish"><i class="rc-lint"></i></span></div></div>`).join("")}
         <div class="rc-aftel" id="rc-aftel" aria-live="assertive"></div></div>
       <div class="rc-feed" id="rc-feed" aria-live="polite"></div>
       <div class="rc-knoppen" id="rc-afbreken"><button type="button" class="btn sm ghost" data-rc="afbreken">Race afbreken</button></div>
@@ -223,7 +223,10 @@
           baan.classList.remove("rent", "finale", "slowmo"); baan.classList.add("flits");
           const volgorde = pos.map((p, i) => [p, i]).sort((a, b) => b[0] - a[0]).map(([, i]) => S.kamelen[i]);
           els[S.kamelen.indexOf(volgorde[0])]?.classList.add("winnaar");
-          melding(`FINISH! ${volgorde[0]} wint!`, "groot");
+          baan.querySelectorAll(".rc-lane")[S.kamelen.indexOf(volgorde[0])]?.classList.add("win");
+          const gs = [...pos].sort((a, b) => b - a), marge = gs[0] - gs[1];
+          const verschil = marge < .6 ? "met een neuslengte" : marge < 1.5 ? "met een halve bult" : marge < 4 ? `met ${marge.toFixed(1).replace(".", ",")} meter voorsprong` : "met een straatlengte voorsprong";
+          melding(`FINISH! ${volgorde[0]} wint ${verschil}!`, "groot");
           document.getElementById("rc-afbreken")?.remove();
           try { window.schietConfetti?.(); } catch {}
           setTimeout(() => afrekenen(volgorde), 1100);
