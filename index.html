@@ -510,6 +510,22 @@ html.op-slot #laad{display:none}
 .kr-kameel{filter:drop-shadow(0 3px 3px rgba(0,0,0,.25))}
 .kr-legenda{display:flex;flex-wrap:wrap;gap:4px 14px;margin:8px 0 0;font-size:.78rem;color:var(--muted);font-weight:600}
 @media (prefers-reduced-motion:reduce){.kr-volgende{animation:none}}
+/* Pongen: regels */
+.bp-seg{margin:0 0 14px}
+.bp-h{font-family:var(--font-display);font-weight:400;font-size:1.35rem;margin:0 0 6px}
+.bp-regels{display:grid;gap:14px}
+.bp-stap{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.bp-nr{width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:800;font-size:.9rem}
+.bp-stap p{margin:0 0 8px}
+.bp-fig{margin:10px 0 6px}
+.bp-fig svg{display:block;width:100%;max-width:420px;height:auto;margin:0 auto}
+.bp-sps{display:flex;gap:18px;justify-content:center;font-size:2.4rem}
+.bp-sps span{animation:bpSps 1.2s ease-in-out infinite}
+.bp-sps span:nth-child(2){animation-delay:.15s}.bp-sps span:nth-child(3){animation-delay:.3s}
+@keyframes bpSps{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px) rotate(-8deg)}}
+.pong-intro .bp-h{margin-top:0}
+@media (max-width:560px){.bp-stap{grid-template-columns:1fr}.bp-nr{width:26px;height:26px;font-size:.8rem}}
+@media (prefers-reduced-motion:reduce){.bp-sps span{animation:none}}
 /* ---------- Seizoensgrafiek ---------- */
 .cmp{font-size:.85rem;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
 .cmp select{font:inherit;font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:#fff}
@@ -1657,7 +1673,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
       <div class="nav-more-menu" id="nav-more-menu" hidden>
         <div class="nm-group"><div class="nm-h">Competitie</div><a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a></div>
         <div class="nm-group"><div class="nm-h">Team</div><a href="#fotos" data-view-link="fotos">Foto's</a><a href="#quotes" data-view-link="quotes">Quotes</a><a href="#regels" data-view-link="regels">Kamelen-regels</a><a href="#ideeen" data-view-link="ideeen">💡 Ideeënbox</a><a href="#push-card" data-push-link>🔔 Meldingen</a></div>
-        <div class="nm-group"><div class="nm-h">Spellen</div><a href="#rad" data-view-link="rad">Kamelen-rad</a><a href="#race" data-view-link="race">Kamelen-racen</a><a href="#mex" data-view-link="mex">Mex</a><a href="#pong" data-view-link="pong">Pong teams</a></div>
+        <div class="nm-group"><div class="nm-h">Spellen</div><a href="#rad" data-view-link="rad">Kamelen-rad</a><a href="#race" data-view-link="race">Kamelen-racen</a><a href="#mex" data-view-link="mex">Mex</a><a href="#pong" data-view-link="pong">Pongen</a></div>
         <div class="nm-group"><div class="nm-h">Account</div><a href="#" data-wrapped>🎁 Kamelen Wrapped</a><a href="#" data-uitloggen>Uitloggen</a></div>
       </div>
     </li>
@@ -1832,11 +1848,11 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
       <a class="card spel-tegel" href="#rad"><span class="st-ic" aria-hidden="true">🎡</span><b>Kamelen-rad</b><span>Draai en kijk wat je moet doen</span></a>
       <a class="card spel-tegel" href="#race"><span class="st-ic" aria-hidden="true">🐪</span><b>Kamelen-racen</b><span>Zet slokken in op je kameel</span></a>
       <a class="card spel-tegel" href="#mex"><span class="st-ic" aria-hidden="true">🎲</span><b>Mex</b><span>Dobbelen tot er een 100-man is</span></a>
-      <a class="card spel-tegel" href="#pong"><span class="st-ic" aria-hidden="true">🏓</span><b>Pong teams</b><span>Eerlijke teams voor bierpong</span></a>
+      <a class="card spel-tegel" href="#pong"><span class="st-ic" aria-hidden="true">🏓</span><b>Pongen</b><span>Beerpong-regels en teams maken</span></a>
     </div>
   </div>
 </div>
-<div class="seg-switch spel-switch" id="spel-switch" hidden role="tablist" aria-label="Spellen"><a href="#spellen" data-sw="spellen">Alle</a><a href="#rad" data-sw="rad">🎡 Rad</a><a href="#race" data-sw="race">🐪 Race</a><a href="#mex" data-sw="mex">🎲 Mex</a><a href="#pong" data-sw="pong">🏓 Pong</a></div>
+<div class="seg-switch spel-switch" id="spel-switch" hidden role="tablist" aria-label="Spellen"><a href="#spellen" data-sw="spellen">Alle</a><a href="#rad" data-sw="rad">🎡 Rad</a><a href="#race" data-sw="race">🐪 Race</a><a href="#mex" data-sw="mex">🎲 Mex</a><a href="#pong" data-sw="pong">🏓 Pongen</a></div>
 <div id="view-ideeen" class="view" hidden>
   <div class="wrap page">
     <header class="page-head">
@@ -1887,15 +1903,68 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   </div>
 </div>
 
-<!-- ================= PONG TEAMS ================= -->
+<!-- ================= PONGEN ================= -->
 <div id="view-pong" class="view" hidden>
   <div class="wrap page">
     <header class="page-head">
       <div class="eyebrow">Beerpong</div>
-      <h1>Pong teams</h1>
-      <p>Laat het lot de teams kiezen. Iedereen legt één vinger op het scherm. Blijven alle vingers 3 seconden stil liggen, dan verdeelt de app jullie willekeurig in twee teams.</p>
+      <h1>Pongen</h1>
+      <p>De Kamelen-regels voor beerpong, en de teams laten kiezen door het lot.</p>
     </header>
-    <section class="card pong-intro">
+    <div class="seg bp-seg" role="group" aria-label="Pongen"><button type="button" data-bp-tab="regels" aria-pressed="true">Spelregels</button><button type="button" data-bp-tab="teams" aria-pressed="false">Teams maken</button></div>
+
+    <div class="bp-regels" data-bp-deel="regels">
+      <section class="card bp-stap"><span class="bp-nr">1</span><div>
+        <h2 class="bp-h">Teams en tafel</h2>
+        <p>De teams worden bepaald door <a href="#pong" data-bp-naar="teams">Kamelen-Chwazi</a>. Elk team zet <b>10 halve-literglazen</b>, een beetje gevuld met water, in een <b>driehoek</b> op zijn eigen helft van de tafel.</p>
+        <div class="bp-fig" data-fig="opstelling"></div></div></section>
+
+      <section class="card bp-stap"><span class="bp-nr">2</span><div>
+        <h2 class="bp-h">Wie begint?</h2>
+        <p>Dat bepaal je met <b>steen, papier, schaar</b>.</p>
+        <div class="bp-fig" data-fig="sps"></div></div></section>
+
+      <section class="card bp-stap"><span class="bp-nr">3</span><div>
+        <h2 class="bp-h">Gooien</h2>
+        <p>Je team heeft per beurt <b>2 balletjes</b>. Gooi vanaf <b>jouw kant</b> in een glas van de tegenstander. Je <b>elleboog moet achter jouw tafelrand blijven</b> tijdens het gooien.</p>
+        <div class="bp-fig" data-fig="elleboog"></div></div></section>
+
+      <section class="card bp-stap"><span class="bp-nr">4</span><div>
+        <h2 class="bp-h">Raak gegooid</h2>
+        <p>De beker <b>blijft eerst staan</b> en je mag <b>nog een keer gooien</b>. Per geraakte beker trekt <b>één iemand van het team waarvan de beker is geraakt een halve bak</b>. Je volgende worp bepaalt wat er met die beker gebeurt:</p>
+        <div class="bp-fig" data-fig="raak"></div>
+        <ul class="steps">
+          <li><b>Mis:</b> de geraakte beker gaat weg.</li>
+          <li><b>Raak in dezelfde beker:</b> <b>BOM</b>. Die beker én alle bekers eromheen gaan weg.</li>
+          <li><b>Raak in een andere beker:</b> de eerste beker gaat weg, de nieuwe blijft staan en je gooit opnieuw. Daarna gelden weer dezelfde regels.</li>
+        </ul>
+        <p class="muted">Je hebt 2 worpen per beurt, plus de extra worpen die je verdient door raak te gooien.</p></div></section>
+
+      <section class="card bp-stap"><span class="bp-nr">5</span><div>
+        <h2 class="bp-h">Over de tafel</h2>
+        <p>Gooi je een bal <b>helemaal over de tafel heen</b>, dan stopt je beurt meteen, ook als je nog worpen over had. De ballen gaan naar de tegenstander en jij trekt <b>een halve bak</b>.</p>
+        <div class="bp-fig" data-fig="over"></div></div></section>
+
+      <section class="card bp-stap"><span class="bp-nr">6</span><div>
+        <h2 class="bp-h">Rebound en trickshot</h2>
+        <p>Mis je, maar pak je de bal van de tafel <b>voordat hij de grond raakt</b>? Dan mag je een <b>trickshot</b> doen en alsnog een glas proberen te raken.</p>
+        <div class="bp-fig" data-fig="rebound"></div></div></section>
+
+      <section class="card bp-stap"><span class="bp-nr">7</span><div>
+        <h2 class="bp-h">Hervormen</h2>
+        <p>Elk team mag <b>één keer per potje</b> de bekers laten hervormen in een vorm naar keuze.</p>
+        <div class="bp-fig" data-fig="hervorm"></div></div></section>
+
+      <section class="card bp-stap"><span class="bp-nr">8</span><div>
+        <h2 class="bp-h">Winnen en afrekenen</h2>
+        <p>Een team dat alle bekers heeft geraakt, wint. <b>Maar:</b> begon dat team, dan krijgt het andere team nog <b>één gelijkmakende beurt</b>.</p>
+        <p>Het verliezende team trekt <b>per glas dat de winnaar nog heeft staan een halve bak</b>.</p>
+        <div class="bp-fig" data-fig="afrekening"></div></div></section>
+    </div>
+
+    <section class="card pong-intro" data-bp-deel="teams" hidden>
+      <h2 class="bp-h">Teams maken met Kamelen-Chwazi</h2>
+      <p class="muted">Laat het lot de teams kiezen. Blijven alle vingers 3 seconden stil liggen, dan verdeelt de app jullie willekeurig in twee teams.</p>
       <div class="pong-demo" aria-hidden="true"><span style="--kleur:#b9d8e8"></span><span style="--kleur:#f08c1c"></span><span style="--kleur:#b9d8e8"></span><span style="--kleur:#f08c1c"></span></div>
       <ul class="steps">
         <li>Leg de telefoon plat op tafel.</li>
@@ -2084,7 +2153,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <a href="#rad" data-view-link="rad">Kamelen-rad</a>
   <a href="#race" data-view-link="race">Kamelen-racen</a>
   <a href="#mex" data-view-link="mex">Mex</a>
-  <a href="#pong" data-view-link="pong">Pong teams</a>
+  <a href="#pong" data-view-link="pong">Pongen</a>
   <div class="ms-h">Account</div>
   <a href="#" data-wrapped>🎁 Kamelen Wrapped</a>
   <a href="#" data-uitloggen>Uitloggen</a>
@@ -3726,9 +3795,10 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795493400"></script>
-<script src="toto.js?v=1795493400"></script>
-<script src="pong.js?v=1795493400"></script>
+<script src="mex.js?v=1795493600"></script>
+<script src="toto.js?v=1795493600"></script>
+<script src="pong.js?v=1795493600"></script>
+<script src="pongregels.js?v=1795493600"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3737,18 +3807,18 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795493400"></script>
-<script src="statistieken.js?v=1795493400"></script>
-<script src="wrapped.js?v=1795493400"></script>
-<script src="race.js?v=1795493400"></script>
-<script src="rad.js?v=1795493400"></script>
-<script src="fotos.js?v=1795493400"></script>
-<script src="quotes.js?v=1795493400"></script>
-<script src="ideeen.js?v=1795493400"></script>
-<script src="seizoen.js?v=1795493400"></script>
-<script src="zege.js?v=1795493400"></script>
-<script src="karavaan.js?v=1795493400"></script>
-<script src="design-proef.js?v=1795493400"></script>
-<script src="push.js?v=1795493400"></script>
+<script src="stemmen.js?v=1795493600"></script>
+<script src="statistieken.js?v=1795493600"></script>
+<script src="wrapped.js?v=1795493600"></script>
+<script src="race.js?v=1795493600"></script>
+<script src="rad.js?v=1795493600"></script>
+<script src="fotos.js?v=1795493600"></script>
+<script src="quotes.js?v=1795493600"></script>
+<script src="ideeen.js?v=1795493600"></script>
+<script src="seizoen.js?v=1795493600"></script>
+<script src="zege.js?v=1795493600"></script>
+<script src="karavaan.js?v=1795493600"></script>
+<script src="design-proef.js?v=1795493600"></script>
+<script src="push.js?v=1795493600"></script>
 </body>
 </html>
