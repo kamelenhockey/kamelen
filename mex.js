@@ -276,8 +276,10 @@
     document.querySelector(".mx-alarm")?.remove();
     const d = document.createElement("div");
     d.className = "mx-alarm"; d.setAttribute("role", "alertdialog"); d.setAttribute("aria-modal", "true"); d.setAttribute("aria-labelledby", "mx-alarm-t");
-    d.innerHTML = `<div class="mx-alarm-in"><div class="mx-alarm-ic" aria-hidden="true">🚨</div>
-      <h2 id="mx-alarm-t">LET OP!<br>${esc(n).toUpperCase()}, JE BENT 100-MAN.<br>JE MAG NIET WEG!</h2>
+    d.innerHTML = `<div class="mx-zwaai" aria-hidden="true"></div><div class="mx-tape boven" aria-hidden="true"><span>100-MAN · NIET WEG · 100-MAN · NIET WEG · 100-MAN · NIET WEG · 100-MAN · NIET WEG · </span></div><div class="mx-tape onder" aria-hidden="true"><span>100-MAN · NIET WEG · 100-MAN · NIET WEG · 100-MAN · NIET WEG · 100-MAN · NIET WEG · </span></div>
+      <div class="mx-alarm-in"><div class="mx-alarm-ic" aria-hidden="true">🚨</div>
+      <div class="mx-alarm-let">LET OP!</div>
+      <h2 id="mx-alarm-t"><span class="mx-alarm-naam">${esc(n)}</span>JE BENT 100-MAN<br>JE MAG NIET WEG!</h2>
       <p>Eerst moet iemand anders 100 gooien. Alleen als <b>iedereen</b> toestemming geeft, mag je eerder weg.</p>
       <div class="mx-alarm-knoppen"><button type="button" class="mx-alarm-ok">Oké, ik blijf zitten</button><button type="button" class="mx-alarm-toestemming">Iedereen geeft toestemming</button></div>
       <div class="mx-toestemming" hidden><p>Iedereen tikt zelf op zijn naam om akkoord te geven:</p>
@@ -304,22 +306,26 @@
       verlaat(n);
     };
     d.querySelector(".mx-alarm-ok").focus();
-    try { navigator.vibrate?.([400, 150, 400, 150, 400, 150, 800]); } catch {}
     sirene();
     const stopTimer = setTimeout(() => { if (d.isConnected && !d.classList.contains("rustig")) sluit(); }, 12000);
   }
-  let ac = null, sireneOsc = null;
+  let ac = null, sireneOsc = null, trilTimer = null;
   function sirene() {
     try {
       ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === "suspended") ac.resume();
-      const o = ac.createOscillator(), g = ac.createGain(), nu = ac.currentTime;
-      o.type = "sawtooth"; g.gain.value = .08;
-      for (let i = 0; i < 8; i++) { o.frequency.setValueAtTime(660, nu + i * .5); o.frequency.linearRampToValueAtTime(990, nu + i * .5 + .25); o.frequency.linearRampToValueAtTime(660, nu + i * .5 + .5); }
-      g.gain.setValueAtTime(.08, nu + 3.8); g.gain.linearRampToValueAtTime(0, nu + 4);
-      o.connect(g).connect(ac.destination); o.start(nu); o.stop(nu + 4); sireneOsc = o;
+      const nu = ac.currentTime, duur = 6;
+      const o = ac.createOscillator(), o2 = ac.createOscillator(), g = ac.createGain();
+      o.type = "square"; o2.type = "sawtooth"; o2.detune.value = 8;
+      /* Nederlandse politie-tweetoon: hoog-laag, hoog-laag */
+      for (let i = 0; i < duur / .8; i++) { const t = nu + i * .8; [o, o2].forEach(x => { x.frequency.setValueAtTime(950, t); x.frequency.setValueAtTime(660, t + .4); }); }
+      g.gain.setValueAtTime(0, nu); g.gain.linearRampToValueAtTime(.07, nu + .05); g.gain.setValueAtTime(.07, nu + duur - .3); g.gain.linearRampToValueAtTime(0, nu + duur);
+      o.connect(g); o2.connect(g); g.connect(ac.destination); o.start(nu); o2.start(nu); o.stop(nu + duur); o2.stop(nu + duur);
+      sireneOsc = { stop() { try { o.stop(); o2.stop(); } catch {} } };
     } catch {}
+    const tril = () => { try { navigator.vibrate?.([300, 120, 300, 120, 600]); } catch {} };
+    tril(); clearInterval(trilTimer); trilTimer = setInterval(tril, 1600); setTimeout(() => clearInterval(trilTimer), 6000);
   }
-  function stopSirene() { try { sireneOsc?.stop(); } catch {} sireneOsc = null; }
+  function stopSirene() { try { sireneOsc?.stop(); } catch {} sireneOsc = null; clearInterval(trilTimer); try { navigator.vibrate?.(0); } catch {} }
 
   /* ---------- Beurtvolgorde slepen (aan het ☰-handvat; werkt met vinger en muis) ---------- */
   let sleep = null;

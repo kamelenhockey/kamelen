@@ -504,14 +504,30 @@ td.delta{color:var(--muted);font-size:.8rem}
 .mx-volgorde li.honderd{background:#fde2df;border-color:#e9a39b}
 .mx-beheer .mx-volgorde li:first-child .mx-vnm::after{content:none}
 .mx-chip.honderd{background:#fde2df;border-color:#e9a39b}
-.mx-alarm{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:24px;color:#fff;text-align:center;animation:mx-knipper .45s steps(1) infinite}
-@keyframes mx-knipper{0%{background:#d0021b}50%{background:#5c0008}}
-.mx-alarm-in{max-width:560px}
-.mx-alarm-ic{font-size:5rem;animation:mx-schud .3s linear infinite}
-@keyframes mx-schud{25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
-.mx-alarm h2{font-family:var(--font-display);font-weight:400;font-size:clamp(2.2rem,10vw,4.2rem);line-height:1.05;margin:10px 0 14px;text-shadow:0 3px 0 rgba(0,0,0,.25)}
-.mx-alarm p{font-size:1.1rem;margin:0 0 22px}
+.mx-alarm{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:70px 20px;color:#fff;text-align:center;overflow:hidden;background:#b00018;animation:mx-flits .5s steps(1) infinite, mx-beef .35s linear infinite}
+@keyframes mx-flits{0%{background:#d0021b}50%{background:#4a0007}}
+@keyframes mx-beef{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-3px)}}
+/* draaiend zwaailicht achter de tekst */
+.mx-zwaai{position:absolute;left:50%;top:50%;width:220vmax;height:220vmax;margin:-110vmax 0 0 -110vmax;background:conic-gradient(from 0deg,rgba(255,255,255,.28) 0 14deg,transparent 14deg 166deg,rgba(255,255,255,.28) 166deg 194deg,transparent 194deg 346deg,rgba(255,255,255,.28) 346deg);animation:mx-draai 1.1s linear infinite;pointer-events:none}
+@keyframes mx-draai{to{transform:rotate(360deg)}}
+/* afzetlint boven en onder */
+.mx-tape{position:absolute;left:-10%;right:-10%;height:44px;display:flex;align-items:center;overflow:hidden;background:repeating-linear-gradient(-45deg,#ffd400 0 22px,#141414 22px 44px);box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.mx-tape.boven{top:18px;transform:rotate(-3deg)}.mx-tape.onder{bottom:18px;transform:rotate(2.5deg)}
+.mx-tape span{white-space:nowrap;font:900 1rem/1 var(--font-body,inherit);letter-spacing:.06em;color:#141414;background:#ffd400;padding:4px 10px;animation:mx-loop 6s linear infinite}
+.mx-tape.onder span{animation-direction:reverse}
+@keyframes mx-loop{to{transform:translateX(-50%)}}
+.mx-alarm-in{position:relative;max-width:620px}
+.mx-alarm-ic{font-size:4.5rem;line-height:1;animation:mx-schud .25s linear infinite}
+@keyframes mx-schud{25%{transform:rotate(-14deg) scale(1.08)}75%{transform:rotate(14deg) scale(1.08)}}
+.mx-alarm-let{display:inline-block;margin:10px 0 6px;padding:4px 16px;border-radius:8px;background:#fff;color:#c00015;font:900 clamp(1.4rem,6vw,2rem)/1.1 var(--font-body,inherit);letter-spacing:.04em;animation:mx-puls .5s ease-in-out infinite alternate}
+@keyframes mx-puls{to{transform:scale(1.12)}}
+.mx-alarm h2{font-family:var(--font-display);font-weight:400;font-size:clamp(2rem,9vw,3.8rem);line-height:1.02;margin:6px 0 14px;text-shadow:0 4px 0 rgba(0,0,0,.3)}
+.mx-alarm-naam{display:block;font-size:1.25em;color:#ffd400;text-transform:uppercase}
+.mx-alarm p{font-size:1.08rem;margin:0 0 20px;text-shadow:0 1px 0 rgba(0,0,0,.3)}
+.mx-alarm-ok{border:0;border-radius:999px;padding:14px 24px;font:700 1.05rem var(--font-body,inherit);background:#fff;color:#a00012;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.mx-alarm,.mx-zwaai,.mx-tape span,.mx-alarm-ic,.mx-alarm-let{animation:none}.mx-alarm{background:#b00018}}
 .mx-alarm.rustig{animation:none;background:#8f0013}
+.mx-alarm.rustig .mx-zwaai{animation-duration:4s;opacity:.4}
 .mx-alarm-knoppen{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
 .mx-alarm-toestemming{border:2px solid #fff;border-radius:999px;padding:12px 20px;font:700 1rem var(--font-body,inherit);background:transparent;color:#fff;cursor:pointer}
 .mx-toestemming{margin-top:8px}
@@ -1223,6 +1239,32 @@ body.wrapped-open{overflow:hidden}
 .spel-tegel .st-ic{font-size:2.4rem;line-height:1}
 .spel-tegel b{font-family:var(--font-display);font-weight:400;font-size:1.4rem}
 .spel-tegel span:last-child{color:var(--muted);font-size:.9rem}
+/* ---------- Proef: nieuwe homepagina met de woestijnkameel (alleen met ?home=proef) ---------- */
+.hero .hero-foto{display:none}
+body.home-proef[data-page="home"] .hero{overflow:hidden;background:linear-gradient(180deg,#9fc3e6 0%,#c6dcee 55%,#f3dcc0 100%);border-bottom:0}
+body.home-proef[data-page="home"] .hero .hero-foto{display:block;position:absolute;z-index:0;object-fit:cover;pointer-events:none;max-width:none!important}
+body.home-proef[data-page="home"] .hero .wrap{position:relative;z-index:1}
+body.home-proef[data-page="home"] .hero::after{content:"";position:absolute;z-index:1;left:0;right:0;bottom:-1px;height:46px;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 46' preserveAspectRatio='none'%3E%3Cpath d='M0 30 C 180 6 360 6 560 22 S 940 44 1140 22 S 1360 10 1440 18 V46 H0Z' fill='%23163650'/%3E%3C/svg%3E") bottom/100% 100% no-repeat}
+body.home-proef[data-page="home"] .wordmark{text-shadow:0 2px 18px rgba(255,255,255,.55)}
+body.home-proef[data-page="home"] .hero .eyebrow{color:var(--orange-ink)}
+.proef-label{position:fixed;left:50%;bottom:calc(70px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:80;display:flex;gap:10px;align-items:center;padding:6px 8px 6px 14px;border-radius:999px;background:var(--ink);color:#fff;font-size:.8rem;box-shadow:0 8px 20px -10px rgba(0,0,0,.6)}
+body:not([data-page="home"]) .proef-label{display:none}
+.proef-label a{color:#fff;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:999px;text-decoration:none}
+@media (min-width:761px){
+  body.home-proef[data-page="home"] .hero .wrap{min-height:300px;padding-bottom:56px}
+  body.home-proef[data-page="home"] .hero .hero-foto{right:0;top:0;height:100%!important;width:min(64%,820px)!important;object-position:55% 18%;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.55) 22%,#000 45%);mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.55) 22%,#000 45%)}
+  body.home-proef[data-page="home"] .statbar{position:relative;z-index:2;background:rgba(255,255,255,.88);backdrop-filter:blur(8px)}
+}
+body.home-proef[data-page="home"] .bijgewerkt{background:rgba(255,255,255,.7);padding:1px 7px;border-radius:99px;color:var(--ink)}
+@media (max-width:760px){
+  body.home-proef[data-page="home"] .hero::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 46' preserveAspectRatio='none'%3E%3Cpath d='M0 30 C 180 6 360 6 560 22 S 940 44 1140 22 S 1360 10 1440 18 V46 H0Z' fill='%23b9d8e8'/%3E%3C/svg%3E")}
+  body.home-proef[data-page="home"] .hero .hero-foto{left:0;top:0;width:100%!important;height:250px!important;object-position:72% 40%;
+    -webkit-mask-image:linear-gradient(180deg,#000 55%,transparent 100%);mask-image:linear-gradient(180deg,#000 55%,transparent 100%)}
+  body.home-proef[data-page="home"] .hero .wrap{padding-top:196px!important;padding-bottom:40px!important}
+  body.home-proef[data-page="home"] .hero .wrap > img{width:76px!important;filter:drop-shadow(0 4px 10px rgba(22,54,80,.25))}
+}
 /* Ideeënbox */
 .idee-form{padding:18px 20px;margin-bottom:18px}
 .idee-soorten{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}
@@ -1340,6 +1382,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
     <button type="button" class="ik-chip" id="ik-chip" hidden></button>
     <span class="bijgewerkt" id="bijgewerkt" aria-live="off"></span>
   </div>
+  <img class="hero-foto" src="kameel-woestijn.jpg" alt="" aria-hidden="true" width="678" height="452" decoding="async">
   <div class="trek-ververs" id="trek-ververs" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
   <div class="wrap">
     <img src="logo.png" alt="Logo van de Kamelen: een lopende oranje kameel">
@@ -3176,6 +3219,20 @@ return Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJs
   });
 }
 laadGegevens(false);
+/* ---------- Proef nieuwe homepagina: alleen met ?home=proef (onthouden in dit venster) ---------- */
+(() => {
+  try {
+    const q = new URLSearchParams(location.search).get("home");
+    if (q === "proef") sessionStorage.setItem("kamelen-home-proef", "1");
+    if (q === "uit") sessionStorage.removeItem("kamelen-home-proef");
+    if (sessionStorage.getItem("kamelen-home-proef") !== "1") return;
+    document.body.classList.add("home-proef");
+    const l = document.createElement("div"); l.className = "proef-label";
+    l.innerHTML = `<span>Proefversie homepagina</span><a href="?home=uit#home">Uitzetten</a>`;
+    document.body.appendChild(l);
+  } catch {}
+})();
+
 /* ---------- Laatst bijgewerkt ---------- */
 function toonBijgewerkt(){
   const el = document.getElementById("bijgewerkt"), t = window._bijgewerktOm; if (!el || !t) return;
@@ -3343,9 +3400,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795489000"></script>
-<script src="toto.js?v=1795489000"></script>
-<script src="pong.js?v=1795489000"></script>
+<script src="mex.js?v=1795489100"></script>
+<script src="toto.js?v=1795489100"></script>
+<script src="pong.js?v=1795489100"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3354,14 +3411,14 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795489000"></script>
-<script src="statistieken.js?v=1795489000"></script>
-<script src="wrapped.js?v=1795489000"></script>
-<script src="race.js?v=1795489000"></script>
-<script src="rad.js?v=1795489000"></script>
-<script src="fotos.js?v=1795489000"></script>
-<script src="quotes.js?v=1795489000"></script>
-<script src="ideeen.js?v=1795489000"></script>
-<script src="push.js?v=1795489000"></script>
+<script src="stemmen.js?v=1795489100"></script>
+<script src="statistieken.js?v=1795489100"></script>
+<script src="wrapped.js?v=1795489100"></script>
+<script src="race.js?v=1795489100"></script>
+<script src="rad.js?v=1795489100"></script>
+<script src="fotos.js?v=1795489100"></script>
+<script src="quotes.js?v=1795489100"></script>
+<script src="ideeen.js?v=1795489100"></script>
+<script src="push.js?v=1795489100"></script>
 </body>
 </html>
