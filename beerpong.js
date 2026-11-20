@@ -94,7 +94,7 @@
     /* gevallen bier en vlekken */
     spatten.forEach(s => { const p = P(s.x, s.y); ctx.fillStyle = "rgba(240,200,90,.45)"; ctx.beginPath(); ctx.ellipse(p.x, p.y, s.r * p.s, s.r * p.s * .4, 0, 0, Math.PI * 2); ctx.fill(); });
     /* vastgehouden biertje */
-    if (S && S.bier) tekenBier(S.bier);
+    if (S && S.bier) tekenBier(bierPlek());
     /* bekers, achterste eerst */
     if (S) {
       const team = 1 - S.beurt;
@@ -136,6 +136,20 @@
     if (open) { ctx.strokeStyle = "#f2c230"; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(t.x, t.y, r + 3, r * .42 + 3, 0, 0, Math.PI * 2); ctx.stroke();
       ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(t.x, t.y + r * .05, Math.max(3, BAL_R * p.s * .8), 0, Math.PI * 2); ctx.fill(); }
     if (kiesbaar) { ctx.strokeStyle = "#e8384f"; ctx.lineWidth = 2.5; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.ellipse(t.x, t.y + hoog / 2, r + 6, hoog / 2 + 6, 0, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]); }
+  }
+  /* Het biertje loopt mee met degene die het vasthoudt: langs de linkerkant, achter de tafel en langs de rechterkant */
+  function bierPlek() {
+    const b = S.bier, t = performance.now() / 1000 * b.tempo + b.fase;
+    let u = .5 + .5 * Math.sin(t) + .06 * Math.sin(t * 3.7);
+    u = Math.max(0, Math.min(1, u));
+    const L1 = 40, L2 = TAFEL_B + 12, tot = L1 * 2 + L2; let s = u * tot;
+    if (s < L1) return { x: -6, y: 212 + s };
+    s -= L1; if (s < L2) return { x: -6 + s, y: 252 };
+    s -= L2; return { x: TAFEL_B + 6, y: 250 - s };
+  }
+  function loopBier() {
+    const stap = () => { if (!S || !S.bier || S.fase === "klaar") return; if (!mik) teken(); requestAnimationFrame(stap); };
+    requestAnimationFrame(stap);
   }
   function tekenBier(b) {
     const p = P(b.x, b.y), r = 6 * p.s, h = r * 2.4;
@@ -193,10 +207,11 @@
   }
   function doorgeven() {
     S.fase = "wissel"; S.worpen = 2; S.open = null; S.trick = false; S.stuiterKeuze = false;
-    S.bier = Math.random() < .3 ? { x: Math.random() < .5 ? -5 : TAFEL_B + 5, y: 238 } : null;
+    S.bier = Math.random() < .3 ? { fase: Math.random() * 6.28, tempo: .45 + Math.random() * .35 } : null;
+    if (S.bier) loopBier();
     werkBord(); teken();
     laag.innerHTML = `<div class="bpg-kaart"><span class="bpg-stip" style="background:${KLEUR[S.beurt]}"></span>
-      <h3>Beurt voor ${esc(gooier().naam)}</h3><p>${S.gelijkmaker ? "<b>Gelijkmakende beurt!</b> Gooi alle bekers weg om gelijk te spelen." : "Geef de telefoon door."}${S.bier ? "<br>🍺 Iemand van de tegenstander houdt zijn biertje vast naast de tafel. Raak = meteen gewonnen!" : ""}</p>
+      <h3>Beurt voor ${esc(gooier().naam)}</h3><p>${S.gelijkmaker ? "<b>Gelijkmakende beurt!</b> Gooi alle bekers weg om gelijk te spelen." : "Geef de telefoon door."}${S.bier ? "<br>🍺 Iemand van de tegenstander loopt met zijn biertje rond de tafel. Raak = meteen gewonnen!" : ""}</p>
       <button type="button" class="btn" data-bpg="klaar">Ik gooi!</button></div>`;
     laag.hidden = false;
   }
@@ -265,7 +280,8 @@
 
   function land(x, y, naStuiter) {
     /* biertje vastgehouden? */
-    if (S.bier && Math.hypot(S.bier.x - x, S.bier.y - y) < 7) { bal = null; teken(); meld("🍺 RAAK IN HET BIERTJE!", "groot"); return setTimeout(() => einde(S.beurt, `Raak in het biertje dat ${esc(doel().naam)} vasthield. Meteen gewonnen!`), 900); }
+    const bp = S.bier && bierPlek();
+    if (bp && Math.hypot(bp.x - x, bp.y - y) < 6) { bal = null; teken(); meld("🍺 RAAK IN HET BIERTJE!", "groot"); return setTimeout(() => einde(S.beurt, `Raak in het biertje dat ${esc(doel().naam)} vasthield. Meteen gewonnen!`), 900); }
     /* volledig over de tafel */
     if (!naStuiter && y > TAFEL_L + 2) {
       const verder = { x: x + (x - TAFEL_B / 2) * .3, y: y + 40 };
