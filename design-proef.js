@@ -1,5 +1,5 @@
 /* =========================================================
-   Design-proef (alleen met ?design=proef, onthouden in dit venster; ?design=uit zet hem uit)
+   Design-extra's voor iedereen
    - glazen kaarten op home met de woestijnfoto erachter
    - kop die meeschuift bij scrollen + compacte balk bovenin
    - kameeltje in de tabbalk dat naar het actieve tabje loopt
@@ -8,22 +8,8 @@
    - jarige-modus: feestmuts op het logo en confetti
    ========================================================= */
 (function () {
-  let aan = false;
-  try {
-    const q = new URLSearchParams(location.search).get("design");
-    if (q === "proef") sessionStorage.setItem("kamelen-design-proef", "1");
-    if (q === "uit") sessionStorage.removeItem("kamelen-design-proef");
-    aan = sessionStorage.getItem("kamelen-design-proef") === "1";
-  } catch {}
-  if (!aan) return;
   document.body.classList.add("design-proef");
   const rustig = matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  /* Proeflabel */
-  const label = document.createElement("div");
-  label.className = "proef-label dp-label";
-  label.innerHTML = `<span>Design-proef</span><a href="?design=uit#home">Uitzetten</a>`;
-  document.body.appendChild(label);
 
   /* ---------- 1. Glazen kaarten: de foto blijft vast achter de pagina staan ---------- */
   const achter = document.createElement("div");
