@@ -3231,7 +3231,7 @@ laadGegevens(false);
     if (sessionStorage.getItem("kamelen-home-proef") !== "1") return;
     document.body.classList.add("home-proef");
     /* Elke keer dat de app opent een andere woestijnfoto */
-    const FOTOS = [{"src": "woestijn/2.jpg", "d": "50% 58%", "m": "50% 55%"}, {"src": "woestijn/3.jpg", "d": "78% 62%", "m": "82% 58%"}, {"src": "woestijn/4.jpg", "d": "50% 55%", "m": "55% 55%"}];
+    const FOTOS = [{"src": "woestijn/2.jpg", "d": "50% 58%", "m": "50% 55%"}, {"src": "woestijn/3.jpg", "d": "78% 62%", "m": "82% 58%"}, {"src": "woestijn/4.jpg", "d": "50% 38%", "m": "55% 55%"}, {"src": "woestijn/5.jpg", "d": "50% 45%", "m": "45% 60%"}, {"src": "woestijn/6.jpg", "d": "50% 45%", "m": "50% 45%"}, {"src": "woestijn/7.jpg", "d": "50% 55%", "m": "55% 50%"}, {"src": "woestijn/8.jpg", "d": "50% 60%", "m": "70% 55%"}, {"src": "woestijn/9.jpg", "d": "50% 45%", "m": "62% 48%"}, {"src": "woestijn/10.jpg", "d": "50% 50%", "m": "30% 50%"}, {"src": "woestijn/11.jpg", "d": "50% 60%", "m": "55% 55%"}, {"src": "woestijn/12.jpg", "d": "50% 50%", "m": "50% 68%"}, {"src": "woestijn/13.jpg", "d": "50% 30%", "m": "50% 40%"}, {"src": "woestijn/14.jpg", "d": "50% 55%", "m": "45% 62%"}, {"src": "woestijn/15.jpg", "d": "50% 38%", "m": "60% 55%"}, {"src": "woestijn/16.jpg", "d": "50% 32%", "m": "40% 45%"}];
     let i = 0; try { i = (Number(localStorage.getItem("kamelen-hero-foto")) + 1) % FOTOS.length || 0; localStorage.setItem("kamelen-hero-foto", i); } catch {}
     const zet = n => {
       const f = FOTOS[n], img = document.querySelector(".hero .hero-foto"), hero = document.querySelector(".hero");
@@ -3413,9 +3413,9 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795489300"></script>
-<script src="toto.js?v=1795489300"></script>
-<script src="pong.js?v=1795489300"></script>
+<script src="mex.js?v=1795489400"></script>
+<script src="toto.js?v=1795489400"></script>
+<script src="pong.js?v=1795489400"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3424,14 +3424,14 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795489300"></script>
-<script src="statistieken.js?v=1795489300"></script>
-<script src="wrapped.js?v=1795489300"></script>
-<script src="race.js?v=1795489300"></script>
-<script src="rad.js?v=1795489300"></script>
-<script src="fotos.js?v=1795489300"></script>
-<script src="quotes.js?v=1795489300"></script>
-<script src="ideeen.js?v=1795489300"></script>
-<script src="push.js?v=1795489300"></script>
+<script src="stemmen.js?v=1795489400"></script>
+<script src="statistieken.js?v=1795489400"></script>
+<script src="wrapped.js?v=1795489400"></script>
+<script src="race.js?v=1795489400"></script>
+<script src="rad.js?v=1795489400"></script>
+<script src="fotos.js?v=1795489400"></script>
+<script src="quotes.js?v=1795489400"></script>
+<script src="ideeen.js?v=1795489400"></script>
+<script src="push.js?v=1795489400"></script>
 </body>
 </html>
