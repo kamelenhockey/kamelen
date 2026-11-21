@@ -86,8 +86,8 @@
       const c = document.createElement("canvas"); c.width = TAFEL_B * BLAD_PX; c.height = (TAFEL_L - BLAD_Y0) * BLAD_PX;
       const g = c.getContext("2d"), yPx = y => (TAFEL_L - y) * BLAD_PX;
       g.fillStyle = "#b9d8e8"; g.fillRect(0, 0, c.width, c.height);
-      const lb = 50 * BLAD_PX, lh = lb * logo.height / logo.width;
-      g.drawImage(logo, (c.width - lb) / 2, yPx(150) - lh, lb, lh);
+      const lb = 38 * BLAD_PX, lh = lb * logo.height / logo.width;
+      g.drawImage(logo, (c.width - lb) / 2, yPx(152) - lh, lb, lh);
       g.fillStyle = "#111"; g.textAlign = "center"; g.textBaseline = "alphabetic";
       g.font = `800 ${9 * BLAD_PX}px Montserrat, "Arial Black", Inter, system-ui, sans-serif`;
       const w = g.measureText("KAMELEN").width, max = 46 * BLAD_PX;
@@ -171,9 +171,9 @@
     let u = .5 + .5 * Math.sin(t) + .06 * Math.sin(t * 3.7);
     u = Math.max(0, Math.min(1, u));
     const L1 = 40, L2 = TAFEL_B + 12, tot = L1 * 2 + L2; let s = u * tot;
-    if (s < L1) return { x: -6, y: 212 + s };
-    s -= L1; if (s < L2) return { x: -6 + s, y: 252 };
-    s -= L2; return { x: TAFEL_B + 6, y: 250 - s };
+    if (s < L1) return { x: -3, y: 214 + s };
+    s -= L1; if (s < L2) return { x: -3 + s * (TAFEL_B + 6) / L2, y: 252 };
+    s -= L2; return { x: TAFEL_B + 3, y: 252 - s };
   }
   function loopBier() {
     const stap = () => { if (!S || !S.bier || S.fase === "klaar") return; if (!mik) teken(); requestAnimationFrame(stap); };
