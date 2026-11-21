@@ -97,7 +97,7 @@
     });
   }
   maakBlad();
-  let bal = null, spatten = [];
+  let bal = null, spatten = [], spoor = [];
   function teken() {
     if (!W) return;
     ctx.clearRect(0, 0, W, H);
@@ -126,15 +126,23 @@
     /* bekers, achterste eerst */
     if (S) {
       const team = 1 - S.beurt;
-      [...doel().bekers].sort((p, q) => q.y - p.y).forEach(k => tekenBeker(k, team, S.open === k.id, S.stuiterKeuze));
+      if (S.vorige) { const v = P(S.vorige.x, S.vorige.y), r = 5; ctx.strokeStyle = "rgba(22,54,80,.35)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(v.x - r, v.y - r * .5); ctx.lineTo(v.x + r, v.y + r * .5); ctx.moveTo(v.x + r, v.y - r * .5); ctx.lineTo(v.x - r, v.y + r * .5); ctx.stroke(); }
+      const nu = performance.now();
+      [...doel().bekers.map(k => ({ k })), ...verdwijn.filter(v => v.team === team)].sort((p, q) => q.k.y - p.k.y).forEach(o => {
+        if (o.t0) { const f = Math.min(1, (nu - o.t0) / 380); ctx.save(); ctx.globalAlpha = 1 - f; const p = P(o.k.x, o.k.y); ctx.translate(p.x, p.y); ctx.scale(1 - f * .6, 1 - f * .6); ctx.translate(-p.x, -p.y + f * 10); tekenBeker(o.k, team, false, false); ctx.restore(); }
+        else tekenBeker(o.k, team, S.open === o.k.id, S.stuiterKeuze);
+      });
+      druppels.forEach(d => { const f = (nu - d.t0) / 1000, p = P(d.x + d.vx * f, d.y + d.vy * f, Math.max(0, d.vh * f - 120 * f * f)); ctx.fillStyle = "rgba(120,180,230,.85)"; ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(1.5, p.s * .9), 0, Math.PI * 2); ctx.fill(); });
     }
-    /* bal */
+    /* bal met spoortje */
+    if (bal && spoor.length) spoor.forEach((s, i) => { ctx.fillStyle = `rgba(22,54,80,${.04 + i / spoor.length * .16})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.r * (.4 + i / spoor.length * .5), 0, Math.PI * 2); ctx.fill(); });
     if (bal) {
       const sch = P(bal.x, bal.y), p = P(bal.x, bal.y, bal.h), r = Math.max(4, BAL_R * p.s);
       if (bal.h > 0 && bal.y < TAFEL_L + 2) { ctx.fillStyle = "rgba(0,0,0,.28)"; ctx.beginPath(); ctx.ellipse(sch.x, sch.y, r, r * .4, 0, 0, Math.PI * 2); ctx.fill(); }
       const g = ctx.createRadialGradient(p.x - r * .35, p.y - r * .35, r * .1, p.x, p.y, r); g.addColorStop(0, "#fff"); g.addColorStop(1, "#d9d9d9");
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = "rgba(0,0,0,.25)"; ctx.lineWidth = 1; ctx.stroke();
-    }
+      spoor.push({ x: p.x, y: p.y, r }); if (spoor.length > 9) spoor.shift();
+    } else spoor = [];
     /* bal in de hand: volgt je vinger */
     if (S && S.fase === "gooien" && !bal) {
       const x = mik ? mik.x : W / 2, y = mik ? mik.y : H - 46;
@@ -176,6 +184,44 @@
     ctx.fillStyle = "rgba(246,189,69,.95)"; ctx.fillRect(p.x - r * .85, p.y, r * 1.7, h);
     ctx.fillStyle = "#fffaf0"; ctx.beginPath(); ctx.ellipse(p.x, p.y, r, r * .4, 0, 0, Math.PI * 2); ctx.fill();
     ctx.font = `${Math.max(11, r)}px system-ui`; ctx.textAlign = "center"; ctx.fillText("🍺", p.x, p.y - r * .9);
+  }
+
+  /* ---------- Geluid (Web Audio, geen bestanden) ---------- */
+  let AC = null;
+  const ac = () => { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === "suspended") AC.resume(); return AC; } catch { return null; } };
+  function klank(soort) {
+    const c = ac(); if (!c) return; const t = c.currentTime;
+    const ruis = (sec, f, q, v, type = "bandpass") => { const b = c.createBuffer(1, Math.max(1, c.sampleRate * sec | 0), c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
+      const s = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain(); s.buffer = b; fl.type = type; fl.frequency.value = f; fl.Q.value = q; g.gain.value = v; s.connect(fl).connect(g).connect(c.destination); s.start(t); };
+    const toon = (f1, f2, sec, v, type = "sine", na = 0) => { const o = c.createOscillator(), g = c.createGain(); o.type = type; o.frequency.setValueAtTime(f1, t + na); o.frequency.exponentialRampToValueAtTime(f2, t + na + sec);
+      g.gain.setValueAtTime(.0001, t + na); g.gain.exponentialRampToValueAtTime(v, t + na + .005); g.gain.exponentialRampToValueAtTime(.0001, t + na + sec); o.connect(g).connect(c.destination); o.start(t + na); o.stop(t + na + sec + .02); };
+    if (soort === "tik") { toon(2600, 1800, .05, .25, "triangle"); ruis(.03, 3500, 1.5, .4); }
+    if (soort === "rand") { toon(3000, 2200, .04, .22, "triangle"); toon(2400, 1700, .05, .18, "triangle", .09); }
+    if (soort === "plons") { ruis(.25, 700, .8, .9, "lowpass"); toon(500, 140, .18, .3); }
+    if (soort === "zoef") { ruis(.35, 1200, .7, .35); }
+  }
+  /* bekers verdwijnen met een korte animatie, spetters bij raak */
+  let verdwijn = [], druppels = [];
+  function verwijder(lijst) {
+    const team = 1 - S.beurt, nu = performance.now();
+    lijst.forEach(k => verdwijn.push({ k, team, t0: nu }));
+    const ids = new Set(lijst.map(k => k.id));
+    doel().bekers = doel().bekers.filter(b => !ids.has(b.id));
+    animeer();
+  }
+  function plons(k) {
+    const nu = performance.now();
+    for (let i = 0; i < 12; i++) druppels.push({ x: k.x, y: k.y, vx: (Math.random() - .5) * 30, vy: (Math.random() - .5) * 10, vh: 25 + Math.random() * 35, t0: nu });
+    animeer();
+  }
+  let animatie = false;
+  function animeer() {
+    if (animatie) return; animatie = true;
+    const stap = () => { const nu = performance.now();
+      verdwijn = verdwijn.filter(v => nu - v.t0 < 380); druppels = druppels.filter(d => nu - d.t0 < 600);
+      if (!bal) teken();
+      if (verdwijn.length || druppels.length) requestAnimationFrame(stap); else { animatie = false; teken(); } };
+    requestAnimationFrame(stap);
   }
 
   /* ---------- Bord en knoppen ---------- */
@@ -225,7 +271,7 @@
       setTimeout(() => doorgeven(), 1500); }, rustig ? 100 : 1500);
   }
   function doorgeven() {
-    S.fase = "wissel"; S.worpen = 2; S.open = null; S.trick = false; S.stuiterKeuze = false;
+    S.fase = "wissel"; S.worpen = 2; S.open = null; S.trick = false; S.stuiterKeuze = false; S.vorige = null;
     S.bier = Math.random() < .3 ? { fase: Math.random() * 6.28, tempo: .45 + Math.random() * .35 } : null;
     if (S.bier) loopBier();
     werkBord(); teken();
@@ -293,7 +339,7 @@
     if (v.vy < .3 || start.y - eind.y < 25) return;          // geen echte worp
     /* richting: van waar je de bal pakte naar waar je hem losliet */
     const richting = (eind.x - start.x) / Math.max(30, start.y - eind.y);
-    gooi({ v: Math.hypot(v.vx, v.vy), richting });
+    ac(); gooi({ v: Math.hypot(v.vx, v.vy), richting, sx: eind.x });
   };
   cv.addEventListener("pointerup", los); cv.addEventListener("pointercancel", () => { mik = null; teken(); });
 
@@ -303,10 +349,10 @@
     const afstand = 60 + 115 * Math.log(1 + m.v * 1.5) + ruisG() * 8;          // cm vanaf de gooier
     /* richting: precies waar je visueel naartoe veegt, omgerekend naar de tafel */
     const z = afstand + D0, schermDy = Math.max(40, (H - 46) - (hor + Fy / z));
-    const zij = TAFEL_B / 2 + m.richting * schermDy * z / Fx + ruisG() * 4;
-    const doelY = afstand, doelX = zij;
-    /* vlucht 1 */
-    vlieg({ x: TAFEL_B / 2, y: 70 }, { x: doelX, y: doelY }, 34 + afstand * .1, 700, () => land(doelX, doelY, false));
+    const zij = TAFEL_B / 2 + (m.sx + m.richting * schermDy - W / 2) * z / Fx + ruisG() * 4;
+    const doelY = afstand, doelX = zij, vanX = TAFEL_B / 2 + (m.sx - W / 2) * (90 + D0) / Fx;
+    /* vlucht 1: vanaf je hand, met een boog die hoger is naarmate je verder gooit */
+    vlieg({ x: vanX, y: 70 }, { x: doelX, y: doelY }, 30 + afstand * .12, 620 + afstand, () => land(doelX, doelY, false));
   }
   function vlieg(van, naar, piek, ms, klaar) {
     const t0 = performance.now(); if (rustig) ms = 1;
@@ -322,6 +368,7 @@
   const rand = (x, y) => doel().bekers.find(k => { const d = Math.hypot(k.x - x, (k.y - y) * .9); return d >= RAAK_R && d < BEKER_R + 2.4; });
 
   function land(x, y, naStuiter) {
+    S.vorige = { x, y };
     /* biertje vastgehouden? */
     const bp = S.bier && bierPlek();
     if (bp && Math.hypot(bp.x - x, bp.y - y) < 6) { bal = null; teken(); meld("🍺 RAAK IN HET BIERTJE!", "groot"); return setTimeout(() => einde(S.beurt, `Raak in het biertje dat ${esc(doel().naam)} vasthield. Meteen gewonnen!`), 900); }
@@ -329,7 +376,7 @@
     if (!naStuiter && y > TAFEL_L + 3 && x > -2 && x < TAFEL_B + 2) {   /* airball: helemaal over de tafel heen */
       const verder = { x: x + (x - TAFEL_B / 2) * .3, y: y + 40 };
       return vlieg({ x, y }, verder, 10, 300, () => {
-        bal = null; bak(S.beurt);
+        bal = null; bak(S.beurt); klank("zoef");
         if (S.open !== null) haalWeg(S.open);
         meld(`💨 Airball! Helemaal over de tafel. Beurt voorbij, ${esc(gooier().naam)} trekt een halve bak.`, "lang");
         S.open = null; return volgendeBeurt(1600);
@@ -340,11 +387,12 @@
     if (x < -2 || x > TAFEL_B + 2 || y > TAFEL_L + 3) { meld("Naast de tafel, mis!"); return vlieg({ x, y }, { x: x + (x - TAFEL_B / 2) * .2, y: y + 20 }, 6, 300, () => { bal = null; teken(); gemist(); }); }
     /* te kort: stuiteren */
     if (!naStuiter && y < 200 && y > 120 && x > 0 && x < TAFEL_B) {
+      klank("tik");
       const y2 = y + (y - 105) * .55, x2 = x + (x - TAFEL_B / 2) * .25;
       return stuiter(x, y, x2, y2);
     }
     /* rand of tafel: gemist */
-    const r = rand(x, y);
+    const r = rand(x, y); klank(r ? "rand" : "tik");
     meld(r ? "😩 Op de rand… eruit!" : naStuiter ? "Gestuiterd, maar mis." : "Mis!");
     const weg = { x: x + (Math.random() - .5) * 20, y: Math.min(TAFEL_L + 30, y + 30) };
     vlieg({ x, y }, weg, 12, 350, () => { bal = null; teken(); gemist(); });
@@ -358,7 +406,7 @@
       /* kans dat je je eigen glas omstoot */
       if (Math.random() < .18 && doel().bekers.length > 1) {
         const om = doel().bekers[Math.floor(Math.random() * doel().bekers.length)];
-        if (om.id !== S.open) { spatten.push({ x: om.x + 6, y: om.y + 2, r: 9 }); doel().bekers = doel().bekers.filter(b => b.id !== om.id);
+        if (om.id !== S.open) { spatten.push({ x: om.x + 6, y: om.y + 2, r: 9 }); verwijder([om]);
           setTimeout(() => meld(`🫗 ${esc(doel().naam)} stoot bij het wegslaan een glas om. Pech, dat glas is weg!`, "lang"), 700); }
       }
     }, { once: true });
@@ -369,13 +417,13 @@
     });
   }
   function raak(k, naStuiter) {
-    bal = null;
+    bal = null; klank("plons"); plons(k);
     try { navigator.vibrate?.(40); } catch {}
     bak(1 - S.beurt);
     if (S.open !== null && S.open === k.id) {
       /* BOM */
       const weg = [k, ...buren(doel().bekers, k)];
-      doel().bekers = doel().bekers.filter(b => !weg.includes(b));
+      verwijder(weg);
       S.open = null;
       meld(`💥 BOM! ${weg.length} ${weg.length === 1 ? "beker" : "bekers"} weg. Iemand van ${esc(doel().naam)} trekt een halve bak.`, "groot");
       return naRaak(naStuiter);
@@ -400,12 +448,12 @@
     let beste = null, bd = 1e9;
     doel().bekers.forEach(k => { if (k.id === S.open) return; const p = P(k.x, k.y); const d = Math.hypot(p.x - mx, p.y + BEKER_R * p.s - my); if (d < bd) { bd = d; beste = k; } });
     if (!beste || bd > 40) return;
-    doel().bekers = doel().bekers.filter(b => b.id !== beste.id); S.stuiterKeuze = false;
+    verwijder([beste]); S.stuiterKeuze = false;
     meld("Beker weggehaald. Gooi je extra worp.");
     if (!doel().bekers.length) return allesWeg();
     werkBord(); teken();
   }
-  function haalWeg(id) { doel().bekers = doel().bekers.filter(b => b.id !== id); }
+  function haalWeg(id) { const k = doel().bekers.find(b => b.id === id); if (k) verwijder([k]); }
   function gemist() {
     if (S.open !== null) { haalWeg(S.open); S.open = null; meld("Mis: de geraakte beker gaat weg."); if (!doel().bekers.length) return allesWeg(); }
     if (S.trick) { S.trick = false; return verder(); }
