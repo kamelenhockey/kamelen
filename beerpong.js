@@ -135,21 +135,12 @@
       const g = ctx.createRadialGradient(p.x - r * .35, p.y - r * .35, r * .1, p.x, p.y, r); g.addColorStop(0, "#fff"); g.addColorStop(1, "#d9d9d9");
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = "rgba(0,0,0,.25)"; ctx.lineWidth = 1; ctx.stroke();
     }
-    /* richten */
-    if (mik) {
-      const start = { x: W / 2, y: H - 46 };
-      const kracht = Math.min(1, mik.dy / 160), lengte = 40 + kracht * 150, hoek = Math.atan2(-mik.dx * .9, mik.dy) + Math.sin(performance.now() / 110) * .07;   // trillende hand
-      ctx.strokeStyle = `rgba(22,54,80,${.5 + kracht * .5})`; ctx.lineWidth = 3; ctx.setLineDash([4, 7]);
-      ctx.beginPath(); ctx.moveTo(start.x, start.y); ctx.lineTo(start.x + Math.sin(hoek) * lengte, start.y - Math.cos(hoek) * lengte); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle = kracht > .97 ? "#e8384f" : "#f2c230"; ctx.fillRect(14, H - 20 - 110 * kracht, 10, 110 * kracht);
-      ctx.strokeStyle = "rgba(22,54,80,.5)"; ctx.strokeRect(14, H - 130, 10, 110);
-    }
-    /* bal in de hand */
+    /* bal in de hand: volgt je vinger */
     if (S && S.fase === "gooien" && !bal) {
-      const x = W / 2 + (mik ? Math.max(-60, Math.min(60, mik.dx)) * .3 : 0), y = H - 46 + (mik ? Math.min(90, mik.dy) * .25 : 0);
+      const x = mik ? mik.x : W / 2, y = mik ? mik.y : H - 46;
       const g = ctx.createRadialGradient(x - 5, y - 5, 2, x, y, 13); g.addColorStop(0, "#fff"); g.addColorStop(1, "#d6d6d6");
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 13, 0, Math.PI * 2); ctx.fill();
-      if (!mik) { ctx.fillStyle = "rgba(22,54,80,.75)"; ctx.font = "600 12px Inter, system-ui, sans-serif"; ctx.textAlign = "center"; ctx.fillText(S.trick ? "Trickshot! Trek naar beneden en laat los" : "Trek naar beneden en laat los", W / 2, H - 12); }
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 13, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = "rgba(0,0,0,.2)"; ctx.lineWidth = 1; ctx.stroke();
+      if (!mik) { ctx.fillStyle = "rgba(22,54,80,.75)"; ctx.font = "600 12px Inter, system-ui, sans-serif"; ctx.textAlign = "center"; ctx.fillText(S.trick ? "Trickshot! Swipe de bal naar de bekers" : "Swipe de bal naar de bekers", W / 2, H - 12); }
     }
   }
   function tekenBeker(k, team, open, kiesbaar) {
@@ -270,25 +261,34 @@
   }
 
   /* ---------- Gooien ---------- */
-  let mik = null, startPunt = null;
+  /* Gooien = swipen: pak de bal en veeg hem naar de bekers. Snelheid bepaalt de afstand, richting de kant. */
+  let mik = null, sporen = [];
+  const plek = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top, t: performance.now() }; };
   cv.addEventListener("pointerdown", e => {
     if (!S || S.fase !== "gooien" || bal) return;
     if (S.stuiterKeuze) return kiesBeker(e);
-    startPunt = { x: e.clientX, y: e.clientY }; mik = { dx: 0, dy: 0 }; cv.setPointerCapture(e.pointerId); teken();
-    const tril = () => { if (!mik) return; teken(); requestAnimationFrame(tril); }; requestAnimationFrame(tril);
+    const p = plek(e); if (p.y < H * .45) return;          // pak de bal onderin
+    mik = { x: p.x, y: p.y }; sporen = [p]; cv.setPointerCapture(e.pointerId); teken();
   });
-  cv.addEventListener("pointermove", e => { if (!mik) return; mik = { dx: e.clientX - startPunt.x, dy: Math.max(0, e.clientY - startPunt.y) }; teken(); });
+  cv.addEventListener("pointermove", e => {
+    if (!mik) return; const p = plek(e); sporen.push(p); if (sporen.length > 30) sporen.shift();
+    mik = { x: p.x, y: p.y }; teken();
+  });
   const los = e => {
-    if (!mik) return; const m = { ...mik, tril: Math.sin(performance.now() / 110) * .07 }; mik = null; teken();
-    if (m.dy < 18) return;
-    gooi(m);
+    if (!mik) return; const eind = plek(e); sporen.push(eind); mik = null;
+    /* snelheid over de laatste ~90 ms */
+    const recent = sporen.filter(s => eind.t - s.t <= 90), eerst = recent[0] || sporen[0];
+    const dt = Math.max(16, eind.t - eerst.t), vx = (eind.x - eerst.x) / dt, vy = (eerst.y - eind.y) / dt;   // px per ms, omhoog positief
+    teken();
+    if (vy < .25) return;                                    // geen echte worp
+    gooi({ vx, vy });
   };
   cv.addEventListener("pointerup", los); cv.addEventListener("pointercancel", () => { mik = null; teken(); });
 
   function gooi(m) {
     S.fase = "vlucht"; werkBord();
-    const afstand = 60 + m.dy * 1.3 + ruisG() * 9;          // cm vanaf de gooier: gevoelig en met spreiding
-    const zij = TAFEL_B / 2 + (-m.dx / Math.max(40, m.dy)) * afstand * .7 + Math.tan(m.tril || 0) * afstand * .35 + ruisG() * 5;
+    const afstand = 60 + m.vy * 85 + ruisG() * 9;          // cm vanaf de gooier
+    const zij = TAFEL_B / 2 + (m.vx / m.vy) * afstand * .5 + ruisG() * 5;
     const doelY = afstand, doelX = zij;
     /* vlucht 1 */
     vlieg({ x: TAFEL_B / 2, y: 70 }, { x: doelX, y: doelY }, 34 + afstand * .1, 700, () => land(doelX, doelY, false));
