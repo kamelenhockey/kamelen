@@ -77,6 +77,26 @@
   const P = (x, y, h = 0) => { const z = y + D0; return { x: W / 2 + Fx * (x - TAFEL_B / 2) / z, y: hor + Fy / z - Fx * h / z * .55, s: Fx / z }; };
 
   /* ---------- Tekenen ---------- */
+  /* Tafelblad met het Kamelen-logo en de naam, als plaatje van 10 px per cm */
+  const BLAD_PX = 10, BLAD_Y0 = Y_ONDER - 30;
+  let blad = null;
+  function maakBlad() {
+    const logo = new Image(); logo.src = "logo.png";
+    logo.onload = () => (document.fonts?.ready || Promise.resolve()).then(() => {
+      const c = document.createElement("canvas"); c.width = TAFEL_B * BLAD_PX; c.height = (TAFEL_L - BLAD_Y0) * BLAD_PX;
+      const g = c.getContext("2d"), yPx = y => (TAFEL_L - y) * BLAD_PX;
+      g.fillStyle = "#b9d8e8"; g.fillRect(0, 0, c.width, c.height);
+      const lb = 50 * BLAD_PX, lh = lb * logo.height / logo.width;
+      g.drawImage(logo, (c.width - lb) / 2, yPx(150) - lh, lb, lh);
+      g.fillStyle = "#111"; g.textAlign = "center"; g.textBaseline = "alphabetic";
+      g.font = `800 ${9 * BLAD_PX}px Montserrat, "Arial Black", Inter, system-ui, sans-serif`;
+      const w = g.measureText("KAMELEN").width, max = 46 * BLAD_PX;
+      if (w > max) g.font = `800 ${9 * BLAD_PX * max / w}px Montserrat, "Arial Black", Inter, system-ui, sans-serif`;
+      g.fillText("KAMELEN", c.width / 2, yPx(128));
+      blad = c; teken();
+    });
+  }
+  maakBlad();
   let bal = null, spatten = [];
   function teken() {
     if (!W) return;
@@ -85,12 +105,20 @@
     ctx.fillStyle = lucht; ctx.fillRect(0, 0, W, H);
     /* tafel */
     const a = P(0, Y_ONDER - 30), b = P(TAFEL_B, Y_ONDER - 30), c = P(TAFEL_B, TAFEL_L), d = P(0, TAFEL_L);
-    ctx.fillStyle = "#1f6b45"; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c.x, c.y); ctx.lineTo(d.x, d.y); ctx.closePath(); ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 3; ctx.stroke();
-    const m1 = P(TAFEL_B / 2, Y_ONDER - 30), m2 = P(TAFEL_B / 2, TAFEL_L);
-    ctx.setLineDash([6, 6]); ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.beginPath(); ctx.moveTo(m1.x, m1.y); ctx.lineTo(m2.x, m2.y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = "#b9d8e8"; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c.x, c.y); ctx.lineTo(d.x, d.y); ctx.closePath(); ctx.fill();
+    /* Kamelen-tafelblad: in dunne stroken in perspectief getekend */
+    if (blad) {
+      const STAP = 1.5;
+      for (let yy = BLAD_Y0; yy < TAFEL_L; yy += STAP) {
+        const onder = P(0, yy), boven = P(0, yy + STAP), r2 = P(TAFEL_B, yy);
+        const sy = (TAFEL_L - yy - STAP) * BLAD_PX, sh = STAP * BLAD_PX;
+        ctx.drawImage(blad, 0, Math.max(0, sy), blad.width, sh, onder.x, boven.y, r2.x - onder.x, onder.y - boven.y + .6);
+      }
+    }
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c.x, c.y); ctx.lineTo(d.x, d.y); ctx.closePath();
+    ctx.strokeStyle = "rgba(255,255,255,.9)"; ctx.lineWidth = 3; ctx.stroke();
     const rand = P(0, TAFEL_L), rand2 = P(TAFEL_B, TAFEL_L);
-    ctx.fillStyle = "#14472e"; ctx.fillRect(rand.x, rand.y, rand2.x - rand.x, 5);
+    ctx.fillStyle = "#7fa9c2"; ctx.fillRect(rand.x, rand.y, rand2.x - rand.x, 5);
     /* gevallen bier en vlekken */
     spatten.forEach(s => { const p = P(s.x, s.y); ctx.fillStyle = "rgba(240,200,90,.45)"; ctx.beginPath(); ctx.ellipse(p.x, p.y, s.r * p.s, s.r * p.s * .4, 0, 0, Math.PI * 2); ctx.fill(); });
     /* vastgehouden biertje */
@@ -111,17 +139,17 @@
     if (mik) {
       const start = { x: W / 2, y: H - 46 };
       const kracht = Math.min(1, mik.dy / 160), lengte = 40 + kracht * 150, hoek = Math.atan2(-mik.dx * .9, mik.dy) + Math.sin(performance.now() / 110) * .07;   // trillende hand
-      ctx.strokeStyle = `rgba(255,255,255,${.5 + kracht * .5})`; ctx.lineWidth = 3; ctx.setLineDash([4, 7]);
+      ctx.strokeStyle = `rgba(22,54,80,${.5 + kracht * .5})`; ctx.lineWidth = 3; ctx.setLineDash([4, 7]);
       ctx.beginPath(); ctx.moveTo(start.x, start.y); ctx.lineTo(start.x + Math.sin(hoek) * lengte, start.y - Math.cos(hoek) * lengte); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = kracht > .97 ? "#e8384f" : "#f2c230"; ctx.fillRect(14, H - 20 - 110 * kracht, 10, 110 * kracht);
-      ctx.strokeStyle = "rgba(255,255,255,.6)"; ctx.strokeRect(14, H - 130, 10, 110);
+      ctx.strokeStyle = "rgba(22,54,80,.5)"; ctx.strokeRect(14, H - 130, 10, 110);
     }
     /* bal in de hand */
     if (S && S.fase === "gooien" && !bal) {
       const x = W / 2 + (mik ? Math.max(-60, Math.min(60, mik.dx)) * .3 : 0), y = H - 46 + (mik ? Math.min(90, mik.dy) * .25 : 0);
       const g = ctx.createRadialGradient(x - 5, y - 5, 2, x, y, 13); g.addColorStop(0, "#fff"); g.addColorStop(1, "#d6d6d6");
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 13, 0, Math.PI * 2); ctx.fill();
-      if (!mik) { ctx.fillStyle = "rgba(255,255,255,.75)"; ctx.font = "600 12px Inter, system-ui, sans-serif"; ctx.textAlign = "center"; ctx.fillText(S.trick ? "Trickshot! Trek naar beneden en laat los" : "Trek naar beneden en laat los", W / 2, H - 12); }
+      if (!mik) { ctx.fillStyle = "rgba(22,54,80,.75)"; ctx.font = "600 12px Inter, system-ui, sans-serif"; ctx.textAlign = "center"; ctx.fillText(S.trick ? "Trickshot! Trek naar beneden en laat los" : "Trek naar beneden en laat los", W / 2, H - 12); }
     }
   }
   function tekenBeker(k, team, open, kiesbaar) {
