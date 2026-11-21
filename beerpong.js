@@ -16,7 +16,7 @@
 (function () {
   const box = document.getElementById("bp-spel"); if (!box) return;
   const esc = s => String(s).replace(/[<>&"]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c]));
-  const TAFEL_B = 61, TAFEL_L = 244, BEKER_R = 4.6, RAAK_R = 3.5, BAL_R = 2;
+  const TAFEL_B = 61, TAFEL_L = 244, BEKER_R = 4.6, RAAK_R = 3.9, BAL_R = 2;
   const ruisG = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;   // ongeveer normaal verdeeld, -1..1
   const KLEUR = ["#3f87ad", "#f08c1c"], LICHT = ["#d4ebf6", "#ffe2bd"];
   const rustig = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -330,7 +330,7 @@
     if (!mik) return; const p = plek(e); sporen.push(p); if (sporen.length > 40) sporen.shift();
     mik = { x: p.x, y: p.y }; teken();
     /* bal is hoog genoeg geveegd: dan vliegt hij weg, ook als je vinger nog doorgaat */
-    if (p.y < H * .5 && snelheid().vy > .5) los(e);
+    if (p.y < H * .4 && snelheid().vy > .5) los(e);
   });
   const los = e => {
     if (!mik) return; const eind = plek(e); if (eind.t - sporen[sporen.length - 1].t > 2) sporen.push(eind);
@@ -345,12 +345,17 @@
 
   function gooi(m) {
     S.fase = "vlucht"; werkBord();
-    /* snelheid -> afstand: log-curve, zodat er een ruim venster is waarin je de bekers haalt (ongeveer 1,6 - 2,6 px/ms) */
-    const afstand = 60 + 115 * Math.log(1 + m.v * 1.5) + ruisG() * 8;          // cm vanaf de gooier
+    /* snelheid -> afstand: log-curve, zodat er een ruim venster is waarin je de bekers haalt (zie hieronder) */
+    const afstand = 156 + 52 * Math.log(1 + m.v * 1.2) + ruisG() * 5;          // cm vanaf de gooier: ruim venster (ongeveer 1,3 - 3,2 px/ms haalt de bekers)
     /* richting: precies waar je visueel naartoe veegt, omgerekend naar de tafel */
     const z = afstand + D0, schermDy = Math.max(40, (H - 46) - (hor + Fy / z));
-    const zij = TAFEL_B / 2 + (m.sx + m.richting * schermDy - W / 2) * z / Fx + ruisG() * 4;
-    const doelY = afstand, doelX = zij, vanX = TAFEL_B / 2 + (m.sx - W / 2) * (90 + D0) / Fx;
+    let zij = TAFEL_B / 2 + (m.sx + m.richting * schermDy - W / 2) * z / Fx + ruisG() * 2.5;
+    /* lichte hulp: vlak naast een beker wordt de bal er een stukje naartoe getrokken */
+    let dichtst = null, dd = 1e9;
+    doel().bekers.forEach(k => { const d = Math.hypot(k.x - zij, (k.y - afstand) * .9); if (d < dd) { dd = d; dichtst = k; } });
+    let doelY0 = afstand;
+    if (dichtst && dd < 7) { zij += (dichtst.x - zij) * .35; doelY0 += (dichtst.y - doelY0) * .35; }
+    const doelY = doelY0, doelX = zij, vanX = TAFEL_B / 2 + (m.sx - W / 2) * (90 + D0) / Fx;
     /* vlucht 1: vanaf je hand, met een boog die hoger is naarmate je verder gooit */
     vlieg({ x: vanX, y: 70 }, { x: doelX, y: doelY }, 30 + afstand * .12, 620 + afstand, () => land(doelX, doelY, false));
   }
