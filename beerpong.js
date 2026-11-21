@@ -270,25 +270,40 @@
     const p = plek(e); if (p.y < H * .45) return;          // pak de bal onderin
     mik = { x: p.x, y: p.y }; sporen = [p]; cv.setPointerCapture(e.pointerId); teken();
   });
+  /* snelheid: gewogen gemiddelde over de laatste ~110 ms (recente stukjes tellen zwaarder) */
+  const snelheid = () => {
+    const nu = sporen[sporen.length - 1]; let vx = 0, vy = 0, w = 0;
+    for (let i = sporen.length - 1; i > 0; i--) {
+      const a = sporen[i - 1], b = sporen[i]; if (nu.t - a.t > 110) break;
+      const dt = Math.max(4, b.t - a.t), g = 1 + (110 - (nu.t - b.t)) / 40;
+      vx += (b.x - a.x) / dt * g; vy += (a.y - b.y) / dt * g; w += g;
+    }
+    return w ? { vx: vx / w, vy: vy / w } : { vx: 0, vy: 0 };
+  };
   cv.addEventListener("pointermove", e => {
-    if (!mik) return; const p = plek(e); sporen.push(p); if (sporen.length > 30) sporen.shift();
+    if (!mik) return; const p = plek(e); sporen.push(p); if (sporen.length > 40) sporen.shift();
     mik = { x: p.x, y: p.y }; teken();
+    /* bal is hoog genoeg geveegd: dan vliegt hij weg, ook als je vinger nog doorgaat */
+    if (p.y < H * .5 && snelheid().vy > .5) los(e);
   });
   const los = e => {
-    if (!mik) return; const eind = plek(e); sporen.push(eind); mik = null;
-    /* snelheid over de laatste ~90 ms */
-    const recent = sporen.filter(s => eind.t - s.t <= 90), eerst = recent[0] || sporen[0];
-    const dt = Math.max(16, eind.t - eerst.t), vx = (eind.x - eerst.x) / dt, vy = (eerst.y - eind.y) / dt;   // px per ms, omhoog positief
-    teken();
-    if (vy < .25) return;                                    // geen echte worp
-    gooi({ vx, vy });
+    if (!mik) return; const eind = plek(e); if (eind.t - sporen[sporen.length - 1].t > 2) sporen.push(eind);
+    const start = sporen[0]; mik = null;
+    const v = snelheid(); teken();
+    if (v.vy < .3 || start.y - eind.y < 25) return;          // geen echte worp
+    /* richting: van waar je de bal pakte naar waar je hem losliet */
+    const richting = (eind.x - start.x) / Math.max(30, start.y - eind.y);
+    gooi({ v: Math.hypot(v.vx, v.vy), richting });
   };
   cv.addEventListener("pointerup", los); cv.addEventListener("pointercancel", () => { mik = null; teken(); });
 
   function gooi(m) {
     S.fase = "vlucht"; werkBord();
-    const afstand = 60 + m.vy * 85 + ruisG() * 9;          // cm vanaf de gooier
-    const zij = TAFEL_B / 2 + (m.vx / m.vy) * afstand * .5 + ruisG() * 5;
+    /* snelheid -> afstand: log-curve, zodat er een ruim venster is waarin je de bekers haalt (ongeveer 1,6 - 2,6 px/ms) */
+    const afstand = 60 + 115 * Math.log(1 + m.v * 1.5) + ruisG() * 8;          // cm vanaf de gooier
+    /* richting: precies waar je visueel naartoe veegt, omgerekend naar de tafel */
+    const z = afstand + D0, schermDy = Math.max(40, (H - 46) - (hor + Fy / z));
+    const zij = TAFEL_B / 2 + m.richting * schermDy * z / Fx + ruisG() * 4;
     const doelY = afstand, doelX = zij;
     /* vlucht 1 */
     vlieg({ x: TAFEL_B / 2, y: 70 }, { x: doelX, y: doelY }, 34 + afstand * .1, 700, () => land(doelX, doelY, false));
@@ -311,17 +326,18 @@
     const bp = S.bier && bierPlek();
     if (bp && Math.hypot(bp.x - x, bp.y - y) < 6) { bal = null; teken(); meld("🍺 RAAK IN HET BIERTJE!", "groot"); return setTimeout(() => einde(S.beurt, `Raak in het biertje dat ${esc(doel().naam)} vasthield. Meteen gewonnen!`), 900); }
     /* volledig over de tafel */
-    if (!naStuiter && y > TAFEL_L + 2) {
+    if (!naStuiter && y > TAFEL_L + 3 && x > -2 && x < TAFEL_B + 2) {   /* airball: helemaal over de tafel heen */
       const verder = { x: x + (x - TAFEL_B / 2) * .3, y: y + 40 };
       return vlieg({ x, y }, verder, 10, 300, () => {
         bal = null; bak(S.beurt);
         if (S.open !== null) haalWeg(S.open);
-        meld(`💨 Over de tafel! Beurt voorbij, ${esc(gooier().naam)} trekt een halve bak.`, "lang");
+        meld(`💨 Airball! Helemaal over de tafel. Beurt voorbij, ${esc(gooier().naam)} trekt een halve bak.`, "lang");
         S.open = null; return volgendeBeurt(1600);
       });
     }
     const k = bekerOp(x, y);
     if (k) return raak(k, naStuiter);
+    if (x < -2 || x > TAFEL_B + 2 || y > TAFEL_L + 3) { meld("Naast de tafel, mis!"); return vlieg({ x, y }, { x: x + (x - TAFEL_B / 2) * .2, y: y + 20 }, 6, 300, () => { bal = null; teken(); gemist(); }); }
     /* te kort: stuiteren */
     if (!naStuiter && y < 200 && y > 120 && x > 0 && x < TAFEL_B) {
       const y2 = y + (y - 105) * .55, x2 = x + (x - TAFEL_B / 2) * .25;
