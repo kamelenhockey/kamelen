@@ -4,12 +4,6 @@
  "hockeyNlUrl": "https://www.hockey.nl/match-center#/team/21368|182976/program",
  "programma": [
   {
-   "datum": "2026-11-22",
-   "thuis": "Gron.Studs H7",
-   "tijd": "17:15",
-   "uit": "GHBS H14"
-  },
-  {
    "datum": "2026-11-29",
    "thuis": "GHBS H14",
    "tijd": "10:45",
@@ -889,5 +883,5 @@
  "puntenAftrek": {
   "GCHC H13": 3
  },
- "competitieBijgewerkt": "2026-11-22T15:51:52.643Z"
+ "competitieBijgewerkt": "2026-11-22T16:52:38.089Z"
 }
