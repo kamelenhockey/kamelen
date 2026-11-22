@@ -474,6 +474,12 @@
    "uit": "Daring H1"
   },
   {
+   "datum": "2026-11-22",
+   "thuis": "Gron.Studs H7",
+   "score": "3-4",
+   "uit": "GHBS H14"
+  },
+  {
    "datum": "2026-11-17",
    "thuis": "GCHC H13",
    "score": "4-1",
@@ -803,17 +809,17 @@
   },
   {
    "positie": 2,
+   "team": "GHBS H14",
+   "gespeeld": 10,
+   "punten": 21,
+   "doelsaldo": 13
+  },
+  {
+   "positie": 3,
    "team": "HCSO H1",
    "gespeeld": 10,
    "punten": 19,
    "doelsaldo": 33
-  },
-  {
-   "positie": 3,
-   "team": "GHBS H14",
-   "gespeeld": 9,
-   "punten": 18,
-   "doelsaldo": 12
   },
   {
    "positie": 4,
@@ -860,9 +866,9 @@
   {
    "positie": 10,
    "team": "Gron.Studs H7",
-   "gespeeld": 8,
+   "gespeeld": 9,
    "punten": 8,
-   "doelsaldo": -10
+   "doelsaldo": -11
   },
   {
    "positie": 11,
@@ -883,5 +889,5 @@
  "puntenAftrek": {
   "GCHC H13": 3
  },
- "competitieBijgewerkt": "2026-11-22T16:52:38.089Z"
+ "competitieBijgewerkt": "2026-11-22T22:51:17.936Z"
 }
