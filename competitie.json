@@ -462,6 +462,18 @@
  ],
  "uitslagen": [
   {
+   "datum": "2026-11-22",
+   "thuis": "Eemsmond H1",
+   "score": "2-7",
+   "uit": "Sneek H1"
+  },
+  {
+   "datum": "2026-11-22",
+   "thuis": "HCSO H1",
+   "score": "5-1",
+   "uit": "GHBS H12"
+  },
+  {
    "datum": "2026-11-17",
    "thuis": "GCHC H13",
    "score": "4-1",
@@ -785,30 +797,30 @@
   {
    "positie": 1,
    "team": "Sneek H1",
-   "gespeeld": 9,
-   "punten": 22,
-   "doelsaldo": 11
+   "gespeeld": 10,
+   "punten": 25,
+   "doelsaldo": 16
   },
   {
    "positie": 2,
+   "team": "HCSO H1",
+   "gespeeld": 10,
+   "punten": 19,
+   "doelsaldo": 33
+  },
+  {
+   "positie": 3,
    "team": "GHBS H14",
    "gespeeld": 9,
    "punten": 18,
    "doelsaldo": 12
   },
   {
-   "positie": 3,
+   "positie": 4,
    "team": "GCHC H13",
    "gespeeld": 9,
    "punten": 16,
    "doelsaldo": 7
-  },
-  {
-   "positie": 4,
-   "team": "HCSO H1",
-   "gespeeld": 9,
-   "punten": 16,
-   "doelsaldo": 29
   },
   {
    "positie": 5,
@@ -827,9 +839,9 @@
   {
    "positie": 7,
    "team": "GHBS H12",
-   "gespeeld": 9,
+   "gespeeld": 10,
    "punten": 13,
-   "doelsaldo": 7
+   "doelsaldo": 3
   },
   {
    "positie": 8,
@@ -862,14 +874,14 @@
   {
    "positie": 12,
    "team": "Eemsmond H1",
-   "gespeeld": 9,
+   "gespeeld": 10,
    "punten": 0,
-   "doelsaldo": -32
+   "doelsaldo": -37
   }
  ],
- "standPer": "17-11-2026",
+ "standPer": "22-11-2026",
  "puntenAftrek": {
   "GCHC H13": 3
  },
- "competitieBijgewerkt": "2026-11-22T14:02:11.510Z"
+ "competitieBijgewerkt": "2026-11-22T14:54:49.308Z"
 }
