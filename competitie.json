@@ -5,16 +5,6 @@
  "programma": [
   {
    "datum": "2026-11-22",
-   "thuis": "GHBS H13",
-   "tijd": "09:00",
-   "uit": "GCHC H13",
-   "wedstrijdId": "2105965",
-   "veld": "Veld 3 - Riant Makelaars Groningen (Waterveld)",
-   "accommodatie": "Corpus den Hoorn",
-   "adres": "Laan Corpus den Hoorn 101 9728JR Groningen"
-  },
-  {
-   "datum": "2026-11-22",
    "thuis": "Leeuwarden H2-O",
    "tijd": "12:45",
    "uit": "Emmen H1"
@@ -139,7 +129,11 @@
    "datum": "2027-03-14",
    "thuis": "HCSO H1",
    "tijd": null,
-   "uit": "GCHC H13"
+   "uit": "GCHC H13",
+   "wedstrijdId": "2105988",
+   "veld": null,
+   "accommodatie": "Sportpark 'Het Pagedal'",
+   "adres": "Manegelaan 3 9502CB Stadskanaal"
   },
   {
    "datum": "2027-03-14",
@@ -901,5 +895,5 @@
  "puntenAftrek": {
   "GCHC H13": 3
  },
- "competitieBijgewerkt": "2026-11-17T20:11:42.765Z"
+ "competitieBijgewerkt": "2026-11-22T08:55:20.929Z"
 }
