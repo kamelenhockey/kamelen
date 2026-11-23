@@ -50,6 +50,16 @@
    "uit": "Gron.Studs H7"
   },
   {
+   "datum": "2027-02-28",
+   "thuis": "GHBS H13",
+   "tijd": null,
+   "uit": "GCHC H13",
+   "wedstrijdId": "2105965",
+   "veld": null,
+   "accommodatie": "Corpus den Hoorn",
+   "adres": "Laan Corpus den Hoorn 101 9728JR Groningen"
+  },
+  {
    "datum": "2027-03-07",
    "thuis": "Daring H1",
    "tijd": null,
@@ -99,11 +109,7 @@
    "datum": "2027-03-14",
    "thuis": "HCSO H1",
    "tijd": null,
-   "uit": "GCHC H13",
-   "wedstrijdId": "2105988",
-   "veld": null,
-   "accommodatie": "Sportpark 'Het Pagedal'",
-   "adres": "Manegelaan 3 9502CB Stadskanaal"
+   "uit": "GCHC H13"
   },
   {
    "datum": "2027-03-14",
@@ -895,5 +901,5 @@
  "puntenAftrek": {
   "GCHC H13": 3
  },
- "competitieBijgewerkt": "2026-11-23T10:19:45.553Z"
+ "competitieBijgewerkt": "2026-11-23T13:26:18.160Z"
 }
