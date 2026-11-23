@@ -457,6 +457,12 @@
  "uitslagen": [
   {
    "datum": "2026-11-22",
+   "thuis": "Leeuwarden H2-O",
+   "score": "4-2",
+   "uit": "Emmen H1"
+  },
+  {
+   "datum": "2026-11-22",
    "thuis": "Eemsmond H1",
    "score": "2-7",
    "uit": "Sneek H1"
@@ -830,17 +836,17 @@
   },
   {
    "positie": 5,
+   "team": "Leeuwarden H2-O",
+   "gespeeld": 10,
+   "punten": 17,
+   "doelsaldo": -3
+  },
+  {
+   "positie": 6,
    "team": "GCHC H13",
    "gespeeld": 9,
    "punten": 16,
    "doelsaldo": 7
-  },
-  {
-   "positie": 6,
-   "team": "Leeuwarden H2-O",
-   "gespeeld": 9,
-   "punten": 14,
-   "doelsaldo": -5
   },
   {
    "positie": 7,
@@ -852,9 +858,9 @@
   {
    "positie": 8,
    "team": "Emmen H1",
-   "gespeeld": 9,
+   "gespeeld": 10,
    "punten": 13,
-   "doelsaldo": 3
+   "doelsaldo": 1
   },
   {
    "positie": 9,
@@ -889,5 +895,5 @@
  "puntenAftrek": {
   "GCHC H13": 3
  },
- "competitieBijgewerkt": "2026-11-22T22:51:17.936Z"
+ "competitieBijgewerkt": "2026-11-23T10:19:45.553Z"
 }
