@@ -564,6 +564,8 @@ html.op-slot #laad{display:none}
 .bpg-tabel td,.bpg-tabel th{padding:4px 6px;text-align:left}
 .bpg-vormen{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .bpg-knoppen{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.poster-img{display:block;width:100%;border-radius:12px;box-shadow:0 10px 30px -12px rgba(0,0,0,.5)}
+.poster-knoppen{display:flex;gap:8px;margin-top:10px}
 .fx.afgelast .h,.fx.afgelast .a{text-decoration:line-through;opacity:.6}
 .fx.afgelast .t{color:#c9402c;font-weight:800;font-size:.72rem;text-transform:none}
 .kz-banner.afgelast{background:#fff1ee;border-color:#f3c3b8}
@@ -2537,6 +2539,28 @@ async function renderWeather(m){
 /* ---------- Afgelaste wedstrijden ---------- */
 const afgelastLijst = () => (DATA.afgelast || []).filter(a => a.bevestigd);
 const verplaatstVan = m => afgelastLijst().find(a => a.thuis === m.thuis && a.uit === m.uit && a.nieuweDatum === m.datum);
+/* ---------- Wedstrijdposter (proef: ?poster=proef) ---------- */
+function posterProef(){
+  try { const q = new URLSearchParams(location.search).get("poster"); if (q === "proef") sessionStorage.setItem("kamelen-poster-proef", "1"); if (q === "uit") sessionStorage.removeItem("kamelen-poster-proef"); return sessionStorage.getItem("kamelen-poster-proef") === "1"; } catch { return false; }
+}
+posterProef();
+async function toonPoster(){
+  const m = window._posterMatch, box = document.getElementById("wm-poster"); if (!m || !box || !window.maakPoster) return;
+  box.innerHTML = `<p class="muted">Poster maken…</p>`;
+  const sel = (DATA.opstelling || []).length && DATA.opstellingWedstrijd === m.datum ? DATA.opstelling.map(canon) : [];
+  const st = n => (DATA.stand || []).find(x => x.team === n);
+  const wij = isUs(m.thuis) ? m.thuis : m.uit, zij = isUs(m.thuis) ? m.uit : m.thuis, a = st(wij), b = st(zij);
+  const stand = a && b ? `#${a.positie} KAMELEN  \u00b7  #${b.positie} ${String(zij).replace(/\s+H\d.*$/i, "").toUpperCase()}` : "";
+  try {
+    const cv = await window.maakPoster(m, { spelers: sel, stand });
+    const blob = await new Promise(ok => cv.toBlob(ok, "image/png"));
+    const url = URL.createObjectURL(blob), naam = `kamelen-poster-${m.datum}.png`;
+    box.innerHTML = `<img class="poster-img" src="${url}" alt="Wedstrijdposter ${esc(m.thuis)} – ${esc(m.uit)}"><div class="poster-knoppen"><button type="button" class="btn" id="poster-deel">Delen</button><a class="btn ghost" href="${url}" download="${naam}">Opslaan</a></div>`;
+    const deel = document.getElementById("poster-deel"), file = new File([blob], naam, { type: "image/png" });
+    if (!(navigator.canShare && navigator.canShare({ files: [file] }))) deel.remove();
+    else deel.addEventListener("click", () => navigator.share({ files: [file], title: "Matchday Kamelen" }).catch(() => {}));
+  } catch { box.innerHTML = `<p class="muted">De poster maken lukte niet.</p>`; }
+}
 function renderAfgelast(){
   const el = document.getElementById("afgelast-banner"); if (!el) return;
   const nu = Date.now();
@@ -2672,6 +2696,8 @@ function openMatch(sleutel){
     if (v) html += `<div class="wm-oordeel ${v.uitkomst === echt ? "goed" : "fout"}">${v.uitkomst === echt ? "✓ Het model zat goed" : "✗ Het model zat ernaast"}: vooraf werd ${v.uitslag[0]} – ${v.uitslag[1]} verwacht${v.uitslag[0] === a && v.uitslag[1] === b ? ", zelfs de exacte uitslag" : ""}.</div>`;
   }
   /* Gespeelde wedstrijd van ons: wie deed er mee (wordt meteen daarna ingeladen) */
+  if (!gespeeld && ons && posterProef()) html += `<div class="dlg-sec"><h3 class="sub-h">Wedstrijdposter</h3><div id="wm-poster"><button type="button" class="btn" onclick="toonPoster()">🎨 Maak de poster</button></div></div>`;
+  window._posterMatch = m;
   if (gespeeld && ons) html += `<div class="dlg-sec" id="wm-selectie"><h3 class="sub-h">Selectie</h3><p class="muted">Selectie laden…</p></div>`;
   if (!v) html += `<div class="empty">Er zijn nog te weinig uitslagen om deze wedstrijd te voorspellen.</div>`;
   else {
@@ -3868,11 +3894,12 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795495100"></script>
-<script src="toto.js?v=1795495100"></script>
-<script src="pong.js?v=1795495100"></script>
-<script src="pongregels.js?v=1795495100"></script>
-<script src="beerpong.js?v=1795495100"></script>
+<script src="mex.js?v=1795495200"></script>
+<script src="toto.js?v=1795495200"></script>
+<script src="pong.js?v=1795495200"></script>
+<script src="pongregels.js?v=1795495200"></script>
+<script src="beerpong.js?v=1795495200"></script>
+<script src="poster.js?v=1795495200"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3881,18 +3908,18 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795495100"></script>
-<script src="statistieken.js?v=1795495100"></script>
-<script src="wrapped.js?v=1795495100"></script>
-<script src="race.js?v=1795495100"></script>
-<script src="rad.js?v=1795495100"></script>
-<script src="fotos.js?v=1795495100"></script>
-<script src="quotes.js?v=1795495100"></script>
-<script src="ideeen.js?v=1795495100"></script>
-<script src="seizoen.js?v=1795495100"></script>
-<script src="zege.js?v=1795495100"></script>
-<script src="karavaan.js?v=1795495100"></script>
-<script src="design-proef.js?v=1795495100"></script>
-<script src="push.js?v=1795495100"></script>
+<script src="stemmen.js?v=1795495200"></script>
+<script src="statistieken.js?v=1795495200"></script>
+<script src="wrapped.js?v=1795495200"></script>
+<script src="race.js?v=1795495200"></script>
+<script src="rad.js?v=1795495200"></script>
+<script src="fotos.js?v=1795495200"></script>
+<script src="quotes.js?v=1795495200"></script>
+<script src="ideeen.js?v=1795495200"></script>
+<script src="seizoen.js?v=1795495200"></script>
+<script src="zege.js?v=1795495200"></script>
+<script src="karavaan.js?v=1795495200"></script>
+<script src="design-proef.js?v=1795495200"></script>
+<script src="push.js?v=1795495200"></script>
 </body>
 </html>
