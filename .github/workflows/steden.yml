@@ -2,7 +2,7 @@ name: Stadsfoto's ophalen
 
 on:
   push:
-    paths: ["steden/bronnen.txt"]
+    paths: ["steden/bronnen.txt", "fonts/bronnen.txt"]
   workflow_dispatch: {}
 
 permissions:
@@ -27,9 +27,16 @@ jobs:
               "https://commons.wikimedia.org/wiki/Special:FilePath/${bestand}?width=1280" -o "steden/$naam.jpg" || true
             file "steden/$naam.jpg"
           done
+      - name: Lettertypen downloaden
+        run: |
+          grep -v '^#' fonts/bronnen.txt | while read -r pad; do
+            [ -z "$pad" ] && continue
+            naam=$(basename "$pad"); [ -f "fonts/$naam" ] && continue
+            curl -sSL "https://raw.githubusercontent.com/google/fonts/main/$pad" -o "fonts/$naam" || true
+          done
       - name: Opslaan
         run: |
           git config user.name "kamelen-bot"
           git config user.email "kamelen-bot@users.noreply.github.com"
-          git add steden/*.jpg || true
+          git add steden/*.jpg fonts/*.ttf || true
           git diff --staged --quiet || (git commit -m "Stadsfoto's opgehaald" && git pull --rebase && git push)
