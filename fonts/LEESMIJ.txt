@@ -1,3 +1,4 @@
 Inter Display (Black Italic, Bold), (c) 2016-2023 The Inter Project Authors, https://github.com/rsms/inter
 Gebruikt onder de SIL Open Font License 1.1 (https://openfontlicense.org). Hier als subset (Latijns) voor de wedstrijdposter.
 DM Serif Display (c) Colophon Foundry, via github.com/google/fonts, SIL Open Font License 1.1.
+Shrikhand (c) Jonny Pinhorn, Alfa Slab One (c) JM Sole; via github.com/google/fonts, SIL Open Font License 1.1.
