@@ -16,9 +16,12 @@
     oldehove: { src: "steden/leeuwarden-staand.jpg", fx: .45, fy: .3, door: "Gouwenaar" },
     plantsoen: { src: "steden/groningen-studs.jpg", fx: .55, fy: .4, door: "Wutsje" },
     waterpoort: { src: "steden/sneek.jpg", fx: .5, fy: .35, door: "Michielverbeek" },
-    kameel: { src: "steden/kameel.jpg", fx: .42, fy: .42, door: "Skander Zarrad" },
+    kameel: { src: "steden/kameel.jpg", fx: .42, fy: .42, breed: 1.35, door: "Skander Zarrad" },
     karavaan: { src: "steden/kameel-woestijn.jpg", fx: .55, fy: .55, door: "ASC Leiden" },
     wind: { src: "steden/eemshaven.jpg", fx: .42, fy: .4, door: "Uberprutser" },
+    parkeren: { src: "steden/stadskanaal.jpg", fx: .5, fy: .4, door: "Donald Trung" },
+    senaat: { src: "steden/vindicat.jpg", fx: .5, fy: .45, door: "Rijksmuseum", crop: [.19, .556, .81, .869] },
+    emmen: { src: "steden/emmen.jpg", fx: .45, fy: .5, door: "Richard Broekhuijzen" },
     olifant: { src: "steden/olifant.jpg", fx: .5, fy: .35, door: "Eric de Redelijkheid" }
   };
   /* Kleurgrading: schaduwen, hooglichten, hoeveel kleur er overblijft */
@@ -31,21 +34,22 @@
   };
   /* Per tegenstander een eigen idee (volgorde telt: specifiek eerst) */
   const IDEE = [
-    { test: /leeuwarden/i, kort: "LWD", beeld: ["martini", "oldehove"], grade: "nacht", zin: "Twee torens. Eén winnaar." },
-    { test: /ghbs\s*h13/i, kort: "GHB", beeld: ["martini"], grade: "nacht", zin: "Ingehaald. Nu telt het." },
-    { test: /ghbs\s*h11/i, kort: "GHB", beeld: ["karavaan"], grade: "zand", zin: "Zelfde stad, andere woestijn." },
-    { test: /ghbs\s*h12/i, kort: "GHB", beeld: ["kameel"], grade: "rood", zin: "Derby. Geen genade." },
-    { test: /ghbs/i, kort: "GHB", beeld: ["markt"], grade: "nacht", zin: "Wie heeft de stad?" },
-    { test: /sneek/i, kort: "SNK", beeld: ["waterpoort"], grade: "staal", zin: "De nummer één. De poort staat open." },
-    { test: /hcso/i, kort: "HCSO", beeld: ["karavaan"], grade: "rood", zin: "Er staat nog een 1–8 open." },
-    { test: /daring/i, kort: "DAR", beeld: ["kameel"], grade: "zand", zin: "Wie durft, wint." },
-    { test: /studs/i, kort: "STU", beeld: ["plantsoen"], grade: "groen", zin: "Collegegeld betaald. Les krijgen ze hier." },
-    { test: /eemsmond/i, kort: "EEM", beeld: ["wind"], grade: "staal", zin: "Tegenwind? Kamelen lopen door." },
-    { test: /emmen/i, kort: "EMM", beeld: ["olifant"], grade: "zand", zin: "Olifanten vergeten nooit. Wij ook niet." },
-    { test: /./, kort: null, beeld: ["karavaan"], grade: "zand", zin: "De karavaan trekt door." }
+    { test: /leeuwarden/i, beeld: ["martini", "oldehove"], grade: "nacht", zin: "Hun toren staat al scheef. Wij duwen nog even." },
+    { test: /ghbs\s*h13/i, beeld: ["martini"], grade: "nacht", zin: "Ingehaald. Nu telt het." },
+    { test: /ghbs\s*h11/i, beeld: ["karavaan"], grade: "zand", zin: "Zelfde stad, andere woestijn." },
+    { test: /ghbs\s*h12/i, beeld: ["kameel"], grade: "rood", zin: "Derby. Geen genade." },
+    { test: /ghbs\s*h14/i, beeld: ["markt"], grade: "nacht", zin: "Het veertiende van GHBS. Er zitten er dertien boven." },
+    { test: /ghbs/i, beeld: ["markt"], grade: "nacht", zin: "Wie heeft de stad?" },
+    { test: /sneek/i, beeld: ["waterpoort"], grade: "staal", zin: "De nummer één. De poort staat open." },
+    { test: /hcso/i, beeld: ["parkeren"], grade: "staal", zin: "Max. twee uur in Stadskanaal. Langer houdt niemand het vol." },
+    { test: /daring/i, beeld: ["kameel"], grade: "zand", zin: "Durven wel. Kunnen niet." },
+    { test: /studs/i, beeld: ["senaat"], grade: "zand", zin: "Vindicat sinds 1815. Hockey sinds vorige week." },
+    { test: /eemsmond/i, beeld: ["wind"], grade: "staal", zin: "Tegenwind? Kamelen lopen door." },
+    { test: /emmen/i, beeld: ["emmen"], grade: "groen", zin: "Emmen. Ook van bovenaf geen gezicht." },
+    { test: /./, beeld: ["karavaan"], grade: "zand", zin: "De karavaan trekt door." }
   ];
   const korteNaam = t => String(t).replace(/\s+(H|D)\d+.*$/i, "").replace(/^Gron\.?\s*Studs/i, "Studs").trim();
-  const STADVAN = { GHBS: "Groningen", Studs: "Groningen", Sneek: "Sneek", Daring: "Veendam", Eemsmond: "Uithuizen", Emmen: "Emmen", Leeuwarden: "Leeuwarden" };
+  const STADVAN = { GHBS: "Groningen", Studs: "Groningen", Sneek: "Sneek", HCSO: "Stadskanaal", Daring: "Veendam", Eemsmond: "Uithuizen", Emmen: "Emmen", Leeuwarden: "Leeuwarden" };
 
   const laad = src => new Promise((ok, fout) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fout; i.src = src; });
   let fontKlaar = null;
@@ -63,10 +67,12 @@
   /* foto vullend in een vlak, daarna filmisch gegradeerd */
   function beeld(ctx, img, f, g, x, y, w, h) {
     const tmp = document.createElement("canvas"); tmp.width = w; tmp.height = h; const t = tmp.getContext("2d");
+    if (img && f.crop) { const [a, b, c, e] = f.crop, cc = document.createElement("canvas"); cc.width = img.width * (c - a); cc.height = img.height * (e - b); cc.getContext("2d").drawImage(img, -img.width * a, -img.height * b); img = cc; }
     if (img) {
-      const s = Math.max(w / img.width, h / img.height) * 1.04, iw = img.width * s, ih = img.height * s;
+      const s = f.breed ? w / img.width * f.breed : Math.max(w / img.width, h / img.height) * 1.04, iw = img.width * s, ih = img.height * s;
       let ox = w / 2 - f.fx * iw, oy = h * .4 - f.fy * ih;
-      ox = Math.min(0, Math.max(w - iw, ox)); oy = Math.min(0, Math.max(h - ih, oy));
+      ox = Math.min(0, Math.max(w - iw, ox)); oy = f.breed ? 0 : Math.min(0, Math.max(h - ih, oy));
+      if (f.breed) { t.fillStyle = "#000"; t.fillRect(0, 0, w, h); }
       t.drawImage(img, ox, oy, iw, ih);
       const px = t.getImageData(0, 0, w, h), d = px.data, S = g.s, Hh = g.h, k = g.kleur;
       for (let i = 0; i < d.length; i += 4) {
@@ -93,52 +99,55 @@
     const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const ctx = cv.getContext("2d");
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
 
-    /* ----- beeld ----- */
-    const BH = 1000;
+    /* ----- beeld: vult de hele poster ----- */
     if (fotos.length === 2) {
-      /* rivaliteit: links thuisploeg, rechts uitploeg, smalle naad ertussen */
       const [l, r] = wijThuis ? [0, 1] : [1, 0];
-      beeld(ctx, imgs[l], fotos[l], g, 0, 0, W / 2 - 3, BH); beeld(ctx, imgs[r], fotos[r], g, W / 2 + 3, 0, W / 2 - 3, BH);
-    } else beeld(ctx, imgs[0], fotos[0], g, 0, 0, W, BH);
-    /* vignet en overgang naar zwart */
-    let gr = ctx.createRadialGradient(W / 2, BH * .42, 200, W / 2, BH * .45, 900);
-    gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.7)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, BH);
-    gr = ctx.createLinearGradient(0, 520, 0, BH); gr.addColorStop(0, "rgba(6,5,4,0)"); gr.addColorStop(.75, "rgba(6,5,4,.92)"); gr.addColorStop(1, "#060504");
-    ctx.fillStyle = gr; ctx.fillRect(0, 0, W, BH); ctx.fillStyle = "#060504"; ctx.fillRect(0, BH, W, H - BH);
-    gr = ctx.createLinearGradient(0, 0, 0, 220); gr.addColorStop(0, "rgba(0,0,0,.55)"); gr.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, 220);
+      beeld(ctx, imgs[l], fotos[l], g, 0, 0, W / 2 - 2, H); beeld(ctx, imgs[r], fotos[r], g, W / 2 + 2, 0, W / 2 - 2, H);
+    } else beeld(ctx, imgs[0], fotos[0], g, 0, 0, W, H);
+    let gr = ctx.createRadialGradient(W / 2, H * .3, 150, W / 2, H * .35, 1000);
+    gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.65)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+    gr = ctx.createLinearGradient(0, 430, 0, 1010); gr.addColorStop(0, "rgba(6,5,4,0)"); gr.addColorStop(.6, "rgba(6,5,4,.82)"); gr.addColorStop(1, "rgba(6,5,4,.97)");
+    ctx.fillStyle = gr; ctx.fillRect(0, 430, W, 580); ctx.fillStyle = "rgba(6,5,4,.97)"; ctx.fillRect(0, 1010, W, H - 1010);
+    gr = ctx.createLinearGradient(0, 0, 0, 200); gr.addColorStop(0, "rgba(0,0,0,.6)"); gr.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, 200);
 
-    /* ----- kop: logo en team ----- */
-    if (logo) { const lh = 64, lw = lh * logo.width / logo.height; ctx.globalAlpha = .95; ctx.drawImage(logo, 64, 52, lw, lh); ctx.globalAlpha = 1; }
-    ctx.fillStyle = WIT; ctx.font = F(500, 24); spatie(ctx, "GCHC HEREN 13", W - 64, 92, 6, "right");
+    /* ----- kop ----- */
+    const L = 72;
+    if (logo) { const lh = 60, lw = lh * logo.width / logo.height; ctx.drawImage(logo, L, 54, lw, lh); }
+    ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, opt.ronde ? `RONDE ${opt.ronde}` : "MATCHDAY", W - L, 94, 7, "right");
 
-    /* ----- KAM VS LWD ----- */
-    const titel = wijThuis ? ["KAM", kort] : [kort, "KAM"];
-    let s = 150, sp = 30; const maak = () => `${[...titel[0]].join(" ")}   V S   ${[...titel[1]].join(" ")}`;
-    ctx.font = F(500, s); while (breedte(ctx, maak(), sp) > W - 128 && s > 70) { s -= 4; sp = s / 5; ctx.font = F(500, s); }
-    ctx.fillStyle = WIT; spatie(ctx, maak(), W / 2, 860, sp, "center");
-    ctx.fillStyle = ZAND; ctx.font = F(300, 40); ctx.textAlign = "center"; ctx.fillText(idee.zin, W / 2, 926);
+    /* ----- namen onder elkaar, helemaal uitgeschreven ----- */
+    const namen = (wijThuis ? ["KAMELEN", tk] : [tk, "KAMELEN"]).map(n => n.toUpperCase());
+    let s = 168, sp = 10; ctx.font = F(700, s);
+    while (Math.max(...namen.map(n => breedte(ctx, n, sp))) > W - 2 * L && s > 80) { s -= 4; sp = s / 16; ctx.font = F(700, s); }
+    const y1 = 700, y2 = y1 + s * .92 + 56;
+    ctx.fillStyle = WIT; spatie(ctx, namen[0], L - 4, y1, sp);
+    ctx.fillStyle = ZAND; ctx.font = F(300, 40); spatie(ctx, "TEGEN", L, y1 + 58, 14);
+    const tw = breedte(ctx, "TEGEN", 14) + 24; ctx.fillStyle = "rgba(244,239,230,.3)"; ctx.fillRect(L + tw, y1 + 44, W - 2 * L - tw, 1);
+    ctx.fillStyle = WIT; ctx.font = F(700, s); spatie(ctx, namen[1], L - 4, y2, sp);
+    ctx.fillStyle = ZAND; ctx.font = F(300, 38); ctx.textAlign = "left";
+    let zs = 38; while (ctx.measureText(idee.zin).width > W - 2 * L && zs > 26) { zs -= 2; ctx.font = F(300, zs); }
+    ctx.fillText(idee.zin, L, y2 + 66);
 
-    /* ----- selectie ----- */
+    /* ----- selectie als aftiteling ----- */
     const spelers = (opt.spelers || []).map(n => String(n).toUpperCase());
-    ctx.fillStyle = MUTED; ctx.font = F(500, 20); spatie(ctx, "SELECTIE", W / 2, 1000, 8, "center");
-    if (spelers.length) {
-      const kol = spelers.length > 12 ? 4 : 3, rijen = Math.ceil(spelers.length / kol), kw = (W - 200) / kol, rh = Math.min(36, 144 / rijen);
-      ctx.fillStyle = WIT; ctx.font = F(500, 28);
-      spelers.forEach((n, i) => spatie(ctx, n, 100 + (i % kol) * kw + kw / 2, 1040 + Math.floor(i / kol) * rh, 3, "center"));
-    } else { ctx.fillStyle = WIT; ctx.font = F(300, 28); ctx.textAlign = "center"; ctx.fillText("Volgt zodra de afmeldingen binnen zijn", W / 2, 1050); }
+    let sy = y2 + 140; ctx.font = F(700, 22); ctx.fillStyle = WIT; spatie(ctx, "SELECTIE", L, sy, 6);
+    ctx.font = F(500, 24); ctx.fillStyle = "rgba(244,239,230,.78)";
+    const tekst = spelers.length ? spelers : ["VOLGT ZODRA DE AFMELDINGEN BINNEN ZIJN"];
+    let x = L + breedte((ctx.font = F(700, 22), ctx), "SELECTIE", 6) + 28; ctx.font = F(500, 24);
+    tekst.forEach(n => { const bw = breedte(ctx, n, 4); if (x + bw > W - L) { x = L; sy += 38; } spatie(ctx, n, x, sy, 4); x += bw + 26; });
 
     /* ----- onderrij: datum | plek | competitie ----- */
     const d = new Date(m.datum + "T12:00:00");
-    const dag = d.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" });
+    const dag = d.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" }).toUpperCase();
     const plek = wijThuis ? ["THUIS", "Groningen"] : ["UIT", STADVAN[tk] || tk];
-    const cellen = [[dag.charAt(0).toUpperCase() + dag.slice(1), m.tijd ? `${m.tijd.replace(":", ".")} uur` : "Tijd volgt"], [plek[0], plek[1]], ["1E KLASSE", opt.ronde ? `Ronde ${opt.ronde}` : "Heren Reserve"]];
-    const cw = (W - 128) / 3, ry = 1232;
-    ctx.fillStyle = "rgba(244,239,230,.25)"; ctx.fillRect(64, ry - 52, W - 128, 1);
+    const cellen = [[dag, m.tijd ? `${m.tijd.replace(":", ".")} uur` : "Tijd volgt"], plek, ["HEREN RESERVE", "1e klasse"]];
+    const ry = H - 112, cw = (W - 2 * L) / 3;
+    ctx.fillStyle = "rgba(244,239,230,.25)"; ctx.fillRect(L, ry - 46, W - 2 * L, 1);
     cellen.forEach(([a, b], i) => {
-      const cx = 64 + cw * i + cw / 2;
-      if (i) { ctx.fillStyle = "rgba(244,239,230,.25)"; ctx.fillRect(64 + cw * i, ry - 18, 1, 66); }
-      ctx.fillStyle = WIT; ctx.font = F(700, i ? 30 : 28); spatie(ctx, i ? a : a.toUpperCase(), cx, ry + 4, 3, "center");
-      ctx.fillStyle = MUTED; ctx.font = F(300, 26); ctx.textAlign = "center"; ctx.fillText(b, cx, ry + 40);
+      const cx = L + cw * i + (i ? 28 : 0);
+      if (i) { ctx.fillStyle = "rgba(244,239,230,.25)"; ctx.fillRect(L + cw * i, ry - 22, 1, 62); }
+      ctx.fillStyle = WIT; ctx.font = F(700, 26); spatie(ctx, a, cx, ry, 3);
+      ctx.fillStyle = MUTED; ctx.font = F(300, 26); ctx.textAlign = "left"; ctx.fillText(b, cx, ry + 34);
     });
 
     /* ----- bron en korrel ----- */
