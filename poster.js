@@ -30,6 +30,10 @@
     vismarkt: { src: "steden/gron-c.jpg", fx: .45, fy: .5, door: "C messier" },
     soc: { src: "steden/soc-a.jpg", fx: .4, fy: .4, door: "Wutsje" },
     madurodam: { src: "steden/soc-i.jpg", fx: .5, fy: .4, door: "Willem Nabuurs" },
+    elfsteden: { src: "steden/elfsteden.jpg", fx: .42, fy: .45, door: "Harry Pot / Anefo" },
+    klunen: { src: "steden/elfsteden2.jpg", fx: .55, fy: .55, door: "Nationaal Archief" },
+    oldehovezw: { src: "steden/oldehove2.jpg", fx: .62, fy: .45, door: "Willem van de Poll" },
+    matahari: { src: "steden/matahari.jpg", fx: .42, fy: .3, door: "Michielverbeek" },
     olifant: { src: "steden/olifant.jpg", fx: .5, fy: .35, door: "Eric de Redelijkheid" }
   };
   /* Kleurgrading: schaduwen, hooglichten, hoeveel kleur er overblijft */
@@ -41,6 +45,7 @@
     amber: { s: [26, 10, 2], h: [255, 196, 120], kleur: .25 },
     sloop: { s: [20, 14, 10], h: [255, 236, 210], kleur: .7 },
     vergeeld: { s: [40, 30, 30], h: [255, 236, 200], kleur: .75 },
+    zw: { s: [6, 6, 6], h: [246, 244, 240], kleur: 0 },
     rood: { s: [26, 8, 8], h: [255, 216, 190], kleur: .3 }
   };
   /* Per tegenstander: compositie, hun beeld, ons beeld (Groningen of kamelen), opmaak en zin.
@@ -134,7 +139,7 @@
     let idee = IDEE.find(x => x.test.test(tegen)); idee = { grade: "nacht", ...idee, ...(wijThuis ? idee.thuis : idee.uit) || {} };
     const g = GRADE[idee.grade];
     const tk = korteNaam(tegen);
-    const zijF = FOTO[idee.beeld || "markt"], onsF = FOTO[idee.ons || "martini"];
+    const zijF = FOTO[(opt.mini && opt.mini.foto) || idee.beeld || "markt"], onsF = FOTO[idee.ons || "martini"];
     const fotos = [zijF, onsF];
     let [logo, zijImg, onsImg, kameelImg] = await Promise.all([laad("logo.png").catch(() => null), laad(zijF.src).catch(() => null), laad(onsF.src).catch(() => null), laad("steden/kameel-uit.png").catch(() => null)]);
     const KAMEEL = { door: "Darthjipsu" };
@@ -515,6 +520,26 @@
         let r3 = "", ym = 1262; met.split(" ").forEach(w => { if (ctx.measureText(r3 + w).width > W - 2 * L) { ctx.fillText(r3, L, ym); ym += 30; r3 = ""; } r3 += w + " "; }); ctx.fillText(r3, L, ym);
         bron = [onsF, KAMEEL];
       },
+      /* Minimaal: één echte foto, een paar woorden, verder niets */
+      minimaal() {
+        const o = opt.mini || {}, f = FOTO[o.foto] || zijF, img = o.img || zijImg, gg = GRADE[o.grade || "zw"];
+        const draai = o.draai || 0;
+        if (draai) { const c = document.createElement("canvas"); c.width = W * 1.25; c.height = H * 1.25; beeld(c.getContext("2d"), img, f, gg, 0, 0, c.width, c.height); ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H); ctx.save(); ctx.translate(W / 2, H / 2); ctx.rotate(draai); ctx.drawImage(c, -c.width / 2, -c.height / 2); ctx.restore(); }
+        else beeld(ctx, img, f, gg, 0, 0, W, H);
+        vignet(.55); verloop(o.boven ? 520 : 640, o.boven ? 0 : H, 0, .92); verloop(1000, H, 0, .9); verloop(180, 0, 0, .5);
+        logoOp(L, 50, 52); ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        const kop = o.kop || ["KAMELEN"]; let ks = o.size || 168; ctx.font = F(700, ks); while (kop.some(t => breedte(ctx, t, ks * .02) > W - 2 * L) && ks > 60) { ks -= 4; ctx.font = F(700, ks); }
+        const y0 = o.boven ? 170 + ks * .8 : 1010 - (kop.length - 1) * ks * .9 - (o.sub ? 60 : 0);
+        ctx.save(); if (o.kopDraai) { ctx.translate(L, y0); ctx.rotate(o.kopDraai); ctx.translate(-L, -y0); }
+        kop.forEach((t, i) => { ctx.fillStyle = i === kop.length - 1 && o.accent ? ZAND : WIT; ctx.font = F(700, ks); spatie(ctx, t, L - 4, y0 + i * ks * .9, ks * .02); });
+        ctx.restore();
+        if (o.sub) { ctx.save(); ctx.shadowColor = "rgba(0,0,0,.9)"; ctx.shadowBlur = 18; ctx.fillStyle = ZAND; ctx.font = F(o.boven ? 500 : 300, 38); ctx.textAlign = "left"; ctx.fillText(o.sub, L, o.boven ? y0 + (kop.length - 1) * ks * .9 + 64 : 1044); ctx.restore(); }
+        ctx.fillStyle = "rgba(244,239,230,.3)"; ctx.fillRect(L, 1112, W - 2 * L, 1);
+        ctx.fillStyle = WIT; ctx.font = F(700, 38); spatie(ctx, `${namen[0]} \u2013 ${namen[1]}`, L, 1170, 5);
+        infoKort(1212, MUTED, true); selectieRegel(1262, "rgba(244,239,230,.6)", false, 20);
+        bron = [f];
+      },
+
       /* Leeuwarden 2: waterpas tegen de scheve Oldehove */
       waterpas() {
         ctx.fillStyle = "#0c0d10"; ctx.fillRect(0, 0, W, H);
