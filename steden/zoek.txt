@@ -60,3 +60,9 @@ usmem|Us Mem Leeuwarden koe beeld
 matahari|Mata Hari standbeeld Leeuwarden
 friespaard|Fries paard zwart hengst
 oldehove2|Oldehove Leeuwarden scheve toren
+kameelsneeuw|camel in snow
+kameelsneeuw2|Bactrian camel snow winter
+friespaard2|Friesian horse
+fierljeppen|Fierljeppen
+usmem2|Us Mem standbeeld
+kaatsen|Kaatsen Franeker
