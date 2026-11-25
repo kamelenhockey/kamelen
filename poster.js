@@ -34,6 +34,9 @@
     klunen: { src: "steden/elfsteden2.jpg", fx: .55, fy: .55, door: "Nationaal Archief" },
     oldehovezw: { src: "steden/oldehove2.jpg", fx: .62, fy: .45, door: "Willem van de Poll" },
     matahari: { src: "steden/matahari.jpg", fx: .42, fy: .3, door: "Michielverbeek" },
+    w2: { src: "woestijn/2.jpg", fx: .55, fy: .5, door: "" }, w4: { src: "woestijn/4.jpg", fx: .5, fy: .55, door: "" },
+    w6: { src: "woestijn/6.jpg", fx: .42, fy: .55, door: "" }, w8: { src: "woestijn/8.jpg", fx: .6, fy: .5, door: "" },
+    w14: { src: "woestijn/14.jpg", fx: .55, fy: .55, door: "" }, w16: { src: "woestijn/16.jpg", fx: .55, fy: .5, door: "" },
     olifant: { src: "steden/olifant.jpg", fx: .5, fy: .35, door: "Eric de Redelijkheid" }
   };
   /* Kleurgrading: schaduwen, hooglichten, hoeveel kleur er overblijft */
@@ -907,7 +910,7 @@
     (OPMAAK[opt.opmaak || idee.opmaak] || OPMAAK.bord)();
 
     /* ----- bron en korrel ----- */
-    const makers = [...new Set((bron || [zijF, onsF]).map(f => f.door))];
+    const makers = [...new Set((bron || [zijF, onsF]).map(f => f.door))].filter(Boolean);
     if (makers.length) { ctx.fillStyle = /zwitsers/.test(idee.opmaak) ? "rgba(23,18,13,.45)" : "rgba(244,239,230,.32)"; ctx.font = F(300, 15); ctx.textAlign = "center";
       ctx.fillText(`Foto's: ${[...new Set(makers)].join(", ")} \u00b7 Wikimedia Commons`, W / 2, H - 22); }
     const korrel = ctx.getImageData(0, 0, W, H), px = korrel.data;
