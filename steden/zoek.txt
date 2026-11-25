@@ -54,3 +54,9 @@ soc-j|Grote Markt Groningen Forum Martinitoren
 soc-k|Grote Markt Groningen oostwand
 kam-f|camel blue sky
 kam-g|dromedary Morocco
+elfsteden|Elfstedentocht 1963 schaatsers
+elfsteden2|Elfstedentocht 1997
+usmem|Us Mem Leeuwarden koe beeld
+matahari|Mata Hari standbeeld Leeuwarden
+friespaard|Fries paard zwart hengst
+oldehove2|Oldehove Leeuwarden scheve toren
