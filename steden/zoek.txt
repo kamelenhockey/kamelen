@@ -16,3 +16,23 @@ stadskanaal2|Stadskanaal centrum
 vindicat|Vindicat atque Polit Groningen
 emmen-centrum|Emmen Raadhuisplein
 leeuw2|Panthera leo male
+emmen-a|Emmen Angelslo flat
+emmen-b|Emmen Emmerhout flat
+emmen-c|Emmen Weiersstraat
+emmen-d|Emmen gemeentehuis
+skanaal-a|Stadskanaal gemeentehuis
+skanaal-b|Stadskanaal Navolaan
+skanaal-c|Stadskanaal winkelcentrum
+skanaal-d|Stadskanaal flat
+delfzijl-a|Delfzijl Chemiepark
+delfzijl-b|Delfzijl haven
+delfzijl-c|Delfzijl Aldel
+delfzijl-d|Delfzijl centrum
+veendam-a|Veendam gemeentehuis
+veendam-b|Veendam Kerkstraat
+veendam-c|Veendam Museum Veenkoloniën
+veendam-d|Veendam Beneden Oosterdiep
+gron-a|Groninger Museum
+gron-b|Forum Groningen
+gron-c|Groningen Vismarkt
+gron-d|Groningen Hoofdstation
