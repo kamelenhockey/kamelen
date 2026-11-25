@@ -1,166 +1,152 @@
 /* =========================================================
-   Wedstrijdposter in retrostijl (1080 x 1350):
-   zonnestralen, 70s-strepen, twee steden in boogramen,
-   dikke retroletters, datum op een kaartje en de selectie.
-   window.maakPoster(wedstrijd, { spelers }) -> Promise<canvas>
+   Wedstrijdposter (1080 x 1350), filmisch en minimaal:
+   één beeld per wedstrijd (steeds een ander idee), donker
+   gegradeerd, grote gespatieerde letters "KAM VS LWD",
+   de selectie en onderaan datum | plek | competitie.
+   window.maakPoster(wedstrijd, { spelers, ronde }) -> Promise<canvas>
    ========================================================= */
 (function () {
   const W = 1080, H = 1350;
-  const PAPIER = "#f2e4c6", BRUIN = "#2b1a10", ROEST = "#c8461b", ORANJE = "#ee8a1d", MOSTERD = "#f2b53a", ZAND = "#e8cf9f";
+  const WIT = "#f4efe6", ZAND = "#d9b27c", MUTED = "rgba(244,239,230,.62)";
 
-  /* Steden: foto uit /steden (Wikimedia Commons), waar het onderwerp staat, en de maker */
-  const STAD = {
-    groningen: { naam: "Groningen", foto: "steden/groningen-markt.jpg", fx: .37, fy: .3, door: "Uberprutser" },
-    groningen2: { naam: "Groningen", foto: "steden/groningen.jpg", fx: .5, fy: .32, door: "Rudolphous" },
-    studs: { naam: "Groningen", foto: "steden/groningen-studs.jpg", fx: .5, fy: .45, door: "Wutsje" },
-    leeuwarden: { naam: "Leeuwarden", foto: "steden/leeuwarden.jpg", fx: .56, fy: .28, door: "Gouwenaar" },
-    sneek: { naam: "Sneek", foto: "steden/sneek.jpg", fx: .5, fy: .4, door: "Michielverbeek" },
-    veendam: { naam: "Veendam", foto: "steden/veendam.jpg", fx: .55, fy: .4, door: "A. J. van der Wal" },
-    uithuizen: { naam: "Uithuizen", foto: "steden/uithuizen.jpg", fx: .5, fy: .4, door: "DrTW" },
-    emmen: { naam: "Emmen", foto: "steden/emmen.jpg", fx: .45, fy: .45, door: "Richard Broekhuijzen" }
+  /* Foto's uit /steden (Wikimedia Commons): bestand, focuspunt, maker */
+  const FOTO = {
+    martini: { src: "steden/groningen.jpg", fx: .39, fy: .32, door: "Rudolphous" },
+    markt: { src: "steden/groningen-markt.jpg", fx: .37, fy: .3, door: "Uberprutser" },
+    oldehove: { src: "steden/leeuwarden-staand.jpg", fx: .45, fy: .3, door: "Gouwenaar" },
+    plantsoen: { src: "steden/groningen-studs.jpg", fx: .55, fy: .4, door: "Wutsje" },
+    waterpoort: { src: "steden/sneek.jpg", fx: .5, fy: .35, door: "Michielverbeek" },
+    kameel: { src: "steden/kameel.jpg", fx: .42, fy: .42, door: "Skander Zarrad" },
+    karavaan: { src: "steden/kameel-woestijn.jpg", fx: .55, fy: .55, door: "ASC Leiden" },
+    wind: { src: "steden/eemshaven.jpg", fx: .42, fy: .4, door: "Uberprutser" },
+    olifant: { src: "steden/olifant.jpg", fx: .5, fy: .35, door: "Eric de Redelijkheid" }
   };
-  const TEGEN = [
-    { test: /leeuwarden/i, stad: "leeuwarden", zin: "Twee torens, één winnaar" },
-    { test: /studs/i, stad: "studs", zin: "Studenten tegen de woestijn" },
-    { test: /ghbs/i, stad: "groningen2", zin: "Stadsderby: wie heeft de stad?" },
-    { test: /sneek|hcso/i, stad: "sneek", zin: "Door de Waterpoort, de woestijn in" },
-    { test: /daring/i, stad: "veendam", zin: "Wie durft, wint" },
-    { test: /eemsmond/i, stad: "uithuizen", zin: "Van het wad naar de woestijn" },
-    { test: /emmen/i, stad: "emmen", zin: "Van het Drentse zand naar ons zand" },
-    { test: /./, stad: null, zin: "De karavaan trekt door" }
+  /* Kleurgrading: schaduwen, hooglichten, hoeveel kleur er overblijft */
+  const GRADE = {
+    nacht: { s: [8, 14, 28], h: [255, 214, 160], kleur: .25 },
+    zand: { s: [24, 14, 8], h: [255, 222, 176], kleur: .45 },
+    staal: { s: [10, 18, 22], h: [226, 236, 238], kleur: .2 },
+    groen: { s: [8, 18, 12], h: [236, 232, 200], kleur: .35 },
+    rood: { s: [26, 8, 8], h: [255, 216, 190], kleur: .3 }
+  };
+  /* Per tegenstander een eigen idee (volgorde telt: specifiek eerst) */
+  const IDEE = [
+    { test: /leeuwarden/i, kort: "LWD", beeld: ["martini", "oldehove"], grade: "nacht", zin: "Twee torens. Eén winnaar." },
+    { test: /ghbs\s*h13/i, kort: "GHB", beeld: ["martini"], grade: "nacht", zin: "Ingehaald. Nu telt het." },
+    { test: /ghbs\s*h11/i, kort: "GHB", beeld: ["karavaan"], grade: "zand", zin: "Zelfde stad, andere woestijn." },
+    { test: /ghbs\s*h12/i, kort: "GHB", beeld: ["kameel"], grade: "rood", zin: "Derby. Geen genade." },
+    { test: /ghbs/i, kort: "GHB", beeld: ["markt"], grade: "nacht", zin: "Wie heeft de stad?" },
+    { test: /sneek/i, kort: "SNK", beeld: ["waterpoort"], grade: "staal", zin: "De nummer één. De poort staat open." },
+    { test: /hcso/i, kort: "HCSO", beeld: ["karavaan"], grade: "rood", zin: "Er staat nog een 1–8 open." },
+    { test: /daring/i, kort: "DAR", beeld: ["kameel"], grade: "zand", zin: "Wie durft, wint." },
+    { test: /studs/i, kort: "STU", beeld: ["plantsoen"], grade: "groen", zin: "Collegegeld betaald. Les krijgen ze hier." },
+    { test: /eemsmond/i, kort: "EEM", beeld: ["wind"], grade: "staal", zin: "Tegenwind? Kamelen lopen door." },
+    { test: /emmen/i, kort: "EMM", beeld: ["olifant"], grade: "zand", zin: "Olifanten vergeten nooit. Wij ook niet." },
+    { test: /./, kort: null, beeld: ["karavaan"], grade: "zand", zin: "De karavaan trekt door." }
   ];
   const korteNaam = t => String(t).replace(/\s+(H|D)\d+.*$/i, "").replace(/^Gron\.?\s*Studs/i, "Studs").trim();
+  const STADVAN = { GHBS: "Groningen", Studs: "Groningen", Sneek: "Sneek", Daring: "Veendam", Eemsmond: "Uithuizen", Emmen: "Emmen", Leeuwarden: "Leeuwarden" };
 
   const laad = src => new Promise((ok, fout) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fout; i.src = src; });
   let fontKlaar = null;
   const fonts = () => fontKlaar || (fontKlaar = Promise.all([
-    ["PRetro", "fonts/Shrikhand-Regular.woff"], ["PSlab", "fonts/AlfaSlabOne-Regular.woff"], ["PSans", "fonts/InterDisplay-SemiBold.woff"]
-  ].map(async ([n, u]) => { try { const f = new FontFace(n, `url(${u})`); await f.load(); document.fonts.add(f); } catch {} })));
-  const RETRO = s => `${s}px PRetro, "Cooper Black", Georgia, serif`;
-  const SLAB = s => `${s}px PSlab, Rockwell, Georgia, serif`;
-  const SANS = s => `600 ${s}px PSans, "Helvetica Neue", Arial, sans-serif`;
+    ["PCond", "fonts/BarlowCondensed-Medium.woff", "500"], ["PCond", "fonts/BarlowCondensed-Bold.woff", "700"], ["PCond", "fonts/BarlowCondensed-Light.woff", "300"]
+  ].map(async ([n, u, w]) => { try { const f = new FontFace(n, `url(${u})`, { weight: w }); await f.load(); document.fonts.add(f); } catch {} })));
+  const F = (w, s) => `${w} ${s}px PCond, "Arial Narrow", Arial, sans-serif`;
 
   const breedte = (ctx, t, sp) => [...t].reduce((a, c) => a + ctx.measureText(c).width + sp, -sp);
   function spatie(ctx, tekst, x, y, sp, uitlijn = "left") {
     let cx = uitlijn === "center" ? x - breedte(ctx, tekst, sp) / 2 : uitlijn === "right" ? x - breedte(ctx, tekst, sp) : x;
     ctx.textAlign = "left"; for (const c of tekst) { ctx.fillText(c, cx, y); cx += ctx.measureText(c).width + sp; }
   }
-  /* retro tekst: dikke donkere rand + verschoven schaduw */
-  function retroTekst(ctx, tekst, x, y, font, vul, schaduw = BRUIN, uitlijn = "center", diepte = 8) {
-    ctx.font = font; ctx.textAlign = uitlijn; ctx.lineJoin = "round";
-    for (let d = diepte; d > 0; d--) { ctx.fillStyle = schaduw; ctx.fillText(tekst, x + d, y + d); }
-    ctx.lineWidth = 10; ctx.strokeStyle = BRUIN; ctx.strokeText(tekst, x, y);
-    ctx.fillStyle = vul; ctx.fillText(tekst, x, y);
-  }
-  function boog(ctx, x, y, w, h) { const r = w / 2; ctx.beginPath(); ctx.moveTo(x, y + h); ctx.lineTo(x, y + r); ctx.arc(x + r, y + r, r, Math.PI, 0); ctx.lineTo(x + w, y + h); ctx.closePath(); }
 
-  /* foto als duotoon met rasterpuntjes in een boograam */
-  function raamFoto(ctx, img, x, y, w, h, fx, fy, licht) {
-    ctx.save(); boog(ctx, x, y, w, h); ctx.clip();
-    ctx.fillStyle = ZAND; ctx.fillRect(x, y, w, h);
+  /* foto vullend in een vlak, daarna filmisch gegradeerd */
+  function beeld(ctx, img, f, g, x, y, w, h) {
+    const tmp = document.createElement("canvas"); tmp.width = w; tmp.height = h; const t = tmp.getContext("2d");
     if (img) {
-      const s = Math.max(w / img.width, h / img.height) * 1.06, iw = img.width * s, ih = img.height * s;
-      let ox = x + w / 2 - fx * iw, oy = y + h * .45 - fy * ih;
-      ox = Math.min(x, Math.max(x + w - iw, ox)); oy = Math.min(y, Math.max(y + h - ih, oy));
-      /* duotoon: grijs, dan donkerbruin in de schaduwen en een warme kleur in het licht */
-      const tmp = document.createElement("canvas"); tmp.width = w; tmp.height = h; const t = tmp.getContext("2d");
-      t.filter = "grayscale(1) contrast(1.35) brightness(1.08)"; t.drawImage(img, ox - x, oy - y, iw, ih); t.filter = "none";
-      const px = t.getImageData(0, 0, w, h), d = px.data;
-      const a = [0x2b, 0x1a, 0x10], b = licht;
-      for (let i = 0; i < d.length; i += 4) { const v = d[i] / 255; d[i] = a[0] + (b[0] - a[0]) * v; d[i + 1] = a[1] + (b[1] - a[1]) * v; d[i + 2] = a[2] + (b[2] - a[2]) * v; }
+      const s = Math.max(w / img.width, h / img.height) * 1.04, iw = img.width * s, ih = img.height * s;
+      let ox = w / 2 - f.fx * iw, oy = h * .4 - f.fy * ih;
+      ox = Math.min(0, Math.max(w - iw, ox)); oy = Math.min(0, Math.max(h - ih, oy));
+      t.drawImage(img, ox, oy, iw, ih);
+      const px = t.getImageData(0, 0, w, h), d = px.data, S = g.s, Hh = g.h, k = g.kleur;
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], gg = d[i + 1], b = d[i + 2];
+        let l = (r * .299 + gg * .587 + b * .114) / 255;
+        l = l < .5 ? 2 * l * l * .9 : 1 - 2 * (1 - l) * (1 - l) * 1.05; l = Math.max(0, Math.min(1, l * .92));
+        for (let c = 0; c < 3; c++) {
+          const tint = S[c] + (Hh[c] - S[c]) * l, orig = [r, gg, b][c] * (.35 + l * .55);
+          d[i + c] = tint * (1 - k) + orig * k;
+        }
+      }
       t.putImageData(px, 0, 0);
-      ctx.drawImage(tmp, x, y);
-      /* rasterpuntjes */
-      ctx.fillStyle = "rgba(43,26,16,.16)";
-      for (let yy = y; yy < y + h; yy += 7) for (let xx = x + ((yy / 7) % 2) * 3.5; xx < x + w; xx += 7) { ctx.beginPath(); ctx.arc(xx, yy, 1.3, 0, Math.PI * 2); ctx.fill(); }
-    }
-    ctx.restore();
-    ctx.save(); ctx.lineWidth = 9; ctx.strokeStyle = BRUIN; boog(ctx, x, y, w, h); ctx.stroke(); ctx.restore();
+    } else { t.fillStyle = "#1a140e"; t.fillRect(0, 0, w, h); }
+    ctx.drawImage(tmp, x, y);
   }
 
   async function maakPoster(m, opt = {}) {
     await fonts();
     const wijThuis = /gchc/i.test(m.thuis), tegen = wijThuis ? m.uit : m.thuis;
-    const t = TEGEN.find(x => x.test.test(tegen)), zij = STAD[t.stad] || null, ons = STAD.groningen;
+    const idee = IDEE.find(x => x.test.test(tegen)), g = GRADE[idee.grade];
+    const tk = korteNaam(tegen), kort = idee.kort || tk.replace(/[^a-z]/gi, "").slice(0, 3).toUpperCase();
+    const fotos = idee.beeld.map(n => FOTO[n]);
+    const [logo, ...imgs] = await Promise.all([laad("logo.png").catch(() => null), ...fotos.map(f => laad(f.src).catch(() => null))]);
     const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const ctx = cv.getContext("2d");
-    const nr = 2 + (m.datum.split("-").reduce((a, b) => a + Number(b), 0) % 15);
-    const [imgOns, imgZij, logo] = await Promise.all([laad(ons.foto).catch(() => null), laad(zij ? zij.foto : `woestijn/${nr}.jpg`).catch(() => null), laad("logo.png").catch(() => null)]);
+    ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
 
-    /* ----- papier ----- */
-    ctx.fillStyle = PAPIER; ctx.fillRect(0, 0, W, H);
-    /* zonnestralen vanuit het midden */
-    ctx.save(); ctx.translate(W / 2, 560); ctx.fillStyle = "rgba(232,190,120,.45)";
-    for (let k = 0; k < 36; k += 2) { const a1 = k / 36 * Math.PI * 2, a2 = (k + 1) / 36 * Math.PI * 2; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a1) * 1400, Math.sin(a1) * 1400); ctx.lineTo(Math.cos(a2) * 1400, Math.sin(a2) * 1400); ctx.closePath(); ctx.fill(); }
-    ctx.restore();
-    /* 70s-strepen dwars achter de ramen */
-    [ROEST, ORANJE, MOSTERD, BRUIN].forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(0, 470 + i * 34, W, 34); });
+    /* ----- beeld ----- */
+    const BH = 1000;
+    if (fotos.length === 2) {
+      /* rivaliteit: links thuisploeg, rechts uitploeg, smalle naad ertussen */
+      const [l, r] = wijThuis ? [0, 1] : [1, 0];
+      beeld(ctx, imgs[l], fotos[l], g, 0, 0, W / 2 - 3, BH); beeld(ctx, imgs[r], fotos[r], g, W / 2 + 3, 0, W / 2 - 3, BH);
+    } else beeld(ctx, imgs[0], fotos[0], g, 0, 0, W, BH);
+    /* vignet en overgang naar zwart */
+    let gr = ctx.createRadialGradient(W / 2, BH * .42, 200, W / 2, BH * .45, 900);
+    gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.7)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, BH);
+    gr = ctx.createLinearGradient(0, 520, 0, BH); gr.addColorStop(0, "rgba(6,5,4,0)"); gr.addColorStop(.75, "rgba(6,5,4,.92)"); gr.addColorStop(1, "#060504");
+    ctx.fillStyle = gr; ctx.fillRect(0, 0, W, BH); ctx.fillStyle = "#060504"; ctx.fillRect(0, BH, W, H - BH);
+    gr = ctx.createLinearGradient(0, 0, 0, 220); gr.addColorStop(0, "rgba(0,0,0,.55)"); gr.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, 220);
 
-    /* ----- kop ----- */
-    retroTekst(ctx, "MATCHDAY", W / 2, 158, SLAB(124), PAPIER, ROEST, "center", 9);
-    ctx.fillStyle = BRUIN; ctx.font = SANS(24); spatie(ctx, `★  GCHC HEREN 13  ★  ${wijThuis ? "THUIS" : "UIT"}  ★`, W / 2, 214, 6, "center");
+    /* ----- kop: logo en team ----- */
+    if (logo) { const lh = 64, lw = lh * logo.width / logo.height; ctx.globalAlpha = .95; ctx.drawImage(logo, 64, 52, lw, lh); ctx.globalAlpha = 1; }
+    ctx.fillStyle = WIT; ctx.font = F(500, 24); spatie(ctx, "GCHC HEREN 13", W - 64, 92, 6, "right");
 
-    /* ----- twee boogramen met de steden ----- */
-    const RW = 420, RH = 500, RY = 250;
-    const fl = wijThuis ? ons : (zij || { fx: .5, fy: .5 }), fr = wijThuis ? (zij || { fx: .5, fy: .5 }) : ons;
-    const imgL = wijThuis ? imgOns : imgZij, imgR = wijThuis ? imgZij : imgOns;
-    ctx.fillStyle = BRUIN; boog(ctx, 72 + 14, RY + 14, RW, RH); ctx.fill(); boog(ctx, W - 72 - RW + 14, RY + 14, RW, RH); ctx.fill();
-    raamFoto(ctx, imgL, 72, RY, RW, RH, fl.fx, fl.fy, wijThuis ? [0xf6, 0xc3, 0x6a] : [0xf2, 0xe4, 0xc6]);
-    raamFoto(ctx, imgR, W - 72 - RW, RY, RW, RH, fr.fx, fr.fy, wijThuis ? [0xf2, 0xe4, 0xc6] : [0xf6, 0xc3, 0x6a]);
-    /* stadsnaam onderin elk raam */
-    const stadL = (wijThuis ? "Groningen" : (zij ? zij.naam : "")).toUpperCase(), stadR = (wijThuis ? (zij ? zij.naam : "") : "Groningen").toUpperCase();
-    ctx.font = SLAB(26); [[stadL, 72 + RW / 2], [stadR, W - 72 - RW / 2]].forEach(([s, x]) => { if (!s) return;
-      const bw = breedte(ctx, s, 4) + 36; ctx.fillStyle = BRUIN; ctx.beginPath(); ctx.roundRect(x - bw / 2, RY + RH - 62, bw, 44, 22); ctx.fill(); ctx.fillStyle = PAPIER; spatie(ctx, s, x, RY + RH - 31, 4, "center"); });
-
-    /* vs-badge tussen de ramen */
-    ctx.save(); ctx.translate(W / 2, RY + 330);
-    ctx.fillStyle = BRUIN; ctx.beginPath(); ctx.arc(7, 7, 74, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = MOSTERD; ctx.beginPath(); ctx.arc(0, 0, 74, 0, Math.PI * 2); ctx.fill(); ctx.lineWidth = 7; ctx.strokeStyle = BRUIN; ctx.stroke();
-    ctx.setLineDash([6, 7]); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 58, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = BRUIN; ctx.font = RETRO(64); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("vs", 0, 4); ctx.textBaseline = "alphabetic";
-    ctx.restore();
-
-    /* ----- teams ----- */
-    const thuisNaam = wijThuis ? "Kamelen" : korteNaam(tegen), uitNaam = wijThuis ? korteNaam(tegen) : "Kamelen";
-    let s = 104; ctx.font = RETRO(s); while (Math.max(ctx.measureText(thuisNaam).width, ctx.measureText(uitNaam).width) > 440 && s > 56) { s -= 4; ctx.font = RETRO(s); }
-    retroTekst(ctx, thuisNaam, 72 + RW / 2, 870, RETRO(s), wijThuis ? ORANJE : PAPIER, BRUIN, "center", 7);
-    retroTekst(ctx, uitNaam, W - 72 - RW / 2, 870, RETRO(s), wijThuis ? PAPIER : ORANJE, BRUIN, "center", 7);
-
-    /* ----- zinnetje ----- */
-    ctx.fillStyle = ROEST; ctx.font = RETRO(44); ctx.textAlign = "center"; ctx.fillText(t.zin, W / 2, 950);
-
-    /* ----- datum op een kaartje ----- */
-    const dag = new Date(m.datum + "T12:00:00").toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" }).toUpperCase();
-    const regel = `${dag}  ★  ${m.tijd || "TIJD VOLGT"}`;
-    ctx.font = SLAB(34); const kb = breedte(ctx, regel, 3) + 110, kx = (W - kb) / 2, ky = 972, kh = 74;
-    const kaart = (dx, dy) => { ctx.beginPath(); ctx.moveTo(kx + dx, ky + dy); ctx.lineTo(kx + kb + dx, ky + dy); ctx.lineTo(kx + kb - 30 + dx, ky + kh / 2 + dy); ctx.lineTo(kx + kb + dx, ky + kh + dy); ctx.lineTo(kx + dx, ky + kh + dy); ctx.lineTo(kx + 30 + dx, ky + kh / 2 + dy); ctx.closePath(); ctx.fill(); };
-    ctx.fillStyle = ROEST; kaart(8, 8); ctx.fillStyle = BRUIN; kaart(0, 0);
-    ctx.fillStyle = PAPIER; spatie(ctx, regel, W / 2, ky + 49, 3, "center");
+    /* ----- KAM VS LWD ----- */
+    const titel = wijThuis ? ["KAM", kort] : [kort, "KAM"];
+    let s = 150, sp = 30; const maak = () => `${[...titel[0]].join(" ")}   V S   ${[...titel[1]].join(" ")}`;
+    ctx.font = F(500, s); while (breedte(ctx, maak(), sp) > W - 128 && s > 70) { s -= 4; sp = s / 5; ctx.font = F(500, s); }
+    ctx.fillStyle = WIT; spatie(ctx, maak(), W / 2, 860, sp, "center");
+    ctx.fillStyle = ZAND; ctx.font = F(300, 40); ctx.textAlign = "center"; ctx.fillText(idee.zin, W / 2, 926);
 
     /* ----- selectie ----- */
-    const sp = (opt.spelers || []).map(n => String(n).toUpperCase());
-    ctx.fillStyle = BRUIN; ctx.font = RETRO(38); ctx.textAlign = "center"; ctx.fillText("De selectie", W / 2, 1126);
-    ctx.fillRect(W / 2 - 170 - 150, 1114, 150, 3); ctx.fillRect(W / 2 + 170, 1114, 150, 3);
-    /* kameeltjes die naar de selectie lopen */
-    if (logo) { const lw = 80, lh = lw * logo.height / logo.width; ctx.drawImage(logo, W / 2 - 170 - 150 - lw - 6, 1122 - lh, lw, lh);
-      ctx.save(); ctx.translate(W / 2 + 170 + 150 + lw + 6, 0); ctx.scale(-1, 1); ctx.drawImage(logo, 0, 1122 - lh, lw, lh); ctx.restore(); }
-    if (sp.length) {
-      const kol = 4, rij = Math.ceil(sp.length / kol), kw = (W - 140) / kol, rh = Math.min(35, 130 / rij);
-      sp.forEach((n, i) => { const x = 70 + (i % kol) * kw + kw / 2, y = 1172 + Math.floor(i / kol) * rh;
-        let fs = 26; ctx.font = SLAB(fs); while (breedte(ctx, n, 2) > kw - 12 && fs > 14) { fs--; ctx.font = SLAB(fs); }
-        ctx.fillStyle = BRUIN; spatie(ctx, n, x, y, 2, "center"); });
-    } else { ctx.fillStyle = BRUIN; ctx.font = SLAB(30); ctx.textAlign = "center"; ctx.fillText("VOLGT ZODRA DE AFMELDINGEN BINNEN ZIJN", W / 2, 1200); }
+    const spelers = (opt.spelers || []).map(n => String(n).toUpperCase());
+    ctx.fillStyle = MUTED; ctx.font = F(500, 20); spatie(ctx, "SELECTIE", W / 2, 1000, 8, "center");
+    if (spelers.length) {
+      const kol = spelers.length > 12 ? 4 : 3, rijen = Math.ceil(spelers.length / kol), kw = (W - 200) / kol, rh = Math.min(36, 144 / rijen);
+      ctx.fillStyle = WIT; ctx.font = F(500, 28);
+      spelers.forEach((n, i) => spatie(ctx, n, 100 + (i % kol) * kw + kw / 2, 1040 + Math.floor(i / kol) * rh, 3, "center"));
+    } else { ctx.fillStyle = WIT; ctx.font = F(300, 28); ctx.textAlign = "center"; ctx.fillText("Volgt zodra de afmeldingen binnen zijn", W / 2, 1050); }
 
-    /* ----- lijst eromheen ----- */
-    ctx.lineWidth = 14; ctx.strokeStyle = BRUIN; ctx.beginPath(); ctx.roundRect(20, 20, W - 40, H - 40, 30); ctx.stroke();
-    ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(38, 38, W - 76, H - 76, 20); ctx.stroke();
-    const makers = [ons, zij].filter(x => x && x.door).map(x => x.door);
-    if (makers.length) { ctx.fillStyle = "rgba(43,26,16,.55)"; ctx.font = SANS(13); ctx.textAlign = "center"; ctx.fillText(`Foto's: ${makers.join(", ")} · Wikimedia Commons (CC BY-SA)`, W / 2, H - 52); }
+    /* ----- onderrij: datum | plek | competitie ----- */
+    const d = new Date(m.datum + "T12:00:00");
+    const dag = d.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" });
+    const plek = wijThuis ? ["THUIS", "Groningen"] : ["UIT", STADVAN[tk] || tk];
+    const cellen = [[dag.charAt(0).toUpperCase() + dag.slice(1), m.tijd ? `${m.tijd.replace(":", ".")} uur` : "Tijd volgt"], [plek[0], plek[1]], ["1E KLASSE", opt.ronde ? `Ronde ${opt.ronde}` : "Heren Reserve"]];
+    const cw = (W - 128) / 3, ry = 1232;
+    ctx.fillStyle = "rgba(244,239,230,.25)"; ctx.fillRect(64, ry - 52, W - 128, 1);
+    cellen.forEach(([a, b], i) => {
+      const cx = 64 + cw * i + cw / 2;
+      if (i) { ctx.fillStyle = "rgba(244,239,230,.25)"; ctx.fillRect(64 + cw * i, ry - 18, 1, 66); }
+      ctx.fillStyle = WIT; ctx.font = F(700, i ? 30 : 28); spatie(ctx, i ? a : a.toUpperCase(), cx, ry + 4, 3, "center");
+      ctx.fillStyle = MUTED; ctx.font = F(300, 26); ctx.textAlign = "center"; ctx.fillText(b, cx, ry + 40);
+    });
 
-    /* ----- papierkorrel en vergeelde randen ----- */
-    const korrel = ctx.getImageData(0, 0, W, H), d = korrel.data;
-    for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - .5) * 22; d[i] += n; d[i + 1] += n; d[i + 2] += n * .8; }
+    /* ----- bron en korrel ----- */
+    ctx.fillStyle = "rgba(244,239,230,.32)"; ctx.font = F(300, 15); ctx.textAlign = "center";
+    ctx.fillText(`Foto${fotos.length > 1 ? "'s" : ""}: ${fotos.map(f => f.door).join(", ")} · Wikimedia Commons`, W / 2, H - 26);
+    const korrel = ctx.getImageData(0, 0, W, H), px = korrel.data;
+    for (let i = 0; i < px.length; i += 4) { const n = (Math.random() - .5) * 14; px[i] += n; px[i + 1] += n; px[i + 2] += n; }
     ctx.putImageData(korrel, 0, 0);
-    const g = ctx.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, H * .8); g.addColorStop(0, "rgba(120,70,20,0)"); g.addColorStop(1, "rgba(120,70,20,.22)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
     return cv;
   }
   window.maakPoster = maakPoster;
