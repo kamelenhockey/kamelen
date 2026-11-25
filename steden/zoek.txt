@@ -36,3 +36,6 @@ gron-a|Groninger Museum
 gron-b|Forum Groningen
 gron-c|Groningen Vismarkt
 gron-d|Groningen Hoofdstation
+soc-a|Vindicat sociëteit Grote Markt
+soc-b|Mutua Fides Groningen
+soc-c|Grote Markt Groningen oostzijde
