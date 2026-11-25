@@ -39,3 +39,12 @@ gron-d|Groningen Hoofdstation
 soc-a|Vindicat sociëteit Grote Markt
 soc-b|Mutua Fides Groningen
 soc-c|Grote Markt Groningen oostzijde
+soc-d|Grote Markt oostzijde Groningen 2021
+soc-e|Grote Markt Groningen 2022
+soc-f|Mutua Fides Vindicat 2019
+soc-g|Groningen Grote Markt Forum 2020
+kam-a|Dromedary white background
+kam-b|Camelus dromedarius isolated
+kam-c|Dromedary side view Canary Islands
+kam-d|Camel standing desert sky
+kam-e|Dromedary walking
