@@ -2554,7 +2554,7 @@ async function toonPoster(){
   try {
     const ons = [...(DATA.uitslagen || []), ...(DATA.programma || [])].filter(x => isUs(x.thuis) || isUs(x.uit)).sort((a, b) => a.datum.localeCompare(b.datum));
     const ronde = ons.findIndex(x => x.datum === m.datum && x.thuis === m.thuis) + 1 || null;
-    const cv = await window.maakPoster(m, { spelers: sel, stand, ronde });
+    const cv = await window.maakPoster(m, { spelers: sel, stand, ronde, standLijst: DATA.stand || [], seizoen: ons });
     const blob = await new Promise(ok => cv.toBlob(ok, "image/png"));
     const url = URL.createObjectURL(blob), naam = `kamelen-poster-${m.datum}.png`;
     box.innerHTML = `<img class="poster-img" src="${url}" alt="Wedstrijdposter ${esc(m.thuis)} – ${esc(m.uit)}"><div class="poster-knoppen"><button type="button" class="btn" id="poster-deel">Delen</button><a class="btn ghost" href="${url}" download="${naam}">Opslaan</a></div>`;
@@ -3896,12 +3896,12 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796013800"></script>
-<script src="toto.js?v=1796013800"></script>
-<script src="pong.js?v=1796013800"></script>
-<script src="pongregels.js?v=1796013800"></script>
-<script src="beerpong.js?v=1796013800"></script>
-<script src="poster.js?v=1796013800"></script>
+<script src="mex.js?v=1796100200"></script>
+<script src="toto.js?v=1796100200"></script>
+<script src="pong.js?v=1796100200"></script>
+<script src="pongregels.js?v=1796100200"></script>
+<script src="beerpong.js?v=1796100200"></script>
+<script src="poster.js?v=1796100200"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3910,18 +3910,18 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796013800"></script>
-<script src="statistieken.js?v=1796013800"></script>
-<script src="wrapped.js?v=1796013800"></script>
-<script src="race.js?v=1796013800"></script>
-<script src="rad.js?v=1796013800"></script>
-<script src="fotos.js?v=1796013800"></script>
-<script src="quotes.js?v=1796013800"></script>
-<script src="ideeen.js?v=1796013800"></script>
-<script src="seizoen.js?v=1796013800"></script>
-<script src="zege.js?v=1796013800"></script>
-<script src="karavaan.js?v=1796013800"></script>
-<script src="design-proef.js?v=1796013800"></script>
-<script src="push.js?v=1796013800"></script>
+<script src="stemmen.js?v=1796100200"></script>
+<script src="statistieken.js?v=1796100200"></script>
+<script src="wrapped.js?v=1796100200"></script>
+<script src="race.js?v=1796100200"></script>
+<script src="rad.js?v=1796100200"></script>
+<script src="fotos.js?v=1796100200"></script>
+<script src="quotes.js?v=1796100200"></script>
+<script src="ideeen.js?v=1796100200"></script>
+<script src="seizoen.js?v=1796100200"></script>
+<script src="zege.js?v=1796100200"></script>
+<script src="karavaan.js?v=1796100200"></script>
+<script src="design-proef.js?v=1796100200"></script>
+<script src="push.js?v=1796100200"></script>
 </body>
 </html>
