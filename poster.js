@@ -37,6 +37,10 @@
     w2: { src: "woestijn/2.jpg", fx: .55, fy: .5, door: "" }, w4: { src: "woestijn/4.jpg", fx: .5, fy: .55, door: "" },
     w6: { src: "woestijn/6.jpg", fx: .42, fy: .55, door: "" }, w8: { src: "woestijn/8.jpg", fx: .6, fy: .5, door: "" },
     w14: { src: "woestijn/14.jpg", fx: .55, fy: .55, door: "" }, w16: { src: "woestijn/16.jpg", fx: .55, fy: .5, door: "" },
+    usmem: { src: "steden/usmem2.jpg", fx: .4, fy: .5, door: "Michielverbeek" },
+    paard: { src: "steden/friespaard2.jpg", fx: .42, fy: .22, door: "Oleg Yunakov" },
+    ljeppen: { src: "steden/fierljeppen.jpg", fx: .5, fy: .45, door: "Peter van der Sluijs" },
+    w3: { src: "woestijn/3.jpg", fx: .7, fy: .6, door: "" }, w9: { src: "woestijn/9.jpg", fx: .5, fy: .55, door: "" }, w12: { src: "woestijn/12.jpg", fx: .55, fy: .55, door: "" },
     olifant: { src: "steden/olifant.jpg", fx: .5, fy: .35, door: "Eric de Redelijkheid" }
   };
   /* Kleurgrading: schaduwen, hooglichten, hoeveel kleur er overblijft */
@@ -146,6 +150,7 @@
     const fotos = [zijF, onsF];
     let [logo, zijImg, onsImg, kameelImg] = await Promise.all([laad("logo.png").catch(() => null), laad(zijF.src).catch(() => null), laad(onsF.src).catch(() => null), laad("steden/kameel-uit.png").catch(() => null)]);
     const KAMEEL = { door: "Darthjipsu" };
+    const mo = opt.mini || {}, imgs2 = await Promise.all([mo.zij || mo.foto, mo.ons].map(k => k && FOTO[k] ? laad(FOTO[k].src).catch(() => null) : null));
     const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const ctx = cv.getContext("2d");
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
 
@@ -523,6 +528,40 @@
         let r3 = "", ym = 1262; met.split(" ").forEach(w => { if (ctx.measureText(r3 + w).width > W - 2 * L) { ctx.fillText(r3, L, ym); ym += 30; r3 = ""; } r3 += w + " "; }); ctx.fillText(r3, L, ym);
         bron = [onsF, KAMEEL];
       },
+      /* Tweeluik: boven hun beeld, onder het onze, de zin loopt over de naad */
+      tweeluik() {
+        const o = opt.mini || {}, A = FOTO[o.zij], B = FOTO[o.ons];
+        ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
+        beeld(ctx, imgs2[0], A, GRADE[o.gradeZij || "staal"], 0, 0, W, 560);
+        beeld(ctx, imgs2[1], B, GRADE[o.gradeOns || "zand"], 0, 566, W, 540);
+        ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, 560); ctx.clip(); verloop(300, 560, 0, .75); verloop(160, 0, 0, .55); ctx.restore();
+        ctx.save(); ctx.beginPath(); ctx.rect(0, 566, W, 540); ctx.clip(); verloop(840, 1106, 0, .85); ctx.restore();
+        ctx.fillStyle = ZAND; ctx.fillRect(0, 560, W, 6);
+        logoOp(L, 44, 52); ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 86, 7, "right");
+        let ks = o.size || 120; ctx.font = F(700, ks); while ([o.r1, o.r2].some(t => breedte(ctx, t, 2) > W - 2 * L) && ks > 50) { ks -= 4; ctx.font = F(700, ks); }
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = 24;
+        ctx.fillStyle = WIT; spatie(ctx, o.r1, L - 3, 530, 2); ctx.fillStyle = ZAND; spatie(ctx, o.r2, L - 3, 1076, 2);
+        ctx.fillStyle = "rgba(244,239,230,.85)"; ctx.font = F(500, 22); spatie(ctx, tk.toUpperCase(), L, 530 - ks * .8 - 18, 7); spatie(ctx, "KAMELEN", L, 1076 - ks * .8 - 18, 7); ctx.restore();
+        ctx.fillStyle = WIT; ctx.font = F(700, 34); spatie(ctx, `${namen[0]} \u2013 ${namen[1]}`, L, 1162, 5);
+        infoKort(1202, MUTED, true); selectieRegel(1250, "rgba(244,239,230,.6)", false, 20);
+        bron = [A, B];
+      },
+
+      /* Woordenboek: "kamiel", het Friese woord voor kameel */
+      woord() {
+        const o = opt.mini || {}, f = FOTO[o.foto]; beeld(ctx, imgs2[0], f, GRADE.zand, 0, 0, W, H);
+        verloop(300, 1000, 0, .92); ctx.fillStyle = "rgba(6,5,4,.92)"; ctx.fillRect(0, 1000, W, H - 1000); verloop(180, 0, 0, .5);
+        logoOp(L, 50, 52); ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        ctx.fillStyle = WIT; ctx.font = `400 170px PSerifR, Georgia, serif`; ctx.textAlign = "left"; ctx.fillText("ka·miel", L - 6, 700);
+        ctx.fillStyle = ZAND; ctx.font = `italic 400 36px PSerif, Georgia, serif`; ctx.fillText("(Fries) de; meervoud kamielen", L, 756);
+        const def = ["1  Kameel. Taai hoefdier, kan lang zonder water.", "2  Ploeg uit Grins die op snein 29 novimber", "    om 15.30 oere fan Ljouwert wint."];
+        ctx.fillStyle = "rgba(244,239,230,.9)"; ctx.font = `400 38px PSerifR, Georgia, serif`; def.forEach((t2, i) => ctx.fillText(t2, L, 840 + i * 52));
+        ctx.fillStyle = "rgba(244,239,230,.55)"; ctx.font = `italic 400 30px PSerif, Georgia, serif`; ctx.fillText("Zie ook: Leeuwarden, verliezen.", L, 1024);
+        ctx.fillStyle = "rgba(244,239,230,.3)"; ctx.fillRect(L, 1112, W - 2 * L, 1);
+        ctx.fillStyle = WIT; ctx.font = F(700, 38); spatie(ctx, `${namen[0]} \u2013 ${namen[1]}`, L, 1170, 5);
+        infoKort(1212, MUTED, true); selectieRegel(1262, "rgba(244,239,230,.6)", false, 20); bron = [f];
+      },
+
       /* Minimaal: één echte foto, een paar woorden, verder niets */
       minimaal() {
         const o = opt.mini || {}, f = FOTO[o.foto] || zijF, img = o.img || zijImg, gg = GRADE[o.grade || "zw"];
