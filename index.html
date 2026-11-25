@@ -564,6 +564,10 @@ html.op-slot #laad{display:none}
 .bpg-tabel td,.bpg-tabel th{padding:4px 6px;text-align:left}
 .bpg-vormen{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .bpg-knoppen{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.fx.afgelast .h,.fx.afgelast .a{text-decoration:line-through;opacity:.6}
+.fx.afgelast .t{color:#c9402c;font-weight:800;font-size:.72rem;text-transform:none}
+.kz-banner.afgelast{background:#fff1ee;border-color:#f3c3b8}
+.tt-afgelast{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:#fff1ee;border:1px solid #f3c3b8;font-size:.88rem;color:var(--ink)}
 /* ---------- Seizoensgrafiek ---------- */
 .cmp{font-size:.85rem;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
 .cmp select{font:inherit;font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 10px;background:#fff}
@@ -1720,6 +1724,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
 
 <div id="view-home">
 <div class="home-banners" id="home-banners"><div class="wrap">
+  <div id="afgelast-banner" class="kz-banner-wrap"></div>
   <div id="jarig-banner" class="kz-banner-wrap jarig-wrap"></div>
   <div id="kz-banner" class="kz-banner-wrap"></div>
   <div id="scorito-banner" class="kz-banner-wrap"></div>
@@ -2529,15 +2534,28 @@ async function renderWeather(m){
 }
 
 /* ---------- Programma & uitslagen ---------- */
+/* ---------- Afgelaste wedstrijden ---------- */
+const afgelastLijst = () => (DATA.afgelast || []).filter(a => a.bevestigd);
+const verplaatstVan = m => afgelastLijst().find(a => a.thuis === m.thuis && a.uit === m.uit && a.nieuweDatum === m.datum);
+function renderAfgelast(){
+  const el = document.getElementById("afgelast-banner"); if (!el) return;
+  const nu = Date.now();
+  const recent = afgelastLijst().filter(a => nu - toDate(a.datum, a.tijd || "12:00") < 10 * 864e5 && !a.gespeeld);
+  el.innerHTML = recent.map(a => `<a class="kz-banner afgelast" href="#wedstrijden"><span>⛔</span><span><b>Afgelast: ${esc(a.thuis)} – ${esc(a.uit)}</b><br><small>Was ${fmtDay(a.datum, { weekday: "short", day: "numeric", month: "short" })} · ${a.nieuweDatum ? `nieuwe datum ${fmtDay(a.nieuweDatum, { weekday: "short", day: "numeric", month: "short" })}` : "nieuwe datum nog niet bekend"}</small></span></a>`).join("");
+}
 function renderProgram(){
-  const all = DATA.programma || [];
+  const vandaag = new Date(); vandaag.setHours(0, 0, 0, 0);
+  const afg = afgelastLijst().filter(a => toDate(a.datum) >= new Date(vandaag - 7 * 864e5) && !a.gespeeld).map(a => ({ ...a, isAfgelast: true }));
+  const all = [...(DATA.programma || []), ...afg].sort((a, b) => a.datum.localeCompare(b.datum));
   const box = document.getElementById("program");
   if (!all.length){ box.innerHTML = empty("Nog geen programma", "", DATA.hockeyNlUrl); return; }
   box.innerHTML = `<div id="prog-list" class="list"></div>`;
   segToggle(document.getElementById("prog-toggle"), "Kamelen", "Hele poule", only => {
     const list = only ? all.filter(m => isUs(m.thuis + m.uit)) : all;
     document.getElementById("prog-list").innerHTML = groupByDate(list).map(([d, ms]) => `<div class="day">${fmtDay(d)}</div>` +
-      ms.map(m => `<div class="fx klik ${isUs(m.thuis+m.uit)?"us":""}" ${matchAttr(m)}><span class="t num">${m.tijd ? esc(m.tijd) : "n.n.b."}</span><span class="h">${teamLink(m.thuis)}</span><span class="sep">–</span><span class="a">${teamLink(m.uit)}</span></div>${m.veld ? `<div class="fx-venue">${esc(m.veld)}${m.accommodatie ? ` · ${esc(m.accommodatie)}` : ""}</div>` : ""}`).join("")).join("");
+      ms.map(m => m.isAfgelast
+        ? `<div class="fx afgelast ${isUs(m.thuis+m.uit)?"us":""}"><span class="t num">afgelast</span><span class="h">${teamLink(m.thuis)}</span><span class="sep">–</span><span class="a">${teamLink(m.uit)}</span></div><div class="fx-venue">${m.nieuweDatum ? `Verplaatst naar ${fmtDay(m.nieuweDatum)}` : "Nieuwe datum nog niet bekend"}</div>`
+        : `<div class="fx klik ${isUs(m.thuis+m.uit)?"us":""}" ${matchAttr(m)}><span class="t num">${m.tijd ? esc(m.tijd) : "n.n.b."}</span><span class="h">${teamLink(m.thuis)}</span><span class="sep">–</span><span class="a">${teamLink(m.uit)}</span></div>${m.veld || verplaatstVan(m) ? `<div class="fx-venue">${verplaatstVan(m) ? `Verplaatst van ${fmtDay(verplaatstVan(m).datum, { day: "numeric", month: "long" })}${m.veld ? " · " : ""}` : ""}${m.veld ? `${esc(m.veld)}${m.accommodatie ? ` · ${esc(m.accommodatie)}` : ""}` : ""}</div>` : ""}`).join("")).join("");
   });
 }
 function renderResults(){
@@ -3631,8 +3649,8 @@ return Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJs
     const veilig = f => { try { const r = f(); if (r && r.catch) r.catch(e => console.error(e)); return r; } catch (e) { console.error(e); } };
     const formBezig = v => pagina === v && bezigMetIets(true);
     (stil
-      ? [renderStats, renderNext, renderProgram, renderResults, renderStandings, renderTopscorers, renderLiters, renderSeason, renderPlayers, () => formBezig("toto") || window.renderToto?.(), renderDash, renderJarig]
-      : [renderStats, renderNext, renderProgram, renderResults, renderStandings, renderTopscorers, renderLiters, initPredictor, renderSeason, renderPlayers, initAgenda, () => window.renderMex?.(), () => window.renderRace?.(), () => window.renderToto?.(), renderDash, renderJarig, confettiNaWinst]).forEach(veilig);
+      ? [renderAfgelast, renderStats, renderNext, renderProgram, renderResults, renderStandings, renderTopscorers, renderLiters, renderSeason, renderPlayers, () => formBezig("toto") || window.renderToto?.(), renderDash, renderJarig]
+      : [renderAfgelast, renderStats, renderNext, renderProgram, renderResults, renderStandings, renderTopscorers, renderLiters, initPredictor, renderSeason, renderPlayers, initAgenda, () => window.renderMex?.(), () => window.renderRace?.(), () => window.renderToto?.(), renderDash, renderJarig, confettiNaWinst]).forEach(veilig);
     DATA.litersBasis = DATA.liters;
     veilig(() => window.renderStatistieken?.());
     if (!formBezig("fotos")) veilig(() => window.renderFotos?.());
@@ -3850,11 +3868,11 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1795495000"></script>
-<script src="toto.js?v=1795495000"></script>
-<script src="pong.js?v=1795495000"></script>
-<script src="pongregels.js?v=1795495000"></script>
-<script src="beerpong.js?v=1795495000"></script>
+<script src="mex.js?v=1795495100"></script>
+<script src="toto.js?v=1795495100"></script>
+<script src="pong.js?v=1795495100"></script>
+<script src="pongregels.js?v=1795495100"></script>
+<script src="beerpong.js?v=1795495100"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3863,18 +3881,18 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1795495000"></script>
-<script src="statistieken.js?v=1795495000"></script>
-<script src="wrapped.js?v=1795495000"></script>
-<script src="race.js?v=1795495000"></script>
-<script src="rad.js?v=1795495000"></script>
-<script src="fotos.js?v=1795495000"></script>
-<script src="quotes.js?v=1795495000"></script>
-<script src="ideeen.js?v=1795495000"></script>
-<script src="seizoen.js?v=1795495000"></script>
-<script src="zege.js?v=1795495000"></script>
-<script src="karavaan.js?v=1795495000"></script>
-<script src="design-proef.js?v=1795495000"></script>
-<script src="push.js?v=1795495000"></script>
+<script src="stemmen.js?v=1795495100"></script>
+<script src="statistieken.js?v=1795495100"></script>
+<script src="wrapped.js?v=1795495100"></script>
+<script src="race.js?v=1795495100"></script>
+<script src="rad.js?v=1795495100"></script>
+<script src="fotos.js?v=1795495100"></script>
+<script src="quotes.js?v=1795495100"></script>
+<script src="ideeen.js?v=1795495100"></script>
+<script src="seizoen.js?v=1795495100"></script>
+<script src="zege.js?v=1795495100"></script>
+<script src="karavaan.js?v=1795495100"></script>
+<script src="design-proef.js?v=1795495100"></script>
+<script src="push.js?v=1795495100"></script>
 </body>
 </html>

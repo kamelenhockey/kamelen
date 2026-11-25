@@ -106,9 +106,32 @@ if (stand.length < 4) throw new Error(`Stand lijkt onvolledig (${stand.length} t
 if (programma.length + uitslagen.length < (oud.programma.length + oud.uitslagen.length) - 10)
   throw new Error("Veel minder wedstrijden dan vorige keer – niets bijgewerkt.");
 
+// Afgelaste en verplaatste wedstrijden van ons bijhouden.
+// Een wedstrijd die uit het programma verdwijnt zonder uitslag, is na 30 uur "afgelast";
+// komt hij met een nieuwe datum terug, dan noteren we die (verplaatst).
+const isOns = w => ONS.test(w.thuis + w.uit), paarVan = w => `${w.thuis}|${w.uit}`;
+const nuOns = new Map([...uitslagen, ...programma].filter(isOns).map(w => [paarVan(w), w]));
+const nuMs = Date.now();
+let afgelast = (oud.afgelast || []).map(a => ({ ...a }));
+for (const w of (oud.programma || []).filter(isOns)) {
+  const nu = nuOns.get(paarVan(w));
+  if (nu && (nu.score || nu.datum === w.datum)) continue;          // gespeeld of ongewijzigd
+  if (afgelast.some(a => a.thuis === w.thuis && a.uit === w.uit && a.datum === w.datum)) continue;
+  afgelast.push({ thuis: w.thuis, uit: w.uit, datum: w.datum, tijd: w.tijd || null, nieuweDatum: nu ? nu.datum : null, vermist: new Date().toISOString() });
+}
+for (const a of afgelast) {
+  const nu = nuOns.get(`${a.thuis}|${a.uit}`);
+  if (nu && nu.score) a.gespeeld = nu.datum;
+  else if (nu && nu.datum !== a.datum) a.nieuweDatum = nu.datum;
+}
+// Alleen tonen als hij echt niet gespeeld is: geen uitslag 30 uur na de aftrap, of een nieuwe datum
+afgelast = afgelast.filter(a => !(a.gespeeld && a.gespeeld === a.datum))
+  .filter(a => { const nu = nuOns.get(`${a.thuis}|${a.uit}`); return !(nu && !nu.score && nu.datum === a.datum); });   // toch weer op de oude datum: vergissing
+afgelast.forEach(a => { a.bevestigd = !!a.nieuweDatum || nuMs - new Date(`${a.datum}T${a.tijd || "12:00"}:00`).getTime() > 30 * 3600e3; });
+
 const nieuw = {
   ...oud,
-  programma, uitslagen, stand,
+  programma, uitslagen, stand, afgelast,
   standPer: standPer || oud.standPer,
   puntenAftrek: berekenAftrek(stand, uitslagen),
   competitieBijgewerkt: new Date().toISOString(),

@@ -901,5 +901,16 @@
  "puntenAftrek": {
   "GCHC H13": 3
  },
- "competitieBijgewerkt": "2026-11-23T13:26:18.160Z"
+ "competitieBijgewerkt": "2026-11-23T13:26:18.160Z",
+ "afgelast": [
+  {
+   "thuis": "GHBS H13",
+   "uit": "GCHC H13",
+   "datum": "2026-11-22",
+   "tijd": "09:00",
+   "nieuweDatum": "2027-02-28",
+   "vermist": "2026-11-22T12:59:00.000Z",
+   "bevestigd": true
+  }
+ ]
 }

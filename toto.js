@@ -50,8 +50,25 @@
   function verwerk(reacties) {
     const ws = onzeWedstrijden();
     const perMatch = new Map(ws.map(m => [sleutel(m), { m, voorsp: new Map() }]));
+    /* Een voorspelling hoort bij de wedstrijd waarvoor hij is ingevuld (thuis – uit + oorspronkelijke datum).
+       Is die wedstrijd afgelast en verplaatst, dan verhuist de voorspelling mee naar de nieuwe datum.
+       Is de nieuwe datum nog onbekend, dan wordt hij bewaard maar nergens meegeteld.
+       Oude voorspellingen zonder wedstrijdnaam: eerstvolgende wedstrijd na het invullen. */
+    const afgelast = DATA.afgelast || [];
+    const paar = s => String(s || "").split(/\s+[–-]\s+/).map(x => x.trim());
+    const datumVan = d => { const x = d ? new Date(d) : null; return x && !isNaN(x) ? `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}` : null; };
+    const zoekMatch = r => {
+      if (!r.wedstrijd) return ws.find(w => aftrap(w) > r.tijd);
+      const [th, ui] = paar(r.wedstrijd), dat = datumVan(r.aftrap);
+      const zelfde = ws.filter(w => w.thuis === th && w.uit === ui);
+      if (!zelfde.length) return null;
+      if (!dat) return zelfde.find(w => aftrap(w) > r.tijd) || null;
+      const precies = zelfde.find(w => w.datum === dat); if (precies) return precies;
+      const a = afgelast.find(x => x.thuis === th && x.uit === ui && x.datum === dat);
+      return a && a.nieuweDatum ? zelfde.find(w => w.datum === a.nieuweDatum) || null : null;
+    };
     for (const r of reacties.sort((a, b) => a.tijd - b.tijd)) {
-      const m = ws.find(w => aftrap(w) > r.tijd);   // eerstvolgende wedstrijd na invullen
+      const m = zoekMatch(r);
       if (!m) continue;
       perMatch.get(sleutel(m)).voorsp.set(r.naam, r);  // laatste inzending telt
     }
@@ -127,6 +144,10 @@
           <div class="tt-when">${fmtDay(volgende.datum)}${volgende.tijd ? ` · ${esc(volgende.tijd)}` : ""} · voorspellen kan tot de aftrap</div></div>
         ${CFG.api ? "" : `<a class="btn mx-big" href="${esc(CFG.form)}" target="_blank" rel="noopener">Doe je voorspelling</a>`}
       </div>
+      ${(DATA.afgelast || []).filter(a => a.bevestigd && !a.gespeeld && nu - aftrap(a) < 10 * 864e5).map(a => {
+        const bewaard = a.nieuweDatum ? [...(perMatch.get(sleutel({ datum: a.nieuweDatum, thuis: a.thuis, uit: a.uit }))?.voorsp.values() || [])].filter(r => !r.model).length : 0;
+        return `<p class="tt-afgelast">⛔ <b>${esc(a.thuis)} – ${esc(a.uit)}</b> van ${fmtDay(a.datum, { day: "numeric", month: "long" })} is afgelast. ${a.nieuweDatum ? `${bewaard ? `De ${bewaard} ${bewaard === 1 ? "voorspelling" : "voorspellingen"} daarvoor ${bewaard === 1 ? "blijft" : "blijven"} staan voor de nieuwe datum, ${fmtDay(a.nieuweDatum, { day: "numeric", month: "long" })}.` : `De nieuwe datum is ${fmtDay(a.nieuweDatum, { day: "numeric", month: "long" })}.`}` : "Voorspellingen daarvoor blijven bewaard tot er een nieuwe datum is."} Voor de wedstrijd hierboven voorspel je opnieuw.</p>`;
+      }).join("")}
       ${CFG.api ? formulier(volgende) : ""}
       <div class="tt-voted"><span class="k">${v.size - v.has(MODEL_NAAM)} ${v.size - v.has(MODEL_NAAM) === 1 ? "voorspelling" : "voorspellingen"}</span>${[...v.values()].map(r => r.model ? `<span class="tt-chip tt-model">🐪 Model: <b>${scoreTekst(r.voor, r.tegen, volgende)}</b></span>` : `<span class="tt-chip">${esc(r.naam)}</span>`).join("")}${v.size - v.has(MODEL_NAAM) ? `<span class="tt-hint">Wat ze voorspeld hebben zie je na de aftrap. Het model laat zijn gok alvast zien.</span>` : ""}</div>`;
     }
@@ -201,7 +222,7 @@
 
   /* ---------- Gegevens: nieuwe opslag + oude formulierantwoorden ---------- */
   function vanApi(j) {
-    return (j.voorspellingen || []).map(r => ({ tijd: tijdstip(r.tijd), naam: canon(r.naam), voor: r.voor === null ? NaN : parseInt(r.voor, 10), tegen: r.tegen === null ? NaN : parseInt(r.tegen, 10), verborgen: r.voor === null }))
+    return (j.voorspellingen || []).map(r => ({ tijd: tijdstip(r.tijd), naam: canon(r.naam), wedstrijd: r.wedstrijd || "", aftrap: r.aftrap || null, voor: r.voor === null ? NaN : parseInt(r.voor, 10), tegen: r.tegen === null ? NaN : parseInt(r.tegen, 10), verborgen: r.voor === null }))
       .filter(r => r.tijd && r.naam);
   }
   window.renderToto = async function () {
