@@ -2,7 +2,7 @@ name: Stadsfoto's ophalen
 
 on:
   push:
-    paths: ["steden/bronnen.txt", "fonts/bronnen.txt"]
+    paths: ["steden/bronnen.txt", "steden/zoek.txt", "fonts/bronnen.txt", "scripts/stadsfotos.mjs"]
   workflow_dispatch: {}
 
 permissions:
@@ -27,6 +27,11 @@ jobs:
               "https://commons.wikimedia.org/wiki/Special:FilePath/${bestand}?width=1280" -o "steden/$naam.jpg" || true
             file "steden/$naam.jpg"
           done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Stadsfoto's zoeken
+        run: node scripts/stadsfotos.mjs
       - name: Lettertypen downloaden
         run: |
           grep -v '^#' fonts/bronnen.txt | while read -r pad; do
@@ -38,5 +43,5 @@ jobs:
         run: |
           git config user.name "kamelen-bot"
           git config user.email "kamelen-bot@users.noreply.github.com"
-          git add steden/*.jpg fonts/*.ttf || true
+          git add steden/*.jpg steden/fotos.json fonts/*.ttf || true
           git diff --staged --quiet || (git commit -m "Stadsfoto's opgehaald" && git pull --rebase && git push)

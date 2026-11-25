@@ -1,3 +1,5 @@
 # lettertypen uit github.com/google/fonts (SIL Open Font License)
 ofl/dmserifdisplay/DMSerifDisplay-Regular.ttf
 ofl/dmserifdisplay/DMSerifDisplay-Italic.ttf
+ofl/shrikhand/Shrikhand-Regular.ttf
+ofl/alfaslabone/AlfaSlabOne-Regular.ttf
