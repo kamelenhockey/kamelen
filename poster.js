@@ -40,6 +40,7 @@
     groen: { s: [8, 18, 12], h: [236, 232, 200], kleur: .35 },
     amber: { s: [26, 10, 2], h: [255, 196, 120], kleur: .25 },
     sloop: { s: [20, 14, 10], h: [255, 236, 210], kleur: .7 },
+    vergeeld: { s: [40, 30, 30], h: [255, 236, 200], kleur: .75 },
     rood: { s: [26, 8, 8], h: [255, 216, 190], kleur: .3 }
   };
   /* Per tegenstander: compositie, hun beeld, ons beeld (Groningen of kamelen), opmaak en zin.
@@ -50,17 +51,17 @@
   const IDEE = [
     { test: /leeuwarden/i, thuis: { opmaak: "torens", beeld: "oldehove", ons: "martini", zin: "Zij hebben hun toren nooit afgemaakt." },
       uit: { opmaak: "stempelkaart", zin: "Finish in Leeuwarden." } },
-    { test: /ghbs\s*h13/i, uit: { opmaak: "kalender", zin: "Uitgesteld, niet vergeten." }, thuis: { opmaak: "festival", zin: "Laatste thuiswedstrijd van het seizoen." } },
-    { test: /ghbs\s*h11/i, opmaak: "bord", beeld: "vismarkt", zin: "Er is maar één Stad." },
-    { test: /ghbs\s*h12/i, opmaak: "viltje", zin: "Vorige keer 0–3. Het eerste rondje is voor hen." },
+    { test: /ghbs\s*h13/i, uit: { opmaak: "kalender", zin: "Uitgesteld, niet vergeten." }, thuis: { opmaak: "serie", ons: "martini", zin: "" } },
+    { test: /ghbs\s*h11/i, opmaak: "album", zin: "Ruilen? Geen sprake van." },
+    { test: /ghbs\s*h12/i, opmaak: "bon", zin: "Vorige keer betaalden zij. Dat houden we zo." },
     { test: /ghbs\s*h14/i, opmaak: "zwitsers", groot: "13", klein: "14", zin: "Het veertiende." },
     { test: /ghbs/i, opmaak: "bord", beeld: "vismarkt", zin: "Er is maar één Stad." },
     { test: /sneek/i, opmaak: "stand", beeld: "waterpoort", zin: "" },
     { test: /hcso/i, opmaak: "ticket", beeld: "toren", grade: "staal", code: "STK", zin: "Alleen retour verkrijgbaar." },
     { test: /daring/i, opmaak: "scorebord", zin: "Ze mogen het nog een keer proberen." },
-    { test: /studs/i, opmaak: "sloop", beeld: "madurodam", zin: "Mutua Fides is gesloten." },
-    { test: /eemsmond/i, opmaak: "route", beeld: "stootblok", grade: "staal", zin: "Delfzijl. Einde van de lijn." },
-    { test: /emmen/i, opmaak: "zoo", beeld: "olifant", zin: "Emmen heeft al genoeg dieren." },
+    { test: /studs/i, opmaak: "uitnodiging", zin: "" },
+    { test: /eemsmond/i, opmaak: "weer", zin: "" },
+    { test: /emmen/i, opmaak: "kaart", beeld: "flat", zin: "Mooier dan dit wordt Emmen niet." },
     { test: /./, opmaak: "bord", beeld: "vismarkt", zin: "De karavaan trekt door." }
   ];
   const POS = { Groningen: [53.219, 6.566], Leeuwarden: [53.201, 5.799], Sneek: [53.033, 5.659], Stadskanaal: [52.99, 6.95], Veendam: [53.105, 6.877], Delfzijl: [53.33, 6.92], Emmen: [52.785, 6.897] };
@@ -70,7 +71,7 @@
   const laad = src => new Promise((ok, fout) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fout; i.src = src; });
   let fontKlaar = null;
   const fonts = () => fontKlaar || (fontKlaar = Promise.all([
-    ["PCond", "fonts/BarlowCondensed-Medium.woff", "500"], ["PCond", "fonts/BarlowCondensed-Bold.woff", "700"], ["PCond", "fonts/BarlowCondensed-Light.woff", "300"], ["PSans", "fonts/InterDisplay-SemiBold.woff", "600"], ["PSerif", "fonts/DMSerifDisplay-Italic.woff", "400", "italic"]
+    ["PCond", "fonts/BarlowCondensed-Medium.woff", "500"], ["PCond", "fonts/BarlowCondensed-Bold.woff", "700"], ["PCond", "fonts/BarlowCondensed-Light.woff", "300"], ["PSans", "fonts/InterDisplay-SemiBold.woff", "600"], ["PSerif", "fonts/DMSerifDisplay-Italic.woff", "400", "italic"], ["PSerifR", "fonts/DMSerifDisplay-Regular.woff", "400"]
   ].map(async ([n, u, w, st]) => { try { const f = new FontFace(n, `url(${u})`, { weight: w, style: st || "normal" }); await f.load(); document.fonts.add(f); } catch {} })));
   const F = (w, s) => `${w} ${s}px PCond, "Arial Narrow", Arial, sans-serif`;
 
@@ -332,6 +333,187 @@
         ctx.font = F(300, 40); ctx.fillText("tegen", x, 1150); x += ctx.measureText("tegen").width + 16; ctx.font = F(700, 60); spatie(ctx, namen[1], x, 1150, 2);
         const cellen = [[`${weekdag} ${datum}`, tijd], [wijThuis ? "THUIS" : "UIT", plek], ["HEREN RESERVE", "1e klasse"]], cw = (W - 128) / 3;
         cellen.forEach(([a, b], i) => { ctx.fillStyle = INK; ctx.font = F(700, 26); spatie(ctx, a, 64 + cw * i, 1256, 3); ctx.font = F(300, 26); ctx.textAlign = "left"; ctx.fillText(b, 64 + cw * i, 1292); });
+      },
+      /* Studs: corpsuitnodiging voor hun ontgroening, met lakzegel */
+      uitnodiging() {
+        let gr = ctx.createRadialGradient(W / 2, 560, 100, W / 2, 600, 900); gr.addColorStop(0, "#173a29"); gr.addColorStop(1, "#06140d"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+        for (let i = 0; i < 9000; i++) { ctx.fillStyle = `rgba(255,255,255,${Math.random() * .025})`; ctx.fillRect(Math.random() * W, Math.random() * H, 1.5, 1.5); }
+        const GOUD = "#b8954a", INKT = "#1d2a22";
+        const cx = W / 2, kw = 820, kh = 940, ky = 120;
+        ctx.save(); ctx.translate(cx, ky + kh / 2); ctx.rotate(-.018);
+        ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = 60; ctx.shadowOffsetY = 20; ctx.fillStyle = "#f4ecd8"; ctx.fillRect(-kw / 2, -kh / 2, kw, kh); ctx.shadowColor = "transparent";
+        ctx.strokeStyle = GOUD; ctx.lineWidth = 4; ctx.strokeRect(-kw / 2 + 28, -kh / 2 + 28, kw - 56, kh - 56); ctx.lineWidth = 1.5; ctx.strokeRect(-kw / 2 + 40, -kh / 2 + 40, kw - 80, kh - 80);
+        if (logo) { const bw = 150; ctx.drawImage(kameelVorm(GOUD, bw), -bw / 2, -kh / 2 + 80); }
+        const y0 = -kh / 2;
+        const regel = (t, y, font, kleur = INKT, sp = 0) => { ctx.fillStyle = kleur; ctx.font = font; if (sp) spatie(ctx, t, 0, y0 + y, sp, "center"); else { ctx.textAlign = "center"; ctx.fillText(t, 0, y0 + y); } };
+        regel("HET KAMELENCORPS", 250, F(500, 24), GOUD, 10);
+        regel("heeft de eer", 318, `italic 400 38px PSerif, Georgia, serif`);
+        regel(`de heren van ${tk}`, 392, `400 62px PSerifR, Georgia, serif`);
+        regel("uit te nodigen voor hun", 452, `italic 400 38px PSerif, Georgia, serif`);
+        regel("Ontgroening", 574, `400 120px PSerifR, Georgia, serif`);
+        regel("op het kunstgras", 632, `italic 400 38px PSerif, Georgia, serif`);
+        ctx.fillStyle = GOUD; ctx.fillRect(-120, y0 + 668, 240, 2);
+        regel(`${weekdag.toLowerCase()} ${datum.toLowerCase()} 2027`, 728, `400 40px PSerifR, Georgia, serif`);
+        regel(`aanvang ${tijd.toLowerCase()}, Groningen`, 772, `italic 400 30px PSerif, Georgia, serif`);
+        regel("Dresscode: scheenbeschermers", 828, `italic 400 30px PSerif, Georgia, serif`, "#5a5045");
+        regel("R.S.V.P. niet nodig, jullie komen toch", 868, F(500, 20), GOUD, 4);
+        ctx.restore();
+        /* lakzegel */
+        const zx = cx + 300, zy = ky + kh - 40;
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = 16; ctx.shadowOffsetY = 6; ctx.fillStyle = "#8e1a1a"; ctx.beginPath();
+        for (let a = 0; a < 7; a += .2) { const r = 86 + Math.sin(a * 7) * 6 + Math.cos(a * 3) * 4; ctx.lineTo(zx + Math.cos(a) * r, zy + Math.sin(a) * r); } ctx.fill(); ctx.restore();
+        ctx.fillStyle = "#a82424"; ctx.beginPath(); ctx.arc(zx, zy, 62, 0, 7); ctx.fill(); ctx.strokeStyle = "#6e1010"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(zx, zy, 62, 0, 7); ctx.stroke();
+        if (logo) { const bw = 96, bh = bw * logo.height / logo.width; ctx.drawImage(kameelVorm("#6e1010", bw), zx - bw / 2, zy - bh / 2); }
+        ctx.fillStyle = WIT; ctx.font = F(700, 50); spatie(ctx, `${namen[0]}  TEGEN  ${namen[1]}`, L, 1170, 3);
+        selectieRegel(1218, "rgba(244,239,230,.75)"); infoKort(1306, WIT, true); bron = [];
+      },
+
+      /* Ronde 17: stickeralbum, de selectie als plaatjes */
+      album() {
+        ctx.fillStyle = "#efe7d6"; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = "rgba(228,138,44,.08)"; for (let y = 0; y < H; y += 40) for (let x = (y / 40) % 2 ? 20 : 0; x < W; x += 40) { ctx.beginPath(); ctx.arc(x, y, 4, 0, 7); ctx.fill(); }
+        ctx.fillStyle = "#e48a2c"; ctx.fillRect(0, 0, W, 170);
+        ctx.fillStyle = "#1b120a"; ctx.font = F(700, 64); ctx.textAlign = "left"; ctx.fillText("KAMELEN", L, 96); ctx.font = F(500, 24); spatie(ctx, "STICKERALBUM 2026/2027  /  BLZ. " + (opt.ronde || 1), L, 140, 5);
+        if (logo) { const lh = 120, lw = lh * logo.width / logo.height; ctx.drawImage(logo, W - L - lw, 26, lw, lh); }
+        const lijst = spelers.length ? spelers : [], kol = 4, sw = 216, sh = 208, gx = (W - kol * sw) / (kol + 1), y0 = 200;
+        for (let i = 0; i < 16; i++) { const x = gx + (i % kol) * (sw + gx), y = y0 + Math.floor(i / kol) * (sh + 18), n = lijst[i];
+          ctx.save(); ctx.translate(x + sw / 2, y + sh / 2); ctx.rotate(n ? ((i * 53) % 9 - 4) / 300 : 0); ctx.translate(-sw / 2, -sh / 2);
+          if (!n) { ctx.setLineDash([8, 6]); ctx.strokeStyle = "rgba(27,18,10,.3)"; ctx.lineWidth = 2; ctx.strokeRect(6, 6, sw - 12, sh - 12); ctx.setLineDash([]); ctx.fillStyle = "rgba(27,18,10,.3)"; ctx.font = F(700, 54); ctx.textAlign = "center"; ctx.fillText(String(i + 1), sw / 2, sh / 2 + 18); ctx.restore(); continue; }
+          ctx.shadowColor = "rgba(0,0,0,.25)"; ctx.shadowBlur = 10; ctx.shadowOffsetY = 4; ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.roundRect(0, 0, sw, sh, 10); ctx.fill(); ctx.shadowColor = "transparent";
+          const g2 = ctx.createLinearGradient(0, 0, 0, sh); const glim = i === 0;
+          if (glim) { g2.addColorStop(0, "#ffd36e"); g2.addColorStop(.35, "#ff8fb1"); g2.addColorStop(.7, "#8fd3ff"); g2.addColorStop(1, "#c9a2ff"); } else { g2.addColorStop(0, "#f2b45a"); g2.addColorStop(1, "#b9601d"); }
+          ctx.fillStyle = g2; ctx.beginPath(); ctx.roundRect(8, 8, sw - 16, sh - 52, 6); ctx.fill();
+          if (kameelImg) { const bw = sw - 40, bh = bw * kameelImg.height / kameelImg.width; ctx.save(); ctx.beginPath(); ctx.roundRect(8, 8, sw - 16, sh - 52, 6); ctx.clip(); ctx.drawImage(kameelImg, i % 2 ? sw - 20 : 20, sh - 44 - bh + 14, i % 2 ? -bw : bw, bh); ctx.restore(); }
+          ctx.fillStyle = "#1b120a"; ctx.beginPath(); ctx.arc(30, 30, 18, 0, 7); ctx.fill(); ctx.fillStyle = "#fff"; ctx.font = F(700, 20); ctx.textAlign = "center"; ctx.fillText(String(i + 1), 30, 37);
+          ctx.fillStyle = "#1b120a"; let fs = 26; ctx.font = F(700, fs); while (breedte(ctx, n, 2) > sw - 24 && fs > 14) { fs--; ctx.font = F(700, fs); } spatie(ctx, n, sw / 2, sh - 16, 2, "center");
+          ctx.restore(); }
+        ctx.fillStyle = "#1b120a"; ctx.font = F(700, 52); spatie(ctx, `${namen[0]}  TEGEN  ${namen[1]}`, L, 1150, 3);
+        ctx.fillStyle = "#b9601d"; ctx.font = F(500, 32); ctx.textAlign = "left"; ctx.fillText(idee.zin, L, 1198);
+        ctx.fillStyle = "#1b120a"; ctx.fillRect(L, 1236, W - 2 * L, 2); infoKort(1290, "#1b120a", true); bron = [KAMEEL];
+      },
+
+      /* Ronde 18: kassabon van de vorige ontmoeting */
+      bon() {
+        const gr = ctx.createLinearGradient(0, 0, W, H); gr.addColorStop(0, "#2a1b11"); gr.addColorStop(1, "#120b06"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = "rgba(0,0,0,.25)"; ctx.lineWidth = 2; for (let y = 0; y < H; y += 11) { ctx.beginPath(); ctx.moveTo(0, y); for (let x = 0; x <= W; x += 60) ctx.lineTo(x, y + Math.sin(x / 120 + y / 40) * 3); ctx.stroke(); }
+        const vorige = (opt.seizoen || []).find(x => x.score && (x.thuis === tegen || x.uit === tegen));
+        let wij = 0, zij = 0, vd = ""; if (vorige) { const [a, b] = vorige.score.split("-").map(Number), th = /gchc/i.test(vorige.thuis); wij = th ? a : b; zij = th ? b : a; vd = new Date(vorige.datum + "T12:00").toLocaleDateString("nl-NL", { day: "2-digit", month: "2-digit", year: "numeric" }); }
+        const BW = 540, BH = 1150, c = document.createElement("canvas"); c.width = BW; c.height = BH; const t = c.getContext("2d");
+        t.fillStyle = "#fbfaf6"; t.beginPath(); t.moveTo(0, 0); t.lineTo(BW, 0); t.lineTo(BW, BH - 14); for (let x = BW; x >= 0; x -= 18) t.lineTo(x, BH - (x / 18 % 2 ? 0 : 14)); t.closePath(); t.fill();
+        const INK = "#26221e", M = `500 22px PSans, Arial, sans-serif`, MB = `600 24px PSans, Arial, sans-serif`;
+        let y = 70; const mid = (s, f = M) => { t.font = f; t.fillStyle = INK; t.textAlign = "center"; t.fillText(s, BW / 2, y); y += 34; };
+        const rij = (l, r, f = M) => { t.font = f; t.fillStyle = INK; t.textAlign = "left"; t.fillText(l, 36, y); t.textAlign = "right"; t.fillText(r, BW - 36, y); y += 36; };
+        const streep = () => { t.fillStyle = INK; for (let x = 36; x < BW - 36; x += 12) t.fillRect(x, y - 14, 7, 2); y += 22; };
+        if (logo) { const bw = 120, bh = bw * logo.height / logo.width; t.drawImage(kameelVorm(INK, bw), BW / 2 - bw / 2, y - 30); y += bh; }
+        mid("CAFÉ DE KAMEEL", `600 34px PSans, Arial, sans-serif`); mid("Grote Markt, Groningen"); y += 10; streep();
+        rij(`Datum ${vd || "-"}`, `Tafel ${tk}`); rij("Bediening", "Heren 13"); streep();
+        rij(`${wij} x Doelpunt Kamelen`, `${wij},00`); rij(`${zij} x Doelpunt ${tk}`, `${zij},00`); rij("1 x Rondje verliezers", "6,50"); rij("1 x Ijszakje", "0,00"); streep();
+        rij("TOTAAL", `${zij}–${wij}`, `600 40px PSans, Arial, sans-serif`); y += 6; rij("Betaald door", `${tk} ${(tegen.match(/H\d+/) || [""])[0]}`); streep();
+        mid("VOLGENDE BESTELLING", MB); mid(`${weekdag.toLowerCase()} ${datum.toLowerCase()}, ${tijd.toLowerCase()}`); mid(wijThuis ? "thuis, Groningen" : `uit, ${plek}`); y += 10;
+        let zaad = 97; const rnd = () => (zaad = (zaad * 1103515245 + 12345) >>> 0) / 4294967296; t.fillStyle = INK; for (let bx = 90; bx < BW - 90;) { const w2 = 2 + Math.floor(rnd() * 5); if (rnd() > .35) t.fillRect(bx, y, w2, 90); bx += w2 + 2; } y += 130;
+        mid("Bedankt en tot ziens!"); mid("Geen retour mogelijk.");
+        ctx.save(); ctx.translate(70 + BW / 2, 90 + BH / 2); ctx.rotate(.02); ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 16; ctx.drawImage(c, -BW / 2, -BH / 2); ctx.restore();
+        /* rechterkolom */
+        const rx = 660; ctx.fillStyle = WIT; ctx.font = F(700, 86); ctx.textAlign = "left"; ctx.fillText(namen[0], rx, 220); ctx.fillStyle = ZAND; ctx.font = F(300, 40); ctx.fillText("tegen", rx, 280); ctx.fillStyle = WIT; ctx.font = F(700, 86); ctx.fillText(namen[1], rx, 370);
+        ctx.fillStyle = ZAND; ctx.font = F(300, 32); const woorden = idee.zin.split(" "); let r2 = "", yz = 450; woorden.forEach(w => { if (ctx.measureText(r2 + w).width > W - rx - 40) { ctx.fillText(r2, rx, yz); yz += 42; r2 = ""; } r2 += w + " "; }); ctx.fillText(r2, rx, yz);
+        ctx.fillStyle = MUTED; ctx.font = F(700, 20); spatie(ctx, "SELECTIE", rx, yz + 90, 6); ctx.fillStyle = WIT; ctx.font = F(500, 30);
+        (spelers.length ? spelers : ["VOLGT"]).forEach((n, i) => spatie(ctx, n, rx + (i >= 8 ? 190 : 0), yz + 136 + (i % 8) * 40, 3));
+        logoOp(W - L - 80, 50, 56); bron = [];
+      },
+
+      /* Ronde 19: weerbericht, een echte kameel als weerman */
+      weer() {
+        const zee = ctx.createLinearGradient(0, 0, 0, 1000); zee.addColorStop(0, "#1f5ea8"); zee.addColorStop(1, "#174a86"); ctx.fillStyle = zee; ctx.fillRect(0, 0, W, 1000);
+        /* provincie Groningen, grof */
+        const pr = [[6.19, 53.41], [6.35, 53.43], [6.55, 53.45], [6.72, 53.47], [6.86, 53.45], [6.93, 53.37], [7.02, 53.33], [7.1, 53.29], [7.2, 53.24], [7.21, 53.12], [7.18, 53.0], [7.09, 52.87], [6.98, 52.85], [6.88, 52.96], [6.72, 53.03], [6.55, 53.07], [6.4, 53.08], [6.27, 53.12], [6.2, 53.2], [6.18, 53.32]];
+        const pj = ([lo, la]) => [230 + (lo - 6.1) * 660, 250 + (53.52 - la) * 1100];
+        const land = ctx.createLinearGradient(0, 100, 0, 1000); land.addColorStop(0, "#7cb35f"); land.addColorStop(1, "#5c9447"); ctx.fillStyle = land;
+        ctx.beginPath(); pr.forEach((p, i) => { const [x, y] = pj(p); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,.7)"; ctx.lineWidth = 3; ctx.stroke();
+        /* Friesland en Drenthe als vlakken aan de rand */
+        ctx.fillStyle = "#6aa352"; ctx.beginPath(); ctx.moveTo(0, pj([6.19, 53.41])[1]); [[6.18, 53.32], [6.2, 53.2], [6.27, 53.12], [6.4, 53.08], [6.55, 53.07], [6.72, 53.03], [6.88, 52.96], [6.98, 52.85], [7.09, 52.87]].forEach(p => ctx.lineTo(...pj(p))); ctx.lineTo(pj([7.09, 52.87])[0], 1000); ctx.lineTo(0, 1000); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#6aa352"; ctx.beginPath(); ctx.moveTo(...pj([7.21, 53.12])); ctx.lineTo(...pj([7.2, 53.24])); ctx.lineTo(W, pj([7.2, 53.24])[1] - 40); ctx.lineTo(W, 1000); ctx.lineTo(...pj([7.18, 53.0])); ctx.closePath(); ctx.fill();
+        const stad = (naam, p, icoon, temp) => { const [x, y] = pj(p); ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(x, y, 9, 0, 7); ctx.fill();
+          ctx.fillStyle = "rgba(10,30,60,.85)"; ctx.font = F(700, 30); const tw = ctx.measureText(naam.toUpperCase()).width + 30; ctx.fillRect(x + 18, y - 22, tw, 42); ctx.fillStyle = "#fff"; ctx.textAlign = "left"; ctx.fillText(naam.toUpperCase(), x + 33, y + 10);
+          ctx.fillStyle = "#e0262b"; ctx.fillRect(x + 18 + tw, y - 22, 70, 42); ctx.fillStyle = "#fff"; ctx.fillText(temp, x + 30 + tw, y + 10); icoon(x, y - 110); };
+        const zon = (x, y) => { ctx.fillStyle = "#ffcc33"; ctx.beginPath(); ctx.arc(x, y, 50, 0, 7); ctx.fill(); ctx.strokeStyle = "#ffcc33"; ctx.lineWidth = 8; ctx.lineCap = "round"; for (let a = 0; a < 8; a++) { ctx.beginPath(); ctx.moveTo(x + Math.cos(a * .785) * 64, y + Math.sin(a * .785) * 64); ctx.lineTo(x + Math.cos(a * .785) * 86, y + Math.sin(a * .785) * 86); ctx.stroke(); } };
+        const storm = (x, y) => { ctx.fillStyle = "#4a5260"; [[0, 0, 56], [-50, 14, 42], [52, 16, 44], [0, 26, 50]].forEach(([dx, dy, r]) => { ctx.beginPath(); ctx.arc(x + dx, y + dy, r, 0, 7); ctx.fill(); });
+          ctx.fillStyle = "#ffd400"; ctx.beginPath(); ctx.moveTo(x - 6, y + 50); ctx.lineTo(x - 30, y + 110); ctx.lineTo(x - 6, y + 104); ctx.lineTo(x - 20, y + 160); ctx.lineTo(x + 26, y + 90); ctx.lineTo(x, y + 96); ctx.lineTo(x + 16, y + 50); ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = "#9fd3ff"; ctx.lineWidth = 5; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(x - 70 + i * 34, y + 70); ctx.lineTo(x - 80 + i * 34, y + 100); ctx.stroke(); } };
+        stad("Groningen", [6.566, 53.219], zon, "24°"); stad("Delfzijl", [6.92, 53.33], storm, "9°");
+        /* windpijl met kracht */
+        const [wx, wy] = pj([6.8, 53.41]); ctx.save(); ctx.translate(wx - 60, wy - 50); ctx.rotate(.5); ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.moveTo(-70, -16); ctx.lineTo(30, -16); ctx.lineTo(30, -36); ctx.lineTo(80, 0); ctx.lineTo(30, 36); ctx.lineTo(30, 16); ctx.lineTo(-70, 16); ctx.closePath(); ctx.fill(); ctx.fillStyle = "#174a86"; ctx.font = F(700, 30); ctx.textAlign = "center"; ctx.fillText("8", -10, 11); ctx.restore();
+        /* de weerman */
+        if (kameelImg) { const bw = 560, bh = bw * kameelImg.height / kameelImg.width; ctx.save(); ctx.shadowColor = "rgba(0,0,0,.4)"; ctx.shadowBlur = 30; ctx.drawImage(kameelImg, -60, 1000 - bh + 30, bw, bh); ctx.restore(); }
+        /* onderbalk */
+        ctx.fillStyle = "#0c2340"; ctx.fillRect(0, 1000, W, H - 1000);
+        ctx.fillStyle = "#e0262b"; ctx.fillRect(0, 900, 520, 70); ctx.fillStyle = "#fff"; ctx.font = F(700, 38); spatie(ctx, "WEERBERICHT", 30, 948, 6);
+        ctx.fillStyle = "#fff"; ctx.fillRect(520, 900, W - 520, 70); ctx.fillStyle = "#0c2340"; ctx.font = F(700, 32); spatie(ctx, `${weekdag} ${datum}`, 545, 946, 4);
+        ctx.fillStyle = "#fff"; ctx.font = F(500, 34); ctx.textAlign = "left"; ctx.fillText("Delfzijl: zwaar bewolkt, kans op een pak slaag 90%.", L, 1060);
+        ctx.font = F(700, 50); spatie(ctx, `${namen[0]}  TEGEN  ${namen[1]}`, L, 1140, 3);
+        selectieRegel(1196, "rgba(255,255,255,.75)"); infoKort(1300, "#fff", true); logoOp(W - L - 80, 50, 56); bron = [KAMEEL];
+      },
+
+      /* Ronde 20: ansichtkaarten, groeten uit Emmen */
+      kaart() {
+        const gr = ctx.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, "#8a6a45"); gr.addColorStop(1, "#5e4429"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+        for (let i = 0; i < 14000; i++) { ctx.fillStyle = `rgba(${Math.random() > .5 ? "40,25,10" : "255,230,200"},${Math.random() * .12})`; ctx.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+        const CW = 760, CH = 500;
+        /* achterkant met de boodschap */
+        const ach = document.createElement("canvas"); ach.width = CW; ach.height = CH; const a = ach.getContext("2d");
+        a.fillStyle = "#f3ecdc"; a.fillRect(0, 0, CW, CH); a.fillStyle = "rgba(60,40,20,.35)"; a.fillRect(CW / 2, 40, 2, CH - 80);
+        a.fillStyle = "#2a3b6b"; a.font = `italic 400 30px PSerif, Georgia, serif`; a.textAlign = "left";
+        ["Beste Emmen,", "", "Kom gerust langs op " + datum.toLowerCase() + ".", "Neem een foto van thuis mee,", "dan lijkt het hier nog mooier.", "", "Groeten uit Stad,", "de Kamelen"].forEach((t2, i) => a.fillText(t2, 36, 90 + i * 40));
+        for (let i = 0; i < 4; i++) { a.fillStyle = "rgba(60,40,20,.35)"; a.fillRect(CW / 2 + 30, 290 + i * 50, CW / 2 - 70, 2); }
+        a.fillStyle = "#2a3b6b"; a.font = `italic 400 28px PSerif, Georgia, serif`; a.fillText(`${tk} H1`, CW / 2 + 36, 280); a.fillText("Ergens in Drenthe", CW / 2 + 36, 330); a.fillText("(niet naar kijken)", CW / 2 + 36, 380);
+        /* postzegel met de echte kameel en een stempel */
+        const sx = CW - 170, sy = 36, sw = 130, sh = 160; a.fillStyle = "#fff"; a.fillRect(sx, sy, sw, sh);
+        a.globalCompositeOperation = "destination-out"; for (let x = sx; x <= sx + sw; x += 13) { a.beginPath(); a.arc(x, sy, 5, 0, 7); a.arc(x, sy + sh, 5, 0, 7); a.fill(); } for (let y = sy; y <= sy + sh; y += 13) { a.beginPath(); a.arc(sx, y, 5, 0, 7); a.arc(sx + sw, y, 5, 0, 7); a.fill(); } a.globalCompositeOperation = "source-over";
+        a.fillStyle = "#e48a2c"; a.fillRect(sx + 12, sy + 12, sw - 24, sh - 24); if (kameelImg) { const bw = sw - 30, bh = bw * kameelImg.height / kameelImg.width; a.drawImage(kameelImg, sx + 15, sy + sh - 30 - bh, bw, bh); }
+        a.fillStyle = "#fff"; a.font = F(700, 18); a.fillText("13 CT", sx + 18, sy + 34);
+        a.strokeStyle = "rgba(40,40,60,.7)"; a.lineWidth = 3; a.beginPath(); a.arc(sx - 30, sy + 110, 56, 0, 7); a.stroke(); a.font = F(700, 16); a.fillStyle = "rgba(40,40,60,.75)"; a.textAlign = "center"; a.fillText("GRONINGEN", sx - 30, sy + 104); a.fillText(datum, sx - 30, sy + 126);
+        for (let i = 0; i < 4; i++) { a.beginPath(); for (let x = sx + 30; x < sx + 200; x += 6) a.lineTo(x, sy + 170 + i * 14 + Math.sin(x / 9) * 4); a.stroke(); }
+        ctx.save(); ctx.translate(590, 800); ctx.rotate(.07); ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 12; ctx.drawImage(ach, -CW / 2, -CH / 2); ctx.restore();
+        /* voorkant: groeten uit Emmen */
+        const vk = document.createElement("canvas"); vk.width = CW; vk.height = CH; const v = vk.getContext("2d");
+        v.fillStyle = "#fff"; v.fillRect(0, 0, CW, CH); beeld(v, zijImg, zijF, GRADE.vergeeld, 18, 18, CW - 36, CH - 36);
+        v.fillStyle = "rgba(255,255,255,.95)"; v.font = `italic 400 70px PSerif, Georgia, serif`; v.textAlign = "left"; v.shadowColor = "rgba(0,0,0,.6)"; v.shadowBlur = 10; v.fillText("Groeten uit", 44, 110);
+        v.font = F(700, 130); v.fillStyle = "#e9c46a"; v.fillText("EMMEN", 40, 230); v.shadowBlur = 0;
+        ctx.save(); ctx.translate(450, 330); ctx.rotate(-.06); ctx.shadowColor = "rgba(0,0,0,.55)"; ctx.shadowBlur = 36; ctx.shadowOffsetY = 14; ctx.drawImage(vk, -CW / 2, -CH / 2); ctx.restore();
+        logoOp(W - L - 80, 40, 56);
+        ctx.fillStyle = "rgba(20,12,4,.55)"; ctx.fillRect(0, 1040, W, H - 1040);
+        ctx.fillStyle = WIT; ctx.font = F(700, 52); spatie(ctx, `${namen[0]}  TEGEN  ${namen[1]}`, L, 1112, 3);
+        ctx.fillStyle = "#f2d39a"; ctx.font = F(300, 32); ctx.textAlign = "left"; ctx.fillText(idee.zin, L, 1158); selectieRegel(1212, "rgba(244,239,230,.85)"); infoKort(1306, WIT, true); bron = [zijF, KAMEEL];
+      },
+
+      /* Ronde 21: de laatste thuiswedstrijd als docuserie op een streamingdienst */
+      serie() {
+        ctx.fillStyle = "#0b0b0b"; ctx.fillRect(0, 0, W, H);
+        beeld(ctx, onsImg, onsF, GRADE.nacht, 0, 0, W, 760);
+        let gr = ctx.createLinearGradient(0, 300, 0, 760); gr.addColorStop(0, "rgba(11,11,11,0)"); gr.addColorStop(1, "#0b0b0b"); ctx.fillStyle = gr; ctx.fillRect(0, 300, W, 460);
+        gr = ctx.createLinearGradient(0, 0, 700, 0); gr.addColorStop(0, "rgba(11,11,11,.85)"); gr.addColorStop(1, "rgba(11,11,11,0)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, 760);
+        if (kameelImg) { const bw = 640, bh = bw * kameelImg.height / kameelImg.width; ctx.save(); ctx.translate(W + 60, 760 - bh); ctx.scale(-1, 1); ctx.filter = "brightness(.85) contrast(1.1)"; ctx.drawImage(kameelImg, 0, 0, bw, bh); ctx.restore(); }
+        ctx.fillStyle = "#0b0b0b"; ctx.fillRect(0, 740, W, 30);
+        ctx.fillStyle = "#e48a2c"; ctx.font = F(700, 22); spatie(ctx, "DOCUSERIE", L, 110, 8);
+        ctx.fillStyle = "#fff"; ctx.font = F(700, 140); ctx.textAlign = "left"; ctx.fillText("KAMELEN", L - 6, 250);
+        ctx.fillStyle = "rgba(255,255,255,.7)"; ctx.font = F(500, 26); ctx.fillText("2026–2027   22 afleveringen   Sport   16+", L, 300);
+        ctx.fillStyle = "#fff"; ctx.font = F(700, 36); ctx.fillText(`Aflevering ${opt.ronde || ""}: de laatste thuiswedstrijd`, L, 380);
+        ctx.fillStyle = "rgba(255,255,255,.8)"; ctx.font = F(300, 28); ["Nog één keer in Stad. " + tk + " komt langs om", "het seizoen af te sluiten. De karavaan", "wil met een overwinning de zomer in."].forEach((t2, i) => ctx.fillText(t2, L, 428 + i * 36));
+        ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.roundRect(L, 560, 250, 70, 8); ctx.fill(); ctx.fillStyle = "#0b0b0b"; ctx.beginPath(); ctx.moveTo(L + 40, 576); ctx.lineTo(L + 40, 614); ctx.lineTo(L + 72, 595); ctx.closePath(); ctx.fill(); ctx.font = F(700, 32); ctx.fillText("Afspelen", L + 92, 607);
+        ctx.fillStyle = "rgba(120,120,120,.55)"; ctx.beginPath(); ctx.roundRect(L + 270, 560, 270, 70, 8); ctx.fill(); ctx.fillStyle = "#fff"; ctx.fillText("+  Mijn lijst", L + 300, 607);
+        ctx.fillStyle = "#fff"; ctx.font = F(700, 32); ctx.textAlign = "left"; ctx.fillText("Afleveringen", L, 820);
+        const ons = opt.seizoen || [], hier = ons.findIndex(x => x.datum === m.datum), eps = ons.slice(Math.max(0, hier - 2), hier + 1);
+        eps.forEach((w, i) => { const y = 860 + i * 130, th = /gchc/i.test(w.thuis), t1 = th ? "Kamelen" : korteNaam(w.thuis), t2 = th ? korteNaam(w.uit) : "Kamelen", nu = w.datum === m.datum;
+          const g3 = ctx.createLinearGradient(L, y, L + 200, y + 112); g3.addColorStop(0, nu ? "#e48a2c" : "#3a3a3a"); g3.addColorStop(1, nu ? "#7a3d0d" : "#1c1c1c"); ctx.fillStyle = g3; ctx.fillRect(L, y, 200, 112);
+          if (logo) { const lh = 52, lw = lh * logo.width / logo.height; ctx.drawImage(nu ? logo : kameelVorm("#777", lw), L + 100 - lw / 2, y + 30, lw, lh); }
+          if (!nu) { ctx.fillStyle = "#e0262b"; ctx.fillRect(L, y + 108, 200, 4); }
+          ctx.fillStyle = "#fff"; ctx.font = F(700, 30); ctx.textAlign = "left"; ctx.fillText(`${ons.indexOf(w) + 1}. ${t1} – ${t2}`, L + 230, y + 42);
+          ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.font = F(500, 24); ctx.fillText(nu ? `Nieuw: ${weekdag.toLowerCase()} ${datum.toLowerCase()}, ${tijd.toLowerCase()}` : (w.score ? `Uitslag ${w.score}` : new Date(w.datum + "T12:00").toLocaleDateString("nl-NL", { day: "numeric", month: "long" })), L + 230, y + 80);
+          if (nu) { ctx.fillStyle = "#e48a2c"; ctx.font = F(700, 20); spatie(ctx, "NIEUWE AFLEVERING", W - L, y + 42, 4, "right"); } });
+        ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.font = F(500, 22); ctx.textAlign = "left";
+        const met = "Met: " + (spelers.length ? spelers.map(n => n[0] + n.slice(1).toLowerCase()).join(", ") : "de selectie volgt");
+        let r3 = "", ym = 1262; met.split(" ").forEach(w => { if (ctx.measureText(r3 + w).width > W - 2 * L) { ctx.fillText(r3, L, ym); ym += 30; r3 = ""; } r3 += w + " "; }); ctx.fillText(r3, L, ym);
+        bron = [onsF, KAMEEL];
       },
       /* 1. Torenduel (Leeuwarden thuis): weegschaal van een bokswedstrijd, Martinitoren tegen Oldehove */
       torens() {
