@@ -11,3 +11,8 @@ eemshaven|Eemshaven windmolens
 olifant|Wildlands Emmen olifant
 martini-nacht|Martinitoren nacht
 waterpoort-nacht|Waterpoort Sneek avond
+stadskanaal|Stadskanaal Hoofdstraat
+stadskanaal2|Stadskanaal centrum
+vindicat|Vindicat atque Polit Groningen
+emmen-centrum|Emmen Raadhuisplein
+leeuw2|Panthera leo male
