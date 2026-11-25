@@ -3,3 +3,6 @@ ofl/dmserifdisplay/DMSerifDisplay-Regular.ttf
 ofl/dmserifdisplay/DMSerifDisplay-Italic.ttf
 ofl/shrikhand/Shrikhand-Regular.ttf
 ofl/alfaslabone/AlfaSlabOne-Regular.ttf
+ofl/barlowcondensed/BarlowCondensed-Bold.ttf
+ofl/barlowcondensed/BarlowCondensed-Medium.ttf
+ofl/barlowcondensed/BarlowCondensed-Light.ttf

@@ -4,3 +4,10 @@ veendam|Veendam Oosterdiep
 uithuizen|Menkemaborg Uithuizen
 emmen|Emmen Drenthe centrum
 groningen-studs|Groningen Noorderplantsoen
+leeuw|male lion portrait dark background
+kameel|dromedary camel portrait
+kameel-woestijn|camel caravan desert dunes
+eemshaven|Eemshaven windmolens
+olifant|Wildlands Emmen olifant
+martini-nacht|Martinitoren nacht
+waterpoort-nacht|Waterpoort Sneek avond
