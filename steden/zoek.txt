@@ -48,3 +48,9 @@ kam-b|Camelus dromedarius isolated
 kam-c|Dromedary side view Canary Islands
 kam-d|Camel standing desert sky
 kam-e|Dromedary walking
+soc-h|Mutua Fides
+soc-i|Vindicat Groningen
+soc-j|Grote Markt Groningen Forum Martinitoren
+soc-k|Grote Markt Groningen oostwand
+kam-f|camel blue sky
+kam-g|dromedary Morocco
