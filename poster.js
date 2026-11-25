@@ -32,21 +32,21 @@
     groen: { s: [8, 18, 12], h: [236, 232, 200], kleur: .35 },
     rood: { s: [26, 8, 8], h: [255, 216, 190], kleur: .3 }
   };
-  /* Per tegenstander een eigen idee (volgorde telt: specifiek eerst) */
+  /* Per tegenstander een eigen beeld, zin en opmaak (volgorde telt: specifiek eerst) */
   const IDEE = [
-    { test: /leeuwarden/i, beeld: ["martini", "oldehove"], grade: "nacht", zin: "Hun toren staat al scheef. Wij duwen nog even." },
-    { test: /ghbs\s*h13/i, beeld: ["martini"], grade: "nacht", zin: "Ingehaald. Nu telt het." },
-    { test: /ghbs\s*h11/i, beeld: ["karavaan"], grade: "zand", zin: "Zelfde stad, andere woestijn." },
-    { test: /ghbs\s*h12/i, beeld: ["kameel"], grade: "rood", zin: "Derby. Geen genade." },
-    { test: /ghbs\s*h14/i, beeld: ["markt"], grade: "nacht", zin: "Het veertiende van GHBS. Er zitten er dertien boven." },
-    { test: /ghbs/i, beeld: ["markt"], grade: "nacht", zin: "Wie heeft de stad?" },
-    { test: /sneek/i, beeld: ["waterpoort"], grade: "staal", zin: "De nummer één. De poort staat open." },
-    { test: /hcso/i, beeld: ["parkeren"], grade: "staal", zin: "Max. twee uur in Stadskanaal. Langer houdt niemand het vol." },
-    { test: /daring/i, beeld: ["kameel"], grade: "zand", zin: "Durven wel. Kunnen niet." },
-    { test: /studs/i, beeld: ["senaat"], grade: "zand", zin: "Vindicat sinds 1815. Hockey sinds vorige week." },
-    { test: /eemsmond/i, beeld: ["wind"], grade: "staal", zin: "Tegenwind? Kamelen lopen door." },
-    { test: /emmen/i, beeld: ["emmen"], grade: "groen", zin: "Emmen. Ook van bovenaf geen gezicht." },
-    { test: /./, beeld: ["karavaan"], grade: "zand", zin: "De karavaan trekt door." }
+    { test: /leeuwarden/i, beeld: ["martini", "oldehove"], grade: "nacht", opmaak: "centraal", zin: "Friezen op bezoek." },
+    { test: /ghbs\s*h13/i, beeld: ["martini"], grade: "nacht", opmaak: "zijlijn", zin: "Uitgesteld, niet vergeten." },
+    { test: /ghbs\s*h11/i, beeld: ["karavaan"], grade: "zand", opmaak: "zijlijn", zin: "Stadsderby." },
+    { test: /ghbs\s*h12/i, beeld: ["kameel"], grade: "rood", opmaak: "band", zin: "Vorige keer 0–3." },
+    { test: /ghbs\s*h14/i, beeld: ["markt"], grade: "nacht", opmaak: "centraal", zin: "Het veertiende." },
+    { test: /ghbs/i, beeld: ["markt"], grade: "nacht", opmaak: "centraal", zin: "Stadsderby." },
+    { test: /sneek/i, beeld: ["waterpoort"], grade: "staal", opmaak: "centraal", zin: "De koploper komt langs." },
+    { test: /hcso/i, beeld: ["parkeren"], grade: "staal", opmaak: "stapel", zin: "Twee uur. Langer blijven we niet." },
+    { test: /daring/i, beeld: ["kameel"], grade: "zand", opmaak: "band", zin: "Vorige keer 1–6." },
+    { test: /studs/i, beeld: ["senaat"], grade: "zand", opmaak: "band", zin: "Ze komen vooral voor de borrel." },
+    { test: /eemsmond/i, beeld: ["wind"], grade: "staal", opmaak: "stapel", zin: "Helemaal naar Uithuizen." },
+    { test: /emmen/i, beeld: ["emmen"], grade: "groen", opmaak: "zijlijn", zin: "Uit Emmen. Straf genoeg." },
+    { test: /./, beeld: ["karavaan"], grade: "zand", opmaak: "stapel", zin: "De karavaan trekt door." }
   ];
   const korteNaam = t => String(t).replace(/\s+(H|D)\d+.*$/i, "").replace(/^Gron\.?\s*Studs/i, "Studs").trim();
   const STADVAN = { GHBS: "Groningen", Studs: "Groningen", Sneek: "Sneek", HCSO: "Stadskanaal", Daring: "Veendam", Eemsmond: "Uithuizen", Emmen: "Emmen", Leeuwarden: "Leeuwarden" };
@@ -99,56 +99,109 @@
     const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const ctx = cv.getContext("2d");
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
 
-    /* ----- beeld: vult de hele poster ----- */
-    if (fotos.length === 2) {
-      const [l, r] = wijThuis ? [0, 1] : [1, 0];
-      beeld(ctx, imgs[l], fotos[l], g, 0, 0, W / 2 - 2, H); beeld(ctx, imgs[r], fotos[r], g, W / 2 + 2, 0, W / 2 - 2, H);
-    } else beeld(ctx, imgs[0], fotos[0], g, 0, 0, W, H);
-    let gr = ctx.createRadialGradient(W / 2, H * .3, 150, W / 2, H * .35, 1000);
-    gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.65)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
-    gr = ctx.createLinearGradient(0, 430, 0, 1010); gr.addColorStop(0, "rgba(6,5,4,0)"); gr.addColorStop(.6, "rgba(6,5,4,.82)"); gr.addColorStop(1, "rgba(6,5,4,.97)");
-    ctx.fillStyle = gr; ctx.fillRect(0, 430, W, 580); ctx.fillStyle = "rgba(6,5,4,.97)"; ctx.fillRect(0, 1010, W, H - 1010);
-    gr = ctx.createLinearGradient(0, 0, 0, 200); gr.addColorStop(0, "rgba(0,0,0,.6)"); gr.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, 200);
-
-    /* ----- kop ----- */
     const L = 72;
-    if (logo) { const lh = 60, lw = lh * logo.width / logo.height; ctx.drawImage(logo, L, 54, lw, lh); }
-    ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, opt.ronde ? `RONDE ${opt.ronde}` : "MATCHDAY", W - L, 94, 7, "right");
-
-    /* ----- namen onder elkaar, helemaal uitgeschreven ----- */
+    const foto = (x, y, w, h) => { if (fotos.length === 2) { const [l, r] = wijThuis ? [0, 1] : [1, 0];
+      beeld(ctx, imgs[l], fotos[l], g, x, y, w / 2 - 2, h); beeld(ctx, imgs[r], fotos[r], g, x + w / 2 + 2, y, w / 2 - 2, h); } else beeld(ctx, imgs[0], fotos[0], g, x, y, w, h); };
+    const verloop = (y0, y1, a0, a1) => { const gr = ctx.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, `rgba(6,5,4,${a0})`); gr.addColorStop(1, `rgba(6,5,4,${a1})`); ctx.fillStyle = gr; ctx.fillRect(0, Math.min(y0, y1), W, Math.abs(y1 - y0)); };
+    const vignet = (k = .65) => { const gr = ctx.createRadialGradient(W / 2, H * .35, 150, W / 2, H * .4, 1000); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, `rgba(0,0,0,${k})`); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H); };
+    const logoOp = (x, y, lh = 60, mid) => { if (!logo) return; const lw = lh * logo.width / logo.height; ctx.drawImage(logo, mid ? x - lw / 2 : x, y, lw, lh); };
+    const past = (tekst, w, wt, s, spf) => { ctx.font = F(wt, s); while (tekst.some(t => breedte(ctx, t, s * spf) > w) && s > 50) { s -= 2; ctx.font = F(wt, s); } return s; };
     const namen = (wijThuis ? ["KAMELEN", tk] : [tk, "KAMELEN"]).map(n => n.toUpperCase());
-    let s = 168, sp = 10; ctx.font = F(700, s);
-    while (Math.max(...namen.map(n => breedte(ctx, n, sp))) > W - 2 * L && s > 80) { s -= 4; sp = s / 16; ctx.font = F(700, s); }
-    const y1 = 700, y2 = y1 + s * .92 + 56;
-    ctx.fillStyle = WIT; spatie(ctx, namen[0], L - 4, y1, sp);
-    ctx.fillStyle = ZAND; ctx.font = F(300, 40); spatie(ctx, "TEGEN", L, y1 + 58, 14);
-    const tw = breedte(ctx, "TEGEN", 14) + 24; ctx.fillStyle = "rgba(244,239,230,.3)"; ctx.fillRect(L + tw, y1 + 44, W - 2 * L - tw, 1);
-    ctx.fillStyle = WIT; ctx.font = F(700, s); spatie(ctx, namen[1], L - 4, y2, sp);
-    ctx.fillStyle = ZAND; ctx.font = F(300, 38); ctx.textAlign = "left";
-    let zs = 38; while (ctx.measureText(idee.zin).width > W - 2 * L && zs > 26) { zs -= 2; ctx.font = F(300, zs); }
-    ctx.fillText(idee.zin, L, y2 + 66);
-
-    /* ----- selectie als aftiteling ----- */
     const spelers = (opt.spelers || []).map(n => String(n).toUpperCase());
-    let sy = y2 + 140; ctx.font = F(700, 22); ctx.fillStyle = WIT; spatie(ctx, "SELECTIE", L, sy, 6);
-    ctx.font = F(500, 24); ctx.fillStyle = "rgba(244,239,230,.78)";
-    const tekst = spelers.length ? spelers : ["VOLGT ZODRA DE AFMELDINGEN BINNEN ZIJN"];
-    let x = L + breedte((ctx.font = F(700, 22), ctx), "SELECTIE", 6) + 28; ctx.font = F(500, 24);
-    tekst.forEach(n => { const bw = breedte(ctx, n, 4); if (x + bw > W - L) { x = L; sy += 38; } spatie(ctx, n, x, sy, 4); x += bw + 26; });
-
-    /* ----- onderrij: datum | plek | competitie ----- */
     const d = new Date(m.datum + "T12:00:00");
-    const dag = d.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" }).toUpperCase();
-    const plek = wijThuis ? ["THUIS", "Groningen"] : ["UIT", STADVAN[tk] || tk];
-    const cellen = [[dag, m.tijd ? `${m.tijd.replace(":", ".")} uur` : "Tijd volgt"], plek, ["HEREN RESERVE", "1e klasse"]];
-    const ry = H - 112, cw = (W - 2 * L) / 3;
-    ctx.fillStyle = "rgba(244,239,230,.25)"; ctx.fillRect(L, ry - 46, W - 2 * L, 1);
-    cellen.forEach(([a, b], i) => {
-      const cx = L + cw * i + (i ? 28 : 0);
-      if (i) { ctx.fillStyle = "rgba(244,239,230,.25)"; ctx.fillRect(L + cw * i, ry - 22, 1, 62); }
-      ctx.fillStyle = WIT; ctx.font = F(700, 26); spatie(ctx, a, cx, ry, 3);
-      ctx.fillStyle = MUTED; ctx.font = F(300, 26); ctx.textAlign = "left"; ctx.fillText(b, cx, ry + 34);
-    });
+    const weekdag = d.toLocaleDateString("nl-NL", { weekday: "long" }).toUpperCase(), datum = d.toLocaleDateString("nl-NL", { day: "numeric", month: "long" }).toUpperCase();
+    const tijd = m.tijd ? `${m.tijd.replace(":", ".")} uur` : "Tijd volgt", plek = wijThuis ? "Groningen" : (STADVAN[tk] || tk);
+    const ronde = opt.ronde ? `RONDE ${opt.ronde}` : "MATCHDAY";
+    const zin = (x, y, s, uitlijn = "left", w = W - 2 * L) => { ctx.fillStyle = ZAND; ctx.textAlign = uitlijn; let z = s; ctx.font = F(300, z); while (ctx.measureText(idee.zin).width > w && z > 24) { z -= 2; ctx.font = F(300, z); } ctx.fillText(idee.zin, x, y); };
+    const infoRij = (ry, midden) => {
+      const cellen = [[`${weekdag} ${datum}`, tijd], [wijThuis ? "THUIS" : "UIT", plek], ["HEREN RESERVE", "1e klasse"]], cw = (W - 2 * L) / 3;
+      ctx.fillStyle = "rgba(244,239,230,.25)"; ctx.fillRect(L, ry - 46, W - 2 * L, 1);
+      cellen.forEach(([a, b], i) => {
+        const cx = midden ? L + cw * i + cw / 2 : L + cw * i + (i ? 28 : 0);
+        if (i) { ctx.fillStyle = "rgba(244,239,230,.25)"; ctx.fillRect(L + cw * i, ry - 22, 1, 62); }
+        ctx.fillStyle = WIT; ctx.font = F(700, 26); spatie(ctx, a, cx, ry, 3, midden ? "center" : "left");
+        ctx.fillStyle = MUTED; ctx.font = F(300, 26); ctx.textAlign = midden ? "center" : "left"; ctx.fillText(b, cx, ry + 34);
+      });
+    };
+    const leeg = ["VOLGT ZODRA DE AFMELDINGEN BINNEN ZIJN"];
+
+    const OPMAAK = {
+      /* namen groot onder elkaar linksonder, selectie als aftiteling */
+      stapel() {
+        foto(0, 0, W, H); vignet(); verloop(430, 1010, 0, .97); ctx.fillStyle = "rgba(6,5,4,.97)"; ctx.fillRect(0, 1010, W, H - 1010); verloop(200, 0, 0, .6);
+        logoOp(L, 54); ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 94, 7, "right");
+        const s = past(namen, W - 2 * L, 700, 168, 1 / 16), sp = s / 16, y1 = 700, y2 = y1 + s * .92 + 56;
+        ctx.fillStyle = WIT; spatie(ctx, namen[0], L - 4, y1, sp);
+        ctx.fillStyle = ZAND; ctx.font = F(300, 40); spatie(ctx, "TEGEN", L, y1 + 58, 14);
+        const tw = breedte(ctx, "TEGEN", 14) + 24; ctx.fillStyle = "rgba(244,239,230,.3)"; ctx.fillRect(L + tw, y1 + 44, W - 2 * L - tw, 1);
+        ctx.fillStyle = WIT; ctx.font = F(700, s); spatie(ctx, namen[1], L - 4, y2, sp);
+        zin(L, y2 + 66, 38);
+        let sy = y2 + 140; ctx.font = F(700, 22); ctx.fillStyle = WIT; spatie(ctx, "SELECTIE", L, sy, 6);
+        let x = L + breedte(ctx, "SELECTIE", 6) + 28; ctx.font = F(500, 24); ctx.fillStyle = "rgba(244,239,230,.78)";
+        (spelers.length ? spelers : leeg).forEach(n => { const bw = breedte(ctx, n, 4); if (x + bw > W - L) { x = L; sy += 38; } spatie(ctx, n, x, sy, 4); x += bw + 26; });
+        infoRij(H - 112);
+      },
+      /* alles gecentreerd, dunne gespatieerde letters, selectie in kolommen */
+      centraal() {
+        foto(0, 0, W, H); ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.fillRect(0, 0, W, H); vignet(.75);
+        verloop(380, 900, 0, .93); ctx.fillStyle = "rgba(6,5,4,.93)"; ctx.fillRect(0, 900, W, H - 900);
+        logoOp(W / 2, 50, 70, true);
+        const s = past(namen, W - 2 * L, 500, 130, .3), sp = s * .3;
+        ctx.fillStyle = WIT; spatie(ctx, namen[0], W / 2, 610, sp, "center");
+        ctx.fillStyle = ZAND; ctx.font = F(300, 30); spatie(ctx, "TEGEN", W / 2, 610 + 64, 16, "center");
+        ctx.fillStyle = WIT; ctx.font = F(500, s); spatie(ctx, namen[1], W / 2, 610 + 64 + s * .95, sp, "center");
+        const yz = 610 + 64 + s * .95 + 70; zin(W / 2, yz, 34, "center");
+        ctx.fillStyle = MUTED; ctx.font = F(500, 20); spatie(ctx, `SELECTIE  /  ${ronde}`, W / 2, yz + 78, 7, "center");
+        const lijst = spelers.length ? spelers : leeg, kol = lijst.length > 1 ? 4 : 1, kw = (W - 2 * L) / kol;
+        ctx.fillStyle = WIT; ctx.font = F(500, 26);
+        lijst.forEach((n, i) => spatie(ctx, n, L + (i % kol) * kw + kw / 2, yz + 126 + Math.floor(i / kol) * 36, 3, "center"));
+        infoRij(H - 104, true);
+      },
+      /* namen bovenaan, selectie als rij rechts, datum groot linksonder */
+      zijlijn() {
+        foto(0, 0, W, H); ctx.fillStyle = "rgba(0,0,0,.2)"; ctx.fillRect(0, 0, W, H); vignet(.6);
+        verloop(560, 0, 0, .92); verloop(640, H, 0, .95);
+        logoOp(W - L - 80, 56);
+        const s = past(namen, W - 2 * L, 700, 140, 1 / 18), sp = s / 18;
+        ctx.fillStyle = WIT; spatie(ctx, namen[0], L - 3, 110 + s * .8, sp);
+        ctx.fillStyle = ZAND; ctx.font = F(300, 34); spatie(ctx, "TEGEN", L, 110 + s * .8 + 54, 14);
+        ctx.fillStyle = WIT; ctx.font = F(700, s); spatie(ctx, namen[1], L - 3, 110 + s * .8 + 54 + s * .9, sp);
+        zin(L, 110 + s * 1.7 + 54 + 60, 34, "left", 640);
+        /* selectie rechts onder elkaar */
+        const lijst = spelers.length ? spelers : ["VOLGT", "ZODRA", "BEKEND"], rh = Math.min(34, 520 / lijst.length), sy = H - 80 - lijst.length * rh;
+        ctx.fillStyle = MUTED; ctx.font = F(500, 18); spatie(ctx, "SELECTIE", W - L, sy - 18, 7, "right");
+        ctx.fillStyle = "rgba(244,239,230,.25)"; ctx.fillRect(W - L - 200, sy - 6, 200, 1);
+        ctx.fillStyle = WIT; ctx.font = F(500, 26); lijst.forEach((n, i) => spatie(ctx, n, W - L, sy + 26 + i * rh, 3, "right"));
+        /* datum groot links */
+        ctx.fillStyle = ZAND; ctx.font = F(500, 26); spatie(ctx, weekdag, L, H - 300, 8);
+        ctx.fillStyle = WIT; const ds = past([datum], 600, 700, 96, .02); spatie(ctx, datum, L - 3, H - 210, ds * .02);
+        ctx.fillStyle = WIT; ctx.font = F(500, 30); ctx.textAlign = "left"; ctx.fillText(`${tijd}, ${wijThuis ? "thuis in" : "uit in"} ${plek}`, L, H - 150);
+        ctx.fillStyle = MUTED; ctx.font = F(300, 24); ctx.fillText(`Heren Reserve 1e klasse, ${ronde.toLowerCase()}`, L, H - 112);
+      },
+      /* foto als vlak bovenin, namen op één regel, selectie in een raster */
+      band() {
+        ctx.fillStyle = "#0d0a07"; ctx.fillRect(0, 0, W, H);
+        foto(0, 0, W, 780); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, 780); ctx.clip(); vignet(.55); verloop(560, 780, 0, .55); verloop(180, 0, 0, .55); ctx.restore();
+        ctx.fillStyle = ZAND; ctx.fillRect(0, 780, W, 4);
+        logoOp(L, 54); ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 94, 7, "right");
+        /* naam 1 vol, "tegen", naam 2 als omlijning */
+        let s = 120; const meet = () => { ctx.font = F(700, s); const a = breedte(ctx, namen[0], s / 30), b = breedte(ctx, namen[1], s / 30); ctx.font = F(300, s * .34); return a + b + ctx.measureText(" tegen ").width + 30; };
+        while (meet() > W - 2 * L && s > 50) s -= 2;
+        const y = 900; let x = L;
+        /* wij vol, de tegenstander alleen als omlijning */
+        const naam = (n, x) => { ctx.font = F(700, s); if (n === "KAMELEN") { ctx.fillStyle = WIT; spatie(ctx, n, x, y, s / 30); }
+          else { ctx.lineWidth = 2.5; ctx.strokeStyle = WIT; let cx = x; for (const c of n) { ctx.strokeText(c, cx, y); cx += ctx.measureText(c).width + s / 30; } } return breedte(ctx, n, s / 30); };
+        x += naam(namen[0], x) + 15;
+        ctx.font = F(300, s * .34); ctx.fillStyle = ZAND; ctx.textAlign = "left"; ctx.fillText(" tegen ", x, y - s * .05); x += ctx.measureText(" tegen ").width + 15;
+        naam(namen[1], x);
+        zin(L, y + 62, 34);
+        ctx.fillStyle = MUTED; ctx.font = F(500, 18); spatie(ctx, "SELECTIE", L, y + 126, 7);
+        const lijst = spelers.length ? spelers : leeg, kol = lijst.length > 1 ? 4 : 1, kw = (W - 2 * L) / kol;
+        ctx.fillStyle = WIT; ctx.font = F(500, 26); lijst.forEach((n, i) => spatie(ctx, n, L + (i % kol) * kw, y + 168 + Math.floor(i / kol) * 32, 3));
+        infoRij(H - 100);
+      }
+    };
+    (OPMAAK[opt.opmaak || idee.opmaak] || OPMAAK.stapel)();
 
     /* ----- bron en korrel ----- */
     ctx.fillStyle = "rgba(244,239,230,.32)"; ctx.font = F(300, 15); ctx.textAlign = "center";
