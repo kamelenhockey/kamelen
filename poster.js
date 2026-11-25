@@ -22,6 +22,12 @@
     parkeren: { src: "steden/stadskanaal.jpg", fx: .5, fy: .4, door: "Donald Trung" },
     senaat: { src: "steden/vindicat.jpg", fx: .5, fy: .45, door: "Rijksmuseum", crop: [.19, .556, .81, .869] },
     emmen: { src: "steden/emmen.jpg", fx: .45, fy: .5, door: "Richard Broekhuijzen" },
+    flat: { src: "steden/emmen-a.jpg", fx: .5, fy: .35, door: "A. J. van der Wal" },
+    toren: { src: "steden/skanaal-d.jpg", fx: .5, fy: .42, door: "Mr. Documents Uploader" },
+    stootblok: { src: "steden/delfzijl-a.jpg", fx: .42, fy: .55, door: "Hardscarf" },
+    kerkstraat: { src: "steden/veendam-b.jpg", fx: .45, fy: .4, door: "Anthony Ruijtenbeek" },
+    museum: { src: "steden/gron-a.jpg", fx: .3, fy: .5, door: "C messier" },
+    vismarkt: { src: "steden/gron-c.jpg", fx: .45, fy: .5, door: "C messier" },
     olifant: { src: "steden/olifant.jpg", fx: .5, fy: .35, door: "Eric de Redelijkheid" }
   };
   /* Kleurgrading: schaduwen, hooglichten, hoeveel kleur er overblijft */
@@ -36,20 +42,20 @@
   const IDEE = [
     { test: /leeuwarden/i, beeld: ["martini", "oldehove"], grade: "nacht", opmaak: "centraal", zin: "Friezen op bezoek." },
     { test: /ghbs\s*h13/i, beeld: ["martini"], grade: "nacht", opmaak: "zijlijn", zin: "Uitgesteld, niet vergeten." },
-    { test: /ghbs\s*h11/i, beeld: ["karavaan"], grade: "zand", opmaak: "zijlijn", zin: "Stadsderby." },
-    { test: /ghbs\s*h12/i, beeld: ["kameel"], grade: "rood", opmaak: "band", zin: "Vorige keer 0–3." },
+    { test: /ghbs\s*h11/i, beeld: ["vismarkt"], grade: "nacht", opmaak: "centraal", zin: "Stadsderby." },
+    { test: /ghbs\s*h12/i, beeld: ["museum"], grade: "rood", opmaak: "zijlijn", zin: "Vorige keer 0–3." },
     { test: /ghbs\s*h14/i, beeld: ["markt"], grade: "nacht", opmaak: "centraal", zin: "Het veertiende." },
     { test: /ghbs/i, beeld: ["markt"], grade: "nacht", opmaak: "centraal", zin: "Stadsderby." },
     { test: /sneek/i, beeld: ["waterpoort"], grade: "staal", opmaak: "centraal", zin: "De koploper komt langs." },
-    { test: /hcso/i, beeld: ["parkeren"], grade: "staal", opmaak: "stapel", zin: "Twee uur. Langer blijven we niet." },
-    { test: /daring/i, beeld: ["kameel"], grade: "zand", opmaak: "band", zin: "Vorige keer 1–6." },
+    { test: /hcso/i, beeld: ["toren"], grade: "staal", opmaak: "band", zin: "Het mooiste gebouw van Stadskanaal." },
+    { test: /daring/i, beeld: ["kerkstraat"], grade: "zand", opmaak: "stapel", zin: "Vorige keer 1–6." },
     { test: /studs/i, beeld: ["senaat"], grade: "zand", opmaak: "band", zin: "Ze komen vooral voor de borrel." },
-    { test: /eemsmond/i, beeld: ["wind"], grade: "staal", opmaak: "stapel", zin: "Helemaal naar Uithuizen." },
-    { test: /emmen/i, beeld: ["emmen"], grade: "groen", opmaak: "zijlijn", zin: "Uit Emmen. Straf genoeg." },
+    { test: /eemsmond/i, beeld: ["stootblok"], grade: "staal", opmaak: "band", zin: "Delfzijl. Einde van de lijn." },
+    { test: /emmen/i, beeld: ["flat"], grade: "groen", opmaak: "stapel", zin: "Uit Emmen. Straf genoeg." },
     { test: /./, beeld: ["karavaan"], grade: "zand", opmaak: "stapel", zin: "De karavaan trekt door." }
   ];
   const korteNaam = t => String(t).replace(/\s+(H|D)\d+.*$/i, "").replace(/^Gron\.?\s*Studs/i, "Studs").trim();
-  const STADVAN = { GHBS: "Groningen", Studs: "Groningen", Sneek: "Sneek", HCSO: "Stadskanaal", Daring: "Veendam", Eemsmond: "Uithuizen", Emmen: "Emmen", Leeuwarden: "Leeuwarden" };
+  const STADVAN = { GHBS: "Groningen", Studs: "Groningen", Sneek: "Sneek", HCSO: "Stadskanaal", Daring: "Veendam", Eemsmond: "Delfzijl", Emmen: "Emmen", Leeuwarden: "Leeuwarden" };
 
   const laad = src => new Promise((ok, fout) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fout; i.src = src; });
   let fontKlaar = null;
