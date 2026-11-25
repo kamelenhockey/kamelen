@@ -1,0 +1,5 @@
+# bestand op Wikimedia Commons | naam in deze map | maker (voor de naamsvermelding)
+Groningen_Martinitoren_v3.jpg|groningen|Rudolphous
+20200922_Oldehove_Leeuwarden.jpg|leeuwarden|Gouwenaar
+20140531_Oldehove_(Aldehou)_Leeuwarden_NL.jpg|leeuwarden-staand|Uberprutser
+20100523_Grote_Markt_en_Martinitoren_Groningen_NL.jpg|groningen-markt|Uberprutser

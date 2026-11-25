@@ -1,0 +1,35 @@
+name: Stadsfoto's ophalen
+
+on:
+  push:
+    paths: ["steden/bronnen.txt"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: site-update
+  cancel-in-progress: false
+
+jobs:
+  foto:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Foto's downloaden van Wikimedia Commons
+        run: |
+          grep -v '^#' steden/bronnen.txt | while IFS='|' read -r bestand naam maker; do
+            [ -z "$bestand" ] && continue
+            [ -f "steden/$naam.jpg" ] && continue
+            curl -sSL -A "KamelenApp/1.0 (https://kamelenhockey.github.io/kamelen/)" \
+              "https://commons.wikimedia.org/wiki/Special:FilePath/${bestand}?width=1280" -o "steden/$naam.jpg" || true
+            file "steden/$naam.jpg"
+          done
+      - name: Opslaan
+        run: |
+          git config user.name "kamelen-bot"
+          git config user.email "kamelen-bot@users.noreply.github.com"
+          git add steden/*.jpg || true
+          git diff --staged --quiet || (git commit -m "Stadsfoto's opgehaald" && git pull --rebase && git push)
