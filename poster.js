@@ -15,7 +15,7 @@
     studs: { naam: "Groningen", foto: "steden/groningen-studs.jpg", fx: .5, fy: .45, door: "Wutsje" },
     leeuwarden: { naam: "Leeuwarden", foto: "steden/leeuwarden.jpg", fx: .56, fy: .28, door: "Gouwenaar" },
     sneek: { naam: "Sneek", foto: "steden/sneek.jpg", fx: .5, fy: .4, door: "Michielverbeek" },
-    veendam: { naam: "Veendam", foto: "steden/veendam.jpg", fx: .5, fy: .45, door: "" },
+    veendam: { naam: "Veendam", foto: "steden/veendam.jpg", fx: .55, fy: .4, door: "A. J. van der Wal" },
     uithuizen: { naam: "Uithuizen", foto: "steden/uithuizen.jpg", fx: .5, fy: .4, door: "DrTW" },
     emmen: { naam: "Emmen", foto: "steden/emmen.jpg", fx: .45, fy: .45, door: "Richard Broekhuijzen" }
   };
@@ -131,21 +131,21 @@
     /* ----- datum op een kaartje ----- */
     const dag = new Date(m.datum + "T12:00:00").toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" }).toUpperCase();
     const regel = `${dag}  ★  ${m.tijd || "TIJD VOLGT"}`;
-    ctx.font = SLAB(34); const kb = breedte(ctx, regel, 3) + 110, kx = (W - kb) / 2, ky = 985, kh = 74;
+    ctx.font = SLAB(34); const kb = breedte(ctx, regel, 3) + 110, kx = (W - kb) / 2, ky = 972, kh = 74;
     const kaart = (dx, dy) => { ctx.beginPath(); ctx.moveTo(kx + dx, ky + dy); ctx.lineTo(kx + kb + dx, ky + dy); ctx.lineTo(kx + kb - 30 + dx, ky + kh / 2 + dy); ctx.lineTo(kx + kb + dx, ky + kh + dy); ctx.lineTo(kx + dx, ky + kh + dy); ctx.lineTo(kx + 30 + dx, ky + kh / 2 + dy); ctx.closePath(); ctx.fill(); };
     ctx.fillStyle = ROEST; kaart(8, 8); ctx.fillStyle = BRUIN; kaart(0, 0);
     ctx.fillStyle = PAPIER; spatie(ctx, regel, W / 2, ky + 49, 3, "center");
 
     /* ----- selectie ----- */
     const sp = (opt.spelers || []).map(n => String(n).toUpperCase());
-    ctx.fillStyle = BRUIN; ctx.font = RETRO(38); ctx.textAlign = "center"; ctx.fillText("De selectie", W / 2, 1112);
-    ctx.fillRect(W / 2 - 170 - 150, 1100, 150, 3); ctx.fillRect(W / 2 + 170, 1100, 150, 3);
+    ctx.fillStyle = BRUIN; ctx.font = RETRO(38); ctx.textAlign = "center"; ctx.fillText("De selectie", W / 2, 1126);
+    ctx.fillRect(W / 2 - 170 - 150, 1114, 150, 3); ctx.fillRect(W / 2 + 170, 1114, 150, 3);
     /* kameeltjes die naar de selectie lopen */
-    if (logo) { const lw = 96, lh = lw * logo.height / logo.width; ctx.drawImage(logo, W / 2 - 170 - 150 - lw - 6, 1104 - lh + 8, lw, lh);
-      ctx.save(); ctx.translate(W / 2 + 170 + 150 + lw + 6, 0); ctx.scale(-1, 1); ctx.drawImage(logo, 0, 1104 - lh + 8, lw, lh); ctx.restore(); }
+    if (logo) { const lw = 80, lh = lw * logo.height / logo.width; ctx.drawImage(logo, W / 2 - 170 - 150 - lw - 6, 1122 - lh, lw, lh);
+      ctx.save(); ctx.translate(W / 2 + 170 + 150 + lw + 6, 0); ctx.scale(-1, 1); ctx.drawImage(logo, 0, 1122 - lh, lw, lh); ctx.restore(); }
     if (sp.length) {
-      const kol = 4, rij = Math.ceil(sp.length / kol), kw = (W - 140) / kol, rh = Math.min(37, 140 / rij);
-      sp.forEach((n, i) => { const x = 70 + (i % kol) * kw + kw / 2, y = 1158 + Math.floor(i / kol) * rh;
+      const kol = 4, rij = Math.ceil(sp.length / kol), kw = (W - 140) / kol, rh = Math.min(35, 130 / rij);
+      sp.forEach((n, i) => { const x = 70 + (i % kol) * kw + kw / 2, y = 1172 + Math.floor(i / kol) * rh;
         let fs = 26; ctx.font = SLAB(fs); while (breedte(ctx, n, 2) > kw - 12 && fs > 14) { fs--; ctx.font = SLAB(fs); }
         ctx.fillStyle = BRUIN; spatie(ctx, n, x, y, 2, "center"); });
     } else { ctx.fillStyle = BRUIN; ctx.font = SLAB(30); ctx.textAlign = "center"; ctx.fillText("VOLGT ZODRA DE AFMELDINGEN BINNEN ZIJN", W / 2, 1200); }
