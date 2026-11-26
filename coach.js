@@ -231,7 +231,7 @@
       <span class="cs-knoppen"><button type="button" class="cs-link" data-cs="einde">${L.klaar ? "Opnieuw" : "Einde"}</button><button type="button" class="cs-link" data-cs="uitlive">Klaar</button></span></div>`;
   }
   function liveHint() {
-    if (!ed.gekozen) return ed.live.loopt ? "Wissel: tik op een speler in de dug-out en daarna op wie eruit gaat." : "Zet de klok aan als de wedstrijd begint. Wisselen kan ook als de klok stilstaat.";
+    if (!ed.gekozen) return ed.live.loopt ? "Wissel: tik op een bankspeler en dan op wie eruit gaat. Van plek ruilen: tik op twee veldspelers, of sleep." : "Zet de klok aan als de wedstrijd begint. Wisselen en van plek ruilen kan ook als de klok stilstaat.";
     const opVeld = ed.o.veld.some(p => p.n === ed.gekozen);
     return `<b>${esc(ed.gekozen)}</b> gekozen: tik op ${opVeld ? "een speler in de dug-out om te wisselen, een andere veldspeler om te ruilen, of een plek op het veld" : "de speler op het veld die eruit gaat"}`;
   }
@@ -319,8 +319,7 @@
   let sleep = null, _sleepNet = false;
   document.addEventListener("pointerdown", e => {
     const sh = document.getElementById("coach-sheet"); if (!sh || sh.hidden || !ed) return;
-    if (ed.live) return;
-    const el = e.target.closest(".cs-body .cv-sp, .cs-body .cv-chip"); if (!el) return;
+    const el = e.target.closest(ed.live ? ".cs-body .cv-sp, .cs-body .cv-dchip" : ".cs-body .cv-sp, .cs-body .cv-chip"); if (!el) return;
     sleep = { n: el.dataset.naam, x0: e.clientX, y0: e.clientY, el, spook: null, chip: el.classList.contains("cv-chip") };
   });
   document.addEventListener("pointermove", e => {
@@ -334,6 +333,14 @@
     if (!sleep) return; const s = sleep; sleep = null; if (!s.spook) return;
     s.spook.remove(); _sleepNet = true; setTimeout(() => { _sleepNet = false; }, 50);
     const onder = document.elementFromPoint(e.clientX, e.clientY), zone = onder && onder.closest("[data-zone]");
+    /* Langs de lijn: op een andere speler loslaten = wisselen of van plek ruilen, op een lege plek = verplaatsen */
+    if (ed.live) {
+      const doel = onder && onder.closest(".cs-body .cv-sp, .cs-body .cv-dchip"), opVeld = n => ed.o.veld.some(p => p.n === n);
+      if (doel && doel.dataset.naam !== s.n && (opVeld(s.n) || opVeld(doel.dataset.naam)) && !ed.live.klaar) liveWissel(s.n, doel.dataset.naam);
+      else if (!doel && zone && zone.dataset.zone === "veld" && opVeld(s.n)) { const p = ed.o.veld.find(x => x.n === s.n), [x, y] = veldPunt(zone, e.clientX, e.clientY); p.x = Math.round(Math.max(4, Math.min(96, x))); p.y = Math.round(Math.max(3, Math.min(97, y))); }
+      else if (!doel && zone && zone.dataset.zone === "bank" && !opVeld(s.n)) { ed.o.bank = ed.o.bank.filter(x => bNaam(x) !== s.n); ed.o.bank.push(`${s.n}|${zone.dataset.lijn}`); }
+      ed.gekozen = null; bewaarLive(); return tekenEditor();
+    }
     if (zone) { const z = zone.dataset.zone; if (z === "veld") { const [x, y] = veldPunt(zone, e.clientX, e.clientY); zetOp(s.n, "veld", x, y); } else if (z === "bank") zetOp(s.n, "bank", zone.dataset.lijn); else weg(s.n); }
     ed.gekozen = null; tekenEditor();
   });
