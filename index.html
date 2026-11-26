@@ -1669,6 +1669,65 @@ h1,h2,h3{font-family:var(--font-display)}
 .card-head h2{font-size:1.6rem}
 .bdg{border-radius:10px}
 .kz-banner{border-radius:14px}
+/* ---------- Opstelling (coach) ---------- */
+.cv-wrap{display:grid;gap:10px;margin:4px 0 10px}
+.cv-veld{position:relative;aspect-ratio:100/160;max-height:70vh;margin:0 auto;width:100%;max-width:420px;border-radius:14px;overflow:hidden;
+  background:repeating-linear-gradient(180deg,#a9cfe3 0 10%,#b9d8e8 10% 20%);box-shadow:inset 0 0 0 1px #8fbcd4;touch-action:none}
+.cv-lijnen{position:absolute;inset:0;width:100%;height:100%}
+.cv-lijnen *{stroke:#fff;stroke-width:.55;vector-effect:non-scaling-stroke;stroke-width:1.6}
+.cv-lijnen .stip{fill:#fff}.cv-lijnen .doel{fill:#fff;stroke:none}
+.cv-sp{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:0;font:inherit;cursor:default;-webkit-user-select:none;user-select:none}
+.cv-veld.bewerk .cv-sp{cursor:grab;touch-action:none}
+.cv-schijf{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.78rem;color:#fff;border:2px solid #fff;box-shadow:0 2px 6px -2px rgba(22,54,80,.5)}
+.cv-sp.keeper .cv-schijf{background:#7a4a24}.cv-sp.verdediging .cv-schijf{background:var(--ink)}
+.cv-sp.middenveld .cv-schijf{background:#2f6f93}.cv-sp.aanval .cv-schijf{background:var(--orange);color:var(--ink)}
+.cv-naam{background:#fff;color:var(--ink);font-weight:700;font-size:.72rem;line-height:1.2;padding:2px 7px;border-radius:999px;white-space:nowrap;max-width:96px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 3px rgba(22,54,80,.2)}
+.cv-sp.aan .cv-schijf,.cv-chip.aan{outline:3px solid var(--orange);outline-offset:2px}
+.cv-sp.weg,.cv-chip.weg{opacity:.3}
+.cv-bank,.cs-pool{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px;border-radius:12px;background:var(--sky-soft);min-height:48px}
+.cs-pool{background:var(--bg);border:1px dashed var(--line)}
+.cv-bank-k{font-size:.75rem;font-weight:700;color:var(--muted);margin-right:4px}
+.cv-chip{border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:.82rem;font-weight:600;padding:5px 10px;border-radius:999px;cursor:pointer;touch-action:none}
+.cv-leeg{font-size:.8rem;color:var(--muted)}
+.cv-door{font-size:.8rem;margin:0 0 8px}
+.cv-spook{position:fixed;z-index:10000;transform:translate(-50%,-130%);background:var(--ink);color:#fff;font-weight:700;font-size:.85rem;padding:6px 12px;border-radius:999px;pointer-events:none;box-shadow:0 6px 16px -6px rgba(0,0,0,.5)}
+.coach-sheet{position:fixed;inset:0;z-index:9000;background:var(--surface);display:flex;flex-direction:column}
+.cs-kop{display:flex;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;background:var(--sky);border-bottom:1px solid #a9cbdd}
+.cs-kop>div{flex:1;min-width:0}.cs-kop .k{font-size:.75rem;color:var(--ink-2)}.cs-kop small{display:block;color:var(--ink-2)}
+.cs-x{width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.6);font-size:1.4rem;color:var(--ink);cursor:pointer}
+.cs-body{flex:1;overflow:auto;padding:12px 14px calc(16px + env(safe-area-inset-bottom));display:grid;gap:10px;align-content:start;max-width:560px;width:100%;margin:0 auto}
+.cs-uitleg{margin:0;font-size:.85rem;color:var(--muted)}
+.cs-knoppen{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+/* Beheerpaneel */
+#beheer{display:grid;gap:var(--gap)}
+.cb-h{font-family:var(--font-display);font-weight:400;font-size:1.3rem;margin:0 0 6px}
+.cb-rij{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)}
+.cb-rij:first-of-type{border-top:0}
+.cb-rij input,.cb-rij select{flex:1;min-width:0}
+.cb-veld{display:grid;gap:4px;margin:8px 0;font-size:.82rem;font-weight:600;color:var(--ink-2)}
+.cb-veld input,.cb-veld textarea,.cb-veld select,.cb-rij input,.cb-rij select{font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+.cb-kort{max-width:120px}
+.cb-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.cb-uitslag{border-top:1px solid var(--line);padding-top:8px}.cb-uitslag p{margin:0 0 4px}
+/* Litergrafiek */
+.lg-kaart{padding:16px}
+.lg-kop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.lg-kop b{font-family:var(--font-display);font-weight:400;font-size:1.6rem}
+.lg-kop small{color:var(--muted)}
+.lg-svg{width:100%;height:auto;display:block;overflow:visible}
+.lg-grid line{stroke:var(--line);stroke-width:1}.lg-grid text,.lg-m{fill:var(--muted);font-size:9px;font-family:var(--font-body)}
+.lg-w{fill:var(--ink);font-size:9px;font-weight:700;font-family:var(--font-body)}
+.lg-hit{fill:transparent}.lg-kol:hover .lg-hit,.lg-kol:focus .lg-hit{fill:var(--sky-soft)}
+.lg-kol{outline:none}
+path.lg-gedaan,rect.lg-gedaan{fill:var(--ink)}path.lg-open,rect.lg-open{fill:var(--orange)}
+.lg-legenda{display:flex;gap:14px;font-size:.8rem;color:var(--ink-2);margin-top:6px}
+.lg-legenda i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+i.lg-gedaan{background:var(--ink)}i.lg-open{background:var(--orange)}
+/* Bonusvraag (Scorito) */
+.tt-bonus{margin-top:12px;padding:12px;border-radius:12px;background:var(--orange-soft)}
+.tt-bonus h3{margin:0 0 4px;font-size:.95rem}.tt-bonus p{margin:0 0 8px;font-size:.85rem;color:var(--ink-2)}
+.tt-bonus .opties{display:flex;flex-wrap:wrap;gap:6px}
+.tt-bonus .cv-chip.aan{background:var(--ink);color:#fff;outline:0}
 </style>
 </head>
 <body>
@@ -1920,6 +1979,15 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   </div>
 </div>
 <div class="seg-switch spel-switch" id="spel-switch" hidden role="tablist" aria-label="Spellen"><a href="#spellen" data-sw="spellen">Alle</a><a href="#rad" data-sw="rad">🎡 Rad</a><a href="#race" data-sw="race">🐪 Race</a><a href="#mex" data-sw="mex">🎲 Mex</a><a href="#pong" data-sw="pong">🏓 Pongen</a></div>
+<div id="view-beheer" class="view" hidden>
+  <div class="wrap page">
+    <header class="page-head">
+      <h1>Beheer</h1>
+      <p>Opstellingen, de Scorito-bonusvraag en snelle links. Alleen zichtbaar voor coaches en beheerders.</p>
+    </header>
+    <div id="beheer"><div class="card empty">Laden…</div></div>
+  </div>
+</div>
 <div id="view-ideeen" class="view" hidden>
   <div class="wrap page">
     <header class="page-head">
@@ -2232,12 +2300,14 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <a href="#quotes" data-view-link="quotes">Quotes</a>
   <a href="#regels" data-view-link="regels">Kamelen-regels</a>
   <a href="#push-card" data-push-link>🔔 Meldingen</a>
+  <a href="#" data-widget-uitleg>📱 Widget op je iPhone</a>
   <div class="ms-h">Spellen</div>
   <a href="#rad" data-view-link="rad">Kamelen-rad</a>
   <a href="#race" data-view-link="race">Kamelen-racen</a>
   <a href="#mex" data-view-link="mex">Mex</a>
   <a href="#pong" data-view-link="pong">Pongen</a>
   <div class="ms-h">Account</div>
+  <a href="#beheer" data-view-link="beheer" data-beheer-link hidden>🛠️ Beheer</a>
   <a href="#" data-wrapped>🎁 Kamelen Wrapped</a>
   <a href="#" data-uitloggen>Uitloggen</a>
 </div>
@@ -2761,6 +2831,7 @@ function openMatch(sleutel){
   if (!gespeeld && ons && window.maakPoster && beheercodeOpgeslagen()) html += `<div class="dlg-sec"><h3 class="sub-h">Wedstrijdposter</h3><div id="wm-poster"><button type="button" class="btn" onclick="toonPoster()">🎨 Maak de poster</button></div></div>`;
   window._posterMatch = m;
   if (gespeeld && ons && window.maakPoster && beheercodeOpgeslagen()) html += `<div class="dlg-sec"><h3 class="sub-h">Uitslagkaart</h3><div id="wm-uitslagkaart"><button type="button" class="btn" onclick="toonUitslagkaart()">📸 Maak de uitslagkaart</button></div></div>`;
+  if (ons) html += `<div class="dlg-sec" id="wm-opstelling"></div>`;
   if (gespeeld && ons) html += `<div class="dlg-sec" id="wm-selectie"><h3 class="sub-h">Selectie</h3><p class="muted">Selectie laden…</p></div>`;
   if (!v) html += `<div class="empty">Er zijn nog te weinig uitslagen om deze wedstrijd te voorspellen.</div>`;
   else {
@@ -2802,6 +2873,7 @@ function openMatch(sleutel){
   document.getElementById("dlg-body").scrollTop = 0;
   if (!dlg.open){ try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } }
   if (gespeeld && ons) toonSelectie(m);
+  if (ons) window.coachVulOpstelling?.(m);
 }
 /* Wie speelde mee: spelers met een leeg vakje of "te laat" + invallers, met doelpunten en kameel/ezel van die dag */
 async function toonSelectie(m){
@@ -3625,7 +3697,7 @@ document.querySelectorAll("[data-dice]").forEach(el => {
 });
 
 /* ---------- Pagina's: home, regels, mex ---------- */
-const VIEWS = ["spelers", "statistieken", "toto", "stemmen", "fotos", "quotes", "ideeen", "spellen", "rad", "race", "voorspeller", "regels", "mex", "pong"];
+const VIEWS = ["beheer", "spelers", "statistieken", "toto", "stemmen", "fotos", "quotes", "ideeen", "spellen", "rad", "race", "voorspeller", "regels", "mex", "pong"];
 const HOME_PAGES = ["home", "wedstrijden", "stand", "topscorers", "liters"];
 /* Oude links (#programma, #uitslagen, #seizoen, #wedstrijd) blijven werken */
 const PAGE_OF = { "": "home", home: "home", wedstrijd: "home", programma: "wedstrijden", uitslagen: "wedstrijden", wedstrijden: "wedstrijden", stand: "stand", seizoen: "stand", topscorers: "topscorers", liters: "liters" };
@@ -3855,7 +3927,7 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) toon
 /* ---------- Statistieken: springknoppen naar elk onderdeel ---------- */
 (() => {
   const nav = document.getElementById("stat-spring"), box = document.getElementById("statistieken-box"); if (!nav || !box) return;
-  const KORT = { "Opvallend": "Opvallend", "Opkomst per speler": "Opkomst", "Badges": "Badges", "Kameel & ezel van de dag": "Kameel & ezel", "Kamelen-Scorito": "Scorito", "Hall of Fame": "Hall of Fame", "Badge-ranglijst": null, "Opkomst per wedstrijd": null, "Waarom niet?": "Afmeldingen" };
+  const KORT = { "Opvallend": "Opvallend", "Liters per maand": "Liters", "Opkomst per speler": "Opkomst", "Badges": "Badges", "Kameel & ezel van de dag": "Kameel & ezel", "Kamelen-Scorito": "Scorito", "Hall of Fame": "Hall of Fame", "Badge-ranglijst": null, "Opkomst per wedstrijd": null, "Waarom niet?": "Afmeldingen" };
   let wacht = 0, doelen = [];
   const bouw = () => { wacht = 0;
     doelen = [];
@@ -4017,11 +4089,11 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796791800"></script>
-<script src="toto.js?v=1796791800"></script>
-<script src="pong.js?v=1796791800"></script>
-<script src="pongregels.js?v=1796791800"></script>
-<script src="beerpong.js?v=1796791800"></script>
+<script src="mex.js?v=1796795400"></script>
+<script src="toto.js?v=1796795400"></script>
+<script src="pong.js?v=1796795400"></script>
+<script src="pongregels.js?v=1796795400"></script>
+<script src="beerpong.js?v=1796795400"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -4030,18 +4102,19 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796791800"></script>
-<script src="statistieken.js?v=1796791800"></script>
-<script src="wrapped.js?v=1796791800"></script>
-<script src="race.js?v=1796791800"></script>
-<script src="rad.js?v=1796791800"></script>
-<script src="fotos.js?v=1796791800"></script>
-<script src="quotes.js?v=1796791800"></script>
-<script src="ideeen.js?v=1796791800"></script>
-<script src="seizoen.js?v=1796791800"></script>
-<script src="zege.js?v=1796791800"></script>
-<script src="karavaan.js?v=1796791800"></script>
-<script src="design-proef.js?v=1796791800"></script>
-<script src="push.js?v=1796791800"></script>
+<script src="stemmen.js?v=1796795400"></script>
+<script src="coach.js?v=1796795400"></script>
+<script src="statistieken.js?v=1796795400"></script>
+<script src="wrapped.js?v=1796795400"></script>
+<script src="race.js?v=1796795400"></script>
+<script src="rad.js?v=1796795400"></script>
+<script src="fotos.js?v=1796795400"></script>
+<script src="quotes.js?v=1796795400"></script>
+<script src="ideeen.js?v=1796795400"></script>
+<script src="seizoen.js?v=1796795400"></script>
+<script src="zege.js?v=1796795400"></script>
+<script src="karavaan.js?v=1796795400"></script>
+<script src="design-proef.js?v=1796795400"></script>
+<script src="push.js?v=1796795400"></script>
 </body>
 </html>

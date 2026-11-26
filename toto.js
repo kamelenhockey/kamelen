@@ -94,6 +94,16 @@
         stand.set(naam, p);
       }
     }
+    /* Bonusvragen: wie het juiste antwoord gaf krijgt de punten van die vraag (laatste antwoord per speler telt) */
+    const bq = (window._bonus || {}).vragen || {}, laatste = new Map();
+    for (const a of (window._bonus || {}).antwoorden || []) if (a.antwoord != null) laatste.set(`${canon(a.naam)}#${a.wedstrijd}`, a);
+    for (const a of laatste.values()) {
+      const q = bq[a.wedstrijd]; if (!q || !q.antwoord) continue;
+      const naam = canon(a.naam); if (!naam) continue;
+      const p = stand.get(naam) || { naam, punten: 0, exact: 0, toto: 0, aantal: 0 };
+      if (String(a.antwoord).trim().toLowerCase() === String(q.antwoord).trim().toLowerCase()) { p.punten += Number(q.punten) || 0; p.bonus = (p.bonus || 0) + 1; }
+      stand.set(naam, p);
+    }
     return { perMatch, stand: [...stand.values()].sort((a, b) => b.punten - a.punten || b.exact - a.exact || a.naam.localeCompare(b.naam)), ws };
   }
 
@@ -148,12 +158,12 @@
         const bewaard = a.nieuweDatum ? [...(perMatch.get(sleutel({ datum: a.nieuweDatum, thuis: a.thuis, uit: a.uit }))?.voorsp.values() || [])].filter(r => !r.model).length : 0;
         return `<p class="tt-afgelast">⛔ <b>${esc(a.thuis)} – ${esc(a.uit)}</b> van ${fmtDay(a.datum, { day: "numeric", month: "long" })} is afgelast. ${a.nieuweDatum ? `${bewaard ? `De ${bewaard} ${bewaard === 1 ? "voorspelling" : "voorspellingen"} daarvoor ${bewaard === 1 ? "blijft" : "blijven"} staan voor de nieuwe datum, ${fmtDay(a.nieuweDatum, { day: "numeric", month: "long" })}.` : `De nieuwe datum is ${fmtDay(a.nieuweDatum, { day: "numeric", month: "long" })}.`}` : "Voorspellingen daarvoor blijven bewaard tot er een nieuwe datum is."} Voor de wedstrijd hierboven voorspel je opnieuw.</p>`;
       }).join("")}
-      ${CFG.api ? formulier(volgende) : ""}
+      ${CFG.api ? formulier(volgende) + bonusBlok(volgende) : ""}
       <div class="tt-voted"><span class="k">${v.size - v.has(MODEL_NAAM)} ${v.size - v.has(MODEL_NAAM) === 1 ? "voorspelling" : "voorspellingen"}</span>${[...v.values()].map(r => r.model ? `<span class="tt-chip tt-model">🐪 Model: <b>${scoreTekst(r.voor, r.tegen, volgende)}</b></span>` : `<span class="tt-chip">${esc(r.naam)}</span>`).join("")}${v.size - v.has(MODEL_NAAM) ? `<span class="tt-hint">Wat ze voorspeld hebben zie je na de aftrap. Het model laat zijn gok alvast zien.</span>` : ""}</div>`;
     }
     html += `<div class="tt-grid"><div><h3 class="sub-h">Klassement</h3>${stand.length ? `<table><thead><tr><th class="r">#</th><th>Speler</th><th class="r" title="Precies goed (${PUNT_EXACT} punten)">Exact</th><th class="r" title="Juiste toto (${PUNT_TOTO} punt)">Toto</th><th class="r">Gesp.</th><th class="r">Ptn</th></tr></thead><tbody>
       ${stand.map((p, i) => `<tr class="${i === 0 ? "lead" : ""}${p.naam === MODEL_NAAM ? " tt-model" : ""}"><td class="r pos">${i + 1}</td><td>${p.naam === MODEL_NAAM ? `🐪 ${esc(p.naam)} <small class="tt-bot">computer</small>` : esc(p.naam)}</td><td class="r">${p.exact}</td><td class="r">${p.toto}</td><td class="r">${p.aantal}</td><td class="r pts">${p.punten}</td></tr>`).join("")}</tbody></table>
-      <p class="note">Precies goed = ${PUNT_EXACT} punten · juiste winnaar of gelijkspel = ${PUNT_TOTO} punt. Wie onderaan eindigt, trakteert. Het Kamelen-model voorspelt elke wedstrijd met alleen de uitslagen van daarvóór; wint het model, dan trakteert niemand extra.</p>` : `<div class="empty">Nog geen gespeelde wedstrijden met voorspellingen.</div>`}</div>
+      <p class="note">Precies goed = ${PUNT_EXACT} punten · juiste winnaar of gelijkspel = ${PUNT_TOTO} punt · goede bonusvraag = de punten van die vraag. Wie onderaan eindigt, trakteert. Het Kamelen-model voorspelt elke wedstrijd met alleen de uitslagen van daarvóór; wint het model, dan trakteert niemand extra.</p>` : `<div class="empty">Nog geen gespeelde wedstrijden met voorspellingen.</div>`}</div>
       <div><h3 class="sub-h">Per wedstrijd</h3>${gespeeld.length ? gespeeld.map(m => {
         const s = onsScore(m), v = [...perMatch.get(sleutel(m)).voorsp.values()];
         return `<div class="tt-played"><div class="tt-ph"><span class="d">${fmtShort(m.datum)}</span><span>${isUs(m.thuis) ? "thuis" : "uit"} tegen ${teamLink(tegenstander(m))}</span><span class="score">${esc(m.score)}</span></div>
@@ -186,6 +196,28 @@
       <div class="tt-submit"><button class="btn mx-big" type="submit">${al ? "Voorspelling aanpassen" : "Voorspelling opslaan"}</button><span class="tt-status" id="tt-status" role="status"></span></div>
     </form>`;
   }
+  /* ---------- Bonusvraag van de coach ---------- */
+  const BONUS_KEY = "kamelen-bonus";
+  const mijnBonus = () => { try { return JSON.parse(localStorage.getItem(BONUS_KEY) || "{}"); } catch { return {}; } };
+  function bonusBlok(m) {
+    const q = ((window._bonus || {}).vragen || {})[sleutel(m)]; if (!q || !q.vraag) return "";
+    const mijn = mijnBonus()[sleutel(m)], opties = q.opties && q.opties.length ? q.opties : (window.selectieVan ? window.selectieVan(m) : []);
+    return `<div class="tt-bonus" data-bonus="${esc(sleutel(m))}"><h3>⭐ Bonusvraag · ${q.punten} ${q.punten == 1 ? "punt" : "punten"}</h3><p>${esc(q.vraag)}</p>
+      <div class="opties">${opties.map(o => `<button type="button" class="cv-chip${mijn === o ? " aan" : ""}" data-bonus-optie="${esc(o)}">${esc(o)}</button>`).join("") || `<span class="muted">De antwoorden komen zodra de selectie bekend is.</span>`}</div>
+      <span class="tt-status" role="status">${mijn ? `Jouw antwoord: <b>${esc(mijn)}</b>. Aanpassen kan tot de aftrap.` : ""}</span></div>`;
+  }
+  box.addEventListener("click", async ev => {
+    const b = ev.target.closest("[data-bonus-optie]"); if (!b) return;
+    const blok = b.closest("[data-bonus]"), st = blok.querySelector(".tt-status"), antwoord = b.dataset.bonusOptie;
+    st.textContent = "Opslaan…";
+    try {
+      const r = await fetch(CFG.api, { method: "POST", body: JSON.stringify({ type: "bonus", code: (window.TOTO_CONFIG || {}).teamcode || "", wedstrijd: blok.dataset.bonus, antwoord }) }).then(x => x.json());
+      if (!r.ok) { st.textContent = r.fout === "te laat" ? "De wedstrijd is al begonnen." : r.fout === "code" ? "Je inlogcode klopt niet meer. Log opnieuw in." : "Opslaan lukte niet."; return; }
+      const al = mijnBonus(); al[blok.dataset.bonus] = antwoord; try { localStorage.setItem(BONUS_KEY, JSON.stringify(al)); } catch {}
+      blok.querySelectorAll("[data-bonus-optie]").forEach(x => x.classList.toggle("aan", x === b));
+      st.innerHTML = `Jouw antwoord: <b>${esc(antwoord)}</b>. Aanpassen kan tot de aftrap.`;
+    } catch { st.textContent = "Geen verbinding."; }
+  });
   box.addEventListener("click", ev => {
     const b = ev.target.closest("[data-step]"); if (!b) return;
     const inp = document.getElementById(b.dataset.step === "voor" ? "tt-voor" : "tt-tegen");
@@ -228,7 +260,7 @@
   window.renderToto = async function () {
     const lijst = [];
     if (CFG.csv) { try { const t = await fetch(CFG.csv, { cache: "no-store" }).then(r => r.ok ? r.text() : ""); lijst.push(...leesReacties(parseCsv(t))); } catch {} }
-    if (CFG.api) { try { const j = await window.kamelenApi(); lijst.push(...vanApi(j)); } catch {} }
+    if (CFG.api) { try { const j = await window.kamelenApi(); window._bonus = { vragen: j.bonusvragen || {}, antwoorden: j.bonusantwoorden || [] }; lijst.push(...vanApi(j)); } catch {} }
     render(lijst);
   };
 })();

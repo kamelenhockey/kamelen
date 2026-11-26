@@ -180,6 +180,58 @@
   const een = n => (isNaN(n) ? "–" : n.toFixed(1).replace(".", ","));
 
   /* ---------- Weergave ---------- */
+  /* ---------- Litergrafiek: boetes per maand, betaald en nog open ---------- */
+  const MND = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
+  const MND_ALT = { maa: 2, mar: 2, may: 4, oct: 9, mrt: 2, mei: 4, okt: 9 };
+  function maandVan(t) {
+    t = String(t || "").toLowerCase();
+    let m = t.match(/\b(\d{1,2})[\s-]*([a-z]{3})/);
+    if (m) { const k = m[2]; const i = MND.indexOf(k); if (i >= 0) return i; if (k in MND_ALT) return MND_ALT[k]; }
+    m = t.match(/\b\d{1,2}[\/.-](\d{1,2})\b/); if (m && +m[1] >= 1 && +m[1] <= 12) return +m[1] - 1;
+    m = t.match(/\b([a-z]{3})[a-z]*\b/g); if (m) for (const w of m) { const i = MND.indexOf(w.slice(0, 3)); if (i >= 0) return i; }
+    return -1;
+  }
+  function literGrafiek() {
+    const rows = DATA.liters || [];
+    const volg = [7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5];   /* aug t/m jun */
+    const per = new Map(volg.map(i => [i, { gedaan: 0, open: 0 }]));
+    let zonder = 0;
+    for (const r of rows) {
+      if (!canon(r.naam)) continue;
+      const l = parseAmount(r.hoeveel).liters; if (!l) continue;
+      const i = maandVan(r.datum), b = per.get(i);
+      if (!b) { zonder += l; continue; }
+      b[/gedaan/i.test(r.status || "") ? "gedaan" : "open"] += l;
+    }
+    /* alleen maanden tot en met nu (of tot de laatste maand met boetes) */
+    const nu = new Date().getMonth(), nuIdx = volg.indexOf(nu);
+    let laatste = volg.reduce((k, i, j) => per.get(i).gedaan + per.get(i).open > 0 ? j : k, -1);
+    laatste = Math.max(laatste, nuIdx < 0 ? volg.length - 1 : nuIdx);
+    const maanden = volg.slice(0, laatste + 1);
+    const tot = maanden.reduce((s, i) => s + per.get(i).gedaan + per.get(i).open, 0);
+    if (!tot) return `<div class="card empty">Zodra er liters in het Liter-incassobureau staan, zie je hier per maand hoeveel er bij kwam.</div>`;
+    const max = Math.max(...maanden.map(i => per.get(i).gedaan + per.get(i).open));
+    const stap = max <= 4 ? 1 : max <= 10 ? 2 : max <= 25 ? 5 : 10, top = Math.ceil(max / stap) * stap;
+    const W = 340, H = 190, L = 26, R = 6, T = 12, B = 24, bw = (W - L - R) / maanden.length, h = v => v / top * (H - T - B);
+    const lijnen = []; for (let v = 0; v <= top; v += stap) lijnen.push(`<line x1="${L}" x2="${W - R}" y1="${H - B - h(v)}" y2="${H - B - h(v)}"/><text x="${L - 5}" y="${H - B - h(v) + 3.5}" text-anchor="end">${v}</text>`);
+    const staaf = (x, y, w, hh, cls, rond) => hh <= 0 ? "" : rond ? `<path class="${cls}" d="M${x} ${y + hh}V${y + Math.min(3, hh)}q0 -${Math.min(3, hh)} ${Math.min(3, hh)} -${Math.min(3, hh)}H${x + w - Math.min(3, hh)}q${Math.min(3, hh)} 0 ${Math.min(3, hh)} ${Math.min(3, hh)}V${y + hh}Z"/>` : `<rect class="${cls}" x="${x}" y="${y}" width="${w}" height="${hh}"/>`;
+    const bars = maanden.map((i, j) => {
+      const b = per.get(i), x = L + j * bw + bw * .18, w = bw * .64, hg = h(b.gedaan), ho = h(b.open), gap = hg > 0 && ho > 0 ? 2 : 0;
+      const tip = `${MND[i]}: ${fmtL(b.gedaan + b.open)} L${b.open ? ` (${fmtL(b.open)} L open)` : ""}`;
+      return `<g class="lg-kol" tabindex="0" aria-label="${tip}"><title>${tip}</title><rect class="lg-hit" x="${L + j * bw}" y="${T}" width="${bw}" height="${H - T - B}"/>
+        ${staaf(x, H - B - hg, w, hg, "lg-gedaan", ho <= 0)}${staaf(x, H - B - hg - gap - Math.max(0, ho - gap), w, Math.max(0, ho - gap), "lg-open", true)}
+        ${b.gedaan + b.open ? `<text class="lg-w" x="${x + w / 2}" y="${H - B - hg - ho - 4}" text-anchor="middle">${fmtL(Math.round((b.gedaan + b.open) * 10) / 10)}</text>` : ""}
+        <text class="lg-m" x="${L + j * bw + bw / 2}" y="${H - 8}" text-anchor="middle">${MND[i]}</text></g>`;
+    }).join("");
+    const open = maanden.reduce((s, i) => s + per.get(i).open, 0);
+    const piek = maanden.reduce((a, i) => per.get(i).gedaan + per.get(i).open > per.get(a).gedaan + per.get(a).open ? i : a, maanden[0]);
+    return `<section class="card lg-kaart">
+      <div class="lg-kop"><div><b>${fmtL(Math.round(tot * 10) / 10)} L</b> dit seizoen${zonder ? ` <small>(+${fmtL(Math.round(zonder * 10) / 10)} L zonder datum)</small>` : ""}</div><small>Natste maand: ${MND[piek]}</small></div>
+      <svg class="lg-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Liters boete per maand">${`<g class="lg-grid">${lijnen.join("")}</g>`}${bars}</svg>
+      <div class="lg-legenda"><span><i class="lg-gedaan"></i>Weggewerkt</span><span><i class="lg-open"></i>Nog open${open ? ` (${fmtL(Math.round(open * 10) / 10)} L)` : ""}</span></div>
+    </section>`;
+  }
+
   function render(S) {
     const gs = S.per.length;
     const kern = [
@@ -398,6 +450,8 @@
       ${seizoenen.length > 1 ? `<section class="card"><div class="card-head"><div><h2>Kampioenen per seizoen</h2></div></div><div class="tablewrap"><table><thead><tr><th>Seizoen</th><th>Topscorer</th><th>Literloser</th><th>Ezel van het seizoen</th></tr></thead><tbody>${[...seizoenen].reverse().map(sz => `<tr><td>${esc(sz.seizoen)}${sz === huidig ? " <small>(loopt)</small>" : ""}</td><td>${kampioen(sz, "doelpunten")}</td><td>${kampioen(sz, "liters")}</td><td>${kampioen(sz, "ezels")}</td></tr>`).join("")}</tbody></table></div></section>` : ""}`;
 
     extra.innerHTML = `
+      <h2 class="stat-h">Liters per maand</h2>
+      ${literGrafiek()}
       <h2 class="stat-h">Badges</h2>
       ${bHtml}
       <h2 class="stat-h">Kameel &amp; ezel van de dag</h2>

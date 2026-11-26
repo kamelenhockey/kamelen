@@ -35,6 +35,12 @@ const profielTab_ = () => tab_("Profielfotos", ["Naam", "Bestand-id", "Tijdstemp
 const quoteTab_ = () => tab_("Quotes", ["Tijdstempel", "Id", "Wie", "Quote", "Context", "Door"]);
 const reactieTab_ = () => tab_("Reacties", ["Tijdstempel", "Id", "Foto-id", "Door", "Reactie"]);
 const ideeTab_ = () => tab_("Ideeen", ["Tijdstempel", "Id", "Door", "Idee", "Soort", "Stemmen", "Status", "Reactie"]);
+/* Coachfunctie en Scorito-bonusvraag */
+const opstelTab_ = () => tab_("Opstellingen", ["Tijdstempel", "Wedstrijd", "Opstelling", "Door"]);
+const bonusTab_ = () => tab_("Bonusvragen", ["Tijdstempel", "Wedstrijd", "Vraag", "Opties", "Antwoord", "Punten", "Aftrap", "Door"]);
+const bonusAntTab_ = () => tab_("Bonusantwoorden", ["Tijdstempel", "Naam", "Wedstrijd", "Antwoord", "Aftrap"]);
+/* Laatste regel per wedstrijd */
+function laatstePer_(sh, kol) { const uit = {}; sh.getDataRange().getValues().slice(1).forEach((r, i) => { if (r[kol]) uit[r[kol]] = { r, rij: i + 2 }; }); return uit; }
 function fotoMap_() {
   const props = PropertiesService.getScriptProperties();
   const id = props.getProperty("FOTOMAP");
@@ -213,7 +219,13 @@ function doGet(e) {
   profielTab_().getDataRange().getValues().slice(1).forEach(r => { if (r[0] && r[1]) profielfotos[r[0]] = r[1]; });
   const reacties = reactieTab_().getDataRange().getValues().slice(1).filter(r => r[1]).map(r => ({ tijd: r[0], id: r[1], foto: r[2], door: r[3], tekst: r[4] }));
   const ideeen = ideeTab_().getDataRange().getValues().slice(1).filter(r => r[1]).map(r => ({ tijd: r[0], id: r[1], door: r[2], tekst: r[3], soort: r[4], stemmen: String(r[5] || "").split(",").filter(String), status: r[6] || "nieuw", reactie: r[7] || "" }));
-  return json_({ ok: true, voorspellingen, stemmen, gesloten: dicht, fotos, quotes, profielfotos, ideeen, reacties });
+  const opstellingen = {}; const op = laatstePer_(opstelTab_(), 1);
+  Object.keys(op).forEach(w => { try { opstellingen[w] = { opstelling: JSON.parse(op[w].r[2]), door: op[w].r[3], tijd: op[w].r[0] }; } catch (x) {} });
+  const bonusvragen = {}; const bq = laatstePer_(bonusTab_(), 1);
+  Object.keys(bq).forEach(w => { const r = bq[w].r; if (!r[2]) return; bonusvragen[w] = { vraag: r[2], opties: String(r[3] || "").split("|").filter(String), antwoord: r[4] || null, punten: Number(r[5]) || 2, aftrap: r[6] }; });
+  const bonusantwoorden = bonusAntTab_().getDataRange().getValues().slice(1).filter(r => r[1]).map(r => {
+    const open = r[4] && new Date(r[4]) > nu; return { tijd: r[0], naam: r[1], wedstrijd: r[2], antwoord: open ? null : r[3] }; });
+  return json_({ ok: true, voorspellingen, stemmen, gesloten: dicht, fotos, quotes, profielfotos, ideeen, reacties, opstellingen, bonusvragen, bonusantwoorden });
 }
 
 function doPost(e) {
@@ -285,6 +297,37 @@ function doPost(e) {
       const ik = speler_(d.code);
       if (d.type === "login") { if (!ik) { Utilities.sleep(800); return json_({ ok: false, fout: "code" }); } return json_({ ok: true, naam: ik, rol: rol_(d.code) }); }
       if (!ik) return json_({ ok: false, fout: "code" });
+      /* Coachfunctie en bonusvraag: alleen coaches of wie de beheercode heeft */
+      const magBeheren = gelijk_(d.beheercode, BEHEERCODE) || isCoach_(ik);
+      if (d.type === "opstelling") {
+        if (!magBeheren) return json_({ ok: false, fout: "geen rechten" });
+        const w = String(d.wedstrijd || "").slice(0, 120); if (!w) return json_({ ok: false, fout: "invoer" });
+        const o = d.opstelling || {}, schoon = { veld: (o.veld || []).slice(0, 16).map(p => ({ n: naam_(p.n), x: Math.max(0, Math.min(100, Number(p.x) || 0)), y: Math.max(0, Math.min(100, Number(p.y) || 0)) })), bank: (o.bank || []).slice(0, 20).map(naam_) };
+        opstelTab_().appendRow([new Date(), w, JSON.stringify(schoon), ik]);
+        return json_({ ok: true });
+      }
+      if (d.type === "bonusvraag") {
+        if (!magBeheren) return json_({ ok: false, fout: "geen rechten" });
+        const w = String(d.wedstrijd || "").slice(0, 120), vraag = String(d.vraag || "").trim().slice(0, 200), aftrap = new Date(d.aftrap);
+        if (!w || !vraag || isNaN(aftrap)) return json_({ ok: false, fout: "invoer" });
+        const opties = (d.opties || []).map(x => String(x).trim().slice(0, 40)).filter(String).slice(0, 30);
+        bonusTab_().appendRow([new Date(), w, vraag, opties.join("|"), "", Math.max(1, Math.min(5, Number(d.punten) || 2)), aftrap.toISOString(), ik]);
+        return json_({ ok: true });
+      }
+      if (d.type === "bonus-uitslag") {
+        if (!magBeheren) return json_({ ok: false, fout: "geen rechten" });
+        const w = String(d.wedstrijd || ""), rij = (laatstePer_(bonusTab_(), 1)[w] || {}).rij; if (!rij) return json_({ ok: false, fout: "geen vraag" });
+        bonusTab_().getRange(rij, 5).setValue(String(d.antwoord || "").slice(0, 40));
+        return json_({ ok: true });
+      }
+      if (d.type === "bonus") {
+        const w = String(d.wedstrijd || ""), v = (laatstePer_(bonusTab_(), 1)[w] || {}).r;
+        if (!v || !v[2]) return json_({ ok: false, fout: "geen vraag" });
+        if (new Date(v[6]) <= new Date()) return json_({ ok: false, fout: "te laat" });
+        const antwoord = String(d.antwoord || "").trim().slice(0, 40); if (!antwoord) return json_({ ok: false, fout: "invoer" });
+        bonusAntTab_().appendRow([new Date(), ik, w, antwoord, new Date(v[6]).toISOString()]);
+        return json_({ ok: true });
+      }
       /* Foto toevoegen (de site verkleint hem eerst tot een JPEG van maximaal 1600 pixels) */
       if (d.type === "foto") {
         const data = String(d.data || "");
