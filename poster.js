@@ -781,6 +781,79 @@
         bron = [];
       },
 
+      /* Duotoon: een echte foto in alleen groen en oranje (onze kleuren), met één woord in omlijning eroverheen */
+      duotoon() {
+        const o = opt.mini || {}, f = FOTO[o.foto] || zijF, img = imgs2[0] || zijImg;
+        const c = document.createElement("canvas"); c.width = W; c.height = H; const t = c.getContext("2d"); beeld(t, img, f, { s: [0, 0, 0], h: [255, 255, 255], kleur: 0 }, 0, 0, W, H);
+        const px = t.getImageData(0, 0, W, H), d = px.data, A = o.donker || [8, 38, 26], B = o.licht || [242, 106, 27];
+        for (let i = 0; i < d.length; i += 4) { let v = d[i] / 255; v = Math.min(1, Math.max(0, (v - .12) * 1.35)); for (let k = 0; k < 3; k++) d[i + k] = A[k] + (B[k] - A[k]) * v; }
+        t.putImageData(px, 0, 0); ctx.drawImage(c, 0, 0);
+        /* raster van fijne lijnen voor drukwerkgevoel */
+        ctx.fillStyle = "rgba(0,0,0,.08)"; for (let y = 0; y < H; y += 4) ctx.fillRect(0, y, W, 1);
+        verloop(880, H, 0, .9);
+        logoOp(L, 50, 52); ctx.fillStyle = "#fff4e6"; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        /* het woord: groot, alleen de omlijning, met een volle kopie die een stukje verschoven is */
+        let ks = o.size || 300; ctx.font = F(700, ks); while (breedte(ctx, o.kop, 4) > W - 2 * L && ks > 80) { ks -= 6; ctx.font = F(700, ks); }
+        const ky = o.kopY || 860;
+        ctx.fillStyle = "rgba(255,244,230,.95)"; spatie(ctx, o.kop, L - 6, ky, 4);
+        ctx.lineWidth = 3; ctx.strokeStyle = "#fff4e6"; let cx = L - 6 + 12; for (const ch of o.kop) { ctx.strokeText(ch, cx, ky + 14); cx += ctx.measureText(ch).width + 4; }
+        ctx.fillStyle = "rgba(255,244,230,.4)"; ctx.fillRect(L, 1112, W - 2 * L, 1);
+        ctx.fillStyle = "#fff4e6"; ctx.font = F(700, 38); spatie(ctx, `${namen[0]} – ${namen[1]}`, L, 1170, 5);
+        infoKort(1212, "rgba(255,244,230,.75)", true); selectieRegel(1262, "rgba(255,244,230,.6)", false, 20); bron = [f];
+      },
+
+      /* Vorm: de laatste vijf uitslagen van beide ploegen als grote letters */
+      vorm() {
+        ctx.fillStyle = "#f1ece2"; ctx.fillRect(0, 0, W, H);
+        for (let i = 0; i < 16000; i++) { ctx.fillStyle = `rgba(0,0,0,${Math.random() * .035})`; ctx.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+        const INK = "#14120f", alle = (opt.alleUitslagen || []).filter(x => x.score).sort((a, b) => b.datum.localeCompare(a.datum));
+        const vijf = team => alle.filter(x => x.thuis === team || x.uit === team).slice(0, 5).map(x => { const [a, b] = x.score.split("-").map(Number), th = x.thuis === team, v = th ? a : b, z = th ? b : a; return v > z ? "W" : v < z ? "V" : "G"; }).reverse();
+        const wijT = wijThuis ? m.thuis : m.uit;
+        logoOp(L, 50, 52); ctx.fillStyle = INK; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        ctx.fillStyle = INK; ctx.font = F(700, 190); ctx.textAlign = "left"; ctx.fillText("VORM.", L - 8, 300);
+        ctx.font = F(500, 22); spatie(ctx, "LAATSTE VIJF WEDSTRIJDEN", L, 350, 7);
+        const rij = (naam, lijst, y) => {
+          ctx.fillStyle = INK; ctx.font = F(700, 44); spatie(ctx, naam, L, y, 4);
+          const kleur = { W: "#2f8a57", G: "#8b9298", V: "#c94430" };
+          for (let k = 0; k < 5; k++) { const r = lijst[k], x = L + 2 + k * 186, yy = y + 30;
+            ctx.fillStyle = r ? kleur[r] : "rgba(0,0,0,.08)"; ctx.fillRect(x, yy, 170, 170);
+            ctx.fillStyle = "#fff"; ctx.font = F(700, 140); ctx.textAlign = "center"; ctx.fillText(r || "", x + 85, yy + 138); ctx.textAlign = "left"; } };
+        rij("KAMELEN", vijf(wijT), 470); rij(tk.toUpperCase(), vijf(tegen), 790);
+        ctx.fillStyle = INK; ctx.fillRect(L, 1112, W - 2 * L, 2);
+        ctx.fillStyle = INK; ctx.font = F(700, 38); spatie(ctx, `${namen[0]} – ${namen[1]}`, L, 1170, 5);
+        infoKort(1212, "rgba(20,18,15,.7)", true); selectieRegel(1262, "rgba(20,18,15,.6)", false, 20); bron = [];
+      },
+
+      /* Plaat: de laatste thuiswedstrijd als lp, de selectie als tracklist */
+      plaat() {
+        ctx.fillStyle = "#121212"; ctx.fillRect(0, 0, W, H);
+        const gr = ctx.createRadialGradient(W / 2, 480, 50, W / 2, 480, 800); gr.addColorStop(0, "rgba(242,106,27,.18)"); gr.addColorStop(1, "rgba(242,106,27,0)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+        const S = 640, hx = 110, hy = 140;
+        /* plaat die uit de hoes schuift */
+        const px = hx + S - 120, py = hy + S / 2, R = S / 2 - 10;
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = 30; ctx.fillStyle = "#0b0b0b"; ctx.beginPath(); ctx.arc(px, py, R, 0, 7); ctx.fill(); ctx.restore();
+        for (let r = R - 8; r > 110; r -= 5) { ctx.strokeStyle = `rgba(255,255,255,${.03 + (r % 15 === 0 ? .03 : 0)})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(px, py, r, 0, 7); ctx.stroke(); }
+        const gl = ctx.createLinearGradient(px - R, py - R, px + R, py + R); gl.addColorStop(.35, "rgba(255,255,255,0)"); gl.addColorStop(.5, "rgba(255,255,255,.09)"); gl.addColorStop(.65, "rgba(255,255,255,0)"); ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(px, py, R, 0, 7); ctx.fill();
+        ctx.fillStyle = "#f26a1b"; ctx.beginPath(); ctx.arc(px, py, 100, 0, 7); ctx.fill();
+        if (logo) { const w2 = 120, h2 = w2 * logo.height / logo.width; ctx.drawImage(kameelVorm("#14120f", w2), px - w2 / 2, py - h2 / 2 - 12); }
+        ctx.fillStyle = "#14120f"; ctx.font = F(700, 16); ctx.textAlign = "center"; ctx.fillText("KANT A  /  33 TOEREN", px, py + 56); ctx.fillStyle = "#0b0b0b"; ctx.beginPath(); ctx.arc(px, py, 6, 0, 7); ctx.fill();
+        /* hoes */
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.7)"; ctx.shadowBlur = 50; ctx.shadowOffsetX = 10; ctx.fillStyle = "#1e5a3c"; ctx.fillRect(hx, hy, S, S); ctx.restore();
+        const hg = ctx.createLinearGradient(hx, hy, hx + S, hy + S); hg.addColorStop(0, "rgba(255,255,255,.06)"); hg.addColorStop(1, "rgba(0,0,0,.25)"); ctx.fillStyle = hg; ctx.fillRect(hx, hy, S, S);
+        ctx.fillStyle = "#f26a1b"; ctx.fillRect(hx, hy + S - 150, S, 10); ctx.fillStyle = "#fff4e6"; ctx.fillRect(hx, hy + S - 132, S, 4);
+        ctx.fillStyle = "#fff4e6"; ctx.font = F(700, 132); ctx.textAlign = "left"; ctx.fillText("KAMELEN", hx + 36, hy + 160);
+        ctx.font = F(300, 44); ctx.fillText("Live in Stad", hx + 40, hy + 220);
+        ctx.fillStyle = "#f26a1b"; ctx.font = F(700, 28); spatie(ctx, `${weekdag} ${datum}`, hx + 40, hy + S - 60, 6);
+        ctx.fillStyle = "rgba(255,244,230,.7)"; ctx.font = F(500, 20); spatie(ctx, "SEIZOENSAFSLUITER  /  LAATSTE THUISWEDSTRIJD", hx + 40, hy + S - 26, 4);
+        /* tracklist */
+        const lijst = spelers.length ? spelers : ["SELECTIE VOLGT"], half = Math.ceil(lijst.length / 2);
+        ctx.fillStyle = "#fff4e6"; ctx.font = F(700, 22); spatie(ctx, "TRACKLIST", L, 870, 8);
+        lijst.forEach((n, k) => { const kant = k < half ? "A" : "B", nr = (k < half ? k : k - half) + 1, x = L + (k < half ? 0 : 470), y = 910 + (k < half ? k : k - half) * 30;
+          ctx.fillStyle = "#f26a1b"; ctx.font = F(700, 20); ctx.textAlign = "left"; ctx.fillText(`${kant}${nr}`, x, y); ctx.fillStyle = "rgba(255,244,230,.85)"; ctx.font = F(500, 20); spatie(ctx, n, x + 44, y, 3); });
+        ctx.fillStyle = "rgba(255,244,230,.25)"; ctx.fillRect(L, 1172, W - 2 * L, 1);
+        ctx.fillStyle = "#fff4e6"; ctx.font = F(700, 34); spatie(ctx, `${namen[0]} – ${namen[1]}`, L, 1220, 5);
+        infoKort(1262, "rgba(255,244,230,.6)", true); bron = [];
+      },
       /* Minimaal: één echte foto, een paar woorden, verder niets */
       minimaal() {
         const o = opt.mini || {}, f = FOTO[o.foto] || zijF, img = o.img || zijImg, gg = GRADE[o.grade || "zw"];
