@@ -7,10 +7,15 @@
 // Tik op de widget om de Kamelen-app te openen.
 
 const SITE = "https://kamelenhockey.github.io/kamelen/";
-// Tikken op de widget opent de Kamelen-app op je beginscherm (iOS 16.4+, de app moet via Safari zijn toegevoegd).
-// Werkt dat bij jou niet, zet dan OPEN_IN_APP op false: dan opent de widget Safari.
-const OPEN_IN_APP = true;
-const OPEN_URL = OPEN_IN_APP ? SITE.replace(/^https:\/\//, "webapp://") : SITE;
+// Waar tikken op de widget naartoe gaat. Kies dit met het veld "Parameter" van de widget
+// (houd de widget ingedrukt → Wijzig widget → Parameter):
+//   leeg         – rechtstreeks de Kamelen-app (iOS 26 en nieuwer)
+//   opdracht     – via de opdracht "Kamelen" in de Opdrachten-app (die opent de Kamelen-app)
+//   safari       – de site in Safari
+const KEUZE = String((typeof args !== "undefined" && args.widgetParameter) || "").trim().toLowerCase();
+const OPEN_URL = KEUZE.startsWith("safari") ? SITE
+  : KEUZE.startsWith("opdracht") || KEUZE.startsWith("shortcut") ? "shortcuts://run-shortcut?name=Kamelen"
+  : SITE.replace(/^https:\/\//, "webapp://");
 
 const ONS = /GCHC\s*H13/i;
 const NAVY = new Color("#163650"), NAVY2 = new Color("#2c4b63"), SKY = new Color("#b9d8e8"), SKY_LICHT = new Color("#e8f2f8");
