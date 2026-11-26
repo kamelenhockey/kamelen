@@ -9,6 +9,13 @@
    Na inloggen staat { naam, code } op dit apparaat, zodat je niet steeds opnieuw hoeft in te loggen. */
 window.IK = null;
 try { const l = JSON.parse(localStorage.getItem("kamelen-login") || "null"); if (l && l.naam && l.code) window.IK = l; } catch (e) {}
+/* Gastlink zonder code: alleen kijken, alleen in dit tabblad, niets wordt op het apparaat bewaard. */
+try {
+  const cyrb = (t, sd = 7) => { let a = 0xdeadbeef ^ sd, b = 0x41c6ce57 ^ sd; for (let i = 0; i < t.length; i++) { const c = t.charCodeAt(i); a = Math.imul(a ^ c, 2654435761); b = Math.imul(b ^ c, 1597334677); } a = Math.imul(a ^ (a >>> 16), 2246822507) ^ Math.imul(b ^ (b >>> 13), 3266489909); b = Math.imul(b ^ (b >>> 16), 2246822507) ^ Math.imul(a ^ (a >>> 13), 3266489909); return 4294967296 * (2097151 & b) + (a >>> 0); };
+  const g = new URLSearchParams(location.search).get("gast");
+  if (g && cyrb(g) === 1430664465135823) sessionStorage.setItem("kamelen-gast", "1");
+  if (!window.IK && sessionStorage.getItem("kamelen-gast") === "1") window.IK = { naam: "Gast", code: "gast", rol: "gast" };
+} catch (e) {}
 if (!window.IK) document.documentElement.classList.add("op-slot");
 </script>
 <style>
