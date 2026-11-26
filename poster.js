@@ -908,7 +908,7 @@
 
       /* De derby's als lp: tracklist = alle onderlinge derby's van dit seizoen, de selectie als bezetting */
       derbyplaat() {
-        const bgr = ctx.createRadialGradient(W / 2, 420, 60, W / 2, 520, 950); bgr.addColorStop(0, "#d6eaf4"); bgr.addColorStop(1, "#97c3da"); ctx.fillStyle = bgr; ctx.fillRect(0, 0, W, H); for (let i = 0; i < 30000; i++) { ctx.fillStyle = `rgba(22,54,80,${Math.random() * .04})`; ctx.fillRect(Math.random() * W, Math.random() * H, 1.5, 1.5); }
+        const bgr = ctx.createRadialGradient(W / 2, 420, 60, W / 2, 520, 950); bgr.addColorStop(0, "#f4f9fc"); bgr.addColorStop(1, "#d7e8f2"); ctx.fillStyle = bgr; ctx.fillRect(0, 0, W, H); for (let i = 0; i < 30000; i++) { ctx.fillStyle = `rgba(22,54,80,${Math.random() * .04})`; ctx.fillRect(Math.random() * W, Math.random() * H, 1.5, 1.5); }
         
         const S = 600, hx = 90, hy = 110, px = hx + S - 110, py = hy + S / 2, R = S / 2 - 10;
         ctx.save(); ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = 30; ctx.fillStyle = "#0b0b0b"; ctx.beginPath(); ctx.arc(px, py, R, 0, 7); ctx.fill(); ctx.restore();
@@ -917,9 +917,9 @@
         if (logo) { const w2 = 110, h2 = w2 * logo.height / logo.width; ctx.drawImage(kameelVorm("#14120f", w2), px - w2 / 2, py - h2 / 2 - 10); }
         ctx.fillStyle = "#0b0b0b"; ctx.beginPath(); ctx.arc(px, py, 6, 0, 7); ctx.fill();
         /* hoes: links onze helft, rechts die van hen */
-        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.7)"; ctx.shadowBlur = 50; ctx.fillStyle = "#163650"; ctx.fillRect(hx, hy, S, S); ctx.restore();
+        ctx.save(); ctx.shadowColor = "rgba(22,54,80,.45)"; ctx.shadowBlur = 50; ctx.shadowOffsetY = 18; ctx.fillStyle = "#8ec3df"; ctx.fillRect(hx, hy, S, S); ctx.restore();
         ctx.fillStyle = "#f08c1c"; ctx.beginPath(); ctx.moveTo(hx + S * .78, hy); ctx.lineTo(hx + S, hy); ctx.lineTo(hx + S, hy + S); ctx.lineTo(hx + S * .22, hy + S); ctx.closePath(); ctx.fill();
-        ctx.fillStyle = "#b9d8e8"; ctx.font = F(700, 88); ctx.textAlign = "left"; ctx.fillText("KAMELEN", hx + 32, hy + 112);
+        ctx.fillStyle = "#163650"; ctx.font = F(700, 88); ctx.textAlign = "left"; ctx.fillText("KAMELEN", hx + 32, hy + 112);
         ctx.fillStyle = "#163650"; ctx.font = F(700, 88); ctx.textAlign = "right"; ctx.fillText(tk.toUpperCase(), hx + S - 32, hy + S - 140); ctx.textAlign = "left";
         ctx.fillStyle = "#163650"; ctx.font = F(500, 24); ctx.textAlign = "right"; spatie(ctx, "DE DERBY'S, SEIZOEN 26/27", hx + S - 32, hy + S - 100, 4, "right");
         ctx.font = F(300, 22); spatie(ctx, "LIVE OPGENOMEN IN GRONINGEN", hx + S - 32, hy + S - 66, 4, "right"); ctx.textAlign = "left";
