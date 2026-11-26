@@ -22,6 +22,14 @@
     const w = (DATA.wedAanwezig || []).find(x => x.datum === m.datum);
     return w && w.aanwezig.size ? [...w.aanwezig].map(canon) : [];
   }
+  /* Selectie nog niet bekend: alle spelers, daarna de invallers */
+  function iedereen() {
+    const vast = [...(typeof ROSTER !== "undefined" ? ROSTER : [])].sort((a, b) => a.localeCompare(b));
+    const inv = [...(typeof INVALLERS !== "undefined" ? INVALLERS : []), ...(DATA.invalSheet || []).map(x => x.naam)].map(canon).filter(Boolean);
+    return [...new Set([...vast, ...[...new Set(inv)].sort((a, b) => a.localeCompare(b))])];
+  }
+  const keuzeVan = m => { const s = selectieVan(m); return s.length ? s : iedereen(); };
+  window.keuzeVan = keuzeVan;
   window.selectieVan = selectieVan;
 
   /* ---------- Het veld ---------- */
@@ -66,10 +74,10 @@
   async function openEditor(m) {
     const j = await window.kamelenApi?.(true).catch(() => ({})) || {};
     const bestaand = (j.opstellingen || {})[sleutel(m)];
-    const sel = selectieVan(m);
-    ed = { m, sel, o: bestaand ? JSON.parse(JSON.stringify(bestaand.opstelling)) : { veld: [], bank: [] }, gekozen: null };
+    const sel = keuzeVan(m), bekend = selectieVan(m).length > 0;
+    ed = { m, sel, bekend, o: bestaand ? JSON.parse(JSON.stringify(bestaand.opstelling)) : { veld: [], bank: [] }, gekozen: null };
     /* alleen spelers uit de selectie houden */
-    if (sel.length) { ed.o.veld = ed.o.veld.filter(p => sel.includes(p.n)); ed.o.bank = ed.o.bank.filter(n => sel.includes(n)); }
+    if (bekend) { ed.o.veld = ed.o.veld.filter(p => sel.includes(p.n)); ed.o.bank = ed.o.bank.filter(n => sel.includes(n)); }
     let sh = document.getElementById("coach-sheet");
     if (!sh) { sh = document.createElement("div"); sh.id = "coach-sheet"; sh.className = "coach-sheet"; document.body.appendChild(sh); }
     sh.hidden = false; document.body.classList.add("sheet-open"); tekenEditor();
@@ -83,10 +91,10 @@
         <div><div class="k">Opstelling</div><b>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}</b> <small>${fmtDay(m.datum, { weekday: "short", day: "numeric", month: "short" })}</small></div>
         <button type="button" class="btn sm" data-cs="opslaan">Opslaan</button></div>
       <div class="cs-body" data-geen-swipe data-geen-trek>
-        ${sel.length ? "" : `<div class="empty"><strong>Selectie nog niet bekend</strong>Zodra de selectie voor deze wedstrijd in de app staat (of de afmeldingen binnen zijn), kun je hier de opstelling maken.</div>`}
+        ${ed.bekend ? "" : `<p class="cs-uitleg"><b>De selectie is nog niet bekend</b>, dus je kunt uit alle spelers en invallers kiezen.</p>`}
         <p class="cs-uitleg">Tik op een naam en daarna op een plek op het veld. Sleep spelers om ze te verplaatsen, naar de bank of terug naar de lijst.</p>
         ${veldHtml(o, true)}
-        <div class="cs-pool" data-zone="pool"><span class="cv-bank-k">Selectie</span>${vrij.length ? vrij.map(n => `<button type="button" class="cv-chip${ed.gekozen === n ? " aan" : ""}" data-naam="${esc(n)}">${esc(n)}</button>`).join("") : `<span class="cv-leeg">${sel.length ? "Iedereen staat op het veld of de bank" : ""}</span>`}</div>
+        <div class="cs-pool" data-zone="pool"><span class="cv-bank-k">${ed.bekend ? "Selectie" : "Alle spelers"}</span>${vrij.length ? vrij.map(n => `<button type="button" class="cv-chip${ed.gekozen === n ? " aan" : ""}" data-naam="${esc(n)}">${esc(n)}</button>`).join("") : `<span class="cv-leeg">${sel.length ? "Iedereen staat op het veld of de bank" : ""}</span>`}</div>
         <div class="cs-knoppen"><button type="button" class="btn sm ghost" data-cs="auto">Standaard opstelling</button><button type="button" class="btn sm ghost" data-cs="leeg">Leegmaken</button><span class="tt-status" id="cs-status" role="status"></span></div>
       </div>`;
     if (ed.gekozen) sh.querySelectorAll(`.cv-chip[data-naam="${CSS.escape(ed.gekozen)}"], .cv-sp[data-naam="${CSS.escape(ed.gekozen)}"]`).forEach(x => x.classList.add("aan"));
@@ -105,7 +113,7 @@
       if (a === "leeg") { ed.o = { veld: [], bank: [] }; ed.gekozen = null; return tekenEditor(); }
       if (a === "auto") { const al = new Set(ed.o.veld.map(p => p.n)); const vrij = ed.sel.filter(n => !al.has(n));
         VAKKEN.filter(([x, y]) => !ed.o.veld.some(p => Math.abs(p.x - x) < 6 && Math.abs(p.y - y) < 6)).forEach(([x, y]) => { const n = vrij.shift(); if (n) zetOp(n, "veld", x, y); });
-        vrij.forEach(n => { if (!ed.o.bank.includes(n)) zetOp(n, "bank"); }); return tekenEditor(); }
+        if (ed.bekend) vrij.forEach(n => { if (!ed.o.bank.includes(n)) zetOp(n, "bank"); }); return tekenEditor(); }
       if (a === "opslaan") { const st = document.getElementById("cs-status"); st.textContent = "Opslaan…"; knop.disabled = true;
         try { const r = await post({ type: "opstelling", wedstrijd: sleutel(ed.m), opstelling: ed.o });
           if (r.ok) { st.textContent = "Opgeslagen!"; const m = ed.m; await window.kamelenApi?.(true); setTimeout(() => { sluitEditor(); window.coachVulOpstelling(m); renderBeheer(); }, 500); }
@@ -154,11 +162,11 @@
     const gespeeld = alle.filter(m => m.score).reverse();
     const bq = j.bonusvragen || {}, ops = j.opstellingen || {};
     const volgende = komend[0];
-    const sel = volgende ? selectieVan(volgende) : [];
+    const sel = volgende ? keuzeVan(volgende) : [];
     const openBonus = gespeeld.filter(m => bq[sleutel(m)] && !bq[sleutel(m)].antwoord);
     box.innerHTML = `
       <section class="card"><h2 class="cb-h">Opstellingen</h2><p class="muted">Zet de spelers van de selectie op het veld of de bank. Iedereen ziet de opstelling bij de wedstrijd.</p>
-        ${komend.map(m => `<div class="cb-rij"><span><b>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}</b><br><small>${fmtDay(m.datum, { weekday: "short", day: "numeric", month: "short" })} · ${selectieVan(m).length ? `${selectieVan(m).length} spelers` : "selectie onbekend"}${ops[sleutel(m)] ? " · ✓ opstelling staat" : ""}</small></span>
+        ${komend.map(m => `<div class="cb-rij"><span><b>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}</b><br><small>${fmtDay(m.datum, { weekday: "short", day: "numeric", month: "short" })} · ${selectieVan(m).length ? `${selectieVan(m).length} spelers` : "selectie nog niet bekend"}${ops[sleutel(m)] ? " · ✓ opstelling staat" : ""}</small></span>
           <button type="button" class="btn sm" data-coach-bewerk="${esc(sleutel(m))}">${ops[sleutel(m)] ? "Aanpassen" : "Maken"}</button></div>`).join("") || `<p class="muted">Geen komende wedstrijden.</p>`}
       </section>
       <section class="card"><h2 class="cb-h">Scorito-bonusvraag</h2>
@@ -171,7 +179,7 @@
         </form>` : `<p class="muted">Geen volgende wedstrijd.</p>`}
         ${openBonus.length ? `<h3 class="sub-h">Juiste antwoord invullen</h3>` + openBonus.map(m => { const q = bq[sleutel(m)];
           return `<form class="cb-uitslag" data-key="${esc(sleutel(m))}"><p><b>${esc(q.vraag)}</b><br><small>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}, ${esc(m.score)}</small></p>
-            <div class="cb-rij"><select>${(q.opties.length ? q.opties : selectieVan(m)).map(x => `<option>${esc(x)}</option>`).join("")}</select><button class="btn sm" type="submit">Opslaan</button><span class="tt-status" role="status"></span></div></form>`; }).join("") : ""}
+            <div class="cb-rij"><select>${(q.opties.length ? q.opties : keuzeVan(m)).map(x => `<option>${esc(x)}</option>`).join("")}</select><button class="btn sm" type="submit">Opslaan</button><span class="tt-status" role="status"></span></div></form>`; }).join("") : ""}
       </section>
       <section class="card"><h2 class="cb-h">Snel naar</h2><div class="cb-links">
         <a class="btn sm ghost" href="#stemmen">Kameel &amp; ezel sluiten</a><a class="btn sm ghost" href="#liters">Liter-incassobureau</a><a class="btn sm ghost" href="#toto">Kamelen-Scorito</a><a class="btn sm ghost" href="#fotos">Foto's en quotes</a></div></section>
@@ -186,7 +194,7 @@
         if (r.ok) { try { localStorage.setItem("kamelen-beheer", code); } catch {} renderBeheer(); } else st.textContent = "Die beheercode klopt niet."; } catch { st.textContent = "Geen verbinding."; } }
     if (f.id === "cb-bonus") { e.preventDefault(); const st = document.getElementById("cb-bst"), m = onze().find(x => sleutel(x) === f.dataset.key);
       const vraag = document.getElementById("cb-vraag").value.trim(); if (!vraag) { st.textContent = "Vul een vraag in."; return; }
-      let opties = document.getElementById("cb-opties").value.split("\n").map(x => x.trim()).filter(Boolean); if (!opties.length) opties = selectieVan(m);
+      let opties = document.getElementById("cb-opties").value.split("\n").map(x => x.trim()).filter(Boolean); if (!opties.length) opties = keuzeVan(m);
       st.textContent = "Opslaan…";
       try { const r = await post({ type: "bonusvraag", wedstrijd: sleutel(m), vraag, opties, punten: +document.getElementById("cb-punten").value, aftrap: toDate(m.datum, m.tijd || "12:00").toISOString() });
         st.textContent = r.ok ? "Opgeslagen!" : foutTekst(r.fout); if (r.ok) { await window.kamelenApi?.(true); window.renderToto?.(); } } catch { st.textContent = "Geen verbinding."; } }
