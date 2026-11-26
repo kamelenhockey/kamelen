@@ -49,6 +49,9 @@
   const SEL = "@selectie";
   const bonusOpties = (opties, m) => { const uit = []; (opties || []).forEach(o => (o === SEL ? keuzeVan(m) : [o]).forEach(x => { if (!uit.includes(x)) uit.push(x); })); return uit; };
   window.bonusOpties = bonusOpties;
+  /* Invallers apart laten zien: in een gestippeld vakje */
+  const invallerSet = () => new Set([...(typeof INVALLERS !== "undefined" ? INVALLERS : []), ...(DATA.invalSheet || []).map(x => x.naam)].map(canon).filter(n => !(typeof ROSTER !== "undefined" && ROSTER.has(n))));
+  window.splitsInvallers = opties => { const inv = invallerSet(); return [opties.filter(o => !inv.has(canon(o))), opties.filter(o => inv.has(canon(o)))]; };
   /* "Wie scoort het eerste doelpunt": punten naar linie (standaardopstelling) — aanvaller 1, middenvelder 2, verdediger of keeper 3 */
   const LINIE_PUNT = { aanval: 1, middenveld: 2, verdediging: 3, keeper: 3 };
   const linieVan = n => { n = canon(n);
@@ -292,7 +295,8 @@
       <div class="cb-rij"><button type="button" class="btn" data-bq="opslaan">${huidig ? "Bonusvraag bijwerken" : "Bonusvraag opslaan"}</button><span class="tt-status" id="bq-st" role="status"></span></div>` : `<p class="muted">Er zijn geen komende wedstrijden.</p>`}
       ${gespeeld.length ? `<h3 class="sub-h bq-kop">Juiste antwoord invullen</h3>${gespeeld.map(x => { const q = bq[sleutel(x)], opts = q.opties.length ? bonusOpties(q.opties, x) : keuzeVan(x);
         return `<div class="bq-uitslag${q.antwoord ? " klaar" : ""}" data-bq-key="${esc(sleutel(x))}"><p><b>${esc(q.vraag)}</b><small>${esc(naamWed(x))}${x.score ? `, ${esc(x.score)}` : ""} · ${q.antwoord ? `antwoord: <b>${esc(q.antwoord)}</b>` : "nog geen antwoord"}</small></p>
-          <div class="bq-opties">${opts.map(o => `<button type="button" class="cv-chip${q.antwoord === o ? " aan" : ""}" data-bq-antw="${esc(o)}">${esc(o)}</button>`).join("")}</div><span class="tt-status" role="status"></span></div>`; }).join("")}` : ""}`;
+          ${(() => { const knop = o => `<button type="button" class="cv-chip${q.antwoord === o ? " aan" : ""}" data-bq-antw="${esc(o)}">${esc(o)}</button>`, [v, inv] = window.splitsInvallers(opts);
+            return `<div class="bq-opties">${v.map(knop).join("")}</div>${inv.length ? `<div class="inv-vak"><span class="inv-k">Invallers</span><div class="bq-opties">${inv.map(knop).join("")}</div></div>` : ""}`; })()}<span class="tt-status" role="status"></span></div>`; }).join("")}` : ""}`;
   }
   const vraagVeld = () => { const v = document.getElementById("bq-vraag"); if (v && concept) concept.vraag = v.value; };
   document.addEventListener("input", e => { if (e.target.id === "bq-vraag" && concept) concept.vraag = e.target.value; });

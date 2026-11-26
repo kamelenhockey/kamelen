@@ -203,7 +203,9 @@
     const q = ((window._bonus || {}).vragen || {})[sleutel(m)]; if (!q || !q.vraag) return "";
     const mijn = mijnBonus()[sleutel(m)], opties = q.opties && q.opties.length ? (window.bonusOpties ? window.bonusOpties(q.opties, m) : q.opties.filter(o => o !== "@selectie")) : (window.keuzeVan ? window.keuzeVan(m) : []);
     return `<div class="tt-bonus" data-bonus="${esc(sleutel(m))}"><h3>⭐ Bonusvraag · ${window.bonusPerLinie && window.bonusPerLinie(q) ? "1 tot 3 punten" : `${q.punten} ${q.punten == 1 ? "punt" : "punten"}`}</h3><p>${esc(q.vraag)}</p>
-      <div class="opties">${opties.map(o => `<button type="button" class="cv-chip${mijn === o ? " aan" : ""}" data-bonus-optie="${esc(o)}">${esc(o)}${window.bonusPerLinie && window.bonusPerLinie(q) ? ` <small class="tt-bpt">${window.bonusPunten(q, o)}</small>` : ""}</button>`).join("") || `<span class="muted">De antwoorden komen zodra de selectie bekend is.</span>`}</div>
+      ${(() => { const knop = o => `<button type="button" class="cv-chip${mijn === o ? " aan" : ""}" data-bonus-optie="${esc(o)}">${esc(o)}${window.bonusPerLinie && window.bonusPerLinie(q) ? ` <small class="tt-bpt">${window.bonusPunten(q, o)}</small>` : ""}</button>`;
+        const [v, inv] = window.splitsInvallers ? window.splitsInvallers(opties) : [opties, []];
+        return `<div class="opties">${v.map(knop).join("") || (inv.length ? "" : `<span class="muted">De antwoorden komen zodra de selectie bekend is.</span>`)}</div>${inv.length ? `<div class="inv-vak"><span class="inv-k">Invallers</span><div class="opties">${inv.map(knop).join("")}</div></div>` : ""}`; })()}
       <span class="tt-status" role="status">${mijn ? `Jouw antwoord: <b>${esc(mijn)}</b>. Aanpassen kan tot de aftrap.` : ""}</span></div>`;
   }
   box.addEventListener("click", async ev => {
