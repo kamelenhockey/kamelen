@@ -38,6 +38,7 @@ const ideeTab_ = () => tab_("Ideeen", ["Tijdstempel", "Id", "Door", "Idee", "Soo
 /* Coachfunctie en Scorito-bonusvraag */
 const opstelTab_ = () => tab_("Opstellingen", ["Tijdstempel", "Wedstrijd", "Opstelling", "Door"]);
 const bonusTab_ = () => tab_("Bonusvragen", ["Tijdstempel", "Wedstrijd", "Vraag", "Opties", "Antwoord", "Punten", "Aftrap", "Door"]);
+const notitieTab_ = () => tab_("Notities", ["Tijdstempel", "Wedstrijd", "Tekst", "Door", "Id"]);
 const bonusAntTab_ = () => tab_("Bonusantwoorden", ["Tijdstempel", "Naam", "Wedstrijd", "Antwoord", "Aftrap"]);
 /* Laatste regel per wedstrijd */
 function laatstePer_(sh, kol) { const uit = {}; sh.getDataRange().getValues().slice(1).forEach((r, i) => { if (r[kol]) uit[r[kol]] = { r, rij: i + 2 }; }); return uit; }
@@ -298,6 +299,21 @@ function doPost(e) {
       /* Coachfunctie en bonusvraag: alleen coaches of wie de beheercode heeft */
       const magBeheren = gelijk_(d.beheercode, BEHEERCODE) || isCoach_(ik);
       /* Opstellingen zijn alleen voor coaches en beheerders: niet in de openbare lijst, maar apart opvragen */
+      /* Notities per wedstrijd: alleen voor coaches en beheerders */
+      if (d.type === "notities") {
+        if (!magBeheren) return json_({ ok: false, fout: "geen rechten" });
+        const notities = notitieTab_().getDataRange().getValues().slice(1).filter(r => r[1] && r[2]).map(r => ({ tijd: r[0], wedstrijd: r[1], tekst: r[2], door: r[3], id: String(r[4]) }));
+        return json_({ ok: true, notities });
+      }
+      if (d.type === "notitie") {
+        if (!magBeheren) return json_({ ok: false, fout: "geen rechten" });
+        if (d.weg) { const rij = rijMetId_(notitieTab_(), 4, d.weg); if (rij) notitieTab_().deleteRow(rij); return json_({ ok: true }); }
+        const w = String(d.wedstrijd || "").slice(0, 120), tekst = String(d.tekst || "").trim().slice(0, 2000);
+        if (!w || !tekst) return json_({ ok: false, fout: "invoer" });
+        const id = String(Date.now()) + Math.floor(Math.random() * 1000);
+        notitieTab_().appendRow([new Date(), w, tekst, ik, id]);
+        return json_({ ok: true, id });
+      }
       if (d.type === "opstellingen") {
         if (!magBeheren) return json_({ ok: false, fout: "geen rechten" });
         const opstellingen = {}, op = laatstePer_(opstelTab_(), 1);

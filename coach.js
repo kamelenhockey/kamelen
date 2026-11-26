@@ -31,6 +31,19 @@
     if (!_ops || vers) _ops = post({ type: "opstellingen" }).then(r => r && r.ok ? r.opstellingen || {} : {}).catch(() => { _ops = null; return {}; });
     return _ops; };
 
+  /* Notities per wedstrijd: ook alleen voor coaches en beheerders */
+  let _not = null;
+  const notities = vers => { if (!isBeheer() || !CFG().api) return Promise.resolve([]);
+    if (!_not || vers) _not = post({ type: "notities" }).then(r => r && r.ok ? r.notities || [] : []).catch(() => { _not = null; return []; });
+    return _not; };
+  const ntTijd = t => { const d = new Date(t); return isNaN(d) ? "" : d.toLocaleDateString("nl-NL", { day: "numeric", month: "short" }) + " " + d.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }); };
+  async function notitieBlok(key) {
+    const l = (await notities()).filter(n => n.wedstrijd === key);
+    return `<div class="nt-lijst">${l.map(n => `<div class="nt"><p>${esc(n.tekst)}</p><small>${esc(n.door || "")} · ${ntTijd(n.tijd)}</small><button type="button" data-nt-weg="${esc(n.id)}" aria-label="Notitie weghalen">×</button></div>`).join("") || `<p class="muted">Nog geen notities.</p>`}</div>
+      <form class="nt-vorm" data-nt-key="${esc(key)}"><textarea maxlength="2000" placeholder="Bijvoorbeeld: tegenstander speelt met één spits, nummer 7 is snel, wij bouwen op via links."></textarea>
+        <div class="cb-rij"><button class="btn sm" type="submit">Notitie toevoegen</button><span class="tt-status" role="status"></span></div></form>`;
+  }
+
   /* Wie doet er mee: de selectie uit de app, anders de aanwezigen uit het afwezigheidsblad */
   function selectieVan(m) {
     if ((DATA.opstelling || []).length && DATA.opstellingWedstrijd === m.datum) return DATA.opstelling.map(canon);
@@ -115,7 +128,8 @@
     const o = (await opstellingen())[sleutel(m)];
     const knop = isBeheer() ? `<button type="button" class="btn sm" data-coach-bewerk="${esc(sleutel(m))}">${o ? "✏️ Opstelling aanpassen" : "✏️ Opstelling maken"}</button>` : "";
     if (!o && !knop) { el.remove(); return; }
-    el.innerHTML = `<h3 class="sub-h">Opstelling</h3>${o ? veldHtml(o.opstelling, false) + `<p class="muted cv-door">Gemaakt door ${esc(o.door || "de coach")}</p>` : `<p class="muted">Nog geen opstelling.</p>`}${knop}`;
+    el.innerHTML = `<h3 class="sub-h">Opstelling</h3>${o ? veldHtml(o.opstelling, false) + `<p class="muted cv-door">Gemaakt door ${esc(o.door || "de coach")}</p>` : `<p class="muted">Nog geen opstelling.</p>`}${knop}
+      <h3 class="sub-h" style="margin-top:16px">Notities <small class="muted">(alleen coaches en beheerders)</small></h3><div data-nt-box="${esc(sleutel(m))}">${await notitieBlok(sleutel(m))}</div>`;
   };
   document.addEventListener("click", e => { const b = e.target.closest("[data-coach-bewerk]"); if (!b) return; const m = onze().find(x => sleutel(x) === b.dataset.coachBewerk); if (m) openEditor(m); });
 
@@ -137,9 +151,12 @@
       ed.o = JSON.parse(JSON.stringify(bestaand.opstelling));
       if (bekend) { ed.o.veld = ed.o.veld.filter(p => sel.includes(p.n)); ed.o.bank = ed.o.bank.filter(n => sel.includes(bNaam(n))); }
     }
-    ed.laden = false; tekenEditor();
+    ed.laden = false;
+    const L = leesLive(sleutel(m)); if (L && (L.loopt || (L.opgeteld && !L.klaar))) return startLive();   /* wedstrijd bezig: meteen verder langs de lijn */
+    tekenEditor();
   }
   function sluitEditor(opnieuw) {
+    if (ed && ed.live) { bewaarLive(); clearInterval(_klokTimer); try { _waak?.release(); } catch {} _waak = null; }
     const sh = document.getElementById("coach-sheet"); if (sh) sh.hidden = true; document.body.classList.remove("sheet-open");
     const terug = ed && ed.uitDialoog ? ed.m : null; ed = null;
     if (terug && typeof openMatch === "function") openMatch(sleutel(terug));
@@ -156,17 +173,88 @@
         <div><b>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}</b><small>${fmtDay(m.datum, { weekday: "long", day: "numeric", month: "long" })}${m.tijd ? ` · ${esc(m.tijd)}` : ""}</small></div>
         <button type="button" class="btn sm cs-opslaan" data-cs="opslaan">Opslaan</button></div>
       <div class="cs-body" data-geen-swipe data-geen-trek>
-        <div class="cs-teller"><span>Veld <b>${o.veld.length}</b>/11</span><span>Bank <b>${o.bank.length}</b></span><span class="cs-knoppen"><button type="button" class="cs-link" data-cs="auto">Standaard</button><button type="button" class="cs-link" data-cs="leeg">Leegmaken</button></span></div>
-        <p class="cs-hint${ed.gekozen ? " actief" : ed.melding ? " lang" : ""}" role="status">${hint}</p>
+        ${ed.live ? liveBalk() : `<div class="cs-teller"><span>Veld <b>${o.veld.length}</b>/11</span><span>Bank <b>${o.bank.length}</b></span><span class="cs-knoppen"><button type="button" class="cs-link" data-cs="auto">Standaard</button><button type="button" class="cs-link" data-cs="leeg">Leegmaken</button></span></div>
+        <button type="button" class="cs-live-start" data-cs="live">⏱️ Langs de lijn: wissels en speeltijd bijhouden</button>`}
+        <p class="cs-hint${ed.gekozen ? " actief" : ed.melding ? " lang" : ""}" role="status">${ed.live ? liveHint() : hint}</p>
         ${veldHtml(o, true, x => bankChip(x, ed.gekozen === bNaam(x) ? " aan" : ""))}
-        <div class="cs-dock">
+        ${ed.live ? liveOverzicht() : ""}
+        <div class="cs-dock"${ed.live ? " hidden" : ""}>
           <div class="cs-rij" data-zone="pool"><span class="cs-rij-k">${ed.bekend ? "Selectie" : "Iedereen"} <small>${vrij.length}</small></span><div class="cs-lijst cs-pool-lijst">${ed.laden && !sel.length ? `<span class="cv-leeg">Laden…</span>` : vrij.length ? vrij.map(chip).join("") : `<span class="cv-leeg">${sel.length ? "Iedereen is ingedeeld" : "Geen spelers gevonden. Tik op ↻ bovenin de app en probeer het opnieuw."}</span>`}</div></div>
           ${ed.bekend ? "" : `<p class="cs-noot">De selectie is nog niet bekend, dus je kiest uit alle spelers en (gestippeld) de invallers.</p>`}
           <span class="tt-status" id="cs-status" role="status"></span>
         </div>
       </div>`;
     sh.querySelector(".cs-body").scrollTop = scroll; const pl = sh.querySelector(".cs-pool-lijst"); if (pl) pl.scrollLeft = poolScroll;
-    if (ed.gekozen) { sh.querySelectorAll(`.cv-sp[data-naam="${CSS.escape(ed.gekozen)}"]`).forEach(x => x.classList.add("aan")); sh.querySelector(".cs-body .cv-duo")?.classList.add("cs-veld-doel"); }
+    if (ed.gekozen) { sh.querySelectorAll(`.cv-sp[data-naam="${CSS.escape(ed.gekozen)}"]`).forEach(x => x.classList.add("aan")); if (!ed.live) sh.querySelector(".cs-body .cv-duo")?.classList.add("cs-veld-doel"); }
+    if (ed.live) { sh.querySelector(".cs-body .cv-duo")?.classList.add("cs-live");
+      sh.querySelectorAll(".cs-body .cv-sp, .cs-body .cv-dchip").forEach(el => { const t = document.createElement("small"); t.className = "lv-m"; t.dataset.lv = el.dataset.naam; el.appendChild(t); });
+      liveTik(); }
+  }
+
+  /* ---------- Langs de lijn: wissels en speeltijd ---------- */
+  /* Alles in "wedstrijdtijd" (ms), die alleen loopt als de klok loopt. Bewaard op dit apparaat, dus herladen kan gewoon. */
+  const LIVE_KEY = k => "kamelen-live-" + k;
+  const leesLive = k => { try { return JSON.parse(localStorage.getItem(LIVE_KEY(k)) || "null"); } catch { return null; } };
+  const bewaarLive = () => { if (ed && ed.live) try { ed.live.o = ed.o; localStorage.setItem(LIVE_KEY(sleutel(ed.m)), JSON.stringify(ed.live)); } catch {} };
+  const gTijd = () => { const L = ed.live; return L.opgeteld + (L.loopt ? Date.now() - L.start : 0); };
+  const fmtKlok = ms => { const t = Math.floor(ms / 1000); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; };
+  const fmtMin = ms => `${Math.floor(ms / 60000)}′`;
+  function spVan(n) { const L = ed.live; if (!L.sp[n]) { const g = gTijd(), opVeld = ed.o.veld.some(p => p.n === n); L.sp[n] = { veld: 0, in: opVeld ? g : null, uit: opVeld ? null : g }; } return L.sp[n]; }
+  const speeltijd = n => { const s = spVan(n); return s.veld + (s.in != null ? gTijd() - s.in : 0); };
+  const bankTijd = n => { const s = spVan(n); return s.uit != null ? gTijd() - s.uit : 0; };
+  function startLive() {
+    const k = sleutel(ed.m);
+    ed.live = leesLive(k) || { loopt: false, start: 0, opgeteld: 0, sp: {}, wissels: [], klaar: false };
+    if (ed.live.o && (ed.live.o.veld || []).length) ed.o = ed.live.o;   /* de stand van zaken op het veld zoals die tijdens de wedstrijd was */
+    ed.gekozen = null;
+    [...ed.o.veld.map(p => p.n), ...ed.o.bank.map(bNaam)].forEach(spVan);
+    bewaarLive(); waakLive(); tekenEditor();
+  }
+  let _klokTimer = null, _waak = null;
+  function waakLive() {
+    clearInterval(_klokTimer); _klokTimer = setInterval(() => { if (!ed || !ed.live) { clearInterval(_klokTimer); return; } liveTik(); }, 1000);
+    try { if (ed.live.loopt && navigator.wakeLock && !_waak) navigator.wakeLock.request("screen").then(w => { _waak = w; w.addEventListener?.("release", () => { _waak = null; }); }).catch(() => {}); } catch {}
+  }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && ed && ed.live && ed.live.loopt) { _waak = null; waakLive(); } });
+  function liveTik() {
+    const sh = document.getElementById("coach-sheet"); if (!sh || !ed || !ed.live) return;
+    const k = sh.querySelector("[data-live-klok]"); if (k) k.textContent = fmtKlok(gTijd());
+    sh.querySelectorAll("[data-lv]").forEach(el => { const n = el.dataset.lv, opVeld = ed.o.veld.some(p => p.n === n);
+      el.textContent = opVeld ? fmtMin(speeltijd(n)) : `zit ${fmtMin(bankTijd(n))}`;
+      el.classList.toggle("lang", !opVeld && bankTijd(n) >= 10 * 60000); });
+    sh.querySelectorAll("[data-lv-rij]").forEach(el => { const n = el.dataset.lvRij; el.querySelector("b").textContent = fmtMin(speeltijd(n)); });
+  }
+  function liveBalk() {
+    const L = ed.live;
+    return `<div class="lv-balk"><span class="lv-klok${L.loopt ? " loopt" : ""}" data-live-klok>${fmtKlok(gTijd())}</span>
+      <button type="button" class="btn lv-start" data-cs="klok">${L.klaar ? "Afgelopen" : L.loopt ? "⏸ Pauze" : L.opgeteld ? "▶ Verder" : "▶ Start"}</button>
+      <span class="cs-knoppen"><button type="button" class="cs-link" data-cs="einde">${L.klaar ? "Opnieuw" : "Einde"}</button><button type="button" class="cs-link" data-cs="uitlive">Klaar</button></span></div>`;
+  }
+  function liveHint() {
+    if (!ed.gekozen) return ed.live.loopt ? "Wissel: tik op een speler in de dug-out en daarna op wie eruit gaat." : "Zet de klok aan als de wedstrijd begint. Wisselen kan ook als de klok stilstaat.";
+    const opVeld = ed.o.veld.some(p => p.n === ed.gekozen);
+    return `<b>${esc(ed.gekozen)}</b> gekozen: tik op ${opVeld ? "een speler in de dug-out om te wisselen, een andere veldspeler om te ruilen, of een plek op het veld" : "de speler op het veld die eruit gaat"}`;
+  }
+  function liveOverzicht() {
+    const L = ed.live, namen = [...ed.o.veld.map(p => p.n), ...ed.o.bank.map(bNaam)];
+    const max = Math.max(60000, ...namen.map(speeltijd));
+    const rijen = [...namen].sort((a, b) => speeltijd(a) - speeltijd(b));
+    return `<div class="lv-over"><div class="lv-kop"><b>Speeltijd</b><small>minst gespeeld bovenaan</small></div>
+      ${rijen.map(n => { const opVeld = ed.o.veld.some(p => p.n === n); return `<div class="lv-rij${opVeld ? "" : " bank"}" data-lv-rij="${esc(n)}"><span>${esc(n)}</span><i style="--w:${Math.round(speeltijd(n) / max * 100)}%"></i><b>${fmtMin(speeltijd(n))}</b></div>`; }).join("")}
+      ${L.wissels.length ? `<div class="lv-kop"><b>Wissels</b><small>${L.wissels.length}</small></div><ol class="lv-log">${[...L.wissels].reverse().map(w => `<li><span>${fmtMin(w.t)}</span> ${esc(w.in)} <em>erin</em>, ${esc(w.uit)} <em>eruit</em></li>`).join("")}</ol>` : ""}</div>`;
+  }
+  function liveWissel(a, b) {   // a en b: namen; precies één op het veld
+    const g = gTijd(), L = ed.live;
+    const veldA = ed.o.veld.find(p => p.n === a), veldB = ed.o.veld.find(p => p.n === b);
+    if (veldA && veldB) { [veldA.x, veldB.x] = [veldB.x, veldA.x]; [veldA.y, veldB.y] = [veldB.y, veldA.y]; return; }
+    const uit = veldA ? a : b, erin = veldA ? b : a, plek = veldA || veldB;
+    const su = spVan(uit), si = spVan(erin);
+    su.veld += su.in != null ? g - su.in : 0; su.in = null; su.uit = g;
+    si.in = g; si.uit = null;
+    const lijn = lijnVan(plek.y) === "keeper" ? "verdediging" : lijnVan(plek.y);
+    ed.o.bank = ed.o.bank.filter(x => bNaam(x) !== erin); ed.o.bank.push(`${uit}|${lijn}`);
+    plek.n = erin;
+    L.wissels.push({ t: g, in: erin, uit });
   }
   const weg = n => { ed.o.veld = ed.o.veld.filter(p => p.n !== n); ed.o.bank = ed.o.bank.filter(x => bNaam(x) !== n); };
   function zetOp(n, zone, x, y) { weg(n); if (zone === "veld") ed.o.veld.push({ n, x: Math.round(Math.max(4, Math.min(96, x))), y: Math.round(Math.max(3, Math.min(97, y))) }); else if (zone === "bank") ed.o.bank.push(`${n}|${x || "middenveld"}`); }
@@ -179,6 +267,16 @@
     if (knop) {
       const a = knop.dataset.cs;
       if (a === "sluit") return sluitEditor();
+      if (a === "live") return startLive();
+      if (a === "uitlive") { bewaarLive(); ed.live = null; ed.gekozen = null; clearInterval(_klokTimer); try { _waak?.release(); } catch {} _waak = null; return tekenEditor(); }
+      if (a === "klok") { const L = ed.live; if (L.klaar) return;
+        if (L.loopt) { L.opgeteld += Date.now() - L.start; L.loopt = false; } else { L.start = Date.now(); L.loopt = true; }
+        bewaarLive(); waakLive(); return tekenEditor(); }
+      if (a === "einde") { const L = ed.live;
+        if (L.klaar) { if (!confirm("Klok en speeltijd op nul zetten?")) return; localStorage.removeItem(LIVE_KEY(sleutel(ed.m))); ed.live = null; return startLive(); }
+        if (L.loopt) { L.opgeteld += Date.now() - L.start; L.loopt = false; }
+        const g = gTijd(); Object.values(L.sp).forEach(sp => { if (sp.in != null) { sp.veld += g - sp.in; sp.in = g; } });
+        L.klaar = true; bewaarLive(); return tekenEditor(); }
       if (a === "leeg") { ed.o = { veld: [], bank: [] }; ed.gekozen = null; return tekenEditor(); }
       if (a === "auto") {
         ed.o = { veld: [], bank: [] }; ed.gekozen = null;
@@ -195,6 +293,18 @@
     }
     const chip = e.target.closest(".cv-chip, .cv-sp");
     if (chip && ed) ed.melding = "";
+    /* Langs de lijn: tikken = kiezen, tweede tik = wisselen of ruilen */
+    if (ed.live) {
+      if (chip) { const n = chip.dataset.naam;
+        if (!ed.gekozen || ed.gekozen === n) { ed.gekozen = ed.gekozen === n ? null : n; return tekenEditor(); }
+        const aVeld = ed.o.veld.some(p => p.n === ed.gekozen), bVeld = ed.o.veld.some(p => p.n === n);
+        if (aVeld || bVeld) { if (!ed.live.klaar) { liveWissel(ed.gekozen, n); bewaarLive(); } ed.gekozen = null; } else ed.gekozen = n;
+        return tekenEditor(); }
+      const zone = e.target.closest('[data-zone="veld"]');
+      if (zone && ed.gekozen && ed.o.veld.some(p => p.n === ed.gekozen)) { const p = ed.o.veld.find(x => x.n === ed.gekozen), [x, y] = veldPunt(zone, e.clientX, e.clientY);
+        p.x = Math.round(Math.max(4, Math.min(96, x))); p.y = Math.round(Math.max(3, Math.min(97, y))); ed.gekozen = null; bewaarLive(); return tekenEditor(); }
+      return;
+    }
     /* Al iemand gekozen en je tikt op een naam in de dug-out: de gekozen speler gaat naar die linie */
     const vakDoel = chip && chip.closest(".cv-dug-vak");
     if (vakDoel && ed.gekozen && ed.gekozen !== chip.dataset.naam) { zetOp(ed.gekozen, "bank", vakDoel.dataset.lijn); ed.gekozen = null; return tekenEditor(); }
@@ -209,6 +319,7 @@
   let sleep = null, _sleepNet = false;
   document.addEventListener("pointerdown", e => {
     const sh = document.getElementById("coach-sheet"); if (!sh || sh.hidden || !ed) return;
+    if (ed.live) return;
     const el = e.target.closest(".cs-body .cv-sp, .cs-body .cv-chip"); if (!el) return;
     sleep = { n: el.dataset.naam, x0: e.clientX, y0: e.clientY, el, spook: null, chip: el.classList.contains("cv-chip") };
   });
@@ -247,14 +358,43 @@
         ${komend.map(m => `<div class="cb-rij"><span><b>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}</b><br><small>${fmtDay(m.datum, { weekday: "short", day: "numeric", month: "short" })} · ${selectieVan(m).length ? `${selectieVan(m).length} spelers` : "selectie nog niet bekend"}${ops[sleutel(m)] ? " · ✓ opstelling staat" : ""}</small></span>
           <button type="button" class="btn sm" data-coach-bewerk="${esc(sleutel(m))}">${ops[sleutel(m)] ? "Aanpassen" : "Maken"}</button></div>`).join("") || `<p class="muted">Geen komende wedstrijden.</p>`}
       </section>
+      <section class="card" id="cb-notities"></section>
       <section class="card" id="cb-bonus-box"></section>
       <section class="card"><h2 class="cb-h">Snel naar</h2><div class="cb-links">
         <a class="btn sm ghost" href="#stemmen">Kameel &amp; ezel sluiten</a><a class="btn sm ghost" href="#liters">Liter-incassobureau</a><a class="btn sm ghost" href="#toto">Kamelen-Scorito</a><a class="btn sm ghost" href="#fotos">Foto's en quotes</a></div></section>
       <section class="card"><h2 class="cb-h">App</h2><div class="cb-rij"><span><small>Ingelogd als ${esc((window.IK || {}).naam || "?")}${(window.IK || {}).rol === "coach" ? " (coach)" : ""}${bcode() ? " · beheercode op dit apparaat" : ""} · versie ${esc(VERSIE)}</small></span></div>
         <div class="cb-links"><button type="button" class="btn sm ghost" data-cb="wis">Bewaarde gegevens wissen en opnieuw laden</button>${bcode() ? `<button type="button" class="btn sm ghost" data-cb="uit">Beheercode van dit apparaat halen</button>` : ""}</div></section>`;
-    tekenBonus();
+    tekenBonus(); tekenNotities();
   }
   window.renderBeheer = renderBeheer;
+  let ntKeuze = null;
+  async function tekenNotities() {
+    const box = document.getElementById("cb-notities"); if (!box) return;
+    const nu = Date.now(), alle = onze();
+    const lijst = [...alle.filter(m => toDate(m.datum, m.tijd || "12:00") <= nu).slice(-3), ...alle.filter(m => toDate(m.datum, m.tijd || "12:00") > nu).slice(0, 5)];
+    if (!lijst.length) { box.innerHTML = ""; return; }
+    if (!ntKeuze || !lijst.some(m => sleutel(m) === ntKeuze)) ntKeuze = sleutel(lijst.find(m => toDate(m.datum, m.tijd || "12:00") > nu) || lijst[lijst.length - 1]);
+    const alleN = await notities();
+    box.innerHTML = `<h2 class="cb-h">Notities</h2><p class="muted">Per wedstrijd, alleen voor coaches en beheerders. Je ziet ze ook bij de wedstrijd zelf.</p>
+      <div class="bq-wed">${lijst.map(m => { const n = alleN.filter(x => x.wedstrijd === sleutel(m)).length;
+        return `<button type="button" class="bq-wedk${sleutel(m) === ntKeuze ? " aan" : ""}" data-nt-wed="${esc(sleutel(m))}"><b>${esc(naamWed(m))}</b><small>${fmtDay(m.datum, { day: "numeric", month: "short" })}${m.score ? ` · ${esc(m.score)}` : ""}${n ? ` · ${n} 📝` : ""}</small></button>`; }).join("")}</div>
+      <div data-nt-box="${esc(ntKeuze)}">${await notitieBlok(ntKeuze)}</div>`;
+    box.querySelector(".bq-wedk.aan")?.scrollIntoView({ block: "nearest", inline: "center" });
+  }
+  const verversNotities = async key => { await notities(true); document.querySelectorAll(`[data-nt-box="${CSS.escape(key)}"]`).forEach(async b => { b.innerHTML = await notitieBlok(key); }); if (document.getElementById("cb-notities")) tekenNotities(); };
+  document.addEventListener("click", async e => {
+    const w = e.target.closest("[data-nt-wed]"); if (w) { ntKeuze = w.dataset.ntWed; return tekenNotities(); }
+    const x = e.target.closest("[data-nt-weg]"); if (!x) return;
+    if (!confirm("Deze notitie weghalen?")) return;
+    const key = x.closest("[data-nt-box]")?.dataset.ntBox; x.disabled = true;
+    try { const r = await post({ type: "notitie", weg: x.dataset.ntWeg }); if (r.ok) verversNotities(key); else { alert(foutTekst(r.fout)); x.disabled = false; } } catch { x.disabled = false; }
+  });
+  document.addEventListener("submit", async e => {
+    const f = e.target.closest(".nt-vorm"); if (!f) return; e.preventDefault();
+    const t = f.querySelector("textarea"), st = f.querySelector(".tt-status"), tekst = t.value.trim(); if (!tekst) { st.textContent = "Typ eerst een notitie."; return; }
+    st.textContent = "Opslaan…";
+    try { const r = await post({ type: "notitie", wedstrijd: f.dataset.ntKey, tekst }); if (r.ok) { t.value = ""; verversNotities(f.dataset.ntKey); } else st.textContent = foutTekst(r.fout); } catch { st.textContent = "Geen verbinding."; }
+  });
 
   /* ---------- Scorito-bonusvraag: per wedstrijd een vraag, het antwoord later ---------- */
   const SNEL = [
