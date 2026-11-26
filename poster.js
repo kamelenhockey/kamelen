@@ -45,6 +45,7 @@
     leeuwzij: { src: "steden/leeuw4.jpg", fx: .72, fy: .45, door: "Anmol Waychal" },
     piste: { src: "steden/temmer.jpg", fx: .5, fy: .74, zoom: 1.25, door: "EgorovaSvetlana" },
     kooi: { src: "steden/temmer3.jpg", fx: .45, fy: .55, door: "Anefo" },
+    kameelkop: { src: "steden/kameel.jpg", fx: .45, fy: .45, door: "Skander Zarrad" },
     olifant: { src: "steden/olifant.jpg", fx: .5, fy: .35, door: "Eric de Redelijkheid" }
   };
   /* Kleurgrading: schaduwen, hooglichten, hoeveel kleur er overblijft */
@@ -564,6 +565,20 @@
         regels.forEach((r, i) => spatie(ctx, r, W / 2, y + i * 30, 3, "center")); bron = [f];
       },
 
+      /* Oog in oog: links hun dier, rechts het onze */
+      oogInOog() {
+        const o = opt.mini || {}, A = FOTO[o.zij], B = FOTO[o.ons];
+        ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
+        beeld(ctx, imgs2[0], A, GRADE.zw, 0, 0, W / 2 - 3, 1060); beeld(ctx, imgs2[1], B, GRADE.zw, W / 2 + 3, 0, W / 2 - 3, 1060);
+        vignet(.5); verloop(760, 1060, 0, .95); ctx.fillStyle = "rgba(6,5,4,.95)"; ctx.fillRect(0, 1060, W, H - 1060); verloop(180, 0, 0, .5);
+        logoOp(L, 50, 52); ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        ctx.fillStyle = "rgba(244,239,230,.8)"; ctx.font = F(500, 22); spatie(ctx, "LEEUW", W / 4, 160, 10, "center"); spatie(ctx, "KAMEEL", W * .75, 160, 10, "center");
+        ctx.fillStyle = WIT; ctx.font = F(700, 220); spatie(ctx, o.kop || "GETEMD.", L - 4, 1030, 4);
+        ctx.fillStyle = "rgba(244,239,230,.3)"; ctx.fillRect(L, 1112, W - 2 * L, 1);
+        ctx.fillStyle = WIT; ctx.font = F(700, 38); spatie(ctx, `${namen[0]} \u2013 ${namen[1]}`, L, 1170, 5);
+        infoKort(1212, MUTED, true); selectieRegel(1262, "rgba(244,239,230,.6)", false, 20); bron = [A, B];
+      },
+
       /* Tweeluik: boven hun beeld, onder het onze, de zin loopt over de naad */
       tweeluik() {
         const o = opt.mini || {}, A = FOTO[o.zij], B = FOTO[o.ons];
@@ -577,7 +592,7 @@
         let ks = o.size || 120; ctx.font = F(700, ks); while ([o.r1, o.r2].some(t => breedte(ctx, t, 2) > W - 2 * L) && ks > 50) { ks -= 4; ctx.font = F(700, ks); }
         ctx.save(); ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = 24;
         ctx.fillStyle = WIT; spatie(ctx, o.r1, L - 3, 530, 2); ctx.fillStyle = ZAND; spatie(ctx, o.r2, L - 3, 1076, 2);
-        ctx.fillStyle = "rgba(244,239,230,.85)"; ctx.font = F(500, 22); spatie(ctx, tk.toUpperCase(), L, 530 - ks * .8 - 18, 7); spatie(ctx, "KAMELEN", L, 1076 - ks * .8 - 18, 7); ctx.restore();
+        ctx.fillStyle = "rgba(244,239,230,.85)"; ctx.font = F(500, 22); spatie(ctx, o.l1 || tk.toUpperCase(), L, 530 - ks * .8 - 18, 7); spatie(ctx, o.l2 || "KAMELEN", L, 1076 - ks * .8 - 18, 7); ctx.restore();
         ctx.fillStyle = WIT; ctx.font = F(700, 34); spatie(ctx, `${namen[0]} \u2013 ${namen[1]}`, L, 1162, 5);
         infoKort(1202, MUTED, true); selectieRegel(1250, "rgba(244,239,230,.6)", false, 20);
         bron = [A, B];
@@ -605,6 +620,11 @@
         if (draai) { const c = document.createElement("canvas"); c.width = W * 1.25; c.height = H * 1.25; beeld(c.getContext("2d"), img, f, gg, 0, 0, c.width, c.height); ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H); ctx.save(); ctx.translate(W / 2, H / 2); ctx.rotate(draai); ctx.drawImage(c, -c.width / 2, -c.height / 2); ctx.restore(); }
         else beeld(ctx, img, f, gg, 0, 0, W, H);
         vignet(.55); verloop(o.boven ? 520 : 640, o.boven ? 0 : H, 0, .92); verloop(1000, H, 0, .9); verloop(180, 0, 0, .5);
+        if (o.kameel && kameelImg) { const k = o.kameel, bw = k.w, bh = bw * kameelImg.height / kameelImg.width;
+          ctx.save(); ctx.fillStyle = "rgba(0,0,0,.6)"; ctx.filter = "blur(16px)"; ctx.beginPath(); ctx.ellipse(k.x + bw / 2, k.y + bh - 6, bw * .45, 20, 0, 0, 7); ctx.fill(); ctx.restore();
+          ctx.save(); ctx.filter = o.grade === "zw" || !o.grade ? "grayscale(1) contrast(1.15) brightness(.95)" : "none"; ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = 30;
+          if (k.spiegel) { ctx.translate(k.x + bw, k.y); ctx.scale(-1, 1); ctx.drawImage(kameelImg, 0, 0, bw, bh); } else ctx.drawImage(kameelImg, k.x, k.y, bw, bh); ctx.restore();
+          if (k.vervaag) verloop(k.vervaag, H, 0, .95); }
         logoOp(L, 50, 52); ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
         const kop = o.kop || ["KAMELEN"]; let ks = o.size || 168; ctx.font = F(700, ks); while (kop.some(t => breedte(ctx, t, ks * .02) > W - 2 * L) && ks > 60) { ks -= 4; ctx.font = F(700, ks); }
         const y0 = o.boven ? 170 + ks * .8 : 1010 - (kop.length - 1) * ks * .9 - (o.sub ? 60 : 0);
