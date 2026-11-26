@@ -14,8 +14,16 @@
   window.kamelenIsBeheer = isBeheer;
   const onze = () => [...(DATA.uitslagen || []), ...(DATA.programma || [])].filter(m => isUs(m.thuis + m.uit))
     .sort((a, b) => toDate(a.datum, a.tijd || "12:00") - toDate(b.datum, b.tijd || "12:00"));
-  const post = body => fetch(CFG().api, { method: "POST", body: JSON.stringify({ code: (window.IK || {}).code || "", beheercode: bcode(), ...body }) }).then(r => r.json());
-  const foutTekst = f => f === "geen rechten" ? "Alleen coaches en beheerders kunnen dit." : f === "code" ? "Je inlogcode klopt niet meer. Log opnieuw in." : f === "te laat" ? "De wedstrijd is al begonnen." : f ? "Het script moet nog bijgewerkt worden." : "Opslaan lukte niet.";
+  const post = async body => {
+    const r = await fetch(CFG().api, { method: "POST", body: JSON.stringify({ code: (window.IK || {}).code || "", beheercode: bcode(), ...body }) }).then(x => x.json());
+    /* Geen rechten terwijl er een beheercode op dit apparaat staat: klopt die nog met het script? */
+    if (r && r.fout === "geen rechten" && bcode()) {
+      const c = await fetch(CFG().api, { method: "POST", body: JSON.stringify({ type: "beheer", actie: "check", beheercode: bcode() }) }).then(x => x.json()).catch(() => ({}));
+      if (c && c.ok === false) { try { localStorage.removeItem("kamelen-beheer"); } catch {} r.fout = "oude beheercode"; setTimeout(() => { zichtbaarheid(); }, 0); }
+    }
+    return r;
+  };
+  const foutTekst = f => f === "oude beheercode" ? "De beheercode op dit apparaat klopt niet meer met het script. Log opnieuw in via Meer → Inloggen als beheerder." : f === "geen rechten" ? "Alleen coaches en beheerders kunnen dit." : f === "code" ? "Je inlogcode klopt niet meer. Log opnieuw in." : f === "te laat" ? "De wedstrijd is al begonnen." : f ? "Het script moet nog bijgewerkt worden." : "Opslaan lukte niet.";
 
   /* Opstellingen: alleen voor coaches en beheerders, apart opgehaald (niet in de openbare gegevens) */
   let _ops = null;
