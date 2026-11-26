@@ -46,6 +46,9 @@
     piste: { src: "steden/temmer.jpg", fx: .5, fy: .74, zoom: 1.25, door: "EgorovaSvetlana" },
     kooi: { src: "steden/temmer3.jpg", fx: .45, fy: .55, door: "Anefo" },
     kameelkop: { src: "steden/kameel.jpg", fx: .45, fy: .45, door: "Skander Zarrad" },
+    stadion: { src: "steden/veld4.jpg", fx: .5, fy: .45, door: "Macabe5387" },
+    doel: { src: "steden/doel3.jpg", fx: .5, fy: .55, door: "Richard Webb" },
+    bal: { src: "steden/doel5.jpg", fx: .5, fy: .5, door: "Clément Bucco-Lechat" },
     olifant: { src: "steden/olifant.jpg", fx: .5, fy: .35, door: "Eric de Redelijkheid" }
   };
   /* Kleurgrading: schaduwen, hooglichten, hoeveel kleur er overblijft */
@@ -155,7 +158,7 @@
     const fotos = [zijF, onsF];
     let [logo, zijImg, onsImg, kameelImg] = await Promise.all([laad("logo.png").catch(() => null), laad(zijF.src).catch(() => null), laad(onsF.src).catch(() => null), laad("steden/kameel-uit.png").catch(() => null)]);
     const KAMEEL = { door: "Darthjipsu" };
-    const TENUE = {}; for (const it of ((opt.mini || {}).items || [])) if (!TENUE[it.img]) TENUE[it.img] = await laad(`tenue/${it.img}.png`).catch(() => null);
+    const TENUE = { shirt: await laad("tenue/shirt.png").catch(() => null) }; for (const it of ((opt.mini || {}).items || [])) if (!TENUE[it.img]) TENUE[it.img] = await laad(`tenue/${it.img}.png`).catch(() => null);
     const mo = opt.mini || {}, imgs2 = await Promise.all([mo.zij || mo.foto, mo.ons].map(k => k && FOTO[k] ? laad(FOTO[k].src).catch(() => null) : null));
     const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const ctx = cv.getContext("2d");
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
@@ -257,6 +260,36 @@
       const t = `${weekdag} ${datum}  /  ${tijd.toUpperCase()}  /  ${wijThuis ? "THUIS" : "UIT"}, ${plek.toUpperCase()}  /  HEREN RESERVE 1E KLASSE`;
       ctx.fillStyle = kleur; let s2 = 24; ctx.font = F(500, s2); while (breedte(ctx, t, 4) > W - 2 * L && s2 > 14) { s2--; ctx.font = F(500, s2); }
       spatie(ctx, t, links ? L : W / 2, y, 4, links ? "left" : "center");
+    };
+    /* Een echte kameel in ons shirt, eventueel met onze oranje sokken (coördinaten in de uitgeknipte foto, 787 x 608) */
+    const o2 = opt.mini || {};
+    const aangekleed = (bw, { spiegel = false, sokken = false } = {}) => {
+      const K = kameelImg; if (!K) { const c = document.createElement("canvas"); c.width = bw; c.height = 1; return c; }
+      const sc = bw / K.width, bh = Math.round(K.height * sc);
+      const nieuw = () => { const c = document.createElement("canvas"); c.width = bw; c.height = bh; const t = c.getContext("2d"); if (spiegel) { t.translate(bw, 0); t.scale(-1, 1); } return [c, t]; };
+      const [c, t] = nieuw(); t.drawImage(K, 0, 0, bw, bh);
+      const afwerken = (l, masker) => {
+        /* eerst schaduw van de kameel erover, dan pas uitsnijden: anders wordt de hele kameel grijs */
+        l.globalCompositeOperation = "multiply"; l.filter = "grayscale(1) brightness(1.55) contrast(1.25)"; l.drawImage(K, 0, 0, bw, bh); l.filter = "none";
+        l.globalCompositeOperation = "destination-in"; l.drawImage(K, 0, 0, bw, bh); l.fillStyle = masker; l.fillRect(0, 0, K.width * sc, bh);
+        l.globalCompositeOperation = "source-over"; };
+      const sh = TENUE.shirt;
+      if (sh) { const [lc, l] = nieuw();
+        l.save(); l.translate(318 * sc, 182 * sc); l.rotate(Math.PI / 2); l.drawImage(sh, -168 * sc, -250 * sc, 336 * sc, 500 * sc); l.restore();
+        const m = l.createLinearGradient(0, 0, 0, bh); m.addColorStop(0, "#000"); m.addColorStop(318 / 608, "#000"); m.addColorStop(342 / 608, "rgba(0,0,0,0)"); m.addColorStop(1, "rgba(0,0,0,0)");
+        afwerken(l, m);
+        /* alleen waar het shirt zit (anders wordt de bult grijs) */
+        l.globalCompositeOperation = "destination-in"; l.save(); l.translate(318 * sc, 182 * sc); l.rotate(Math.PI / 2); l.drawImage(sh, -168 * sc, -250 * sc, 336 * sc, 500 * sc); l.restore(); l.globalCompositeOperation = "source-over";
+        /* hals vrijlaten */
+        l.globalCompositeOperation = "destination-out"; const n = l.createLinearGradient(530 * sc, 0, 575 * sc, 0); n.addColorStop(0, "rgba(0,0,0,0)"); n.addColorStop(1, "#000"); l.fillStyle = n; l.fillRect(530 * sc, 0, bw, bh); l.globalCompositeOperation = "source-over";
+        t.save(); t.setTransform(1, 0, 0, 1, 0, 0); t.drawImage(lc, 0, 0); t.restore(); }
+      if (sokken) { const [lc, l] = nieuw();
+        const g = l.createLinearGradient(0, 360 * sc, 0, bh); g.addColorStop(0, "#ff8a3d"); g.addColorStop(.12, "#ff8a3d"); g.addColorStop(.13, "#f26a1b"); g.addColorStop(.86, "#f26a1b"); g.addColorStop(.87, "#3a3a3a"); g.addColorStop(1, "#2a2a2a");
+        l.fillStyle = g; l.fillRect(0, 360 * sc, bw, bh);
+        const m = l.createLinearGradient(0, 0, 0, bh); m.addColorStop(0, "rgba(0,0,0,0)"); m.addColorStop(356 / 608, "rgba(0,0,0,0)"); m.addColorStop(364 / 608, "#000"); m.addColorStop(1, "#000");
+        afwerken(l, m);
+        t.save(); t.setTransform(1, 0, 0, 1, 0, 0); t.drawImage(lc, 0, 0); t.restore(); }
+      return c;
     };
     const OPMAAK = {
       ticket() {
@@ -614,6 +647,95 @@
         infoKort(1212, MUTED, true); selectieRegel(1262, "rgba(244,239,230,.6)", false, 20); bron = [f];
       },
 
+      /* Teamfoto: de selectie als kamelen in ons shirt, op een echt hockeyveld */
+      teamfoto() {
+        beeld(ctx, zijImg, FOTO.stadion, GRADE.staal, 0, 0, W, H); ctx.fillStyle = "rgba(0,10,30,.35)"; ctx.fillRect(0, 0, W, H);
+        verloop(0, 360, .75, 0); verloop(980, H, 0, .95);
+        logoOp(L, 50, 52); ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        ctx.fillStyle = WIT; ctx.font = F(700, 112); ctx.textAlign = "left"; ctx.fillText("DE SELECTIE.", L - 4, 250);
+        ctx.fillStyle = ZAND; ctx.font = F(300, 34); ctx.fillText(o2.sub || "Zestien kamelen. Eén plan.", L, 300);
+        const lijst = (spelers.length ? spelers : Array.from({ length: 12 }, () => "")).slice(0, 18);
+        const rijen = lijst.length > 12 ? [Math.ceil(lijst.length / 3), Math.ceil(lijst.length / 3), lijst.length - 2 * Math.ceil(lijst.length / 3)] : [Math.ceil(lijst.length / 2), Math.floor(lijst.length / 2)];
+        let i = 0; const yBasis = [530, 770, 1010], labels = [];
+        rijen.forEach((n, r) => { const rr = r + (3 - rijen.length), bw = [165, 195, 230][rr] || 210, gap = (W - 40) / n;
+          for (let k = 0; k < n; k++, i++) { const x = 20 + gap * k + gap / 2, y = yBasis[rr];
+            const c = aangekleed(bw, { spiegel: (k + r) % 2 === 1 }); ctx.save(); ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = 18; ctx.drawImage(c, x - bw / 2, y - c.height); ctx.restore();
+            if (lijst[i]) labels.push([lijst[i], x, y]); } });
+        labels.forEach(([nm, x, y]) => { ctx.font = F(700, 19); const tw = breedte(ctx, nm, 2) + 14; ctx.fillStyle = "rgba(10,20,30,.85)"; ctx.fillRect(x - tw / 2, y + 2, tw, 26); ctx.fillStyle = WIT; spatie(ctx, nm, x, y + 21, 2, "center"); });
+        ctx.fillStyle = WIT; ctx.font = F(700, 38); spatie(ctx, `${namen[0]} – ${namen[1]}`, L, 1170, 5); infoKort(1212, MUTED, true);
+        ctx.fillStyle = "rgba(244,239,230,.6)"; ctx.font = F(500, 22); ctx.textAlign = "left"; ctx.fillText("Teamfoto genomen vlak voor de winst.", L, 1262);
+        bron = [FOTO.stadion, KAMEEL];
+      },
+
+      /* Sokken omhoog: een echte kameel in onze oranje sokken */
+      sokken() {
+        const gr = ctx.createRadialGradient(W / 2, 560, 80, W / 2, 600, 950); gr.addColorStop(0, "#1f5139"); gr.addColorStop(1, "#0a1f15"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+        for (let k = 0; k < 20000; k++) { ctx.fillStyle = `rgba(255,255,255,${Math.random() * .04})`; ctx.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+        const bw = 980, c = aangekleed(bw, { sokken: true, spiegel: true });
+        ctx.save(); ctx.fillStyle = "rgba(0,0,0,.45)"; ctx.filter = "blur(18px)"; ctx.beginPath(); ctx.ellipse(W / 2 + 20, 905, 380, 26, 0, 0, 7); ctx.fill(); ctx.restore();
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.4)"; ctx.shadowBlur = 30; ctx.drawImage(c, W / 2 - bw / 2 + 40, 910 - c.height); ctx.restore();
+        logoOp(L, 50, 52); ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        ctx.fillStyle = WIT; ctx.font = F(700, 150); ctx.textAlign = "left"; ctx.fillText("SOKKEN", L - 4, 1010); ctx.fillStyle = "#f26a1b"; ctx.fillText("OMHOOG.", L - 4 + breedte((ctx.font = F(700, 150), ctx), "SOKKEN ", 0), 1010);
+        ctx.fillStyle = "rgba(244,239,230,.3)"; ctx.fillRect(L, 1060, W - 2 * L, 1);
+        ctx.fillStyle = WIT; ctx.font = F(700, 38); spatie(ctx, `${namen[0]} – ${namen[1]}`, L, 1120, 5);
+        infoKort(1162, MUTED, true); selectieRegel(1214, "rgba(244,239,230,.6)", false, 20); bron = [KAMEEL];
+      },
+
+      /* Getemd: de leeuw in de kooi, een kameel in ons shirt ervoor */
+      getemd() {
+        beeld(ctx, imgs2[0] || zijImg, FOTO.kooi, GRADE.zw, 0, 0, W, H); vignet(.55); verloop(700, H, 0, .95); verloop(200, 0, 0, .5);
+        const bw = 760, c = aangekleed(bw, {});
+        ctx.save(); ctx.fillStyle = "rgba(0,0,0,.55)"; ctx.filter = "blur(18px)"; ctx.beginPath(); ctx.ellipse(330, 985, 300, 24, 0, 0, 7); ctx.fill(); ctx.restore();
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = 30; ctx.drawImage(c, -60, 990 - c.height); ctx.restore();
+        verloop(940, H, 0, .9);
+        logoOp(L, 50, 52); ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        ctx.fillStyle = WIT; ctx.font = F(700, 200); ctx.textAlign = "left"; ctx.fillText("GETEMD.", L - 6, 300);
+        ctx.fillStyle = "rgba(244,239,230,.3)"; ctx.fillRect(L, 1112, W - 2 * L, 1);
+        ctx.fillStyle = WIT; ctx.font = F(700, 38); spatie(ctx, `${namen[0]} – ${namen[1]}`, L, 1170, 5);
+        infoKort(1212, MUTED, true); selectieRegel(1262, "rgba(244,239,230,.6)", false, 20); bron = [FOTO.kooi, KAMEEL];
+      },
+
+      /* Het plan: tactiekbord op echt kunstgras, alle pijlen eindigen in hun doel */
+      plan() {
+        const t = document.createElement("canvas"); t.width = W; t.height = H; beeld(t.getContext("2d"), imgs2[0], { ...FOTO.bal, fx: .15, fy: .2, zoom: 2.4 }, { s: [10, 40, 80], h: [120, 200, 255], kleur: .8 }, 0, 0, W, H);
+        ctx.save(); ctx.filter = "blur(2px)"; ctx.drawImage(t, 0, 0); ctx.restore(); ctx.fillStyle = "rgba(8,40,90,.35)"; ctx.fillRect(0, 0, W, H);
+        /* veldlijnen */
+        const vx = 90, vy = 150, vw = W - 180, vh = 900; ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 4; ctx.strokeRect(vx, vy, vw, vh);
+        ctx.beginPath(); ctx.moveTo(vx, vy + vh / 2); ctx.lineTo(vx + vw, vy + vh / 2); ctx.stroke();
+        [vy, vy + vh].forEach((y, k) => { const d = k ? -1 : 1; ctx.beginPath(); ctx.arc(W / 2, y, 230, d > 0 ? 0 : Math.PI, d > 0 ? Math.PI : 2 * Math.PI); ctx.stroke(); ctx.fillStyle = "#fff"; ctx.fillRect(W / 2 - 55, y - (d > 0 ? 14 : 0), 110, 14); });
+        ctx.setLineDash([12, 12]); [vy, vy + vh].forEach((y, k) => { const d = k ? -1 : 1; ctx.beginPath(); ctx.arc(W / 2, y, 300, d > 0 ? 0 : Math.PI, d > 0 ? Math.PI : 2 * Math.PI); ctx.stroke(); }); ctx.setLineDash([]);
+        /* tegenstanders */
+        const zij = [[300, 330], [520, 300], [760, 340], [420, 450], [650, 470]];
+        zij.forEach(([x, y]) => { ctx.fillStyle = "#2a2a2a"; ctx.beginPath(); ctx.arc(x, y, 26, 0, 7); ctx.fill(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 3; ctx.stroke(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x - 9, y - 9); ctx.lineTo(x + 9, y + 9); ctx.moveTo(x + 9, y - 9); ctx.lineTo(x - 9, y + 9); ctx.stroke(); });
+        /* onze kamelen als magneten, met krijtpijlen naar het doel */
+        const wij = [[220, 860], [430, 760], [640, 820], [860, 700], [540, 620]];
+        ctx.strokeStyle = "rgba(255,255,255,.95)"; ctx.lineWidth = 5; ctx.lineCap = "round";
+        const pijl = (x1, y1, cx, cy, x2, y2) => { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.quadraticCurveTo(cx, cy, x2, y2); ctx.stroke(); const a = Math.atan2(y2 - cy, x2 - cx); ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - 22 * Math.cos(a - .5), y2 - 22 * Math.sin(a - .5)); ctx.moveTo(x2, y2); ctx.lineTo(x2 - 22 * Math.cos(a + .5), y2 - 22 * Math.sin(a + .5)); ctx.stroke(); };
+        pijl(220, 830, 160, 520, 470, 200); pijl(430, 730, 300, 520, 520, 190); pijl(640, 790, 860, 500, 560, 195); pijl(860, 670, 960, 420, 610, 200); pijl(540, 590, 470, 400, 540, 200);
+        wij.forEach(([x, y]) => { ctx.save(); ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = 12; ctx.fillStyle = "#f26a1b"; ctx.beginPath(); ctx.arc(x, y, 38, 0, 7); ctx.fill(); ctx.restore(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 38, 0, 7); ctx.stroke();
+          if (logo) { const w2 = 52, h2 = w2 * logo.height / logo.width; ctx.drawImage(kameelVorm("#fff", w2), x - w2 / 2, y - h2 / 2); } });
+        logoOp(L, 40, 48); ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 82, 7, "right");
+        ctx.fillStyle = "rgba(5,20,45,.92)"; ctx.fillRect(0, 1080, W, H - 1080);
+        ctx.fillStyle = WIT; ctx.font = F(700, 96); ctx.textAlign = "left"; ctx.fillText("HET PLAN.", L - 4, 1176);
+        ctx.fillStyle = WIT; ctx.font = F(700, 30); spatie(ctx, `${namen[0]} – ${namen[1]}`, L + 470, 1150, 4);
+        ctx.fillStyle = MUTED; ctx.font = F(500, 22); ctx.fillText("Alle pijlen wijzen dezelfde kant op.", L + 470, 1180);
+        infoKort(1236, MUTED, true); selectieRegel(1282, "rgba(244,239,230,.6)", false, 19); bron = [FOTO.bal];
+      },
+
+      /* De eerste zit al: een echte bal in een echt doel */
+      eerste() {
+        beeld(ctx, imgs2[0], FOTO.doel, GRADE.groen, 0, 0, W, H); vignet(.55); verloop(760, H, 0, .95); verloop(200, 0, 0, .5);
+        /* bal uitknippen uit de close-up en in het net leggen */
+        const b = imgs2[1]; if (b) { const r = 188 * b.width / 1280, cx = b.width * .5, cy = b.height * .49, d = 74;
+          const c = document.createElement("canvas"); c.width = c.height = d; const t = c.getContext("2d"); t.beginPath(); t.arc(d / 2, d / 2, d / 2, 0, 7); t.clip(); t.drawImage(b, cx - r, cy - r, r * 2, r * 2, 0, 0, d, d);
+          ctx.save(); ctx.fillStyle = "rgba(0,0,0,.45)"; ctx.filter = "blur(6px)"; ctx.beginPath(); ctx.ellipse(o2.balX || 560, (o2.balY || 760) + d / 2 - 4, d * .55, 8, 0, 0, 7); ctx.fill(); ctx.restore();
+          ctx.drawImage(c, (o2.balX || 560) - d / 2, (o2.balY || 760) - d / 2); }
+        logoOp(L, 50, 52); ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        ctx.fillStyle = WIT; ctx.font = F(700, 150); ctx.textAlign = "left"; ctx.fillText("DE EERSTE", L - 4, 990); ctx.fillStyle = "#f26a1b"; ctx.fillText("ZIT AL.", L - 4, 1124 - 20);
+        ctx.fillStyle = "rgba(244,239,230,.3)"; ctx.fillRect(L, 1140, W - 2 * L, 1);
+        ctx.fillStyle = WIT; ctx.font = F(700, 34); spatie(ctx, `${namen[0]} – ${namen[1]}`, L, 1190, 5);
+        infoKort(1228, MUTED, true); selectieRegel(1272, "rgba(244,239,230,.6)", false, 19); bron = [FOTO.doel, FOTO.bal];
+      },
       /* Tenue: shirt, broek of sokken als echt voorwerp op een effen ondergrond */
       tenue() {
         const o = opt.mini || {}, [c1, c2] = o.bg || ["#1d4a35", "#0f2a1e"], ink = o.ink || WIT, acc = o.accent || "#f26a1b";
