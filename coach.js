@@ -349,13 +349,18 @@
           <li>Open Scriptable, tik op <b>+</b>, plak het script en noem het <b>Kamelen</b>.</li>
           <li>Houd je beginscherm ingedrukt, tik op <b>+</b> (of <b>Wijzig</b>), kies <b>Scriptable</b> en voeg de middelste widget toe.</li>
           <li>Tik op de widget terwijl hij wiebelt en kies bij <b>Script</b> voor <b>Kamelen</b>.</li></ol>
-          <p class="muted">Werkt ook klein en op het vergrendelscherm. Tik op de widget om de app te openen.</p>
+          <p class="muted">Werkt in elk formaat en op het vergrendelscherm. Verbeteringen aan de widget komen vanzelf mee; je hoeft het script maar één keer te plakken.</p>
           <div class="cb-links"><button type="button" class="btn" data-widget-kopie>Kopieer het script</button><span class="tt-status" id="wg-st" role="status"></span></div></div>`;
       if (!dlg.open) { try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } } return; }
     const k = e.target.closest("[data-widget-kopie]"); if (!k) return;
     const st = document.getElementById("wg-st");
-    try { const t = await fetch("widget/kamelen-widget.js").then(r => r.text()); await navigator.clipboard.writeText(t); st.textContent = "Gekopieerd! Plak het in Scriptable."; }
-    catch { st.innerHTML = `Kopiëren lukte niet. <a href="widget/kamelen-widget.js" target="_blank">Open het script</a> en kopieer het zelf.`; }
+    const URL_ = "widget/kamelen-widget-laden.js?" + Date.now();
+    try {
+      /* iPhone: kopiëren moet direct bij het tikken gebeuren, dus met een ClipboardItem dat zelf het bestand ophaalt */
+      if (window.ClipboardItem && navigator.clipboard.write) await navigator.clipboard.write([new ClipboardItem({ "text/plain": fetch(URL_).then(r => r.text()).then(t => new Blob([t], { type: "text/plain" })) })]);
+      else await navigator.clipboard.writeText(await fetch(URL_).then(r => r.text()));
+      st.textContent = "Gekopieerd! Plak het in Scriptable.";
+    } catch { st.innerHTML = `Kopiëren lukte niet. <a href="widget/kamelen-widget-laden.js" target="_blank">Open het script</a> en kopieer het zelf.`; }
   });
   addEventListener("hashchange", () => { zichtbaarheid(); if (location.hash === "#beheer") renderBeheer(); });
   document.addEventListener("click", e => { if (e.target.closest("#more-btn")) zichtbaarheid(); }, true);
