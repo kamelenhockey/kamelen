@@ -342,16 +342,29 @@
       document.getElementById("more-sheet").hidden = true; document.body.classList.remove("sheet-open");
       const dlg = document.getElementById("teamDialog");
       document.getElementById("dlg-sub").textContent = "iPhone"; document.getElementById("dlg-title").textContent = "Kamelen-widget";
-      document.getElementById("dlg-body").innerHTML = `<p>De volgende wedstrijd, hoe lang het nog duurt, de stand en de laatste uitslag op je beginscherm.</p>
-        <div class="dlg-sec"><ol class="sub-steps">
+      document.getElementById("dlg-body").innerHTML = `<p>De volgende wedstrijd, hoe lang het nog duurt, de stand en de laatste uitslagen op je beginscherm. Er is een indeling voor klein, middel, groot en het vergrendelscherm.</p>
+        <div class="dlg-sec"><h3 class="sub-h">Deel 1: de widget op je beginscherm</h3><ol class="wg-stappen">
           <li>Installeer de gratis app <a href="https://apps.apple.com/app/scriptable/id1405459188" target="_blank" rel="noopener">Scriptable</a>.</li>
           <li>Tik hieronder op <b>Kopieer het script</b>.</li>
-          <li>Open Scriptable, tik op <b>+</b>, plak het script en noem het <b>Kamelen</b>.</li>
-          <li>Houd je beginscherm ingedrukt, tik op <b>+</b> (of <b>Wijzig</b>), kies <b>Scriptable</b> en voeg de middelste widget toe.</li>
-          <li>Tik op de widget terwijl hij wiebelt en kies bij <b>Script</b> voor <b>Kamelen</b>.</li></ol>
-          <p class="muted">Werkt in elk formaat en op het vergrendelscherm. Verbeteringen aan de widget komen vanzelf mee; je hoeft het script maar één keer te plakken.</p>
-          <div class="cb-links"><button type="button" class="btn" data-widget-kopie>Kopieer het script</button><span class="tt-status" id="wg-st" role="status"></span></div></div>`;
+          <li>Open Scriptable, tik rechtsboven op <b>+</b>, plak het script en tik op de naam bovenaan om hem <b>Kamelen</b> te noemen. Tik op <b>Klaar</b>.</li>
+          <li>Houd je beginscherm ingedrukt tot alles wiebelt, tik linksboven op <b>Wijzig</b> → <b>Voeg widget toe</b>, zoek <b>Scriptable</b> en kies een formaat.</li>
+          <li>Houd de nieuwe widget ingedrukt → <b>Wijzig widget</b> en kies bij <b>Script</b> voor <b>Kamelen</b>.</li></ol>
+          <div class="cb-links"><button type="button" class="btn" data-widget-kopie>Kopieer het script</button><span class="tt-status" id="wg-st" role="status"></span></div>
+          <p class="muted">Je hoeft het script maar één keer te plakken: verbeteringen aan de widget komen vanzelf mee.</p></div>
+        <div class="dlg-sec"><h3 class="sub-h">Deel 2: tikken opent de Kamelen-app</h3>
+          <p>Zonder deze stappen opent een tik op de widget Scriptable of Safari. Een widget kan bij tikken alleen zijn eigen app openen, dus we gaan via de app Opdrachten (die staat al op je iPhone). Je ziet die heel even in beeld, daarna opent de Kamelen-app.</p>
+          <ol class="wg-stappen">
+          <li>Open de app <b>Opdrachten</b>, ga onderin naar <b>Opdrachten</b> en tik rechtsboven op <b>+</b>.</li>
+          <li>Tik bovenaan op de naam → <b>Wijzig naam</b> en typ precies <b>Kamelen</b> (met hoofdletter, geen spatie erachter).</li>
+          <li>Tik op <b>Voeg taak toe</b>, zoek op <b>URL</b> en kies <b>Open URL's</b>.</li>
+          <li>Tik op het blauwe woord <b>URL</b> en plak dit adres (let op: het begint met <i>webapp</i>, niet met https):
+            <div class="wg-url"><code>webapp://kamelenhockey.github.io/kamelen/</code><button type="button" class="btn sm ghost" data-wg-url>Kopieer</button></div></li>
+          <li>Tik op <b>Gereed</b>. Test het door in Opdrachten op de tegel <b>Kamelen</b> te tikken: de Kamelen-app moet openen.</li>
+          <li>Ga naar je beginscherm, houd de widget ingedrukt → <b>Wijzig widget</b> en typ bij <b>Parameter</b> het woord <b>opdracht</b>. Tik buiten het venster.</li></ol>
+          <p class="muted">Liever Safari? Typ bij Parameter dan <b>safari</b>.</p></div>`;
       if (!dlg.open) { try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } } return; }
+    const u = e.target.closest("[data-wg-url]");
+    if (u) { try { await navigator.clipboard.writeText("webapp://kamelenhockey.github.io/kamelen/"); u.textContent = "Gekopieerd"; } catch { u.textContent = "Kopiëren lukte niet"; } return; }
     const k = e.target.closest("[data-widget-kopie]"); if (!k) return;
     const st = document.getElementById("wg-st");
     const URL_ = "widget/kamelen-widget-laden.js?" + Date.now();
