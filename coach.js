@@ -1,11 +1,12 @@
 /* =========================================================
    Coachfunctie, beheerpaneel en bonusvraag-beheer
    - Opstelling: coaches en beheerders zetten de spelers van die wedstrijd op het veld of op de bank.
-     Iedereen ziet de opstelling bij de wedstrijd.
+     Alleen coaches en beheerders zien de opstelling, bij de wedstrijd en hier.
    - Beheerpaneel: alleen voor wie de beheercode heeft of als coach is ingelogd.
    Opslag in het Apps Script (types "opstelling", "bonusvraag", "bonus-uitslag").
    ========================================================= */
 (function () {
+  const VERSIE = ((document.currentScript || {}).src || "").split("v=")[1] || "?";
   const CFG = () => window.TOTO_CONFIG || {};
   const sleutel = m => `${m.datum}|${m.thuis}|${m.uit}`;
   const bcode = () => { try { return localStorage.getItem("kamelen-beheer") || ""; } catch { return ""; } };
@@ -15,6 +16,12 @@
     .sort((a, b) => toDate(a.datum, a.tijd || "12:00") - toDate(b.datum, b.tijd || "12:00"));
   const post = body => fetch(CFG().api, { method: "POST", body: JSON.stringify({ code: (window.IK || {}).code || "", beheercode: bcode(), ...body }) }).then(r => r.json());
   const foutTekst = f => f === "geen rechten" ? "Alleen coaches en beheerders kunnen dit." : f === "code" ? "Je inlogcode klopt niet meer. Log opnieuw in." : f === "te laat" ? "De wedstrijd is al begonnen." : f ? "Het script moet nog bijgewerkt worden." : "Opslaan lukte niet.";
+
+  /* Opstellingen: alleen voor coaches en beheerders, apart opgehaald (niet in de openbare gegevens) */
+  let _ops = null;
+  const opstellingen = vers => { if (!isBeheer() || !CFG().api) return Promise.resolve({});
+    if (!_ops || vers) _ops = post({ type: "opstellingen" }).then(r => r && r.ok ? r.opstellingen || {} : {}).catch(() => { _ops = null; return {}; });
+    return _ops; };
 
   /* Wie doet er mee: de selectie uit de app, anders de aanwezigen uit het afwezigheidsblad */
   function selectieVan(m) {
@@ -61,8 +68,8 @@
   /* ---------- Bij een wedstrijd (dialoog): de opstelling tonen, en voor beheerders een knop ---------- */
   window.coachVulOpstelling = async function (m) {
     const el = document.getElementById("wm-opstelling"); if (!el) return;
-    const j = await window.kamelenApi?.().catch(() => ({})) || {};
-    const o = (j.opstellingen || {})[sleutel(m)];
+    if (!isBeheer()) { el.remove(); return; }
+    const o = (await opstellingen())[sleutel(m)];
     const knop = isBeheer() ? `<button type="button" class="btn sm" data-coach-bewerk="${esc(sleutel(m))}">${o ? "✏️ Opstelling aanpassen" : "✏️ Opstelling maken"}</button>` : "";
     if (!o && !knop) { el.remove(); return; }
     el.innerHTML = `<h3 class="sub-h">Opstelling</h3>${o ? veldHtml(o.opstelling, false) + `<p class="muted cv-door">Gemaakt door ${esc(o.door || "de coach")}</p>` : `<p class="muted">Nog geen opstelling.</p>`}${knop}`;
@@ -72,32 +79,52 @@
   /* ---------- De editor ---------- */
   let ed = null;   // { m, o, sel, gekozen }
   async function openEditor(m) {
-    const j = await window.kamelenApi?.(true).catch(() => ({})) || {};
-    const bestaand = (j.opstellingen || {})[sleutel(m)];
-    const sel = keuzeVan(m), bekend = selectieVan(m).length > 0;
-    ed = { m, sel, bekend, o: bestaand ? JSON.parse(JSON.stringify(bestaand.opstelling)) : { veld: [], bank: [] }, gekozen: null };
-    /* alleen spelers uit de selectie houden */
-    if (bekend) { ed.o.veld = ed.o.veld.filter(p => sel.includes(p.n)); ed.o.bank = ed.o.bank.filter(n => sel.includes(n)); }
+    /* Komt de vraag uit het wedstrijdvenster: dat eerst dicht, anders ligt het over de editor heen */
+    const dlg = document.getElementById("teamDialog"), uitDialoog = !!(dlg && dlg.open); if (uitDialoog) dlg.close();
     let sh = document.getElementById("coach-sheet");
     if (!sh) { sh = document.createElement("div"); sh.id = "coach-sheet"; sh.className = "coach-sheet"; document.body.appendChild(sh); }
+    const sel = keuzeVan(m), bekend = selectieVan(m).length > 0;
+    ed = { m, sel, bekend, uitDialoog, o: { veld: [], bank: [] }, gekozen: null, laden: true };
     sh.hidden = false; document.body.classList.add("sheet-open"); tekenEditor();
+    /* Bestaande opstelling: eerst wat al geladen is (snel), het script niet opnieuw laten wachten */
+    const ops = await opstellingen();
+    if (!ed || ed.m !== m) return;
+    const bestaand = ops[sleutel(m)];
+    if (bestaand && !ed.o.veld.length && !ed.o.bank.length) {
+      ed.o = JSON.parse(JSON.stringify(bestaand.opstelling));
+      if (bekend) { ed.o.veld = ed.o.veld.filter(p => sel.includes(p.n)); ed.o.bank = ed.o.bank.filter(n => sel.includes(n)); }
+    }
+    ed.laden = false; tekenEditor();
   }
-  function sluitEditor() { const sh = document.getElementById("coach-sheet"); if (sh) sh.hidden = true; document.body.classList.remove("sheet-open"); ed = null; }
+  function sluitEditor(opnieuw) {
+    const sh = document.getElementById("coach-sheet"); if (sh) sh.hidden = true; document.body.classList.remove("sheet-open");
+    const terug = ed && ed.uitDialoog ? ed.m : null; ed = null;
+    if (terug && typeof openMatch === "function") openMatch(sleutel(terug));
+  }
   function tekenEditor() {
     const sh = document.getElementById("coach-sheet"); if (!sh || !ed) return;
     const { m, o, sel } = ed, opVeld = new Set(o.veld.map(p => p.n)), opBank = new Set(o.bank);
     const vrij = sel.filter(n => !opVeld.has(n) && !opBank.has(n));
+    const vast = typeof ROSTER !== "undefined" ? ROSTER : new Set(), isInv = n => vast.size > 0 && !vast.has(n);
+    const chip = n => `<button type="button" class="cv-chip${isInv(n) ? " inv" : ""}${ed.gekozen === n ? " aan" : ""}" data-naam="${esc(n)}">${esc(n)}</button>`;
+    const scroll = sh.querySelector(".cs-body")?.scrollTop || 0, poolScroll = sh.querySelector(".cs-pool-lijst")?.scrollLeft || 0;
+    const hint = ed.gekozen ? `<b>${esc(ed.gekozen)}</b> gekozen: tik op het veld of de bank` : "Tik op een naam en daarna op een plek. Slepen kan ook.";
     sh.innerHTML = `<div class="cs-kop"><button type="button" class="cs-x" data-cs="sluit" aria-label="Sluiten">×</button>
-        <div><div class="k">Opstelling</div><b>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}</b> <small>${fmtDay(m.datum, { weekday: "short", day: "numeric", month: "short" })}</small></div>
-        <button type="button" class="btn sm" data-cs="opslaan">Opslaan</button></div>
+        <div><b>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}</b><small>${fmtDay(m.datum, { weekday: "long", day: "numeric", month: "long" })}${m.tijd ? ` · ${esc(m.tijd)}` : ""}</small></div>
+        <button type="button" class="btn sm cs-opslaan" data-cs="opslaan">Opslaan</button></div>
       <div class="cs-body" data-geen-swipe data-geen-trek>
-        ${ed.bekend ? "" : `<p class="cs-uitleg"><b>De selectie is nog niet bekend</b>, dus je kunt uit alle spelers en invallers kiezen.</p>`}
-        <p class="cs-uitleg">Tik op een naam en daarna op een plek op het veld. Sleep spelers om ze te verplaatsen, naar de bank of terug naar de lijst.</p>
+        <div class="cs-teller"><span>Veld <b>${o.veld.length}</b>/11</span><span>Bank <b>${o.bank.length}</b></span><span class="cs-knoppen"><button type="button" class="cs-link" data-cs="auto">Standaard</button><button type="button" class="cs-link" data-cs="leeg">Leegmaken</button></span></div>
+        <p class="cs-hint${ed.gekozen ? " actief" : ""}" role="status">${hint}</p>
         ${veldHtml(o, true)}
-        <div class="cs-pool" data-zone="pool"><span class="cv-bank-k">${ed.bekend ? "Selectie" : "Alle spelers"}</span>${vrij.length ? vrij.map(n => `<button type="button" class="cv-chip${ed.gekozen === n ? " aan" : ""}" data-naam="${esc(n)}">${esc(n)}</button>`).join("") : `<span class="cv-leeg">${sel.length ? "Iedereen staat op het veld of de bank" : ""}</span>`}</div>
-        <div class="cs-knoppen"><button type="button" class="btn sm ghost" data-cs="auto">Standaard opstelling</button><button type="button" class="btn sm ghost" data-cs="leeg">Leegmaken</button><span class="tt-status" id="cs-status" role="status"></span></div>
+        <div class="cs-dock">
+          <div class="cs-rij" data-zone="bank"><span class="cs-rij-k">Bank</span><div class="cs-lijst">${o.bank.length ? o.bank.map(chip).join("") : `<span class="cv-leeg">Tik op een speler en dan hier</span>`}</div></div>
+          <div class="cs-rij" data-zone="pool"><span class="cs-rij-k">${ed.bekend ? "Selectie" : "Iedereen"} <small>${vrij.length}</small></span><div class="cs-lijst cs-pool-lijst">${ed.laden && !sel.length ? `<span class="cv-leeg">Laden…</span>` : vrij.length ? vrij.map(chip).join("") : `<span class="cv-leeg">${sel.length ? "Iedereen is ingedeeld" : "Geen spelers gevonden. Tik op ↻ bovenin de app en probeer het opnieuw."}</span>`}</div></div>
+          ${ed.bekend ? "" : `<p class="cs-noot">De selectie is nog niet bekend, dus je kiest uit alle spelers en (gestippeld) de invallers.</p>`}
+          <span class="tt-status" id="cs-status" role="status"></span>
+        </div>
       </div>`;
-    if (ed.gekozen) sh.querySelectorAll(`.cv-chip[data-naam="${CSS.escape(ed.gekozen)}"], .cv-sp[data-naam="${CSS.escape(ed.gekozen)}"]`).forEach(x => x.classList.add("aan"));
+    sh.querySelector(".cs-body").scrollTop = scroll; const pl = sh.querySelector(".cs-pool-lijst"); if (pl) pl.scrollLeft = poolScroll;
+    if (ed.gekozen) { sh.querySelectorAll(`.cv-sp[data-naam="${CSS.escape(ed.gekozen)}"]`).forEach(x => x.classList.add("aan")); sh.querySelector(".cs-body .cv-veld")?.classList.add("cs-veld-doel"); }
   }
   const weg = n => { ed.o.veld = ed.o.veld.filter(p => p.n !== n); ed.o.bank = ed.o.bank.filter(x => x !== n); };
   function zetOp(n, zone, x, y) { weg(n); if (zone === "veld") ed.o.veld.push({ n, x: Math.round(Math.max(4, Math.min(96, x))), y: Math.round(Math.max(3, Math.min(97, y))) }); else if (zone === "bank") ed.o.bank.push(n); }
@@ -116,7 +143,7 @@
         if (ed.bekend) vrij.forEach(n => { if (!ed.o.bank.includes(n)) zetOp(n, "bank"); }); return tekenEditor(); }
       if (a === "opslaan") { const st = document.getElementById("cs-status"); st.textContent = "Opslaan…"; knop.disabled = true;
         try { const r = await post({ type: "opstelling", wedstrijd: sleutel(ed.m), opstelling: ed.o });
-          if (r.ok) { st.textContent = "Opgeslagen!"; const m = ed.m; await window.kamelenApi?.(true); setTimeout(() => { sluitEditor(); window.coachVulOpstelling(m); renderBeheer(); }, 500); }
+          if (r.ok) { st.textContent = "Opgeslagen!"; const m = ed.m; await opstellingen(true); setTimeout(() => { sluitEditor(); renderBeheer(); setTimeout(() => window.coachVulOpstelling(m), 50); }, 400); }
           else { st.textContent = foutTekst(r.fout); knop.disabled = false; } }
         catch { st.textContent = "Geen verbinding."; knop.disabled = false; } return; }
     }
@@ -133,11 +160,12 @@
   document.addEventListener("pointerdown", e => {
     const sh = document.getElementById("coach-sheet"); if (!sh || sh.hidden || !ed) return;
     const el = e.target.closest(".cs-body .cv-sp, .cs-body .cv-chip"); if (!el) return;
-    sleep = { n: el.dataset.naam, x0: e.clientX, y0: e.clientY, el, spook: null };
+    sleep = { n: el.dataset.naam, x0: e.clientX, y0: e.clientY, el, spook: null, chip: el.classList.contains("cv-chip") };
   });
   document.addEventListener("pointermove", e => {
     if (!sleep) return;
-    if (!sleep.spook) { if (Math.hypot(e.clientX - sleep.x0, e.clientY - sleep.y0) < 8) return;
+    if (!sleep.spook) { const dx = Math.abs(e.clientX - sleep.x0), dy = Math.abs(e.clientY - sleep.y0); if (Math.hypot(dx, dy) < 8) return;
+      if (sleep.chip && dx > dy) { sleep = null; return; }   /* zijwaarts = door de lijst scrollen */
       sleep.spook = document.createElement("div"); sleep.spook.className = "cv-spook"; sleep.spook.textContent = sleep.n; document.body.appendChild(sleep.spook); sleep.el.classList.add("weg"); }
     e.preventDefault(); sleep.spook.style.left = e.clientX + "px"; sleep.spook.style.top = e.clientY + "px";
   }, { passive: false });
@@ -160,12 +188,12 @@
     const j = await window.kamelenApi?.().catch(() => ({})) || {};
     const nu = Date.now(), alle = onze(), komend = alle.filter(m => toDate(m.datum, m.tijd || "23:00") > nu - 3 * 3600e3).slice(0, 6);
     const gespeeld = alle.filter(m => m.score).reverse();
-    const bq = j.bonusvragen || {}, ops = j.opstellingen || {};
+    const bq = j.bonusvragen || {}, ops = await opstellingen();
     const volgende = komend[0];
     const sel = volgende ? keuzeVan(volgende) : [];
     const openBonus = gespeeld.filter(m => bq[sleutel(m)] && !bq[sleutel(m)].antwoord);
     box.innerHTML = `
-      <section class="card"><h2 class="cb-h">Opstellingen</h2><p class="muted">Zet de spelers van de selectie op het veld of de bank. Iedereen ziet de opstelling bij de wedstrijd.</p>
+      <section class="card"><h2 class="cb-h">Opstellingen</h2><p class="muted">Zet de spelers van de selectie op het veld of de bank. Alleen coaches en beheerders zien de opstelling, bij de wedstrijd en hier.</p>
         ${komend.map(m => `<div class="cb-rij"><span><b>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}</b><br><small>${fmtDay(m.datum, { weekday: "short", day: "numeric", month: "short" })} · ${selectieVan(m).length ? `${selectieVan(m).length} spelers` : "selectie nog niet bekend"}${ops[sleutel(m)] ? " · ✓ opstelling staat" : ""}</small></span>
           <button type="button" class="btn sm" data-coach-bewerk="${esc(sleutel(m))}">${ops[sleutel(m)] ? "Aanpassen" : "Maken"}</button></div>`).join("") || `<p class="muted">Geen komende wedstrijden.</p>`}
       </section>
@@ -183,7 +211,7 @@
       </section>
       <section class="card"><h2 class="cb-h">Snel naar</h2><div class="cb-links">
         <a class="btn sm ghost" href="#stemmen">Kameel &amp; ezel sluiten</a><a class="btn sm ghost" href="#liters">Liter-incassobureau</a><a class="btn sm ghost" href="#toto">Kamelen-Scorito</a><a class="btn sm ghost" href="#fotos">Foto's en quotes</a></div></section>
-      <section class="card"><h2 class="cb-h">App</h2><div class="cb-rij"><span><small>Ingelogd als ${esc((window.IK || {}).naam || "?")}${(window.IK || {}).rol === "coach" ? " (coach)" : ""}${bcode() ? " · beheercode op dit apparaat" : ""}</small></span></div>
+      <section class="card"><h2 class="cb-h">App</h2><div class="cb-rij"><span><small>Ingelogd als ${esc((window.IK || {}).naam || "?")}${(window.IK || {}).rol === "coach" ? " (coach)" : ""}${bcode() ? " · beheercode op dit apparaat" : ""} · versie ${esc(VERSIE)}</small></span></div>
         <div class="cb-links"><button type="button" class="btn sm ghost" data-cb="wis">Bewaarde gegevens wissen en opnieuw laden</button>${bcode() ? `<button type="button" class="btn sm ghost" data-cb="uit">Beheercode van dit apparaat halen</button>` : ""}</div></section>`;
   }
   window.renderBeheer = renderBeheer;
@@ -230,5 +258,5 @@
   });
   addEventListener("hashchange", () => { zichtbaarheid(); if (location.hash === "#beheer") renderBeheer(); });
   document.addEventListener("click", e => { if (e.target.closest("#more-btn")) zichtbaarheid(); }, true);
-  setTimeout(() => { zichtbaarheid(); if (location.hash === "#beheer") renderBeheer(); }, 0);
+  setTimeout(() => { zichtbaarheid(); if (isBeheer()) opstellingen(); if (location.hash === "#beheer") renderBeheer(); }, 0);
 })();

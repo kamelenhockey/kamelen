@@ -219,13 +219,11 @@ function doGet(e) {
   profielTab_().getDataRange().getValues().slice(1).forEach(r => { if (r[0] && r[1]) profielfotos[r[0]] = r[1]; });
   const reacties = reactieTab_().getDataRange().getValues().slice(1).filter(r => r[1]).map(r => ({ tijd: r[0], id: r[1], foto: r[2], door: r[3], tekst: r[4] }));
   const ideeen = ideeTab_().getDataRange().getValues().slice(1).filter(r => r[1]).map(r => ({ tijd: r[0], id: r[1], door: r[2], tekst: r[3], soort: r[4], stemmen: String(r[5] || "").split(",").filter(String), status: r[6] || "nieuw", reactie: r[7] || "" }));
-  const opstellingen = {}; const op = laatstePer_(opstelTab_(), 1);
-  Object.keys(op).forEach(w => { try { opstellingen[w] = { opstelling: JSON.parse(op[w].r[2]), door: op[w].r[3], tijd: op[w].r[0] }; } catch (x) {} });
   const bonusvragen = {}; const bq = laatstePer_(bonusTab_(), 1);
   Object.keys(bq).forEach(w => { const r = bq[w].r; if (!r[2]) return; bonusvragen[w] = { vraag: r[2], opties: String(r[3] || "").split("|").filter(String), antwoord: r[4] || null, punten: Number(r[5]) || 2, aftrap: r[6] }; });
   const bonusantwoorden = bonusAntTab_().getDataRange().getValues().slice(1).filter(r => r[1]).map(r => {
     const open = r[4] && new Date(r[4]) > nu; return { tijd: r[0], naam: r[1], wedstrijd: r[2], antwoord: open ? null : r[3] }; });
-  return json_({ ok: true, voorspellingen, stemmen, gesloten: dicht, fotos, quotes, profielfotos, ideeen, reacties, opstellingen, bonusvragen, bonusantwoorden });
+  return json_({ ok: true, voorspellingen, stemmen, gesloten: dicht, fotos, quotes, profielfotos, ideeen, reacties, bonusvragen, bonusantwoorden });
 }
 
 function doPost(e) {
@@ -299,6 +297,13 @@ function doPost(e) {
       if (!ik) return json_({ ok: false, fout: "code" });
       /* Coachfunctie en bonusvraag: alleen coaches of wie de beheercode heeft */
       const magBeheren = gelijk_(d.beheercode, BEHEERCODE) || isCoach_(ik);
+      /* Opstellingen zijn alleen voor coaches en beheerders: niet in de openbare lijst, maar apart opvragen */
+      if (d.type === "opstellingen") {
+        if (!magBeheren) return json_({ ok: false, fout: "geen rechten" });
+        const opstellingen = {}, op = laatstePer_(opstelTab_(), 1);
+        Object.keys(op).forEach(w => { try { opstellingen[w] = { opstelling: JSON.parse(op[w].r[2]), door: op[w].r[3], tijd: op[w].r[0] }; } catch (x) {} });
+        return json_({ ok: true, opstellingen });
+      }
       if (d.type === "opstelling") {
         if (!magBeheren) return json_({ ok: false, fout: "geen rechten" });
         const w = String(d.wedstrijd || "").slice(0, 120); if (!w) return json_({ ok: false, fout: "invoer" });
