@@ -49,6 +49,14 @@
   const SEL = "@selectie";
   const bonusOpties = (opties, m) => { const uit = []; (opties || []).forEach(o => (o === SEL ? keuzeVan(m) : [o]).forEach(x => { if (!uit.includes(x)) uit.push(x); })); return uit; };
   window.bonusOpties = bonusOpties;
+  /* "Wie scoort het eerste doelpunt": punten naar linie (standaardopstelling) — aanvaller 1, middenvelder 2, verdediger of keeper 3 */
+  const LINIE_PUNT = { aanval: 1, middenveld: 2, verdediging: 3, keeper: 3 };
+  const linieVan = n => { n = canon(n);
+    const v = VAKKEN.find(([, , x]) => canon(x) === n); if (v) return v[3] === "keeper" ? "keeper" : lijnVan(v[1]);
+    const w = WISSELS.find(([x]) => canon(x) === n); return w ? w[1] : null; };
+  const isEersteGoal = q => /eerste doelpunt/i.test(String(q && q.vraag || ""));
+  window.bonusPunten = (q, antwoord) => isEersteGoal(q) ? (LINIE_PUNT[linieVan(antwoord)] || 2) : (Number(q.punten) || 0);
+  window.bonusPerLinie = isEersteGoal;
   window.selectieVan = selectieVan;
 
   /* ---------- Het veld ---------- */
@@ -277,7 +285,7 @@
       <div class="cb-veld"><span>Antwoorden <small>(${bonusOpties(concept.opties, m).length})</small></span>
         <div class="bq-opties">${concept.opties.map((o, i) => `<span class="bq-optie${o === SEL ? " sel" : ""}">${o === SEL ? `👥 Spelers van de wedstrijd <small>(${selectieVan(m).length ? `selectie, ${selectieVan(m).length}` : "nu nog iedereen"})</small>` : esc(o)}<button type="button" aria-label="${esc(o)} weghalen" data-bq-weg="${i}">×</button></span>`).join("") || `<span class="muted">Kies een snelle vraag of voeg antwoorden toe.</span>`}</div>
         <div class="bq-toevoeg"><input id="bq-nieuw" maxlength="40" placeholder="Antwoord toevoegen"><button type="button" class="btn sm ghost" data-bq="voeg">Toevoegen</button><button type="button" class="btn sm ghost" data-bq="spelers">+ Spelers van de wedstrijd</button></div></div>
-      <div class="cb-veld"><span>Punten voor een goed antwoord</span><div class="bq-punten">${[1, 2, 3, 4, 5].map(p => `<button type="button" class="${p === concept.punten ? "aan" : ""}" data-bq-pt="${p}">${p}</button>`).join("")}</div></div>
+      ${isEersteGoal(concept) ? `<div class="cb-veld"><span>Punten voor een goed antwoord</span><p class="bq-nu">Hangt af van de linie van de doelpuntenmaker: aanvaller <b>1</b>, middenvelder <b>2</b>, verdediger of keeper <b>3</b>. Invallers en spelers zonder vaste plek: <b>2</b>.</p></div>` : `<div class="cb-veld"><span>Punten voor een goed antwoord</span><div class="bq-punten">${[1, 2, 3, 4, 5].map(p => `<button type="button" class="${p === concept.punten ? "aan" : ""}" data-bq-pt="${p}">${p}</button>`).join("")}</div></div>`}
       <div class="cb-rij"><button type="button" class="btn" data-bq="opslaan">${huidig ? "Bonusvraag bijwerken" : "Bonusvraag opslaan"}</button><span class="tt-status" id="bq-st" role="status"></span></div>` : `<p class="muted">Er zijn geen komende wedstrijden.</p>`}
       ${gespeeld.length ? `<h3 class="sub-h bq-kop">Juiste antwoord invullen</h3>${gespeeld.map(x => { const q = bq[sleutel(x)], opts = q.opties.length ? bonusOpties(q.opties, x) : keuzeVan(x);
         return `<div class="bq-uitslag${q.antwoord ? " klaar" : ""}" data-bq-key="${esc(sleutel(x))}"><p><b>${esc(q.vraag)}</b><small>${esc(naamWed(x))}${x.score ? `, ${esc(x.score)}` : ""} · ${q.antwoord ? `antwoord: <b>${esc(q.antwoord)}</b>` : "nog geen antwoord"}</small></p>

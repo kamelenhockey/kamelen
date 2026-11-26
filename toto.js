@@ -101,7 +101,7 @@
       const q = bq[a.wedstrijd]; if (!q || !q.antwoord) continue;
       const naam = canon(a.naam); if (!naam) continue;
       const p = stand.get(naam) || { naam, punten: 0, exact: 0, toto: 0, aantal: 0 };
-      if (String(a.antwoord).trim().toLowerCase() === String(q.antwoord).trim().toLowerCase()) { p.punten += Number(q.punten) || 0; p.bonus = (p.bonus || 0) + 1; }
+      if (String(a.antwoord).trim().toLowerCase() === String(q.antwoord).trim().toLowerCase()) { p.punten += window.bonusPunten ? window.bonusPunten(q, q.antwoord) : (Number(q.punten) || 0); p.bonus = (p.bonus || 0) + 1; }
       stand.set(naam, p);
     }
     return { perMatch, stand: [...stand.values()].sort((a, b) => b.punten - a.punten || b.exact - a.exact || a.naam.localeCompare(b.naam)), ws };
@@ -202,8 +202,8 @@
   function bonusBlok(m) {
     const q = ((window._bonus || {}).vragen || {})[sleutel(m)]; if (!q || !q.vraag) return "";
     const mijn = mijnBonus()[sleutel(m)], opties = q.opties && q.opties.length ? (window.bonusOpties ? window.bonusOpties(q.opties, m) : q.opties.filter(o => o !== "@selectie")) : (window.keuzeVan ? window.keuzeVan(m) : []);
-    return `<div class="tt-bonus" data-bonus="${esc(sleutel(m))}"><h3>⭐ Bonusvraag · ${q.punten} ${q.punten == 1 ? "punt" : "punten"}</h3><p>${esc(q.vraag)}</p>
-      <div class="opties">${opties.map(o => `<button type="button" class="cv-chip${mijn === o ? " aan" : ""}" data-bonus-optie="${esc(o)}">${esc(o)}</button>`).join("") || `<span class="muted">De antwoorden komen zodra de selectie bekend is.</span>`}</div>
+    return `<div class="tt-bonus" data-bonus="${esc(sleutel(m))}"><h3>⭐ Bonusvraag · ${window.bonusPerLinie && window.bonusPerLinie(q) ? "1 tot 3 punten" : `${q.punten} ${q.punten == 1 ? "punt" : "punten"}`}</h3><p>${esc(q.vraag)}</p>
+      <div class="opties">${opties.map(o => `<button type="button" class="cv-chip${mijn === o ? " aan" : ""}" data-bonus-optie="${esc(o)}">${esc(o)}${window.bonusPerLinie && window.bonusPerLinie(q) ? ` <small class="tt-bpt">${window.bonusPunten(q, o)}</small>` : ""}</button>`).join("") || `<span class="muted">De antwoorden komen zodra de selectie bekend is.</span>`}</div>
       <span class="tt-status" role="status">${mijn ? `Jouw antwoord: <b>${esc(mijn)}</b>. Aanpassen kan tot de aftrap.` : ""}</span></div>`;
   }
   box.addEventListener("click", async ev => {
