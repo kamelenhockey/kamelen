@@ -6,3 +6,5 @@ ofl/alfaslabone/AlfaSlabOne-Regular.ttf
 ofl/barlowcondensed/BarlowCondensed-Bold.ttf
 ofl/barlowcondensed/BarlowCondensed-Medium.ttf
 ofl/barlowcondensed/BarlowCondensed-Light.ttf
+ofl/dmsans/DMSans%5Bopsz,wght%5D.ttf
+ofl/dmsans/DMSans-Italic%5Bopsz,wght%5D.ttf
