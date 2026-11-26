@@ -155,6 +155,7 @@
     const fotos = [zijF, onsF];
     let [logo, zijImg, onsImg, kameelImg] = await Promise.all([laad("logo.png").catch(() => null), laad(zijF.src).catch(() => null), laad(onsF.src).catch(() => null), laad("steden/kameel-uit.png").catch(() => null)]);
     const KAMEEL = { door: "Darthjipsu" };
+    const TENUE = {}; for (const it of ((opt.mini || {}).items || [])) if (!TENUE[it.img]) TENUE[it.img] = await laad(`tenue/${it.img}.png`).catch(() => null);
     const mo = opt.mini || {}, imgs2 = await Promise.all([mo.zij || mo.foto, mo.ons].map(k => k && FOTO[k] ? laad(FOTO[k].src).catch(() => null) : null));
     const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const ctx = cv.getContext("2d");
     ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
@@ -611,6 +612,25 @@
         ctx.fillStyle = "rgba(244,239,230,.3)"; ctx.fillRect(L, 1112, W - 2 * L, 1);
         ctx.fillStyle = WIT; ctx.font = F(700, 38); spatie(ctx, `${namen[0]} \u2013 ${namen[1]}`, L, 1170, 5);
         infoKort(1212, MUTED, true); selectieRegel(1262, "rgba(244,239,230,.6)", false, 20); bron = [f];
+      },
+
+      /* Tenue: shirt, broek of sokken als echt voorwerp op een effen ondergrond */
+      tenue() {
+        const o = opt.mini || {}, [c1, c2] = o.bg || ["#1d4a35", "#0f2a1e"], ink = o.ink || WIT, acc = o.accent || "#f26a1b";
+        const gr = ctx.createRadialGradient(W / 2, 520, 80, W / 2, 600, 950); gr.addColorStop(0, c1); gr.addColorStop(1, c2); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+        for (let i = 0; i < 26000; i++) { ctx.fillStyle = `rgba(${Math.random() > .5 ? "255,255,255" : "0,0,0"},${Math.random() * .05})`; ctx.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+        if (o.hanger) { ctx.strokeStyle = "rgba(220,220,220,.9)"; ctx.lineWidth = 7; ctx.lineCap = "round"; const hx = o.hanger[0], hy = o.hanger[1];
+          ctx.beginPath(); ctx.moveTo(hx, hy + 60); ctx.lineTo(hx, hy + 26); ctx.arc(hx + 18, hy + 26, 18, Math.PI, Math.PI * 1.9); ctx.stroke(); }
+        (o.items || []).forEach(it => { const img = TENUE[it.img]; if (!img) return; const h = it.h, w = h * img.width / img.height;
+          ctx.save(); ctx.translate(it.x, it.y); ctx.rotate(it.rot || 0); ctx.imageSmoothingQuality = "high";
+          ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 18; ctx.drawImage(img, -w / 2, -h / 2, w, h); ctx.restore(); });
+        logoOp(L, 50, 52); ctx.fillStyle = ink; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        const kop = o.kop || []; let ks = o.size || 150; ctx.font = F(700, ks); while (kop.some(t => breedte(ctx, t, 3) > W - 2 * L) && ks > 60) { ks -= 4; ctx.font = F(700, ks); }
+        const ky = o.kopY || 1040 - (kop.length - 1) * ks * .9;
+        kop.forEach((t, i) => { ctx.fillStyle = i === kop.length - 1 && o.accentKop ? acc : ink; ctx.font = F(700, ks); spatie(ctx, t, L - 4, ky + i * ks * .9, 3); });
+        ctx.fillStyle = o.lijn || "rgba(244,239,230,.3)"; ctx.fillRect(L, 1112, W - 2 * L, 1);
+        ctx.fillStyle = ink; ctx.font = F(700, 38); spatie(ctx, `${namen[0]} \u2013 ${namen[1]}`, L, 1170, 5);
+        infoKort(1212, o.zacht || MUTED, true); selectieRegel(1262, o.zacht || "rgba(244,239,230,.6)", false, 20); bron = [];
       },
 
       /* Minimaal: één echte foto, een paar woorden, verder niets */
