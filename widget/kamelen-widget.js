@@ -3,6 +3,10 @@
 // Werkt als klein, middelgroot en vergrendelscherm-widget. Tik op de widget om de Kamelen-app te openen.
 
 const SITE = "https://kamelenhockey.github.io/kamelen/";
+// Tikken op de widget opent de Kamelen-app op je beginscherm (iOS 16.4+, de app moet via Safari zijn toegevoegd).
+// Werkt dat bij jou niet, zet dan OPEN_IN_APP op false: dan opent de widget Safari.
+const OPEN_IN_APP = true;
+const OPEN_URL = OPEN_IN_APP ? SITE.replace(/^https:\/\//, "webapp://") : SITE;
 const ONS = /GCHC\s*H13/i;
 const NAVY = new Color("#163650"), SKY = new Color("#b9d8e8"), ORANJE = new Color("#f08c1c"), WIT = Color.white();
 
@@ -37,7 +41,7 @@ async function maak() {
   const fam = config.widgetFamily || "medium";
 
   const w = new ListWidget();
-  w.url = SITE;
+  w.url = OPEN_URL;
   w.refreshAfterDate = new Date(Date.now() + 3 * 36e5);
 
   if (fam.startsWith("accessory")) {      // vergrendelscherm
@@ -86,6 +90,6 @@ async function maak() {
 
 let widget;
 try { widget = await maak(); }
-catch (e) { widget = new ListWidget(); widget.backgroundColor = SKY; const t = widget.addText("Kamelen: geen verbinding"); t.textColor = NAVY; t.font = Font.boldSystemFont(13); }
+catch (e) { widget = new ListWidget(); widget.url = OPEN_URL; widget.backgroundColor = SKY; const t = widget.addText("Kamelen: geen verbinding"); t.textColor = NAVY; t.font = Font.boldSystemFont(13); }
 if (config.runsInWidget) Script.setWidget(widget); else await widget.presentMedium();
 Script.complete();
