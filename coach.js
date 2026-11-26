@@ -218,38 +218,88 @@
         ${komend.map(m => `<div class="cb-rij"><span><b>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}</b><br><small>${fmtDay(m.datum, { weekday: "short", day: "numeric", month: "short" })} · ${selectieVan(m).length ? `${selectieVan(m).length} spelers` : "selectie nog niet bekend"}${ops[sleutel(m)] ? " · ✓ opstelling staat" : ""}</small></span>
           <button type="button" class="btn sm" data-coach-bewerk="${esc(sleutel(m))}">${ops[sleutel(m)] ? "Aanpassen" : "Maken"}</button></div>`).join("") || `<p class="muted">Geen komende wedstrijden.</p>`}
       </section>
-      <section class="card"><h2 class="cb-h">Scorito-bonusvraag</h2>
-        ${volgende ? `<p class="muted">Voor ${esc(isUs(volgende.thuis) ? "Kamelen" : kortTeam(volgende.thuis))} – ${esc(isUs(volgende.uit) ? "Kamelen" : kortTeam(volgende.uit))}. Spelers kunnen antwoorden tot de aftrap.${bq[sleutel(volgende)] ? ` Nu: <b>${esc(bq[sleutel(volgende)].vraag)}</b>` : ""}</p>
-        <form id="cb-bonus" data-key="${esc(sleutel(volgende))}">
-          <label class="cb-veld"><span>Vraag</span><input id="cb-vraag" maxlength="200" placeholder="Wie scoort het eerste doelpunt?" value="${esc(bq[sleutel(volgende)]?.vraag || "")}"></label>
-          <label class="cb-veld"><span>Antwoorden (één per regel; leeg = de selectie)</span><textarea id="cb-opties" rows="4" placeholder="${esc(sel.slice(0, 4).join("\n"))}">${esc((bq[sleutel(volgende)]?.opties || []).join("\n"))}</textarea></label>
-          <label class="cb-veld cb-kort"><span>Punten</span><select id="cb-punten">${[1, 2, 3, 4, 5].map(p => `<option ${p === (bq[sleutel(volgende)]?.punten || 2) ? "selected" : ""}>${p}</option>`).join("")}</select></label>
-          <div class="cb-rij"><button class="btn sm" type="submit">Bonusvraag opslaan</button><span class="tt-status" id="cb-bst" role="status"></span></div>
-        </form>` : `<p class="muted">Geen volgende wedstrijd.</p>`}
-        ${openBonus.length ? `<h3 class="sub-h">Juiste antwoord invullen</h3>` + openBonus.map(m => { const q = bq[sleutel(m)];
-          return `<form class="cb-uitslag" data-key="${esc(sleutel(m))}"><p><b>${esc(q.vraag)}</b><br><small>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}, ${esc(m.score)}</small></p>
-            <div class="cb-rij"><select>${(q.opties.length ? q.opties : keuzeVan(m)).map(x => `<option>${esc(x)}</option>`).join("")}</select><button class="btn sm" type="submit">Opslaan</button><span class="tt-status" role="status"></span></div></form>`; }).join("") : ""}
-      </section>
+      <section class="card" id="cb-bonus-box"></section>
       <section class="card"><h2 class="cb-h">Snel naar</h2><div class="cb-links">
         <a class="btn sm ghost" href="#stemmen">Kameel &amp; ezel sluiten</a><a class="btn sm ghost" href="#liters">Liter-incassobureau</a><a class="btn sm ghost" href="#toto">Kamelen-Scorito</a><a class="btn sm ghost" href="#fotos">Foto's en quotes</a></div></section>
       <section class="card"><h2 class="cb-h">App</h2><div class="cb-rij"><span><small>Ingelogd als ${esc((window.IK || {}).naam || "?")}${(window.IK || {}).rol === "coach" ? " (coach)" : ""}${bcode() ? " · beheercode op dit apparaat" : ""} · versie ${esc(VERSIE)}</small></span></div>
         <div class="cb-links"><button type="button" class="btn sm ghost" data-cb="wis">Bewaarde gegevens wissen en opnieuw laden</button>${bcode() ? `<button type="button" class="btn sm ghost" data-cb="uit">Beheercode van dit apparaat halen</button>` : ""}</div></section>`;
+    tekenBonus();
   }
   window.renderBeheer = renderBeheer;
+
+  /* ---------- Scorito-bonusvraag: per wedstrijd een vraag, het antwoord later ---------- */
+  const SNEL = [
+    ["Wie scoort het eerste doelpunt van de Kamelen?", "selectie"],
+    ["Wie wordt kameel van de dag?", "selectie"],
+    ["Wie wordt ezel van de dag?", "selectie"],
+    ["Hoeveel doelpunten maken de Kamelen?", ["0", "1", "2", "3", "4", "5 of meer"]],
+    ["Hoeveel tegendoelpunten krijgen de Kamelen?", ["0", "1", "2", "3", "4 of meer"]],
+    ["Wie staat er bij rust voor?", ["Kamelen", "Gelijk", "Tegenstander"]],
+    ["Hoeveel strafcorners krijgen de Kamelen?", ["0–2", "3–5", "6–8", "9 of meer"]],
+    ["Scoort er een verdediger?", ["Ja", "Nee"]],
+    ["Krijgen de Kamelen een kaart?", ["Nee", "Groen", "Geel", "Rood"]],
+    ["Wie scoort het laatste doelpunt?", ["Kamelen", "Tegenstander", "Er valt geen doelpunt"]],
+  ];
+  let concept = null;   // { key, vraag, opties, punten }
+  const naamWed = m => `${isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis)} – ${isUs(m.uit) ? "Kamelen" : kortTeam(m.uit)}`;
+  async function tekenBonus() {
+    const box = document.getElementById("cb-bonus-box"); if (!box) return;
+    const j = await window.kamelenApi?.().catch(() => ({})) || {}, bq = j.bonusvragen || {};
+    const nu = Date.now(), alle = onze();
+    const komend = alle.filter(m => toDate(m.datum, m.tijd || "23:00") > nu).slice(0, 8);
+    const gespeeld = alle.filter(m => toDate(m.datum, m.tijd || "12:00") <= nu && bq[sleutel(m)]).reverse();
+    if (!concept || !komend.some(m => sleutel(m) === concept.key)) {
+      const m = komend[0]; const q = m && bq[sleutel(m)];
+      concept = m ? { key: sleutel(m), vraag: q?.vraag || "", opties: q?.opties?.length ? [...q.opties] : [], punten: q?.punten || 2 } : null;
+    }
+    const m = concept && komend.find(x => sleutel(x) === concept.key), huidig = m && bq[sleutel(m)];
+    box.innerHTML = `<h2 class="cb-h">Scorito-bonusvraag</h2>
+      ${m ? `<p class="muted">Kies een wedstrijd en een vraag. Spelers antwoorden in de Kamelen-Scorito tot de aftrap; het juiste antwoord vul je na de wedstrijd hieronder in.</p>
+      <div class="bq-wed" role="tablist">${komend.map(x => `<button type="button" class="bq-wedk${sleutel(x) === concept.key ? " aan" : ""}" data-bq-wed="${esc(sleutel(x))}"><b>${esc(naamWed(x))}</b><small>${fmtDay(x.datum, { day: "numeric", month: "short" })}${bq[sleutel(x)] ? " · ✓ vraag" : ""}</small></button>`).join("")}</div>
+      ${huidig ? `<p class="bq-nu">Staat nu: <b>${esc(huidig.vraag)}</b> (${huidig.punten} ${huidig.punten == 1 ? "punt" : "punten"})</p>` : ""}
+      <div class="cb-veld"><span>Snel kiezen</span><div class="bq-snel">${SNEL.map(([v], i) => `<button type="button" class="cv-chip${concept.vraag === v ? " aan" : ""}" data-bq-snel="${i}">${esc(v)}</button>`).join("")}</div></div>
+      <label class="cb-veld"><span>Vraag</span><input id="bq-vraag" maxlength="200" placeholder="Of typ zelf een vraag" value="${esc(concept.vraag)}"></label>
+      <div class="cb-veld"><span>Antwoorden <small>(${concept.opties.length})</small></span>
+        <div class="bq-opties">${concept.opties.map((o, i) => `<span class="bq-optie">${esc(o)}<button type="button" aria-label="${esc(o)} weghalen" data-bq-weg="${i}">×</button></span>`).join("") || `<span class="muted">Kies een snelle vraag of voeg antwoorden toe.</span>`}</div>
+        <div class="bq-toevoeg"><input id="bq-nieuw" maxlength="40" placeholder="Antwoord toevoegen"><button type="button" class="btn sm ghost" data-bq="voeg">Toevoegen</button><button type="button" class="btn sm ghost" data-bq="spelers">+ Spelers</button></div></div>
+      <div class="cb-veld"><span>Punten voor een goed antwoord</span><div class="bq-punten">${[1, 2, 3, 4, 5].map(p => `<button type="button" class="${p === concept.punten ? "aan" : ""}" data-bq-pt="${p}">${p}</button>`).join("")}</div></div>
+      <div class="cb-rij"><button type="button" class="btn" data-bq="opslaan">${huidig ? "Bonusvraag bijwerken" : "Bonusvraag opslaan"}</button><span class="tt-status" id="bq-st" role="status"></span></div>` : `<p class="muted">Er zijn geen komende wedstrijden.</p>`}
+      ${gespeeld.length ? `<h3 class="sub-h bq-kop">Juiste antwoord invullen</h3>${gespeeld.map(x => { const q = bq[sleutel(x)], opts = q.opties.length ? q.opties : keuzeVan(x);
+        return `<div class="bq-uitslag${q.antwoord ? " klaar" : ""}" data-bq-key="${esc(sleutel(x))}"><p><b>${esc(q.vraag)}</b><small>${esc(naamWed(x))}${x.score ? `, ${esc(x.score)}` : ""} · ${q.antwoord ? `antwoord: <b>${esc(q.antwoord)}</b>` : "nog geen antwoord"}</small></p>
+          <div class="bq-opties">${opts.map(o => `<button type="button" class="cv-chip${q.antwoord === o ? " aan" : ""}" data-bq-antw="${esc(o)}">${esc(o)}</button>`).join("")}</div><span class="tt-status" role="status"></span></div>`; }).join("")}` : ""}`;
+  }
+  const vraagVeld = () => { const v = document.getElementById("bq-vraag"); if (v && concept) concept.vraag = v.value; };
+  document.addEventListener("input", e => { if (e.target.id === "bq-vraag" && concept) concept.vraag = e.target.value; });
+  document.addEventListener("keydown", e => { if (e.target.id === "bq-nieuw" && e.key === "Enter") { e.preventDefault(); document.querySelector('[data-bq="voeg"]')?.click(); } });
+  document.addEventListener("click", async e => {
+    const t = e.target.closest("[data-bq-wed],[data-bq-snel],[data-bq-weg],[data-bq-pt],[data-bq],[data-bq-antw]"); if (!t || !concept && !t.dataset.bqAntw) return;
+    const m = concept && onze().find(x => sleutel(x) === concept.key);
+    if (t.dataset.bqWed) { const j = await window.kamelenApi?.().catch(() => ({})) || {}, q = (j.bonusvragen || {})[t.dataset.bqWed];
+      concept = { key: t.dataset.bqWed, vraag: q?.vraag || "", opties: q?.opties?.length ? [...q.opties] : [], punten: q?.punten || 2 }; return tekenBonus(); }
+    vraagVeld();
+    if (t.dataset.bqSnel) { const [v, o] = SNEL[+t.dataset.bqSnel]; concept.vraag = v; concept.opties = o === "selectie" ? keuzeVan(m) : [...o]; return tekenBonus(); }
+    if (t.dataset.bqWeg) { concept.opties.splice(+t.dataset.bqWeg, 1); return tekenBonus(); }
+    if (t.dataset.bqPt) { concept.punten = +t.dataset.bqPt; return tekenBonus(); }
+    if (t.dataset.bq === "voeg") { const i = document.getElementById("bq-nieuw"), v = i.value.trim(); if (v && !concept.opties.includes(v)) concept.opties.push(v); await tekenBonus(); document.getElementById("bq-nieuw")?.focus(); return; }
+    if (t.dataset.bq === "spelers") { keuzeVan(m).forEach(n => { if (!concept.opties.includes(n)) concept.opties.push(n); }); return tekenBonus(); }
+    if (t.dataset.bq === "opslaan") { const st = document.getElementById("bq-st");
+      if (!concept.vraag.trim()) { st.textContent = "Vul een vraag in."; return; }
+      if (concept.opties.length < 2) { st.textContent = "Geef minstens twee antwoorden."; return; }
+      st.textContent = "Opslaan…"; t.disabled = true;
+      try { const r = await post({ type: "bonusvraag", wedstrijd: concept.key, vraag: concept.vraag.trim(), opties: concept.opties, punten: concept.punten, aftrap: toDate(m.datum, m.tijd || "12:00").toISOString() });
+        if (r.ok) { await window.kamelenApi?.(true); window.renderToto?.(); await tekenBonus(); const s2 = document.getElementById("bq-st"); if (s2) s2.textContent = "Opgeslagen!"; }
+        else { st.textContent = foutTekst(r.fout); t.disabled = false; } } catch { st.textContent = "Geen verbinding."; t.disabled = false; }
+      return; }
+    if (t.dataset.bqAntw) { const blok = t.closest("[data-bq-key]"), st = blok.querySelector(".tt-status"); st.textContent = "Opslaan…";
+      blok.querySelectorAll("[data-bq-antw]").forEach(x => x.classList.toggle("aan", x === t));
+      try { const r = await post({ type: "bonus-uitslag", wedstrijd: blok.dataset.bqKey, antwoord: t.dataset.bqAntw });
+        if (r.ok) { await window.kamelenApi?.(true); window.renderToto?.(); await tekenBonus(); } else st.textContent = foutTekst(r.fout); } catch { st.textContent = "Geen verbinding."; } }
+  });
   document.addEventListener("submit", async e => {
     const f = e.target;
     if (f.id === "cb-login") { e.preventDefault(); const code = document.getElementById("cb-code").value.trim(), st = document.getElementById("cb-st"); if (!code) return; st.textContent = "Controleren…";
       try { const r = await fetch(CFG().api, { method: "POST", body: JSON.stringify({ type: "beheer", actie: "check", beheercode: code }) }).then(x => x.json());
         if (r.ok) { try { localStorage.setItem("kamelen-beheer", code); } catch {} renderBeheer(); } else st.textContent = "Die beheercode klopt niet."; } catch { st.textContent = "Geen verbinding."; } }
-    if (f.id === "cb-bonus") { e.preventDefault(); const st = document.getElementById("cb-bst"), m = onze().find(x => sleutel(x) === f.dataset.key);
-      const vraag = document.getElementById("cb-vraag").value.trim(); if (!vraag) { st.textContent = "Vul een vraag in."; return; }
-      let opties = document.getElementById("cb-opties").value.split("\n").map(x => x.trim()).filter(Boolean); if (!opties.length) opties = keuzeVan(m);
-      st.textContent = "Opslaan…";
-      try { const r = await post({ type: "bonusvraag", wedstrijd: sleutel(m), vraag, opties, punten: +document.getElementById("cb-punten").value, aftrap: toDate(m.datum, m.tijd || "12:00").toISOString() });
-        st.textContent = r.ok ? "Opgeslagen!" : foutTekst(r.fout); if (r.ok) { await window.kamelenApi?.(true); window.renderToto?.(); } } catch { st.textContent = "Geen verbinding."; } }
-    if (f.classList.contains("cb-uitslag")) { e.preventDefault(); const st = f.querySelector(".tt-status"); st.textContent = "Opslaan…";
-      try { const r = await post({ type: "bonus-uitslag", wedstrijd: f.dataset.key, antwoord: f.querySelector("select").value });
-        st.textContent = r.ok ? "Opgeslagen!" : foutTekst(r.fout); if (r.ok) { await window.kamelenApi?.(true); window.renderToto?.(); setTimeout(renderBeheer, 600); } } catch { st.textContent = "Geen verbinding."; } }
   });
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-cb]"); if (!b) return;

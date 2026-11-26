@@ -1739,13 +1739,35 @@ h1,h2,h3{font-family:var(--font-display)}
 .cs-veld-doel .cv-veld{outline:3px dashed var(--orange);outline-offset:-3px}
 .cs-veld-doel .cv-dug-vak{outline:2px dashed var(--orange);outline-offset:-2px}
 @media (max-width:360px){.cv-duo{grid-template-columns:minmax(0,1fr) 92px}}
+/* Bonusvraag-beheer */
+.bq-wed{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:8px -4px 10px;padding:2px 4px}
+.bq-wed::-webkit-scrollbar{display:none}
+.bq-wedk{flex:none;display:grid;gap:1px;text-align:left;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:7px 11px;cursor:pointer}
+.bq-wedk b{font-size:.85rem}.bq-wedk small{font-size:.72rem;color:var(--muted)}
+.bq-wedk.aan{background:var(--ink);color:#fff;border-color:var(--ink)}.bq-wedk.aan small{color:rgba(255,255,255,.75)}
+.bq-nu{margin:0 0 8px;font-size:.85rem;padding:8px 10px;border-radius:10px;background:var(--sky-soft)}
+.bq-opties{display:flex;flex-wrap:wrap;gap:6px}
+.bq-snel{display:grid;grid-auto-flow:column;grid-template-rows:repeat(3,auto);grid-auto-columns:max-content;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -4px;padding:2px 4px 4px;justify-items:start}
+.bq-snel::-webkit-scrollbar{display:none}
+.bq-snel .cv-chip{font-size:.8rem}
+.cv-chip.aan{background:var(--ink);color:#fff;border-color:var(--ink)}
+.bq-optie{display:inline-flex;align-items:center;gap:2px;background:var(--orange-soft);color:var(--ink);font-size:.82rem;font-weight:600;padding:3px 3px 3px 10px;border-radius:999px}
+.bq-optie button{border:0;background:none;color:var(--orange-ink);font-size:1.05rem;line-height:1;width:24px;height:24px;border-radius:50%;cursor:pointer}
+.bq-toevoeg{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.bq-toevoeg input{flex:1 1 100%;min-width:0}
+.bq-punten{display:flex;gap:6px}
+.bq-punten button{width:42px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-weight:800;color:var(--ink);cursor:pointer}
+.bq-punten button.aan{background:var(--orange);border-color:var(--orange)}
+.bq-kop{margin-top:16px}
+.bq-uitslag{border-top:1px solid var(--line);padding:10px 0}
+.bq-uitslag p{margin:0 0 6px}.bq-uitslag small{display:block;color:var(--muted);font-size:.78rem}
+.bq-uitslag.klaar .cv-chip:not(.aan){opacity:.6}
 /* Beheerpaneel */
 #beheer{display:grid;gap:var(--gap)}
 .cb-h{font-family:var(--font-display);font-weight:400;font-size:1.3rem;margin:0 0 6px}
 .cb-rij{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)}
 .cb-rij:first-of-type{border-top:0}
 .cb-rij input,.cb-rij select{flex:1;min-width:0}
-.cb-veld{display:grid;gap:4px;margin:8px 0;font-size:.82rem;font-weight:600;color:var(--ink-2)}
+.cb-veld{display:grid;gap:6px;margin:10px 0;font-size:.82rem;font-weight:600;color:var(--ink-2)}
 .cb-veld input,.cb-veld textarea,.cb-veld select,.cb-rij input,.cb-rij select{font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
 .cb-kort{max-width:120px}
 .cb-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
@@ -4134,11 +4156,11 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796824200"></script>
-<script src="toto.js?v=1796824200"></script>
-<script src="pong.js?v=1796824200"></script>
-<script src="pongregels.js?v=1796824200"></script>
-<script src="beerpong.js?v=1796824200"></script>
+<script src="mex.js?v=1796831400"></script>
+<script src="toto.js?v=1796831400"></script>
+<script src="pong.js?v=1796831400"></script>
+<script src="pongregels.js?v=1796831400"></script>
+<script src="beerpong.js?v=1796831400"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -4147,19 +4169,19 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796824200"></script>
-<script src="coach.js?v=1796824200"></script>
-<script src="statistieken.js?v=1796824200"></script>
-<script src="wrapped.js?v=1796824200"></script>
-<script src="race.js?v=1796824200"></script>
-<script src="rad.js?v=1796824200"></script>
-<script src="fotos.js?v=1796824200"></script>
-<script src="quotes.js?v=1796824200"></script>
-<script src="ideeen.js?v=1796824200"></script>
-<script src="seizoen.js?v=1796824200"></script>
-<script src="zege.js?v=1796824200"></script>
-<script src="karavaan.js?v=1796824200"></script>
-<script src="design-proef.js?v=1796824200"></script>
-<script src="push.js?v=1796824200"></script>
+<script src="stemmen.js?v=1796831400"></script>
+<script src="coach.js?v=1796831400"></script>
+<script src="statistieken.js?v=1796831400"></script>
+<script src="wrapped.js?v=1796831400"></script>
+<script src="race.js?v=1796831400"></script>
+<script src="rad.js?v=1796831400"></script>
+<script src="fotos.js?v=1796831400"></script>
+<script src="quotes.js?v=1796831400"></script>
+<script src="ideeen.js?v=1796831400"></script>
+<script src="seizoen.js?v=1796831400"></script>
+<script src="zege.js?v=1796831400"></script>
+<script src="karavaan.js?v=1796831400"></script>
+<script src="design-proef.js?v=1796831400"></script>
+<script src="push.js?v=1796831400"></script>
 </body>
 </html>
