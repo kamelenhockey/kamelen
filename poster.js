@@ -41,6 +41,10 @@
     paard: { src: "steden/friespaard2.jpg", fx: .42, fy: .22, door: "Oleg Yunakov" },
     ljeppen: { src: "steden/fierljeppen.jpg", fx: .5, fy: .45, door: "Peter van der Sluijs" },
     w3: { src: "woestijn/3.jpg", fx: .7, fy: .6, door: "" }, w9: { src: "woestijn/9.jpg", fx: .5, fy: .55, door: "" }, w12: { src: "woestijn/12.jpg", fx: .55, fy: .55, door: "" },
+    leeuwfront: { src: "steden/leeuw3.jpg", fx: .5, fy: .42, door: "Giles Laurent" },
+    leeuwzij: { src: "steden/leeuw4.jpg", fx: .72, fy: .45, door: "Anmol Waychal" },
+    piste: { src: "steden/temmer.jpg", fx: .5, fy: .74, zoom: 1.25, door: "EgorovaSvetlana" },
+    kooi: { src: "steden/temmer3.jpg", fx: .45, fy: .55, door: "Anefo" },
     olifant: { src: "steden/olifant.jpg", fx: .5, fy: .35, door: "Eric de Redelijkheid" }
   };
   /* Kleurgrading: schaduwen, hooglichten, hoeveel kleur er overblijft */
@@ -528,6 +532,38 @@
         let r3 = "", ym = 1262; met.split(" ").forEach(w => { if (ctx.measureText(r3 + w).width > W - 2 * L) { ctx.fillText(r3, L, ym); ym += 30; r3 = ""; } r3 += w + " "; }); ctx.fillText(r3, L, ym);
         bron = [onsF, KAMEEL];
       },
+      /* Natuurfilm, twee filmbeelden met ondertitels */
+      filmstills() {
+        const o = opt.mini || {}, A = FOTO[o.zij], B = FOTO[o.ons];
+        ctx.fillStyle = "#050505"; ctx.fillRect(0, 0, W, H);
+        logoOp(L, 40, 48); ctx.fillStyle = "rgba(255,255,255,.7)"; ctx.font = F(500, 20); spatie(ctx, "DE LEEUW EN DE KAMEEL  /  EEN NATUURFILM", W - L, 78, 6, "right");
+        const frame = (img, f, gg, y, h, tc, sub) => { beeld(ctx, img, f, gg, 0, y, W, h);
+          ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.font = F(500, 18); spatie(ctx, tc, L, y - 14, 4);
+          ctx.font = `600 36px PSans, Arial, sans-serif`; ctx.textAlign = "center"; ctx.lineWidth = 6; ctx.strokeStyle = "rgba(0,0,0,.85)"; ctx.lineJoin = "round";
+          ctx.strokeText(sub, W / 2, y + h - 34); ctx.fillStyle = "#fff"; ctx.fillText(sub, W / 2, y + h - 34); };
+        frame(imgs2[0], A, GRADE[o.gradeZij || "zand"], 140, 470, "00:41:12", o.r1);
+        frame(imgs2[1], B, GRADE[o.gradeOns || "zand"], 660, 470, "01:12:56", o.r2);
+        ctx.fillStyle = WIT; ctx.font = F(700, 34); spatie(ctx, `${namen[0]} \u2013 ${namen[1]}`, L, 1196, 5);
+        infoKort(1232, MUTED, true); selectieRegel(1272, "rgba(244,239,230,.6)", false, 20); bron = [A, B];
+      },
+
+      /* Natuurfilm, titelkaart over een echte leeuw */
+      titelkaart() {
+        const o = opt.mini || {}, f = FOTO[o.foto];
+        beeld(ctx, imgs2[0], f, GRADE[o.grade || "zand"], 0, 0, W, H); vignet(.7); verloop(560, 1000, 0, .88); ctx.fillStyle = "rgba(6,5,4,.88)"; ctx.fillRect(0, 1000, W, H - 1000); verloop(220, 0, 0, .6);
+        logoOp(L, 50, 52); ctx.fillStyle = WIT; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        ctx.fillStyle = "rgba(244,239,230,.8)"; ctx.font = F(500, 24); spatie(ctx, o.boven || "EEN NATUURFILM", W / 2, 720, 14, "center");
+        ctx.fillStyle = WIT; ctx.font = F(300, 118); spatie(ctx, o.r1, W / 2, 846, 22, "center"); spatie(ctx, o.r2, W / 2, 966, 22, "center");
+        ctx.fillStyle = ZAND; ctx.font = `italic 400 36px PSerif, Georgia, serif`; ctx.textAlign = "center"; ctx.fillText(o.sub, W / 2, 1040);
+        ctx.fillStyle = "rgba(244,239,230,.3)"; ctx.fillRect(L, 1096, W - 2 * L, 1);
+        ctx.fillStyle = WIT; ctx.font = F(500, 26); spatie(ctx, o.premiere || `${namen[0]} \u2013 ${namen[1]}`, W / 2, 1146, 6, "center");
+        infoKort(1188, MUTED); 
+        const lijst = spelers.length ? spelers : leeg; ctx.fillStyle = "rgba(244,239,230,.6)"; ctx.font = F(500, 20);
+        const met = (o.met || "MET") + "  " + lijst.join("   "); let regel = "", y = 1240, regels = [];
+        met.split("   ").forEach(w => { if (breedte(ctx, regel + w, 3) > W - 2 * L) { regels.push(regel.trim()); regel = ""; } regel += w + "   "; }); regels.push(regel.trim());
+        regels.forEach((r, i) => spatie(ctx, r, W / 2, y + i * 30, 3, "center")); bron = [f];
+      },
+
       /* Tweeluik: boven hun beeld, onder het onze, de zin loopt over de naad */
       tweeluik() {
         const o = opt.mini || {}, A = FOTO[o.zij], B = FOTO[o.ons];
