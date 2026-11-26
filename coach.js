@@ -233,7 +233,7 @@
   function liveHint() {
     if (!ed.gekozen) return ed.live.loopt ? "Wissel: tik op een bankspeler en dan op wie eruit gaat. Van plek ruilen: tik op twee veldspelers, of sleep." : "Zet de klok aan als de wedstrijd begint. Wisselen en van plek ruilen kan ook als de klok stilstaat.";
     const opVeld = ed.o.veld.some(p => p.n === ed.gekozen);
-    return `<b>${esc(ed.gekozen)}</b> gekozen: tik op ${opVeld ? "een speler in de dug-out om te wisselen, een andere veldspeler om te ruilen, of een plek op het veld" : "de speler op het veld die eruit gaat"}`;
+    return `<b>${esc(ed.gekozen)}</b> gekozen: tik op ${opVeld ? "een speler in de dug-out om te wisselen, een andere veldspeler om te ruilen, of een plek op het veld" : "de speler op het veld die eruit gaat, of op een andere linie in de dug-out"}`;
   }
   function liveOverzicht() {
     const L = ed.live, namen = [...ed.o.veld.map(p => p.n), ...ed.o.bank.map(bNaam)];
@@ -243,6 +243,7 @@
       ${rijen.map(n => { const opVeld = ed.o.veld.some(p => p.n === n); return `<div class="lv-rij${opVeld ? "" : " bank"}" data-lv-rij="${esc(n)}"><span>${esc(n)}</span><i style="--w:${Math.round(speeltijd(n) / max * 100)}%"></i><b>${fmtMin(speeltijd(n))}</b></div>`; }).join("")}
       ${L.wissels.length ? `<div class="lv-kop"><b>Wissels</b><small>${L.wissels.length}</small></div><ol class="lv-log">${[...L.wissels].reverse().map(w => `<li><span>${fmtMin(w.t)}</span> ${esc(w.in)} <em>erin</em>, ${esc(w.uit)} <em>eruit</em></li>`).join("")}</ol>` : ""}</div>`;
   }
+  function naarLinie(n, lijn) { const i = ed.o.bank.findIndex(x => bNaam(x) === n); if (i >= 0) { ed.o.bank.splice(i, 1); ed.o.bank.push(`${n}|${lijn}`); bewaarLive(); } }
   function liveWissel(a, b) {   // a en b: namen; precies één op het veld
     const g = gTijd(), L = ed.live;
     const veldA = ed.o.veld.find(p => p.n === a), veldB = ed.o.veld.find(p => p.n === b);
@@ -298,8 +299,13 @@
       if (chip) { const n = chip.dataset.naam;
         if (!ed.gekozen || ed.gekozen === n) { ed.gekozen = ed.gekozen === n ? null : n; return tekenEditor(); }
         const aVeld = ed.o.veld.some(p => p.n === ed.gekozen), bVeld = ed.o.veld.some(p => p.n === n);
-        if (aVeld || bVeld) { if (!ed.live.klaar) { liveWissel(ed.gekozen, n); bewaarLive(); } ed.gekozen = null; } else ed.gekozen = n;
+        if (aVeld || bVeld) { if (!ed.live.klaar) { liveWissel(ed.gekozen, n); bewaarLive(); } ed.gekozen = null; }
+        else { const vA = ed.o.bank.find(x => bNaam(x) === ed.gekozen), vB = ed.o.bank.find(x => bNaam(x) === n);
+          if (vA && vB && bLijn(vA) !== bLijn(vB)) { naarLinie(ed.gekozen, bLijn(vB)); ed.gekozen = null; } else ed.gekozen = n; }
         return tekenEditor(); }
+      /* Bankspeler naar een andere linie in de dug-out */
+      const vak = e.target.closest(".cv-dug-vak");
+      if (vak && ed.gekozen && ed.o.bank.some(x => bNaam(x) === ed.gekozen)) { naarLinie(ed.gekozen, vak.dataset.lijn); ed.gekozen = null; return tekenEditor(); }
       const zone = e.target.closest('[data-zone="veld"]');
       if (zone && ed.gekozen && ed.o.veld.some(p => p.n === ed.gekozen)) { const p = ed.o.veld.find(x => x.n === ed.gekozen), [x, y] = veldPunt(zone, e.clientX, e.clientY);
         p.x = Math.round(Math.max(4, Math.min(96, x))); p.y = Math.round(Math.max(3, Math.min(97, y))); ed.gekozen = null; bewaarLive(); return tekenEditor(); }
@@ -337,6 +343,7 @@
     if (ed.live) {
       const doel = onder && onder.closest(".cs-body .cv-sp, .cs-body .cv-dchip"), opVeld = n => ed.o.veld.some(p => p.n === n);
       if (doel && doel.dataset.naam !== s.n && (opVeld(s.n) || opVeld(doel.dataset.naam)) && !ed.live.klaar) liveWissel(s.n, doel.dataset.naam);
+      else if (doel && doel.dataset.naam !== s.n && zone && zone.dataset.zone === "bank") naarLinie(s.n, zone.dataset.lijn);
       else if (!doel && zone && zone.dataset.zone === "veld" && opVeld(s.n)) { const p = ed.o.veld.find(x => x.n === s.n), [x, y] = veldPunt(zone, e.clientX, e.clientY); p.x = Math.round(Math.max(4, Math.min(96, x))); p.y = Math.round(Math.max(3, Math.min(97, y))); }
       else if (!doel && zone && zone.dataset.zone === "bank" && !opVeld(s.n)) { ed.o.bank = ed.o.bank.filter(x => bNaam(x) !== s.n); ed.o.bank.push(`${s.n}|${zone.dataset.lijn}`); }
       ed.gekozen = null; bewaarLive(); return tekenEditor();
