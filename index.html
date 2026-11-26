@@ -800,7 +800,7 @@ nav.bar a[aria-current="page"]{color:#fff;border-bottom-color:var(--orange)}
 @media (max-width:760px), (max-height:520px) and (orientation:landscape) and (pointer:coarse){
   nav.bar{display:none}
   body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
-  .tabbar{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;z-index:30;left:0;right:0;bottom:0;background:#163650;padding:6px 4px calc(6px + env(safe-area-inset-bottom));border-top:1px solid #234b6a}
+  .tabbar{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;z-index:30;left:0;right:0;bottom:0;transform:translateZ(0);will-change:transform;backface-visibility:hidden;background:#163650;padding:6px 4px calc(6px + env(safe-area-inset-bottom));border-top:1px solid #234b6a}
   .tabbar a,.tabbar button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;color:rgba(255,255,255,.6);font-size:.66rem;font-weight:600;letter-spacing:.02em}
   .tabbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .tabbar [aria-current="page"],.tabbar button[aria-expanded="true"]{color:var(--orange)}
@@ -817,7 +817,7 @@ nav.bar a[aria-current="page"]{color:#fff;border-bottom-color:var(--orange)}
 /* ---------- App-gevoel: scrollen en tikken ---------- */
 html,body{overflow-x:clip}
 html{scroll-padding-top:64px;-webkit-text-size-adjust:100%}
-body{overscroll-behavior-y:none}
+html,body{overscroll-behavior-y:none}
 a,button,summary,label,[role="button"]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .tablewrap,.strip,.q-filter{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 body.sheet-open,body:has(dialog[open]){overflow:hidden}
@@ -1678,10 +1678,11 @@ h1,h2,h3{font-family:var(--font-display)}
 .cv-lijnen .stip{fill:#fff}.cv-lijnen .doel{fill:#fff;stroke:none}
 .cv-sp{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:0;font:inherit;cursor:default;-webkit-user-select:none;user-select:none}
 .cv-veld.bewerk .cv-sp{cursor:grab}
-.cv-schijf{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.78rem;color:#fff;border:2px solid #fff;box-shadow:0 2px 6px -2px rgba(22,54,80,.5)}
+.cv-veld{container-type:inline-size}
+.cv-schijf{width:clamp(24px,11.5cqw,34px);height:clamp(24px,11.5cqw,34px);border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:clamp(.62rem,3.6cqw,.78rem);color:#fff;border:2px solid #fff;box-shadow:0 2px 6px -2px rgba(22,54,80,.5)}
 .cv-sp.keeper .cv-schijf{background:#7a4a24}.cv-sp.verdediging .cv-schijf{background:var(--ink)}
 .cv-sp.middenveld .cv-schijf{background:#2f6f93}.cv-sp.aanval .cv-schijf{background:var(--orange);color:var(--ink)}
-.cv-naam{background:#fff;color:var(--ink);font-weight:700;font-size:.72rem;line-height:1.2;padding:2px 7px;border-radius:999px;white-space:nowrap;max-width:96px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 3px rgba(22,54,80,.2)}
+.cv-naam{background:#fff;color:var(--ink);font-weight:700;font-size:clamp(.6rem,3.6cqw,.72rem);line-height:1.2;padding:1px 6px;border-radius:999px;white-space:nowrap;max-width:96px;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 3px rgba(22,54,80,.2)}
 .cv-sp.aan .cv-schijf,.cv-chip.aan{outline:3px solid var(--orange);outline-offset:2px}
 .cv-sp.weg,.cv-chip.weg{opacity:.3}
 .cv-bank,.cs-pool{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px;border-radius:12px;background:var(--sky-soft);min-height:48px}
@@ -1705,7 +1706,7 @@ h1,h2,h3{font-family:var(--font-display)}
 .cs-hint{margin:0;font-size:.82rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cs-hint.actief{color:var(--ink)}.cs-hint.lang{white-space:normal;color:var(--orange-ink)}
 .cs-body .cv-wrap{margin:0}
-.cs-body .cv-veld{width:min(100%,calc((100dvh - 390px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * .625));min-width:220px;touch-action:pan-y}
+.cs-body .cv-duo{width:min(100%,calc((100dvh - 330px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * .625 + 116px));min-width:300px;margin:0 auto}
 .cs-body .cv-sp{touch-action:none}
 .cs-body .cv-bank{display:none}
 .cs-dock{display:grid;gap:6px}
@@ -1718,7 +1719,26 @@ h1,h2,h3{font-family:var(--font-display)}
 .cs-dock .cv-chip{touch-action:pan-x;padding:7px 12px;font-size:.85rem}
 .cv-chip.inv{border-style:dashed;color:var(--ink-2)}
 .cs-noot{margin:0;font-size:.75rem;color:var(--muted)}
-.cs-veld-doel{outline:3px dashed var(--orange);outline-offset:-3px}
+/* Veld + dug-out */
+.cv-duo{display:grid;grid-template-columns:minmax(0,1fr) 108px;gap:8px;align-items:stretch;margin:4px 0 10px}
+.cv-duo .cv-veld{width:100%;max-width:none;justify-self:center}
+.cv-dug{position:relative;display:flex;flex-direction:column;gap:6px;padding:0 6px 8px;border-radius:16px 16px 10px 10px;background:linear-gradient(180deg,#1f4a6b,var(--ink) 60%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 8px 18px -12px rgba(22,54,80,.7);min-width:0}
+.cv-dug-dak{margin:0 -6px 2px;height:30px;border-radius:16px 16px 0 0;background:linear-gradient(180deg,rgba(185,216,232,.55),rgba(185,216,232,.15));border-bottom:3px solid var(--orange);display:grid;place-items:center}
+.cv-dug-dak span{font-family:var(--font-display);color:#fff;font-size:.95rem;letter-spacing:.01em}
+.cv-dug-vak{flex:1 0 auto;display:flex;flex-direction:column;gap:4px;padding:5px 4px 12px;border-radius:8px;background:rgba(255,255,255,.07);position:relative;min-height:54px}
+.cv-dug-vak::after{content:"";position:absolute;left:4px;right:4px;bottom:3px;height:4px;border-radius:2px;background:rgba(185,216,232,.35)}
+.cv-dug-k{font-size:.66rem;font-weight:700;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px}
+.cv-dug-k::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--lk)}
+.cv-dug-vak.aanval{--lk:var(--orange)}.cv-dug-vak.middenveld{--lk:#6fb2d6}.cv-dug-vak.verdediging{--lk:#b9d8e8}
+.cv-dug-leeg{color:rgba(255,255,255,.35);font-size:1.1rem;text-align:center;margin:auto 0}
+.cv-dchip{display:flex;align-items:center;gap:5px;width:100%;padding:4px 7px;font-size:.74rem;text-align:left;border:0;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.cv-dchip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cv-dchip i{width:7px;height:7px;border-radius:50%;flex:none;background:#2f6f93}
+.cv-dchip.aanval i{background:var(--orange)}.cv-dchip.verdediging i{background:var(--ink)}
+.cv-dchip.aan{outline:3px solid var(--orange);outline-offset:1px}
+.cs-veld-doel .cv-veld{outline:3px dashed var(--orange);outline-offset:-3px}
+.cs-veld-doel .cv-dug-vak{outline:2px dashed var(--orange);outline-offset:-2px}
+@media (max-width:360px){.cv-duo{grid-template-columns:minmax(0,1fr) 92px}}
 /* Beheerpaneel */
 #beheer{display:grid;gap:var(--gap)}
 .cb-h{font-family:var(--font-display);font-weight:400;font-size:1.3rem;margin:0 0 6px}
@@ -3964,11 +3984,13 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) toon
   nav.addEventListener("click", e => { const a = e.target.closest("a[data-naar]"); if (!a) return; e.preventDefault();
     const d = doelen[+a.dataset.naar]; if (d) d[1].scrollIntoView({ behavior: "smooth", block: "start" }); });
   /* tijdens scrollen oplichten waar je bent */
-  addEventListener("scroll", () => { if (document.body.dataset.page !== "statistieken" || !doelen.length) return;
+  let _rafS = 0;
+  addEventListener("scroll", () => { if (_rafS || document.body.dataset.page !== "statistieken" || !doelen.length) return; _rafS = requestAnimationFrame(() => { _rafS = 0; markeer(); }); }, { passive: true });
+  const markeer = () => {
     let nu = 0; doelen.forEach(([, el], i) => { if (el.getBoundingClientRect().top < 140) nu = i; });
     nav.querySelectorAll("a").forEach((a, i) => a.classList.toggle("aan", i === nu));
-    const aan = nav.querySelector("a.aan"); if (aan && (aan.offsetLeft < nav.scrollLeft || aan.offsetLeft + aan.offsetWidth > nav.scrollLeft + nav.clientWidth)) nav.scrollTo({ left: aan.offsetLeft - 16, behavior: "smooth" });
-  }, { passive: true });
+    const aan = nav.querySelector("a.aan"); if (aan && (aan.offsetLeft < nav.scrollLeft || aan.offsetLeft + aan.offsetWidth > nav.scrollLeft + nav.clientWidth)) nav.scrollTo({ left: aan.offsetLeft - 16 });
+  };
 })();
 
 /* ---------- Swipen tussen de tabjes (telefoon) ---------- */
@@ -4112,11 +4134,11 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796813400"></script>
-<script src="toto.js?v=1796813400"></script>
-<script src="pong.js?v=1796813400"></script>
-<script src="pongregels.js?v=1796813400"></script>
-<script src="beerpong.js?v=1796813400"></script>
+<script src="mex.js?v=1796824200"></script>
+<script src="toto.js?v=1796824200"></script>
+<script src="pong.js?v=1796824200"></script>
+<script src="pongregels.js?v=1796824200"></script>
+<script src="beerpong.js?v=1796824200"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -4125,19 +4147,19 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796813400"></script>
-<script src="coach.js?v=1796813400"></script>
-<script src="statistieken.js?v=1796813400"></script>
-<script src="wrapped.js?v=1796813400"></script>
-<script src="race.js?v=1796813400"></script>
-<script src="rad.js?v=1796813400"></script>
-<script src="fotos.js?v=1796813400"></script>
-<script src="quotes.js?v=1796813400"></script>
-<script src="ideeen.js?v=1796813400"></script>
-<script src="seizoen.js?v=1796813400"></script>
-<script src="zege.js?v=1796813400"></script>
-<script src="karavaan.js?v=1796813400"></script>
-<script src="design-proef.js?v=1796813400"></script>
-<script src="push.js?v=1796813400"></script>
+<script src="stemmen.js?v=1796824200"></script>
+<script src="coach.js?v=1796824200"></script>
+<script src="statistieken.js?v=1796824200"></script>
+<script src="wrapped.js?v=1796824200"></script>
+<script src="race.js?v=1796824200"></script>
+<script src="rad.js?v=1796824200"></script>
+<script src="fotos.js?v=1796824200"></script>
+<script src="quotes.js?v=1796824200"></script>
+<script src="ideeen.js?v=1796824200"></script>
+<script src="seizoen.js?v=1796824200"></script>
+<script src="zege.js?v=1796824200"></script>
+<script src="karavaan.js?v=1796824200"></script>
+<script src="design-proef.js?v=1796824200"></script>
+<script src="push.js?v=1796824200"></script>
 </body>
 </html>

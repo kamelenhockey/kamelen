@@ -57,16 +57,26 @@
     [84, 69, "Malcolm", "rechtsback"], [16, 69, "Marijn", "linksback"],
     [50, 50, "Nick", "middenmid"], [82, 47, "Tijmen", "rechtsmid"], [18, 47, "Ali", "linksmid"],
     [50, 24, "Philip", "spits"], [80, 26, "Jon", "rechtsvoor"], [20, 26, "Thijn", "linksvoor"]];
-  const lijnVan = y => y > 86 ? "keeper" : y > 65 ? "verdediging" : y > 40 ? "middenveld" : "aanval";
+  const lijnVan = y => y > 86 ? "keeper" : y > 60 ? "verdediging" : y > 40 ? "middenveld" : "aanval";
   const initialen = n => String(n).split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
   function speler(p, bewerk) {
     return `<button type="button" class="cv-sp ${lijnVan(p.y)}" style="left:${p.x}%;top:${p.y}%" data-naam="${esc(p.n)}" ${bewerk ? "" : "tabindex=-1"}>
       <span class="cv-schijf">${esc(initialen(p.n))}</span><span class="cv-naam">${esc(p.n)}</span></button>`;
   }
-  function veldHtml(o, bewerk) {
+  /* Bank = dug-out naast het veld, per linie (behalve keeper). Opslag per speler als "Naam|linie". */
+  const LINIES = [["aanval", "Aanval"], ["middenveld", "Middenveld"], ["verdediging", "Verdediging"]];
+  const bNaam = x => String(x).split("|")[0], bLijn = x => { const l = String(x).split("|")[1]; return LINIES.some(([k]) => k === l) ? l : "middenveld"; };
+  window.bankNaam = bNaam;
+  const bankChip = (x, extra = "") => `<button type="button" class="cv-chip cv-dchip ${bLijn(x)}${extra}" data-naam="${esc(bNaam(x))}"><i></i><span>${esc(bNaam(x))}</span></button>`;
+  function dugoutHtml(bank, bewerk, chipFn) {
+    return `<div class="cv-dug" aria-label="Bank"><div class="cv-dug-dak"><span>Dug-out</span></div>
+      ${LINIES.map(([k, t]) => { const l = (bank || []).filter(x => bLijn(x) === k);
+        return `<div class="cv-dug-vak ${k}" data-zone="bank" data-lijn="${k}"><span class="cv-dug-k">${t}</span>${l.map(x => (chipFn || bankChip)(x)).join("")}${!l.length && bewerk ? `<span class="cv-dug-leeg">+</span>` : ""}</div>`; }).join("")}</div>`;
+  }
+  function veldHtml(o, bewerk, chipFn) {
     o = o || { veld: [], bank: [] };
-    return `<div class="cv-wrap"><div class="cv-veld${bewerk ? " bewerk" : ""}" data-zone="veld">${LIJNEN}${(o.veld || []).map(p => speler(p, bewerk)).join("")}</div>
-      <div class="cv-bank" data-zone="bank"><span class="cv-bank-k">Bank</span>${(o.bank || []).length ? o.bank.map(n => `<button type="button" class="cv-chip" data-naam="${esc(n)}">${esc(n)}</button>`).join("") : `<span class="cv-leeg">${bewerk ? "Sleep spelers hierheen" : "Niemand"}</span>`}</div></div>`;
+    return `<div class="cv-duo"><div class="cv-veld${bewerk ? " bewerk" : ""}" data-zone="veld">${LIJNEN}${(o.veld || []).map(p => speler(p, bewerk)).join("")}</div>
+      ${dugoutHtml(o.bank, bewerk, chipFn)}</div>`;
   }
   window.veldHtml = veldHtml;
 
@@ -97,7 +107,7 @@
     const bestaand = ops[sleutel(m)];
     if (bestaand && !ed.o.veld.length && !ed.o.bank.length) {
       ed.o = JSON.parse(JSON.stringify(bestaand.opstelling));
-      if (bekend) { ed.o.veld = ed.o.veld.filter(p => sel.includes(p.n)); ed.o.bank = ed.o.bank.filter(n => sel.includes(n)); }
+      if (bekend) { ed.o.veld = ed.o.veld.filter(p => sel.includes(p.n)); ed.o.bank = ed.o.bank.filter(n => sel.includes(bNaam(n))); }
     }
     ed.laden = false; tekenEditor();
   }
@@ -108,31 +118,30 @@
   }
   function tekenEditor() {
     const sh = document.getElementById("coach-sheet"); if (!sh || !ed) return;
-    const { m, o, sel } = ed, opVeld = new Set(o.veld.map(p => p.n)), opBank = new Set(o.bank);
+    const { m, o, sel } = ed, opVeld = new Set(o.veld.map(p => p.n)), opBank = new Set(o.bank.map(bNaam));
     const vrij = sel.filter(n => !opVeld.has(n) && !opBank.has(n));
     const vast = typeof ROSTER !== "undefined" ? ROSTER : new Set(), isInv = n => vast.size > 0 && !vast.has(n);
     const chip = n => `<button type="button" class="cv-chip${isInv(n) ? " inv" : ""}${ed.gekozen === n ? " aan" : ""}" data-naam="${esc(n)}">${esc(n)}</button>`;
     const scroll = sh.querySelector(".cs-body")?.scrollTop || 0, poolScroll = sh.querySelector(".cs-pool-lijst")?.scrollLeft || 0;
-    const hint = ed.melding && !ed.gekozen ? esc(ed.melding) : ed.gekozen ? `<b>${esc(ed.gekozen)}</b> gekozen: tik op het veld of de bank` : "Tik op een naam en daarna op een plek. Slepen kan ook.";
+    const hint = ed.melding && !ed.gekozen ? esc(ed.melding) : ed.gekozen ? `<b>${esc(ed.gekozen)}</b> gekozen: tik op het veld of op een linie in de dug-out` : "Tik op een naam en daarna op een plek. Slepen kan ook.";
     sh.innerHTML = `<div class="cs-kop"><button type="button" class="cs-x" data-cs="sluit" aria-label="Sluiten">×</button>
         <div><b>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}</b><small>${fmtDay(m.datum, { weekday: "long", day: "numeric", month: "long" })}${m.tijd ? ` · ${esc(m.tijd)}` : ""}</small></div>
         <button type="button" class="btn sm cs-opslaan" data-cs="opslaan">Opslaan</button></div>
       <div class="cs-body" data-geen-swipe data-geen-trek>
         <div class="cs-teller"><span>Veld <b>${o.veld.length}</b>/11</span><span>Bank <b>${o.bank.length}</b></span><span class="cs-knoppen"><button type="button" class="cs-link" data-cs="auto">Standaard</button><button type="button" class="cs-link" data-cs="leeg">Leegmaken</button></span></div>
         <p class="cs-hint${ed.gekozen ? " actief" : ed.melding ? " lang" : ""}" role="status">${hint}</p>
-        ${veldHtml(o, true)}
+        ${veldHtml(o, true, x => bankChip(x, ed.gekozen === bNaam(x) ? " aan" : ""))}
         <div class="cs-dock">
-          <div class="cs-rij" data-zone="bank"><span class="cs-rij-k">Bank</span><div class="cs-lijst">${o.bank.length ? o.bank.map(chip).join("") : `<span class="cv-leeg">Tik op een speler en dan hier</span>`}</div></div>
           <div class="cs-rij" data-zone="pool"><span class="cs-rij-k">${ed.bekend ? "Selectie" : "Iedereen"} <small>${vrij.length}</small></span><div class="cs-lijst cs-pool-lijst">${ed.laden && !sel.length ? `<span class="cv-leeg">Laden…</span>` : vrij.length ? vrij.map(chip).join("") : `<span class="cv-leeg">${sel.length ? "Iedereen is ingedeeld" : "Geen spelers gevonden. Tik op ↻ bovenin de app en probeer het opnieuw."}</span>`}</div></div>
           ${ed.bekend ? "" : `<p class="cs-noot">De selectie is nog niet bekend, dus je kiest uit alle spelers en (gestippeld) de invallers.</p>`}
           <span class="tt-status" id="cs-status" role="status"></span>
         </div>
       </div>`;
     sh.querySelector(".cs-body").scrollTop = scroll; const pl = sh.querySelector(".cs-pool-lijst"); if (pl) pl.scrollLeft = poolScroll;
-    if (ed.gekozen) { sh.querySelectorAll(`.cv-sp[data-naam="${CSS.escape(ed.gekozen)}"]`).forEach(x => x.classList.add("aan")); sh.querySelector(".cs-body .cv-veld")?.classList.add("cs-veld-doel"); }
+    if (ed.gekozen) { sh.querySelectorAll(`.cv-sp[data-naam="${CSS.escape(ed.gekozen)}"]`).forEach(x => x.classList.add("aan")); sh.querySelector(".cs-body .cv-duo")?.classList.add("cs-veld-doel"); }
   }
-  const weg = n => { ed.o.veld = ed.o.veld.filter(p => p.n !== n); ed.o.bank = ed.o.bank.filter(x => x !== n); };
-  function zetOp(n, zone, x, y) { weg(n); if (zone === "veld") ed.o.veld.push({ n, x: Math.round(Math.max(4, Math.min(96, x))), y: Math.round(Math.max(3, Math.min(97, y))) }); else if (zone === "bank") ed.o.bank.push(n); }
+  const weg = n => { ed.o.veld = ed.o.veld.filter(p => p.n !== n); ed.o.bank = ed.o.bank.filter(x => bNaam(x) !== n); };
+  function zetOp(n, zone, x, y) { weg(n); if (zone === "veld") ed.o.veld.push({ n, x: Math.round(Math.max(4, Math.min(96, x))), y: Math.round(Math.max(3, Math.min(97, y))) }); else if (zone === "bank") ed.o.bank.push(`${n}|${x || "middenveld"}`); }
   const veldPunt = (veld, cx, cy) => { const r = veld.getBoundingClientRect(); return [(cx - r.left) / r.width * 100, (cy - r.top) / r.height * 100]; };
 
   document.addEventListener("click", async e => {
@@ -147,7 +156,6 @@
         ed.o = { veld: [], bank: [] }; ed.gekozen = null;
         const open = [];
         VAKKEN.forEach(([x, y, naam, plek]) => { const n = ed.sel.find(s => canon(s) === canon(naam)); if (n) zetOp(n, "veld", x, y); else open.push(`${plek} (${naam})`); });
-        if (ed.bekend) ed.sel.filter(n => !ed.o.veld.some(p => p.n === n)).forEach(n => zetOp(n, "bank"));
         ed.melding = open.length ? `Nog open: ${open.join(", ")}` : "";
         return tekenEditor(); }
       if (a === "opslaan") { const st = document.getElementById("cs-status"); st.textContent = "Opslaan…"; knop.disabled = true;
@@ -158,11 +166,14 @@
     }
     const chip = e.target.closest(".cv-chip, .cv-sp");
     if (chip && ed) ed.melding = "";
+    /* Al iemand gekozen en je tikt op een naam in de dug-out: de gekozen speler gaat naar die linie */
+    const vakDoel = chip && chip.closest(".cv-dug-vak");
+    if (vakDoel && ed.gekozen && ed.gekozen !== chip.dataset.naam) { zetOp(ed.gekozen, "bank", vakDoel.dataset.lijn); ed.gekozen = null; return tekenEditor(); }
     if (chip) { const n = chip.dataset.naam; ed.gekozen = ed.gekozen === n ? null : n; return tekenEditor(); }
     const zone = e.target.closest("[data-zone]");
     if (zone && ed.gekozen) { const z = zone.dataset.zone;
       if (z === "veld") { const [x, y] = veldPunt(zone, e.clientX, e.clientY); zetOp(ed.gekozen, "veld", x, y); }
-      else if (z === "bank") zetOp(ed.gekozen, "bank"); else weg(ed.gekozen);
+      else if (z === "bank") zetOp(ed.gekozen, "bank", zone.dataset.lijn); else weg(ed.gekozen);
       ed.gekozen = null; tekenEditor(); }
   });
   /* Slepen (vinger of muis) */
@@ -183,7 +194,7 @@
     if (!sleep) return; const s = sleep; sleep = null; if (!s.spook) return;
     s.spook.remove(); _sleepNet = true; setTimeout(() => { _sleepNet = false; }, 50);
     const onder = document.elementFromPoint(e.clientX, e.clientY), zone = onder && onder.closest("[data-zone]");
-    if (zone) { const z = zone.dataset.zone; if (z === "veld") { const [x, y] = veldPunt(zone, e.clientX, e.clientY); zetOp(s.n, "veld", x, y); } else if (z === "bank") zetOp(s.n, "bank"); else weg(s.n); }
+    if (zone) { const z = zone.dataset.zone; if (z === "veld") { const [x, y] = veldPunt(zone, e.clientX, e.clientY); zetOp(s.n, "veld", x, y); } else if (z === "bank") zetOp(s.n, "bank", zone.dataset.lijn); else weg(s.n); }
     ed.gekozen = null; tekenEditor();
   });
   document.addEventListener("pointercancel", () => { if (sleep && sleep.spook) sleep.spook.remove(); sleep = null; });
