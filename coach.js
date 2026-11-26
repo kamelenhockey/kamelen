@@ -51,7 +51,12 @@
     <rect x="45" y="0.6" width="10" height="2.4" class="doel"/><rect x="45" y="157" width="10" height="2.4" class="doel"/>
   </svg>`;
   /* Standaard opstelling (1-4-3-3 zoals de coaches hem gebruiken): keeper, vier backs, drie middenvelders, drie aanvallers */
-  const VAKKEN = [[50, 92], [16, 72], [40, 76], [60, 79], [84, 72], [24, 53], [50, 58], [76, 53], [50, 33], [24, 22], [76, 22]];
+  /* Standaard opstelling van de Kamelen (ons doel onderaan, rechts = rechts) */
+  const VAKKEN = [
+    [50, 93, "David", "keeper"], [50, 79, "Casper", "laatste man"], [50, 65, "Mini", "voorstopper"],
+    [84, 69, "Malcolm", "rechtsback"], [16, 69, "Marijn", "linksback"],
+    [50, 50, "Nick", "middenmid"], [82, 47, "Tijmen", "rechtsmid"], [18, 47, "Ali", "linksmid"],
+    [50, 24, "Philip", "spits"], [80, 26, "Jon", "rechtsvoor"], [20, 26, "Thijn", "linksvoor"]];
   const lijnVan = y => y > 86 ? "keeper" : y > 65 ? "verdediging" : y > 40 ? "middenveld" : "aanval";
   const initialen = n => String(n).split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
   function speler(p, bewerk) {
@@ -108,13 +113,13 @@
     const vast = typeof ROSTER !== "undefined" ? ROSTER : new Set(), isInv = n => vast.size > 0 && !vast.has(n);
     const chip = n => `<button type="button" class="cv-chip${isInv(n) ? " inv" : ""}${ed.gekozen === n ? " aan" : ""}" data-naam="${esc(n)}">${esc(n)}</button>`;
     const scroll = sh.querySelector(".cs-body")?.scrollTop || 0, poolScroll = sh.querySelector(".cs-pool-lijst")?.scrollLeft || 0;
-    const hint = ed.gekozen ? `<b>${esc(ed.gekozen)}</b> gekozen: tik op het veld of de bank` : "Tik op een naam en daarna op een plek. Slepen kan ook.";
+    const hint = ed.melding && !ed.gekozen ? esc(ed.melding) : ed.gekozen ? `<b>${esc(ed.gekozen)}</b> gekozen: tik op het veld of de bank` : "Tik op een naam en daarna op een plek. Slepen kan ook.";
     sh.innerHTML = `<div class="cs-kop"><button type="button" class="cs-x" data-cs="sluit" aria-label="Sluiten">×</button>
         <div><b>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}</b><small>${fmtDay(m.datum, { weekday: "long", day: "numeric", month: "long" })}${m.tijd ? ` · ${esc(m.tijd)}` : ""}</small></div>
         <button type="button" class="btn sm cs-opslaan" data-cs="opslaan">Opslaan</button></div>
       <div class="cs-body" data-geen-swipe data-geen-trek>
         <div class="cs-teller"><span>Veld <b>${o.veld.length}</b>/11</span><span>Bank <b>${o.bank.length}</b></span><span class="cs-knoppen"><button type="button" class="cs-link" data-cs="auto">Standaard</button><button type="button" class="cs-link" data-cs="leeg">Leegmaken</button></span></div>
-        <p class="cs-hint${ed.gekozen ? " actief" : ""}" role="status">${hint}</p>
+        <p class="cs-hint${ed.gekozen ? " actief" : ed.melding ? " lang" : ""}" role="status">${hint}</p>
         ${veldHtml(o, true)}
         <div class="cs-dock">
           <div class="cs-rij" data-zone="bank"><span class="cs-rij-k">Bank</span><div class="cs-lijst">${o.bank.length ? o.bank.map(chip).join("") : `<span class="cv-leeg">Tik op een speler en dan hier</span>`}</div></div>
@@ -138,9 +143,13 @@
       const a = knop.dataset.cs;
       if (a === "sluit") return sluitEditor();
       if (a === "leeg") { ed.o = { veld: [], bank: [] }; ed.gekozen = null; return tekenEditor(); }
-      if (a === "auto") { const al = new Set(ed.o.veld.map(p => p.n)); const vrij = ed.sel.filter(n => !al.has(n));
-        VAKKEN.filter(([x, y]) => !ed.o.veld.some(p => Math.abs(p.x - x) < 6 && Math.abs(p.y - y) < 6)).forEach(([x, y]) => { const n = vrij.shift(); if (n) zetOp(n, "veld", x, y); });
-        if (ed.bekend) vrij.forEach(n => { if (!ed.o.bank.includes(n)) zetOp(n, "bank"); }); return tekenEditor(); }
+      if (a === "auto") {
+        ed.o = { veld: [], bank: [] }; ed.gekozen = null;
+        const open = [];
+        VAKKEN.forEach(([x, y, naam, plek]) => { const n = ed.sel.find(s => canon(s) === canon(naam)); if (n) zetOp(n, "veld", x, y); else open.push(`${plek} (${naam})`); });
+        if (ed.bekend) ed.sel.filter(n => !ed.o.veld.some(p => p.n === n)).forEach(n => zetOp(n, "bank"));
+        ed.melding = open.length ? `Nog open: ${open.join(", ")}` : "";
+        return tekenEditor(); }
       if (a === "opslaan") { const st = document.getElementById("cs-status"); st.textContent = "Opslaan…"; knop.disabled = true;
         try { const r = await post({ type: "opstelling", wedstrijd: sleutel(ed.m), opstelling: ed.o });
           if (r.ok) { st.textContent = "Opgeslagen!"; const m = ed.m; await opstellingen(true); setTimeout(() => { sluitEditor(); renderBeheer(); setTimeout(() => window.coachVulOpstelling(m), 50); }, 400); }
@@ -148,6 +157,7 @@
         catch { st.textContent = "Geen verbinding."; knop.disabled = false; } return; }
     }
     const chip = e.target.closest(".cv-chip, .cv-sp");
+    if (chip && ed) ed.melding = "";
     if (chip) { const n = chip.dataset.naam; ed.gekozen = ed.gekozen === n ? null : n; return tekenEditor(); }
     const zone = e.target.closest("[data-zone]");
     if (zone && ed.gekozen) { const z = zone.dataset.zone;
