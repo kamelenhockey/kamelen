@@ -1,6 +1,6 @@
 // Kamelen-app: eerst het netwerk (altijd de nieuwste gegevens), bij geen verbinding de laatst bewaarde versie.
-const CACHE = "kamelen-v184";
-const BASIS = ["./", "index.html", "logo.png", "competitie.json", "liters.json", "opstelling.json", "spelers.json", "doelpunten.csv", "apple-touch-icon.png", "mex.js", "toto.js", "pong.js", "stemmen.js", "statistieken.js", "push.js", "fotos.js", "quotes.js", "rad.js", "race.js", "halloffame.json", "wrapped.js", "ideeen.js", "design-proef.js", "seizoen.js", "zege.js", "karavaan.js", "pongregels.js", "beerpong.js", "poster.js",
+const CACHE = "kamelen-v185";
+const BASIS = ["./", "index.html", "logo.png", "competitie.json", "liters.json", "opstelling.json", "spelers.json", "doelpunten.csv", "apple-touch-icon.png", "mex.js", "toto.js", "pong.js", "stemmen.js", "statistieken.js", "push.js", "fotos.js", "quotes.js", "rad.js", "race.js", "halloffame.json", "wrapped.js", "ideeen.js", "design-proef.js", "seizoen.js", "zege.js", "karavaan.js", "pongregels.js", "beerpong.js",
   "fonts/DMSans.woff", "fonts/DMSans-Italic.woff", "fonts/DMSerifDisplay-Regular.woff", "fonts/DMSerifDisplay-Italic.woff"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(BASIS.map(u => new Request(u, { cache: "reload" })))).catch(() => {})); self.skipWaiting(); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(n => n !== CACHE).map(n => caches.delete(n))))); self.clients.claim(); });
