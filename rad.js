@@ -12,6 +12,7 @@
     { kort: "Nog een keer ×2", tekst: "Nog een keer draaien én verdubbelaar", opnieuw: true, dubbel: true },
     { kort: "Keepersbak", tekst: "Keepersbak" },
     { kort: "Bak uitdelen", tekst: "Bak uitdelen" },
+    { kort: "Lichtingbak", tekst: "Lichtingbak: een bak met iedereen uit jouw lichting" },
     { kort: "HUIS", tekst: "HUIS!", gewicht: .3, huis: true, kleur: "#c0392b" },
     { kort: "Nog een keer", tekst: "Nog een keer draaien", opnieuw: true },
     { kort: "Feutenbak", tekst: "Feutenbak" },
@@ -45,7 +46,9 @@
     return `<svg viewBox="0 0 400 400" class="rad-svg" aria-hidden="true">
       <g id="rad-wiel">
         ${VAKKEN.map(v => {
-          const kleur = v.kleur || KLEUREN[k++ % KLEUREN.length];
+          let kleur = v.kleur || KLEUREN[k++ % KLEUREN.length];
+          /* Laatste vakje mag niet dezelfde kleur hebben als het eerste (ze liggen naast elkaar) */
+          if (v === VAKKEN[VAKKEN.length - 1] && !v.kleur && kleur === KLEUREN[0]) kleur = KLEUREN[4];
           const mid = (v.van + v.tot) / 2;
           const tk = v.kleur ? "#fff" : TEKSTKLEUR[kleur];
           return `<path d="${vakPad(v)}" fill="${kleur}" stroke="#fff" stroke-width="2"/>
