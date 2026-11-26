@@ -66,3 +66,9 @@ friespaard2|Friesian horse
 fierljeppen|Fierljeppen
 usmem2|Us Mem standbeeld
 kaatsen|Kaatsen Franeker
+leeuw3|Lion Panthera leo Serengeti male
+leeuw4|Panthera leo lion staring
+leeuw5|Lion Masai Mara
+temmer|lion tamer circus
+temmer2|Lion tamer chair whip
+temmer3|dompteur leeuwen circus
