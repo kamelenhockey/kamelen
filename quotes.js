@@ -72,7 +72,7 @@
 
   async function laad(vers) {
     const api = await window.kamelenApi(vers);
-    if (!api || !("quotes" in api)) { box.innerHTML = `<div class="card empty">De quotes konden niet worden geladen. Ververs de pagina (Ctrl+Shift+R).</div>`; return; }
+    if (!api || !("quotes" in api)) { box.innerHTML = `<div class="card empty">De quotes konden niet worden geladen. Tik op ↻ bovenin om het opnieuw te proberen.</div>`; return; }
     QUOTES = (api.quotes || []).slice().sort((a, b) => new Date(b.tijd) - new Date(a.tijd));
     window.KAMELEN_QUOTES = QUOTES;
     render(); try { renderPlayers(); } catch {}

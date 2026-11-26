@@ -180,7 +180,7 @@
 
   async function laad(vers) {
     const api = await window.kamelenApi(vers);
-    if (!api || !("fotos" in api)) { box.innerHTML = `<div class="card empty">De foto's konden niet worden geladen. Ververs de pagina (Ctrl+Shift+R).</div>`; return; }
+    if (!api || !("fotos" in api)) { box.innerHTML = `<div class="card empty">De foto's konden niet worden geladen. Tik op ↻ bovenin om het opnieuw te proberen.</div>`; return; }
     FOTOS = (api.fotos || []).slice().sort((a, b) => new Date(b.tijd) - new Date(a.tijd));
     DATA.fotos = FOTOS;
     REACTIES = api.reacties || [];

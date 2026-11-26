@@ -86,7 +86,9 @@
     let html = "";
     const ik = (window.IK || {}).naam || "";
     /* Alleen wie meespeelde (en de coaches) mag stemmen, en alleen op wie meespeelde */
-    const mee = m ? AANWEZIG.get(m.datum) : null;
+    let mee = m ? AANWEZIG.get(m.datum) : null;
+    /* Nog geen aanwezigheid uit de sheet? Dan de selectie van die wedstrijd uit de app */
+    if (m && (!mee || !mee.size) && typeof DATA !== "undefined" && DATA.opstellingWedstrijd === m.datum && (DATA.opstelling || []).length) mee = new Set(DATA.opstelling);
     if (mee && mee.size) namen = [...namen.filter(n => mee.has(n)), ...[...mee].filter(n => !namen.includes(n)).sort()];
     if (m && mee && mee.size && !mee.has(ik) && !COACHES.includes(ik)) {
       html += `<div class="empty"><strong>Je speelde deze wedstrijd niet mee</strong>Alleen wie tegen ${esc(tegen(m))} meedeed en de coaches kunnen stemmen. De uitslag zie je hier zodra de stemming gesloten is.</div>`;

@@ -1004,6 +1004,25 @@
     };
     (OPMAAK[opt.opmaak || idee.opmaak] || OPMAAK.bord)();
 
+    /* Uitslagkaart: dezelfde poster, maar onderaan de eindstand, de doelpuntenmakers en kameel en ezel */
+    if (opt.uitslag) {
+      const u = opt.uitslag, [sa, sb] = String(u.score).split("-").map(x => x.trim()), wij = +(wijThuis ? sa : sb), zij = +(wijThuis ? sb : sa);
+      let gr = ctx.createLinearGradient(0, 930, 0, 1045); gr.addColorStop(0, "rgba(8,7,6,0)"); gr.addColorStop(1, "rgb(8,7,6)");
+      ctx.fillStyle = gr; ctx.fillRect(0, 930, W, 115); ctx.fillStyle = "rgb(8,7,6)"; ctx.fillRect(0, 1045, W, H - 1045);
+      ctx.fillStyle = ZAND; ctx.font = F(700, 24); spatie(ctx, "EINDSTAND", L, 1112, 8);
+      const uit = wij > zij ? ["GEWONNEN", "#3fae6b"] : wij < zij ? ["VERLOREN", "#d4503a"] : ["GELIJK", "#9aa1a8"];
+      ctx.fillStyle = uit[1]; ctx.font = F(700, 24); spatie(ctx, uit[0], W - L, 1112, 8, "right");
+      const regel = `${namen[0]}  ${sa}\u2013${sb}  ${namen[1]}`; let gs = 120; ctx.font = F(700, gs);
+      while (breedte(ctx, regel, 2) > W - 2 * L && gs > 50) { gs -= 4; ctx.font = F(700, gs); }
+      ctx.fillStyle = WIT; spatie(ctx, regel, L - 3, 1112 + gs * .95, 2);
+      let y = 1112 + gs * .95 + 54;
+      if (u.scorers && u.scorers.length) { ctx.fillStyle = "rgba(244,239,230,.85)"; ctx.font = F(500, 28); ctx.textAlign = "left";
+        const telling = {}; u.scorers.forEach(n => telling[n] = (telling[n] || 0) + 1);
+        ctx.fillText("Doelpunten: " + Object.entries(telling).map(([n, k]) => k > 1 ? `${n} ${k}\u00d7` : n).join(", "), L, y); y += 42; }
+      if (u.kameel || u.ezel) { ctx.fillStyle = ZAND; ctx.font = F(500, 28); ctx.textAlign = "left";
+        ctx.fillText([u.kameel ? `\u{1F42A} Kameel: ${u.kameel}` : "", u.ezel ? `\u{1FACF} Ezel: ${u.ezel}` : ""].filter(Boolean).join("     "), L, y); }
+    }
+
     /* ----- bron en korrel ----- */
     const makers = [...new Set((bron || [zijF, onsF]).map(f => f.door))].filter(Boolean);
     if (makers.length) { ctx.fillStyle = /zwitsers/.test(idee.opmaak) ? "rgba(23,18,13,.45)" : "rgba(244,239,230,.32)"; ctx.font = F(300, 15); ctx.textAlign = "center";

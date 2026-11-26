@@ -20,6 +20,7 @@ if (!window.IK) document.documentElement.classList.add("op-slot");
 </script>
 <style>
 html.op-slot body > *:not(#slot){display:none!important}
+html.op-slot,html.op-slot body{background:#b9d8e8!important;padding:0!important;margin:0!important;min-height:100%}
 #slot{display:none}
 html.op-slot #slot{display:grid;place-items:center;min-height:100vh;min-height:100dvh;padding:24px;background:linear-gradient(180deg,#d3e7f1,#b9d8e8)}
 .slot-kaart{width:min(380px,100%);background:#fff;border-radius:20px;padding:28px 24px;text-align:center;box-shadow:0 24px 50px -30px rgba(22,54,80,.6)}
@@ -40,9 +41,14 @@ html.op-slot #slot{display:grid;place-items:center;min-height:100vh;min-height:1
 <meta name="apple-mobile-web-app-title" content="Kamelen">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>GCHC Kamelen</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
+<!-- Lettertypes staan in de site zelf, zodat ze ook zonder internet werken -->
+<link rel="preload" href="fonts/DMSans.woff" as="font" type="font/woff" crossorigin>
+<style>
+@font-face{font-family:"DM Sans";src:url(fonts/DMSans.woff) format("woff");font-weight:400 700;font-style:normal;font-display:swap}
+@font-face{font-family:"DM Sans";src:url(fonts/DMSans-Italic.woff) format("woff");font-weight:400 700;font-style:italic;font-display:swap}
+@font-face{font-family:"DM Serif Display";src:url(fonts/DMSerifDisplay-Regular.woff) format("woff");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"DM Serif Display";src:url(fonts/DMSerifDisplay-Italic.woff) format("woff");font-weight:400;font-style:italic;font-display:swap}
+</style>
 <style>
 :root{
   /* Kleuren uit het logo: tegelblauw, kameeloranje, donkerbruin; bier-amber voor de liters */
@@ -794,7 +800,7 @@ nav.bar a[aria-current="page"]{color:#fff;border-bottom-color:var(--orange)}
 @media (max-width:760px), (max-height:520px) and (orientation:landscape) and (pointer:coarse){
   nav.bar{display:none}
   body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
-  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;z-index:30;left:0;right:0;bottom:0;background:#163650;padding:6px 4px calc(6px + env(safe-area-inset-bottom));border-top:1px solid #234b6a}
+  .tabbar{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;z-index:30;left:0;right:0;bottom:0;background:#163650;padding:6px 4px calc(6px + env(safe-area-inset-bottom));border-top:1px solid #234b6a}
   .tabbar a,.tabbar button{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;color:rgba(255,255,255,.6);font-size:.66rem;font-weight:600;letter-spacing:.02em}
   .tabbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .tabbar [aria-current="page"],.tabbar button[aria-expanded="true"]{color:var(--orange)}
@@ -1451,6 +1457,14 @@ body.wrapped-open{overflow:hidden}
 .seg-switch a{flex:1;text-align:center;white-space:nowrap;padding:9px 12px;border-radius:9px;font-weight:600;font-size:.92rem;color:var(--ink);text-decoration:none}
 .seg-switch a[aria-selected="true"]{background:#fff;box-shadow:0 1px 3px rgba(22,54,80,.18)}
 .seg-switch[hidden]{display:none!important}
+.spring{position:sticky;top:0;z-index:15;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 14px;padding:8px 16px;background:linear-gradient(var(--bg) 70%,transparent)}
+.spring::-webkit-scrollbar{display:none}.spring:empty{display:none}
+.spring a{flex:none;padding:7px 12px;border-radius:999px;background:var(--surface);box-shadow:var(--sh);color:var(--ink);font-weight:600;font-size:.84rem;text-decoration:none;white-space:nowrap}
+.spring a.aan{background:var(--ink);color:#fff}
+#statistieken-box [data-spring]{scroll-margin-top:70px}
+@media (min-width:821px){.spring{top:56px}}
+body.design-proef .spring{top:52px}
+.spel-switch{gap:2px}.spel-switch a{padding:9px 4px;font-size:.84rem;letter-spacing:-.01em}
 #comp-switch{grid-column:1/-1}
 @media (min-width:761px){#comp-switch{display:none}}
 .spel-tegels{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--gap)}
@@ -1723,7 +1737,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
     <li class="nav-more"><button type="button" id="nav-more-btn" aria-expanded="false" aria-controls="nav-more-menu">Meer <span aria-hidden="true">▾</span></button>
       <div class="nav-more-menu" id="nav-more-menu" hidden>
         <div class="nm-group"><div class="nm-h">Competitie</div><a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a></div>
-        <div class="nm-group"><div class="nm-h">Team</div><a href="#fotos" data-view-link="fotos">Foto's</a><a href="#quotes" data-view-link="quotes">Quotes</a><a href="#regels" data-view-link="regels">Kamelen-regels</a><a href="#ideeen" data-view-link="ideeen">💡 Ideeënbox</a><a href="#push-card" data-push-link>🔔 Meldingen</a></div>
+        <div class="nm-group"><div class="nm-h">Team</div><a href="#fotos" data-view-link="fotos">Foto's</a><a href="#quotes" data-view-link="quotes">Quotes</a><a href="#regels" data-view-link="regels">Kamelen-regels</a><a href="#push-card" data-push-link>🔔 Meldingen</a></div>
         <div class="nm-group"><div class="nm-h">Spellen</div><a href="#rad" data-view-link="rad">Kamelen-rad</a><a href="#race" data-view-link="race">Kamelen-racen</a><a href="#mex" data-view-link="mex">Mex</a><a href="#pong" data-view-link="pong">Pongen</a></div>
         <div class="nm-group"><div class="nm-h">Account</div><a href="#" data-wrapped>🎁 Kamelen Wrapped</a><a href="#" data-uitloggen>Uitloggen</a></div>
       </div>
@@ -1840,6 +1854,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
       <h1>Statistieken</h1>
       <p>Alles wat je wilt weten over de Kamelen: resultaten, opkomst, doelpunten en liters. Wordt vanzelf bijgewerkt.</p>
     </header>
+    <nav class="spring" id="stat-spring" aria-label="Naar onderdeel" data-geen-swipe></nav>
     <div id="statistieken-box" class="stats"></div>
   </div>
 </div>
@@ -2201,6 +2216,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <a href="#home" data-view-link="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg><span>Home</span></a>
   <a href="#wedstrijden" id="tab-competitie" data-tab-groep="wedstrijden stand"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3M8 17h6"/></svg><span>Competitie</span></a>
   <a href="#toto" data-view-link="toto"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4l2.4 4.6-2.4 3.4-2.4-3.4zM4.6 10l4.8.6M19.4 10l-4.8.6M7 18.5l3-3.5M17 18.5l-3-3.5"/></svg><span>Scorito</span></a>
+  <a href="#stemmen" data-view-link="stemmen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h16v7H4zM7 13V5h10v8"/><path d="M9.5 9l1.8 1.8 3.4-3.6"/></svg><span>Stemmen</span></a>
   <a href="#spellen" data-tab-groep="spellen rad race mex pong"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="11" height="11" rx="2.2"/><path d="M14.5 9.5h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-4"/><circle cx="7" cy="7" r=".9"/><circle cx="11" cy="11" r=".9"/><circle cx="15.5" cy="17.5" r=".9"/></svg><span>Spellen</span></a>
   <button type="button" id="more-btn" aria-expanded="false" aria-controls="more-sheet"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span>Meer</span></button>
 </nav>
@@ -2212,11 +2228,9 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <a href="#voorspeller" data-view-link="voorspeller">Voorspeller</a>
   <div class="ms-h">Team</div>
   <a href="#spelers" data-view-link="spelers">Spelers</a>
-  <a href="#stemmen" data-view-link="stemmen">Kameel &amp; ezel</a>
   <a href="#fotos" data-view-link="fotos">Foto's</a>
   <a href="#quotes" data-view-link="quotes">Quotes</a>
   <a href="#regels" data-view-link="regels">Kamelen-regels</a>
-  <a href="#ideeen" data-view-link="ideeen">💡 Ideeënbox</a>
   <a href="#push-card" data-push-link>🔔 Meldingen</a>
   <div class="ms-h">Spellen</div>
   <a href="#rad" data-view-link="rad">Kamelen-rad</a>
@@ -2283,7 +2297,12 @@ function toDate(datum, tijd){
 const fmtDay = (datum, opts={weekday:"long",day:"numeric",month:"long"}) => toDate(datum).toLocaleDateString("nl-NL", opts);
 const fmtShort = datum => fmtDay(datum, {weekday:"short", day:"numeric", month:"short"});
 const isUs = name => TEAM_MATCH.test(name || "");
-const teamLink = name => `<button type="button" class="team-link${isUs(name) ? " ours" : ""}" data-team="${esc(name)}">${esc(name)}</button>`;
+/* Korte naam voor smalle rijen: "Leeuwarden" in plaats van "Leeuwarden H2-O", "Studs" in plaats van "Gron.Studs H7".
+   Heeft een club meer teams in de poule (GHBS), dan blijft het teamnummer staan. */
+const clubVan = n => String(n || "").replace(/^Gron\.?\s*/i, "").replace(/\s+[HD]\d+.*$/i, "").trim();
+const kortTeam = n => { if (isUs(n)) return n; const c = clubVan(n), alle = [...new Set([...(DATA.stand || []).map(t => t.team), ...(DATA.programma || []).flatMap(m => [m.thuis, m.uit])])];
+  return alle.filter(t => clubVan(t) === c).length > 1 ? String(n).replace(/^Gron\.?\s*/i, "") : c; };
+const teamLink = name => `<button type="button" class="team-link${isUs(name) ? " ours" : ""}" data-team="${esc(name)}" title="${esc(name)}">${esc(kortTeam(name))}</button>`;
 function resultFor(m, team){
   const [a,b] = String(m.score).split("-").map(Number);
   if (isNaN(a) || isNaN(b)) return null;
@@ -2570,6 +2589,26 @@ async function toonPoster(){
     else deel.addEventListener("click", () => navigator.share({ files: [file], title: "Matchday Kamelen" }).catch(() => {}));
   } catch { box.innerHTML = `<p class="muted">De poster maken lukte niet.</p>`; }
 }
+/* Uitslagkaart: de poster van die wedstrijd met de eindstand, doelpuntenmakers en kameel en ezel */
+async function toonUitslagkaart(){
+  const m = window._posterMatch, box = document.getElementById("wm-uitslagkaart"); if (!m || !box || !window.maakPoster || !m.score) return;
+  box.innerHTML = `<p class="muted">Uitslagkaart maken…</p>`;
+  try {
+    const ons = [...(DATA.uitslagen || []), ...(DATA.programma || [])].filter(x => isUs(x.thuis) || isUs(x.uit)).sort((a, b) => a.datum.localeCompare(b.datum));
+    const ronde = ons.findIndex(x => x.datum === m.datum && x.thuis === m.thuis) + 1 || null;
+    const dp = (DATA.doelpunten || []).find(w => { const z = zoekWedstrijd(w); return z && z.datum === m.datum && z.thuis === m.thuis; });
+    const kz = (DATA.kzUitslagen || []).find(x => x.m && x.m.datum === m.datum);
+    const uitslag = { score: m.score, scorers: dp ? dp.goals.map(g => g.wie) : [], kameel: kz ? (kz.kamelen || []).join(" & ") : "", ezel: kz ? (kz.ezels || []).join(" & ") : "" };
+    const cv = await window.maakPoster(m, { spelers: [], ronde, standLijst: DATA.stand || [], seizoen: ons, uitslag });
+    const blob = await new Promise(ok => cv.toBlob(ok, "image/png"));
+    const url = URL.createObjectURL(blob), naam = `kamelen-uitslag-${m.datum}.png`;
+    box.innerHTML = `<img class="poster-img" src="${url}" alt="Uitslagkaart ${esc(m.thuis)} – ${esc(m.uit)} ${esc(m.score)}"><div class="poster-knoppen"><button type="button" class="btn" id="uk-deel">Delen</button><a class="btn" href="${url}" download="${naam}">Bewaren</a></div>`;
+    const deel = document.getElementById("uk-deel"), file = new File([blob], naam, { type: "image/png" });
+    if (!(navigator.canShare && navigator.canShare({ files: [file] }))) deel.remove();
+    else deel.addEventListener("click", () => navigator.share({ files: [file], title: "Uitslag Kamelen" }).catch(() => {}));
+  } catch { box.innerHTML = `<p class="muted">De uitslagkaart maken lukte niet.</p>`; }
+}
+window.toonUitslagkaart = toonUitslagkaart;
 function renderAfgelast(){
   const el = document.getElementById("afgelast-banner"); if (!el) return;
   const nu = Date.now();
@@ -2707,6 +2746,7 @@ function openMatch(sleutel){
   /* Gespeelde wedstrijd van ons: wie deed er mee (wordt meteen daarna ingeladen) */
   if (!gespeeld && ons && posterProef()) html += `<div class="dlg-sec"><h3 class="sub-h">Wedstrijdposter</h3><div id="wm-poster"><button type="button" class="btn" onclick="toonPoster()">🎨 Maak de poster</button></div></div>`;
   window._posterMatch = m;
+  if (gespeeld && ons && window.maakPoster) html += `<div class="dlg-sec"><h3 class="sub-h">Uitslagkaart</h3><div id="wm-uitslagkaart"><button type="button" class="btn" onclick="toonUitslagkaart()">📸 Maak de uitslagkaart</button></div></div>`;
   if (gespeeld && ons) html += `<div class="dlg-sec" id="wm-selectie"><h3 class="sub-h">Selectie</h3><p class="muted">Selectie laden…</p></div>`;
   if (!v) html += `<div class="empty">Er zijn nog te weinig uitslagen om deze wedstrijd te voorspellen.</div>`;
   else {
@@ -3671,9 +3711,13 @@ const loadLitersLive = () => fetchText(LITERS_CSV).then(t => {
 const loadDoelpunten = () => fetchText(DOELPUNTEN_CSV).catch(() => fetchText("doelpunten.csv")).then(t => leesDoelpunten(parseCsv(t))).catch(() => []);
 
 /* stil = op de achtergrond bijwerken: geen spellen of formulieren resetten, geen foutmelding */
-function laadGegevens(stil){
+const SNAPSHOT = "kamelen-gegevens";
+const haalAlles = () => Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("opstelling.json"), loadLitersLive().catch(() => null), loadDoelpunten(), loadJson("spelers.json")])
+  .then(r => { if (r[0] && r[0].programma) try { localStorage.setItem(SNAPSHOT, JSON.stringify({ t: Date.now(), r })); } catch {} return r; });
+/* bron = eerder bewaarde gegevens: dan meteen tonen zonder op internet te wachten */
+function laadGegevens(stil, bron){
 const y = window.scrollY, pagina = document.body.dataset.page;
-return Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("opstelling.json"), loadLitersLive().catch(() => null), loadDoelpunten(), loadJson("spelers.json")])
+return (bron ? Promise.resolve(bron) : haalAlles())
   .then(([comp, lit, ops, live, doelpunten, roster]) => {
     initRoster(roster);
     DATA = { aftrekMoment: { "GCHC H13": "2026-10-18" }, ...comp, ...lit, ...(live ? {liters: live} : {}), opstelling: ops.spelers || [], opstellingWedstrijd: ops.wedstrijd || null, doelpunten }; _trendVorig = null;
@@ -3705,7 +3749,13 @@ return Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJs
     document.querySelector("main").insertAdjacentHTML("afterbegin", `<div class="card wide">${empty("De gegevens konden niet worden geladen", "Ververs de pagina om het opnieuw te proberen.")}</div>`);
   });
 }
-laadGegevens(false).finally(laadKlaar);
+/* Snel openen: eerst wat er de vorige keer was, dan op de achtergrond de nieuwste gegevens */
+(() => {
+  let snap = null; try { snap = JSON.parse(localStorage.getItem(SNAPSHOT) || "null"); } catch {}
+  if (snap && Array.isArray(snap.r) && snap.r.length === 6 && Date.now() - snap.t < 14 * 864e5)
+    laadGegevens(false, snap.r).catch(() => laadGegevens(false)).finally(() => { laadKlaar(); setTimeout(() => stilVerversen(), 30); });
+  else laadGegevens(false).finally(laadKlaar);
+})();
 /* Laadscherm: minstens even laten zien, nooit langer dan 6 seconden */
 function laadKlaar(){
   const el = document.getElementById("laad"); if (!el || el.dataset.weg) return;
@@ -3762,10 +3812,60 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) toon
   markeer();
 })();
 
+/* ---------- Getal op het app-icoon: aantal dingen die je nog moet doen ---------- */
+(() => {
+  if (!("setAppBadge" in navigator)) return;
+  let wacht = 0;
+  const zet = () => { wacht = 0;
+    const ik = (window.IK || {}).naam, taken = document.querySelectorAll("#home-banners .kz-banner.todo").length;
+    const liters = ik && typeof DATA !== "undefined" && (DATA.liters || []).some(l => canon(l.naam) === ik && !/gedaan/i.test(l.status || "")) ? 1 : 0;
+    const n = taken + liters; (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => {}); };
+  const hb = document.getElementById("home-banners");
+  if (hb) new MutationObserver(() => { if (!wacht) wacht = setTimeout(zet, 400); }).observe(hb, { childList: true, subtree: true });
+  setTimeout(zet, 3000);
+})();
+
+/* ---------- Scherm blijft aan tijdens de spellen ---------- */
+(() => {
+  if (!("wakeLock" in navigator)) return;
+  const SPEL = ["spellen", "rad", "race", "mex", "pong"]; let slot = null;
+  const check = async () => {
+    const nodig = document.visibilityState === "visible" && (SPEL.includes(document.body.dataset.page) || !document.getElementById("pong-veld")?.hidden);
+    if (nodig && !slot) { try { slot = await navigator.wakeLock.request("screen"); slot.addEventListener("release", () => { slot = null; }); } catch {} }
+    else if (!nodig && slot) { slot.release().catch(() => {}); slot = null; }
+  };
+  new MutationObserver(check).observe(document.body, { attributes: true, attributeFilter: ["data-page"] });
+  document.addEventListener("visibilitychange", check); addEventListener("hashchange", () => setTimeout(check, 50));
+})();
+
+/* ---------- Statistieken: springknoppen naar elk onderdeel ---------- */
+(() => {
+  const nav = document.getElementById("stat-spring"), box = document.getElementById("statistieken-box"); if (!nav || !box) return;
+  const KORT = { "Opvallend": "Opvallend", "Opkomst per speler": "Opkomst", "Badges": "Badges", "Kameel & ezel van de dag": "Kameel & ezel", "Kamelen-Scorito": "Scorito", "Hall of Fame": "Hall of Fame", "Badge-ranglijst": null, "Opkomst per wedstrijd": null, "Waarom niet?": "Afmeldingen" };
+  let wacht = 0, doelen = [];
+  const bouw = () => { wacht = 0;
+    doelen = [];
+    const strip = box.querySelector(".stat-strip"); if (strip) doelen.push(["Ploeg", strip]);
+    const pers = document.getElementById("stats-persoonlijk"); if (pers && pers.textContent.trim()) doelen.push(["Jij", pers]);
+    box.querySelectorAll("h2").forEach(h => { const t = h.textContent.trim(), k = KORT[t]; if (!k) return; doelen.push([k, h.classList.contains("stat-h") ? h : h.closest("section") || h]); });
+    doelen.forEach(([, el], i) => el.setAttribute("data-spring", i));
+    nav.innerHTML = doelen.map(([t], i) => `<a href="#statistieken" data-naar="${i}">${t}</a>`).join("");
+  };
+  new MutationObserver(() => { if (!wacht) wacht = setTimeout(bouw, 120); }).observe(box, { childList: true, subtree: true });
+  nav.addEventListener("click", e => { const a = e.target.closest("a[data-naar]"); if (!a) return; e.preventDefault();
+    const d = doelen[+a.dataset.naar]; if (d) d[1].scrollIntoView({ behavior: "smooth", block: "start" }); });
+  /* tijdens scrollen oplichten waar je bent */
+  addEventListener("scroll", () => { if (document.body.dataset.page !== "statistieken" || !doelen.length) return;
+    let nu = 0; doelen.forEach(([, el], i) => { if (el.getBoundingClientRect().top < 140) nu = i; });
+    nav.querySelectorAll("a").forEach((a, i) => a.classList.toggle("aan", i === nu));
+    const aan = nav.querySelector("a.aan"); if (aan && (aan.offsetLeft < nav.scrollLeft || aan.offsetLeft + aan.offsetWidth > nav.scrollLeft + nav.clientWidth)) nav.scrollTo({ left: aan.offsetLeft - 16, behavior: "smooth" });
+  }, { passive: true });
+})();
+
 /* ---------- Swipen tussen de tabjes (telefoon) ---------- */
 (() => {
   if (!matchMedia("(pointer:coarse)").matches) return;
-  const VOLGORDE = ["home", "wedstrijden", "stand", "toto", "topscorers", "liters", "statistieken", "voorspeller", "spelers", "stemmen", "fotos", "quotes", "ideeen", "regels"];
+  const VOLGORDE = ["home", "wedstrijden", "stand", "toto", "topscorers", "liters", "statistieken", "voorspeller", "spelers", "stemmen", "fotos", "quotes", "regels"];
   const NIET = "dialog, input, textarea, select, canvas, .wrapped, .rad-wrap, .rc-baan, .pong-veld, .more-sheet, [class^='mx-'], .md-tabs, .seg, .q-filter, svg#chart, [data-geen-swipe]";
   const schuift = el => { for (let e = el; e && e !== document.body; e = e.parentElement) { const s = getComputedStyle(e); if (/(auto|scroll)/.test(s.overflowX) && e.scrollWidth > e.clientWidth + 2) return true; } return false; };
   let x0 = null, y0 = 0, t0 = 0;
@@ -3903,12 +4003,12 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796532200"></script>
-<script src="toto.js?v=1796532200"></script>
-<script src="pong.js?v=1796532200"></script>
-<script src="pongregels.js?v=1796532200"></script>
-<script src="beerpong.js?v=1796532200"></script>
-<script src="poster.js?v=1796532200"></script>
+<script src="mex.js?v=1796619000"></script>
+<script src="toto.js?v=1796619000"></script>
+<script src="pong.js?v=1796619000"></script>
+<script src="pongregels.js?v=1796619000"></script>
+<script src="beerpong.js?v=1796619000"></script>
+<script src="poster.js?v=1796619000"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -3917,18 +4017,18 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796532200"></script>
-<script src="statistieken.js?v=1796532200"></script>
-<script src="wrapped.js?v=1796532200"></script>
-<script src="race.js?v=1796532200"></script>
-<script src="rad.js?v=1796532200"></script>
-<script src="fotos.js?v=1796532200"></script>
-<script src="quotes.js?v=1796532200"></script>
-<script src="ideeen.js?v=1796532200"></script>
-<script src="seizoen.js?v=1796532200"></script>
-<script src="zege.js?v=1796532200"></script>
-<script src="karavaan.js?v=1796532200"></script>
-<script src="design-proef.js?v=1796532200"></script>
-<script src="push.js?v=1796532200"></script>
+<script src="stemmen.js?v=1796619000"></script>
+<script src="statistieken.js?v=1796619000"></script>
+<script src="wrapped.js?v=1796619000"></script>
+<script src="race.js?v=1796619000"></script>
+<script src="rad.js?v=1796619000"></script>
+<script src="fotos.js?v=1796619000"></script>
+<script src="quotes.js?v=1796619000"></script>
+<script src="ideeen.js?v=1796619000"></script>
+<script src="seizoen.js?v=1796619000"></script>
+<script src="zege.js?v=1796619000"></script>
+<script src="karavaan.js?v=1796619000"></script>
+<script src="design-proef.js?v=1796619000"></script>
+<script src="push.js?v=1796619000"></script>
 </body>
 </html>
