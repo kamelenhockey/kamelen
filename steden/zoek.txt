@@ -77,3 +77,9 @@ veld2|hockey pitch artificial turf
 veld3|field hockey stadium
 doel1|field hockey goal net ball
 doel2|hockey goal cage
+veld4|Wagener Stadium hockey
+veld5|hockeyveld kunstgras
+veld6|field hockey pitch empty
+doel3|field hockey goal
+doel4|veldhockey doel
+doel5|field hockey ball
