@@ -908,34 +908,118 @@
 
       /* De derby's als lp: tracklist = alle onderlinge derby's van dit seizoen, de selectie als bezetting */
       derbyplaat() {
-        ctx.fillStyle = "#121212"; ctx.fillRect(0, 0, W, H);
-        const gr = ctx.createRadialGradient(W / 2, 460, 50, W / 2, 460, 800); gr.addColorStop(0, "rgba(242,106,27,.18)"); gr.addColorStop(1, "rgba(242,106,27,0)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = "#0e1d2b"; ctx.fillRect(0, 0, W, H);
+        const gr = ctx.createRadialGradient(W / 2, 460, 50, W / 2, 460, 800); gr.addColorStop(0, "rgba(240,140,28,.18)"); gr.addColorStop(1, "rgba(240,140,28,0)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
         const S = 600, hx = 90, hy = 110, px = hx + S - 110, py = hy + S / 2, R = S / 2 - 10;
         ctx.save(); ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = 30; ctx.fillStyle = "#0b0b0b"; ctx.beginPath(); ctx.arc(px, py, R, 0, 7); ctx.fill(); ctx.restore();
         for (let r = R - 8; r > 105; r -= 5) { ctx.strokeStyle = `rgba(255,255,255,${.03 + (r % 15 === 0 ? .03 : 0)})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(px, py, r, 0, 7); ctx.stroke(); }
-        ctx.fillStyle = "#f26a1b"; ctx.beginPath(); ctx.arc(px, py, 95, 0, 7); ctx.fill();
+        ctx.fillStyle = "#f08c1c"; ctx.beginPath(); ctx.arc(px, py, 95, 0, 7); ctx.fill();
         if (logo) { const w2 = 110, h2 = w2 * logo.height / logo.width; ctx.drawImage(kameelVorm("#14120f", w2), px - w2 / 2, py - h2 / 2 - 10); }
         ctx.fillStyle = "#0b0b0b"; ctx.beginPath(); ctx.arc(px, py, 6, 0, 7); ctx.fill();
         /* hoes: links onze helft, rechts die van hen */
-        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.7)"; ctx.shadowBlur = 50; ctx.fillStyle = "#1e5a3c"; ctx.fillRect(hx, hy, S, S); ctx.restore();
-        ctx.fillStyle = "#e9e4da"; ctx.beginPath(); ctx.moveTo(hx + S * .78, hy); ctx.lineTo(hx + S, hy); ctx.lineTo(hx + S, hy + S); ctx.lineTo(hx + S * .22, hy + S); ctx.closePath(); ctx.fill();
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.7)"; ctx.shadowBlur = 50; ctx.fillStyle = "#163650"; ctx.fillRect(hx, hy, S, S); ctx.restore();
+        ctx.fillStyle = "#f08c1c"; ctx.beginPath(); ctx.moveTo(hx + S * .78, hy); ctx.lineTo(hx + S, hy); ctx.lineTo(hx + S, hy + S); ctx.lineTo(hx + S * .22, hy + S); ctx.closePath(); ctx.fill();
         ctx.fillStyle = "#fff4e6"; ctx.font = F(700, 88); ctx.textAlign = "left"; ctx.fillText("KAMELEN", hx + 32, hy + 112);
-        ctx.fillStyle = "#14120f"; ctx.font = F(700, 88); ctx.textAlign = "right"; ctx.fillText(tk.toUpperCase(), hx + S - 32, hy + S - 140); ctx.textAlign = "left";
-        ctx.fillStyle = "#14120f"; ctx.font = F(500, 24); ctx.textAlign = "right"; spatie(ctx, "DE DERBY'S, SEIZOEN 26/27", hx + S - 32, hy + S - 100, 4, "right");
+        ctx.fillStyle = "#163650"; ctx.font = F(700, 88); ctx.textAlign = "right"; ctx.fillText(tk.toUpperCase(), hx + S - 32, hy + S - 140); ctx.textAlign = "left";
+        ctx.fillStyle = "#163650"; ctx.font = F(500, 24); ctx.textAlign = "right"; spatie(ctx, "DE DERBY'S, SEIZOEN 26/27", hx + S - 32, hy + S - 100, 4, "right");
         ctx.font = F(300, 22); spatie(ctx, "LIVE OPGENOMEN IN GRONINGEN", hx + S - 32, hy + S - 66, 4, "right"); ctx.textAlign = "left";
         /* tracklist: alle duels met deze club */
         const club = clubVan(tegen), duels = [...(opt.alleUitslagen || []), ...(opt.seizoen || [])].filter((x, i, a) => a.findIndex(y => y.datum === x.datum && y.thuis === x.thuis) === i)
           .filter(x => (/gchc/i.test(x.thuis) || /gchc/i.test(x.uit)) && clubVan(/gchc/i.test(x.thuis) ? x.uit : x.thuis) === club).sort((a, b) => a.datum.localeCompare(b.datum));
         ctx.fillStyle = "#fff4e6"; ctx.font = F(700, 22); spatie(ctx, "TRACKLIST", L, 800, 8);
         duels.forEach((x, k) => { const y = 846 + k * 40, nu = x.datum === m.datum, ta = /gchc/i.test(x.thuis) ? "Kamelen" : kortTeam(x.thuis), tb = /gchc/i.test(x.uit) ? "Kamelen" : kortTeam(x.uit);
-          ctx.fillStyle = "#f26a1b"; ctx.font = F(700, 24); ctx.textAlign = "left"; ctx.fillText(String(k + 1).padStart(2, "0"), L, y);
-          ctx.fillStyle = nu ? "#f26a1b" : "rgba(255,244,230,.88)"; ctx.font = F(nu ? 700 : 500, 26); ctx.fillText(`${ta} – ${tb}`, L + 54, y);
+          ctx.fillStyle = "#f08c1c"; ctx.font = F(700, 24); ctx.textAlign = "left"; ctx.fillText(String(k + 1).padStart(2, "0"), L, y);
+          ctx.fillStyle = nu ? "#f08c1c" : "rgba(255,244,230,.88)"; ctx.font = F(nu ? 700 : 500, 26); ctx.fillText(`${ta} – ${tb}`, L + 54, y);
           ctx.textAlign = "right"; ctx.fillText(nu ? "nieuw, live" : (x.score ? x.score.replace("-", ":") : "nog te spelen"), W - L, y); ctx.textAlign = "left"; });
         ctx.fillStyle = "rgba(255,244,230,.25)"; ctx.fillRect(L, 1150, W - 2 * L, 1);
         const lijst = spelers.length ? spelers.map(n => n[0] + n.slice(1).toLowerCase()) : ["volgt"];
         ctx.fillStyle = "rgba(255,244,230,.6)"; ctx.font = F(500, 21); ctx.textAlign = "left"; let r2 = "Bezetting: ", yb = 1190;
         lijst.forEach((n, k) => { const s2 = n + (k < lijst.length - 1 ? ", " : "."); if (ctx.measureText(r2 + s2).width > W - 2 * L) { ctx.fillText(r2, L, yb); yb += 28; r2 = ""; } r2 += s2; }); ctx.fillText(r2, L, yb);
         infoKort(yb + 50, "rgba(255,244,230,.75)", true); bron = [];
+      },
+      /* Daring: twee speelkaarten. Onze aas tegen hun twee. */
+      kaarten() {
+        const NAVY = "#163650", OR = "#f08c1c", SKY = "#b9d8e8", CR = "#f6efe2";
+        const gr = ctx.createRadialGradient(W / 2, 560, 60, W / 2, 600, 900); gr.addColorStop(0, "#1f4a6b"); gr.addColorStop(1, "#0b1f33"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+        for (let i = 0; i < 20000; i++) { ctx.fillStyle = `rgba(255,255,255,${Math.random() * .03})`; ctx.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+        logoOp(L, 50, 52); ctx.fillStyle = CR; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        const kaart = (x, y, rot, waarde, naam, symbool, kleur, schaal = 1) => {
+          const kw = 400 * schaal, kh = 580 * schaal; ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+          ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 16; ctx.fillStyle = CR; ctx.beginPath(); ctx.roundRect(-kw / 2, -kh / 2, kw, kh, 26 * schaal); ctx.fill(); ctx.shadowColor = "transparent";
+          ctx.strokeStyle = "rgba(22,54,80,.15)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(-kw / 2 + 14 * schaal, -kh / 2 + 14 * schaal, kw - 28 * schaal, kh - 28 * schaal, 16 * schaal); ctx.stroke();
+          const hoek = (sx, sy, r) => { ctx.save(); ctx.translate(sx, sy); ctx.rotate(r); ctx.fillStyle = kleur; ctx.font = F(700, 70 * schaal); ctx.textAlign = "center"; ctx.fillText(waarde, 0, 0); symbool(0, 34 * schaal, 26 * schaal); ctx.restore(); };
+          hoek(-kw / 2 + 52 * schaal, -kh / 2 + 84 * schaal, 0); hoek(kw / 2 - 52 * schaal, kh / 2 - 84 * schaal, Math.PI);
+          symbool(0, 0, 130 * schaal);
+          ctx.fillStyle = kleur; ctx.font = F(700, 26 * schaal); spatie(ctx, naam, 0, kh / 2 - 130 * schaal, 6, "center");
+          ctx.restore(); };
+        const kameel = (x, y, s) => { if (!logo) return; const w2 = s * 1.6, h2 = w2 * logo.height / logo.width; ctx.drawImage(kameelVorm(OR, w2), x - w2 / 2, y - h2 / 2); };
+        const schop = (x, y, s) => { ctx.fillStyle = NAVY; ctx.beginPath(); ctx.moveTo(x, y - s * .55); ctx.bezierCurveTo(x + s * .7, y - s * .05, x + s * .45, y + s * .45, x, y + s * .15); ctx.bezierCurveTo(x - s * .45, y + s * .45, x - s * .7, y - s * .05, x, y - s * .55); ctx.fill(); ctx.fillRect(x - s * .06, y + s * .05, s * .12, s * .4); };
+        kaart(390, 600, -.12, "2", tk.toUpperCase(), schop, NAVY, .86);
+        kaart(650, 560, .08, "A", "KAMELEN", kameel, OR, 1.04);
+        ctx.fillStyle = CR; ctx.font = F(700, 42); spatie(ctx, `${namen[0]} – ${namen[1]}`, L, 1150, 5);
+        infoKort(1194, "rgba(246,239,226,.75)", true); selectieRegel(1246, "rgba(246,239,226,.6)", false, 20); bron = [];
+      },
+
+      /* Emmen: navigatiescherm, route Emmen naar Groningen */
+      navigatie() {
+        const NAVY = "#163650", OR = "#f08c1c", SKY = "#b9d8e8", CR = "#f6efe2";
+        ctx.fillStyle = OR; ctx.fillRect(0, 0, W, H);
+        for (let i = 0; i < 16000; i++) { ctx.fillStyle = `rgba(0,0,0,${Math.random() * .04})`; ctx.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+        logoOp(L, 50, 52); ctx.fillStyle = NAVY; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        /* telefoon */
+        const tx = W / 2 - 230, ty = 140, tw = 460, th = 900;
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = 50; ctx.shadowOffsetY = 20; ctx.fillStyle = "#111"; ctx.beginPath(); ctx.roundRect(tx, ty, tw, th, 60); ctx.fill(); ctx.restore();
+        const sx = tx + 16, sy = ty + 16, sw = tw - 32, sh = th - 32;
+        ctx.save(); ctx.beginPath(); ctx.roundRect(sx, sy, sw, sh, 46); ctx.clip();
+        ctx.fillStyle = "#e9eef2"; ctx.fillRect(sx, sy, sw, sh);
+        /* kaart: wegen, water, groen */
+        ctx.fillStyle = "#cfe3c7"; ctx.beginPath(); ctx.ellipse(sx + 90, sy + 520, 140, 90, .4, 0, 7); ctx.fill(); ctx.beginPath(); ctx.ellipse(sx + 360, sy + 260, 110, 70, -.3, 0, 7); ctx.fill();
+        ctx.fillStyle = "#bcd8ea"; ctx.beginPath(); ctx.ellipse(sx + 330, sy + 600, 90, 40, .6, 0, 7); ctx.fill();
+        ctx.strokeStyle = "#fff"; ctx.lineWidth = 14; [[0, 300, sw, 380], [120, 0, 200, sh], [0, 640, sw, 560], [300, 0, 260, sh]].forEach(([a, b, c, d]) => { ctx.beginPath(); ctx.moveTo(sx + a, sy + b); ctx.lineTo(sx + c, sy + d); ctx.stroke(); });
+        /* route */
+        ctx.strokeStyle = NAVY; ctx.lineWidth = 12; ctx.lineCap = "round"; ctx.lineJoin = "round";
+        ctx.beginPath(); ctx.moveTo(sx + 300, sy + 720); ctx.lineTo(sx + 270, sy + 560); ctx.lineTo(sx + 210, sy + 430); ctx.lineTo(sx + 230, sy + 300); ctx.lineTo(sx + 180, sy + 190); ctx.stroke();
+        ctx.fillStyle = NAVY; ctx.beginPath(); ctx.arc(sx + 300, sy + 720, 14, 0, 7); ctx.fill();
+        ctx.fillStyle = OR; ctx.beginPath(); ctx.arc(sx + 180, sy + 190, 22, 0, 7); ctx.fill(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 5; ctx.stroke();
+        /* bovenbalk met instructie */
+        ctx.fillStyle = NAVY; ctx.fillRect(sx, sy, sw, 170);
+        ctx.fillStyle = "#fff"; ctx.font = F(700, 40); ctx.textAlign = "left"; ctx.fillText("↑  Rechtdoor", sx + 30, sy + 92);
+        ctx.font = F(500, 26); ctx.fillStyle = SKY; ctx.fillText("richting Groningen, 60 km", sx + 30, sy + 132);
+        /* onderkaart */
+        ctx.fillStyle = "#fff"; ctx.fillRect(sx, sy + sh - 230, sw, 230);
+        ctx.fillStyle = NAVY; ctx.font = F(700, 44); ctx.fillText("1 u 05 min", sx + 30, sy + sh - 160);
+        ctx.fillStyle = "#6b7a86"; ctx.font = F(500, 24); ctx.fillText("Vertrek: Emmen", sx + 30, sy + sh - 118);
+        ctx.fillStyle = NAVY; ctx.font = F(500, 24); ctx.fillText("Bestemming: drie punten armer", sx + 30, sy + sh - 82);
+        ctx.fillStyle = OR; ctx.beginPath(); ctx.roundRect(sx + 30, sy + sh - 60, sw - 60, 0, 0); ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = NAVY; ctx.font = F(700, 42); spatie(ctx, `${namen[0]} – ${namen[1]}`, L, 1150, 5);
+        infoKort(1194, "rgba(22,54,80,.85)", true); selectieRegel(1246, "rgba(22,54,80,.75)", false, 20); bron = [];
+      },
+
+      /* Sneek: de wisselbeker van de koploper, met een nieuw naamplaatje dat al klaarligt */
+      plaquette() {
+        const NAVY = "#163650", OR = "#f08c1c", CR = "#f6efe2";
+        ctx.fillStyle = NAVY; ctx.fillRect(0, 0, W, H);
+        const gr = ctx.createRadialGradient(W / 2, 420, 40, W / 2, 500, 700); gr.addColorStop(0, "rgba(255,255,255,.14)"); gr.addColorStop(1, "rgba(255,255,255,0)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+        logoOp(L, 50, 52); ctx.fillStyle = CR; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        /* beker */
+        const cx = W / 2, gold = ctx.createLinearGradient(cx - 200, 0, cx + 200, 0); gold.addColorStop(0, "#9c6b1f"); gold.addColorStop(.35, "#f6d27a"); gold.addColorStop(.55, "#fff1c2"); gold.addColorStop(.8, "#c8902f"); gold.addColorStop(1, "#8a5a17");
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = 40; ctx.fillStyle = gold;
+        ctx.beginPath(); ctx.moveTo(cx - 190, 180); ctx.lineTo(cx + 190, 180); ctx.bezierCurveTo(cx + 190, 420, cx + 110, 500, cx + 40, 520); ctx.lineTo(cx + 40, 600); ctx.lineTo(cx - 40, 600); ctx.lineTo(cx - 40, 520); ctx.bezierCurveTo(cx - 110, 500, cx - 190, 420, cx - 190, 180); ctx.fill();
+        ctx.lineWidth = 22; ctx.strokeStyle = gold; ctx.beginPath(); ctx.arc(cx - 200, 290, 70, Math.PI * .5, Math.PI * 1.5); ctx.stroke(); ctx.beginPath(); ctx.arc(cx + 200, 290, 70, -Math.PI * .5, Math.PI * .5); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(cx, 180, 190, 26, 0, 0, 7); ctx.fill(); ctx.restore();
+        ctx.fillStyle = "rgba(60,30,0,.35)"; ctx.beginPath(); ctx.ellipse(cx, 180, 170, 18, 0, 0, 7); ctx.fill();
+        /* voet met naamplaatjes */
+        ctx.fillStyle = "#2a1a0d"; ctx.beginPath(); ctx.moveTo(cx - 120, 600); ctx.lineTo(cx + 120, 600); ctx.lineTo(cx + 210, 860); ctx.lineTo(cx - 210, 860); ctx.closePath(); ctx.fill();
+        const plaat = (y, tekst, nieuw) => { const pw = 300, ph = 50; const g2 = ctx.createLinearGradient(cx - pw / 2, 0, cx + pw / 2, 0); g2.addColorStop(0, nieuw ? "#b5651a" : "#8c8c8c"); g2.addColorStop(.5, nieuw ? "#ffb35a" : "#e6e6e6"); g2.addColorStop(1, nieuw ? "#b5651a" : "#8c8c8c");
+          ctx.fillStyle = g2; ctx.fillRect(cx - pw / 2, y, pw, ph); ctx.fillStyle = nieuw ? "#3a1a04" : "#333"; ctx.font = F(700, 24); spatie(ctx, tekst, cx, y + 34, 4, "center"); };
+        plaat(640, "KOPLOPER", false); plaat(706, tk.toUpperCase(), false);
+        ctx.save(); ctx.translate(0, 0); ctx.strokeStyle = "rgba(240,140,28,.9)"; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(cx - 140, 731); ctx.lineTo(cx + 140, 731); ctx.stroke(); ctx.restore();
+        /* het nieuwe plaatje ligt er al naast */
+        ctx.save(); ctx.translate(cx + 310, 820); ctx.rotate(-.18); ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = 20; const g3 = ctx.createLinearGradient(-150, 0, 150, 0); g3.addColorStop(0, "#b5651a"); g3.addColorStop(.5, "#ffb35a"); g3.addColorStop(1, "#b5651a");
+        ctx.fillStyle = g3; ctx.fillRect(-150, -25, 300, 50); ctx.shadowColor = "transparent"; ctx.fillStyle = "#3a1a04"; ctx.font = F(700, 24); spatie(ctx, "KAMELEN", 0, 9, 4, "center"); ctx.restore();
+        ctx.fillStyle = CR; ctx.font = F(700, 42); spatie(ctx, `${namen[0]} – ${namen[1]}`, L, 1150, 5);
+        infoKort(1194, "rgba(246,239,226,.75)", true); selectieRegel(1246, "rgba(246,239,226,.6)", false, 20); bron = [];
       },
       /* Minimaal: één echte foto, een paar woorden, verder niets */
       minimaal() {
