@@ -143,11 +143,12 @@
   document.addEventListener("pointercancel", () => { if (sleep && sleep.spook) sleep.spook.remove(); sleep = null; });
 
   /* ---------- Beheerpaneel ---------- */
-  function zichtbaarheid() { document.querySelectorAll("[data-beheer-link]").forEach(a => { a.hidden = !isBeheer(); }); }
+  function zichtbaarheid() { document.querySelectorAll("[data-beheer-link]").forEach(a => { a.hidden = !isBeheer(); }); document.querySelectorAll("[data-beheer-login]").forEach(a => { a.hidden = isBeheer() || (window.IK || {}).rol === "gast"; }); }
+  addEventListener("storage", zichtbaarheid); addEventListener("focus", zichtbaarheid);
   async function renderBeheer() {
     zichtbaarheid();
     const box = document.getElementById("beheer"); if (!box) return;
-    if (!isBeheer()) { box.innerHTML = `<div class="card"><h2 class="cb-h">Inloggen als beheerder</h2><form id="cb-login" class="cb-rij"><input id="cb-code" type="password" placeholder="Beheercode" autocomplete="off"><button class="btn sm" type="submit">Inloggen</button></form><span class="tt-status" id="cb-st" role="status"></span></div>`; return; }
+    if (!isBeheer()) { box.innerHTML = `<div class="card"><h2 class="cb-h">Inloggen als beheerder</h2><p class="muted">Vul de beheercode in. Hij wordt alleen op dit apparaat bewaard; daarna zie je in het menu Meer de knop Beheer en bij elke wedstrijd de opstelling.</p><form id="cb-login" class="cb-rij"><input id="cb-code" type="password" placeholder="Beheercode" autocomplete="off"><button class="btn sm" type="submit">Inloggen</button></form><span class="tt-status" id="cb-st" role="status"></span></div>`; return; }
     const j = await window.kamelenApi?.().catch(() => ({})) || {};
     const nu = Date.now(), alle = onze(), komend = alle.filter(m => toDate(m.datum, m.tijd || "23:00") > nu - 3 * 3600e3).slice(0, 6);
     const gespeeld = alle.filter(m => m.score).reverse();
@@ -219,6 +220,7 @@
     try { const t = await fetch("widget/kamelen-widget.js").then(r => r.text()); await navigator.clipboard.writeText(t); st.textContent = "Gekopieerd! Plak het in Scriptable."; }
     catch { st.innerHTML = `Kopiëren lukte niet. <a href="widget/kamelen-widget.js" target="_blank">Open het script</a> en kopieer het zelf.`; }
   });
-  addEventListener("hashchange", () => { if (location.hash === "#beheer") renderBeheer(); });
+  addEventListener("hashchange", () => { zichtbaarheid(); if (location.hash === "#beheer") renderBeheer(); });
+  document.addEventListener("click", e => { if (e.target.closest("#more-btn")) zichtbaarheid(); }, true);
   setTimeout(() => { zichtbaarheid(); if (location.hash === "#beheer") renderBeheer(); }, 0);
 })();
