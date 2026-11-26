@@ -755,6 +755,32 @@
         infoKort(1212, o.zacht || MUTED, true); selectieRegel(1262, o.zacht || "rgba(244,239,230,.6)", false, 20); bron = [];
       },
 
+      /* Wapen met motto (Studs): hun motto is "Vindicat atque polit", het onze wordt "Venit atque vincit" */
+      motto() {
+        const GOUD = "#c9a45a", gr = ctx.createRadialGradient(W / 2, 520, 60, W / 2, 600, 950); gr.addColorStop(0, "#1b4a33"); gr.addColorStop(1, "#071a10"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+        for (let i = 0; i < 30000; i++) { ctx.fillStyle = `rgba(255,255,255,${Math.random() * .03})`; ctx.fillRect(Math.random() * W, Math.random() * H, 1.5, 1.5); }
+        ctx.strokeStyle = GOUD; ctx.lineWidth = 2; ctx.strokeRect(40, 40, W - 80, H - 80); ctx.lineWidth = 1; ctx.strokeRect(52, 52, W - 104, H - 104);
+        /* schild */
+        const sx = W / 2, sy = 170, sw = 400, sh = 480;
+        ctx.save(); ctx.beginPath(); ctx.moveTo(sx - sw / 2, sy); ctx.lineTo(sx + sw / 2, sy); ctx.lineTo(sx + sw / 2, sy + sh * .55); ctx.quadraticCurveTo(sx + sw / 2, sy + sh * .9, sx, sy + sh); ctx.quadraticCurveTo(sx - sw / 2, sy + sh * .9, sx - sw / 2, sy + sh * .55); ctx.closePath();
+        const sg = ctx.createLinearGradient(0, sy, 0, sy + sh); sg.addColorStop(0, "#1f5a3d"); sg.addColorStop(1, "#0d2c1d"); ctx.fillStyle = sg; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = GOUD; ctx.stroke();
+        ctx.clip(); ctx.fillStyle = "rgba(242,106,27,.9)"; ctx.fillRect(sx - sw / 2, sy, sw, 84); ctx.restore();
+        if (logo) { const bw = 270, bh = bw * logo.height / logo.width; ctx.drawImage(kameelVorm(GOUD, bw), sx - bw / 2, sy + 145); }
+        /* drie sterren in de bovenrand */
+        ctx.fillStyle = "#fff4e0"; [-100, 0, 100].forEach(dx => { ctx.save(); ctx.translate(sx + dx, sy + 42); ctx.beginPath(); for (let k = 0; k < 10; k++) { const r = k % 2 ? 7 : 16, a = -Math.PI / 2 + k * Math.PI / 5; ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r); } ctx.fill(); ctx.restore(); });
+        /* lint met motto */
+        const ly = sy + sh + 50; ctx.fillStyle = "#e9dcc0"; ctx.beginPath(); ctx.moveTo(150, ly); ctx.lineTo(W - 150, ly); ctx.lineTo(W - 120, ly + 40); ctx.lineTo(W - 150, ly + 80); ctx.lineTo(150, ly + 80); ctx.lineTo(120, ly + 40); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#14321f"; ctx.font = `400 44px PSerifR, Georgia, serif`; spatie(ctx, "VENIT ATQUE VINCIT", W / 2, ly + 55, 6, "center");
+        ctx.fillStyle = GOUD; ctx.font = F(500, 22); spatie(ctx, "SOCIETAS CAMELORUM GRONINGANA", W / 2, ly + 140, 10, "center");
+        ctx.fillStyle = "#f4ecd8"; ctx.font = `400 92px PSerifR, Georgia, serif`; ctx.textAlign = "center"; ctx.fillText(`${namen[0][0]}${namen[0].slice(1).toLowerCase()} \u2013 ${namen[1][0]}${namen[1].slice(1).toLowerCase()}`, W / 2, ly + 270);
+        ctx.fillStyle = GOUD; ctx.fillRect(W / 2 - 60, ly + 305, 120, 2);
+        ctx.fillStyle = "#f4ecd8"; ctx.font = F(500, 24); spatie(ctx, `${weekdag} ${datum}  /  ${tijd.toUpperCase()}  /  ${wijThuis ? "THUIS" : "UIT"}, ${plek.toUpperCase()}`, W / 2, ly + 360, 5, "center");
+        const lijst = spelers.length ? spelers : leeg; ctx.fillStyle = "rgba(244,236,216,.7)"; ctx.font = F(500, 20);
+        let regel = "", y = ly + 410, regels = []; lijst.forEach(n => { if (breedte(ctx, regel + n + "   ", 3) > W - 260) { regels.push(regel.trim()); regel = ""; } regel += n + "   "; }); regels.push(regel.trim());
+        regels.forEach((r, i) => spatie(ctx, r, W / 2, y + i * 30, 3, "center"));
+        bron = [];
+      },
+
       /* Minimaal: één echte foto, een paar woorden, verder niets */
       minimaal() {
         const o = opt.mini || {}, f = FOTO[o.foto] || zijF, img = o.img || zijImg, gg = GRADE[o.grade || "zw"];
@@ -773,7 +799,7 @@
         ctx.save(); if (o.kopDraai) { ctx.translate(L, y0); ctx.rotate(o.kopDraai); ctx.translate(-L, -y0); }
         kop.forEach((t, i) => { ctx.fillStyle = i === kop.length - 1 && o.accent ? ZAND : WIT; ctx.font = F(700, ks); spatie(ctx, t, L - 4, y0 + i * ks * .9, ks * .02); });
         ctx.restore();
-        if (o.sub) { ctx.save(); ctx.shadowColor = "rgba(0,0,0,.9)"; ctx.shadowBlur = 18; ctx.fillStyle = ZAND; ctx.font = F(o.boven ? 500 : 300, 38); ctx.textAlign = "left"; ctx.fillText(o.sub, L, o.boven ? y0 + (kop.length - 1) * ks * .9 + 64 : 1044); ctx.restore(); }
+        if (o.sub) { ctx.save(); ctx.shadowColor = "rgba(0,0,0,.9)"; ctx.shadowBlur = 18; ctx.fillStyle = o.subKleur || ZAND; ctx.font = F(o.boven ? 500 : 300, 38); ctx.textAlign = "left"; ctx.fillText(o.sub, L, o.boven ? y0 + (kop.length - 1) * ks * .9 + 64 : 1044); ctx.restore(); }
         ctx.fillStyle = "rgba(244,239,230,.3)"; ctx.fillRect(L, 1112, W - 2 * L, 1);
         ctx.fillStyle = WIT; ctx.font = F(700, 38); spatie(ctx, `${namen[0]} \u2013 ${namen[1]}`, L, 1170, 5);
         infoKort(1212, MUTED, true); selectieRegel(1262, "rgba(244,239,230,.6)", false, 20);
