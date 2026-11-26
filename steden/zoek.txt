@@ -72,3 +72,8 @@ leeuw5|Lion Masai Mara
 temmer|lion tamer circus
 temmer2|Lion tamer chair whip
 temmer3|dompteur leeuwen circus
+veld1|field hockey pitch aerial
+veld2|hockey pitch artificial turf
+veld3|field hockey stadium
+doel1|field hockey goal net ball
+doel2|hockey goal cage
