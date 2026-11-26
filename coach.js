@@ -57,6 +57,8 @@
     [84, 69, "Malcolm", "rechtsback"], [16, 69, "Marijn", "linksback"],
     [50, 50, "Nick", "middenmid"], [82, 47, "Tijmen", "rechtsmid"], [18, 47, "Ali", "linksmid"],
     [50, 24, "Philip", "spits"], [80, 26, "Jon", "rechtsvoor"], [20, 26, "Thijn", "linksvoor"]];
+  /* Vaste wissels in de dug-out */
+  const WISSELS = [["Jesse", "aanval"], ["Julius", "aanval"], ["Ids", "middenveld"], ["Boudewijn", "verdediging"], ["Tutu", "verdediging"]];
   const lijnVan = y => y > 86 ? "keeper" : y > 60 ? "verdediging" : y > 40 ? "middenveld" : "aanval";
   const initialen = n => String(n).split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
   function speler(p, bewerk) {
@@ -156,6 +158,7 @@
         ed.o = { veld: [], bank: [] }; ed.gekozen = null;
         const open = [];
         VAKKEN.forEach(([x, y, naam, plek]) => { const n = ed.sel.find(s => canon(s) === canon(naam)); if (n) zetOp(n, "veld", x, y); else open.push(`${plek} (${naam})`); });
+        WISSELS.forEach(([naam, lijn]) => { const n = ed.sel.find(s => canon(s) === canon(naam)); if (n) zetOp(n, "bank", lijn); });
         ed.melding = open.length ? `Nog open: ${open.join(", ")}` : "";
         return tekenEditor(); }
       if (a === "opslaan") { const st = document.getElementById("cs-status"); st.textContent = "Opslaan…"; knop.disabled = true;
