@@ -201,7 +201,7 @@
   const mijnBonus = () => { try { return JSON.parse(localStorage.getItem(BONUS_KEY) || "{}"); } catch { return {}; } };
   function bonusBlok(m) {
     const q = ((window._bonus || {}).vragen || {})[sleutel(m)]; if (!q || !q.vraag) return "";
-    const mijn = mijnBonus()[sleutel(m)], opties = q.opties && q.opties.length ? q.opties : (window.keuzeVan ? window.keuzeVan(m) : []);
+    const mijn = mijnBonus()[sleutel(m)], opties = q.opties && q.opties.length ? (window.bonusOpties ? window.bonusOpties(q.opties, m) : q.opties.filter(o => o !== "@selectie")) : (window.keuzeVan ? window.keuzeVan(m) : []);
     return `<div class="tt-bonus" data-bonus="${esc(sleutel(m))}"><h3>⭐ Bonusvraag · ${q.punten} ${q.punten == 1 ? "punt" : "punten"}</h3><p>${esc(q.vraag)}</p>
       <div class="opties">${opties.map(o => `<button type="button" class="cv-chip${mijn === o ? " aan" : ""}" data-bonus-optie="${esc(o)}">${esc(o)}</button>`).join("") || `<span class="muted">De antwoorden komen zodra de selectie bekend is.</span>`}</div>
       <span class="tt-status" role="status">${mijn ? `Jouw antwoord: <b>${esc(mijn)}</b>. Aanpassen kan tot de aftrap.` : ""}</span></div>`;

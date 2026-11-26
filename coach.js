@@ -37,6 +37,10 @@
   }
   const keuzeVan = m => { const s = selectieVan(m); return s.length ? s : iedereen(); };
   window.keuzeVan = keuzeVan;
+  /* Bonusvraag: "@selectie" staat voor de spelers van die wedstrijd (de selectie als die bekend is, anders iedereen) */
+  const SEL = "@selectie";
+  const bonusOpties = (opties, m) => { const uit = []; (opties || []).forEach(o => (o === SEL ? keuzeVan(m) : [o]).forEach(x => { if (!uit.includes(x)) uit.push(x); })); return uit; };
+  window.bonusOpties = bonusOpties;
   window.selectieVan = selectieVan;
 
   /* ---------- Het veld ---------- */
@@ -262,12 +266,12 @@
       ${huidig ? `<p class="bq-nu">Staat nu: <b>${esc(huidig.vraag)}</b> (${huidig.punten} ${huidig.punten == 1 ? "punt" : "punten"})</p>` : ""}
       <div class="cb-veld"><span>Snel kiezen</span><div class="bq-snel">${SNEL.map(([v], i) => `<button type="button" class="cv-chip${concept.vraag === v ? " aan" : ""}" data-bq-snel="${i}">${esc(v)}</button>`).join("")}</div></div>
       <label class="cb-veld"><span>Vraag</span><input id="bq-vraag" maxlength="200" placeholder="Of typ zelf een vraag" value="${esc(concept.vraag)}"></label>
-      <div class="cb-veld"><span>Antwoorden <small>(${concept.opties.length})</small></span>
-        <div class="bq-opties">${concept.opties.map((o, i) => `<span class="bq-optie">${esc(o)}<button type="button" aria-label="${esc(o)} weghalen" data-bq-weg="${i}">×</button></span>`).join("") || `<span class="muted">Kies een snelle vraag of voeg antwoorden toe.</span>`}</div>
-        <div class="bq-toevoeg"><input id="bq-nieuw" maxlength="40" placeholder="Antwoord toevoegen"><button type="button" class="btn sm ghost" data-bq="voeg">Toevoegen</button><button type="button" class="btn sm ghost" data-bq="spelers">+ Spelers</button></div></div>
+      <div class="cb-veld"><span>Antwoorden <small>(${bonusOpties(concept.opties, m).length})</small></span>
+        <div class="bq-opties">${concept.opties.map((o, i) => `<span class="bq-optie${o === SEL ? " sel" : ""}">${o === SEL ? `👥 Spelers van de wedstrijd <small>(${selectieVan(m).length ? `selectie, ${selectieVan(m).length}` : "nu nog iedereen"})</small>` : esc(o)}<button type="button" aria-label="${esc(o)} weghalen" data-bq-weg="${i}">×</button></span>`).join("") || `<span class="muted">Kies een snelle vraag of voeg antwoorden toe.</span>`}</div>
+        <div class="bq-toevoeg"><input id="bq-nieuw" maxlength="40" placeholder="Antwoord toevoegen"><button type="button" class="btn sm ghost" data-bq="voeg">Toevoegen</button><button type="button" class="btn sm ghost" data-bq="spelers">+ Spelers van de wedstrijd</button></div></div>
       <div class="cb-veld"><span>Punten voor een goed antwoord</span><div class="bq-punten">${[1, 2, 3, 4, 5].map(p => `<button type="button" class="${p === concept.punten ? "aan" : ""}" data-bq-pt="${p}">${p}</button>`).join("")}</div></div>
       <div class="cb-rij"><button type="button" class="btn" data-bq="opslaan">${huidig ? "Bonusvraag bijwerken" : "Bonusvraag opslaan"}</button><span class="tt-status" id="bq-st" role="status"></span></div>` : `<p class="muted">Er zijn geen komende wedstrijden.</p>`}
-      ${gespeeld.length ? `<h3 class="sub-h bq-kop">Juiste antwoord invullen</h3>${gespeeld.map(x => { const q = bq[sleutel(x)], opts = q.opties.length ? q.opties : keuzeVan(x);
+      ${gespeeld.length ? `<h3 class="sub-h bq-kop">Juiste antwoord invullen</h3>${gespeeld.map(x => { const q = bq[sleutel(x)], opts = q.opties.length ? bonusOpties(q.opties, x) : keuzeVan(x);
         return `<div class="bq-uitslag${q.antwoord ? " klaar" : ""}" data-bq-key="${esc(sleutel(x))}"><p><b>${esc(q.vraag)}</b><small>${esc(naamWed(x))}${x.score ? `, ${esc(x.score)}` : ""} · ${q.antwoord ? `antwoord: <b>${esc(q.antwoord)}</b>` : "nog geen antwoord"}</small></p>
           <div class="bq-opties">${opts.map(o => `<button type="button" class="cv-chip${q.antwoord === o ? " aan" : ""}" data-bq-antw="${esc(o)}">${esc(o)}</button>`).join("")}</div><span class="tt-status" role="status"></span></div>`; }).join("")}` : ""}`;
   }
@@ -280,14 +284,14 @@
     if (t.dataset.bqWed) { const j = await window.kamelenApi?.().catch(() => ({})) || {}, q = (j.bonusvragen || {})[t.dataset.bqWed];
       concept = { key: t.dataset.bqWed, vraag: q?.vraag || "", opties: q?.opties?.length ? [...q.opties] : [], punten: q?.punten || 2 }; return tekenBonus(); }
     vraagVeld();
-    if (t.dataset.bqSnel) { const [v, o] = SNEL[+t.dataset.bqSnel]; concept.vraag = v; concept.opties = o === "selectie" ? keuzeVan(m) : [...o]; return tekenBonus(); }
+    if (t.dataset.bqSnel) { const [v, o] = SNEL[+t.dataset.bqSnel]; concept.vraag = v; concept.opties = o === "selectie" ? [SEL] : [...o]; return tekenBonus(); }
     if (t.dataset.bqWeg) { concept.opties.splice(+t.dataset.bqWeg, 1); return tekenBonus(); }
     if (t.dataset.bqPt) { concept.punten = +t.dataset.bqPt; return tekenBonus(); }
     if (t.dataset.bq === "voeg") { const i = document.getElementById("bq-nieuw"), v = i.value.trim(); if (v && !concept.opties.includes(v)) concept.opties.push(v); await tekenBonus(); document.getElementById("bq-nieuw")?.focus(); return; }
-    if (t.dataset.bq === "spelers") { keuzeVan(m).forEach(n => { if (!concept.opties.includes(n)) concept.opties.push(n); }); return tekenBonus(); }
+    if (t.dataset.bq === "spelers") { if (!concept.opties.includes(SEL)) concept.opties.unshift(SEL); return tekenBonus(); }
     if (t.dataset.bq === "opslaan") { const st = document.getElementById("bq-st");
       if (!concept.vraag.trim()) { st.textContent = "Vul een vraag in."; return; }
-      if (concept.opties.length < 2) { st.textContent = "Geef minstens twee antwoorden."; return; }
+      if (bonusOpties(concept.opties, m).length < 2) { st.textContent = "Geef minstens twee antwoorden."; return; }
       st.textContent = "Opslaan…"; t.disabled = true;
       try { const r = await post({ type: "bonusvraag", wedstrijd: concept.key, vraag: concept.vraag.trim(), opties: concept.opties, punten: concept.punten, aftrap: toDate(m.datum, m.tijd || "12:00").toISOString() });
         if (r.ok) { await window.kamelenApi?.(true); window.renderToto?.(); await tekenBonus(); const s2 = document.getElementById("bq-st"); if (s2) s2.textContent = "Opgeslagen!"; }
