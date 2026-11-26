@@ -291,6 +291,8 @@
         t.save(); t.setTransform(1, 0, 0, 1, 0, 0); t.drawImage(lc, 0, 0); t.restore(); }
       return c;
     };
+    const clubVan = n => String(n || "").replace(/^Gron\.?\s*/i, "").replace(/\s+[HD]\d+.*$/i, "").trim();
+    const kortTeam = n => { const c = clubVan(n), alle = (opt.standLijst || []).map(t => t.team); return alle.filter(t => clubVan(t) === c).length > 1 ? String(n).replace(/^Gron\.?\s*/i, "") : c; };
     const OPMAAK = {
       ticket() {
         const tmp = document.createElement("canvas"); tmp.width = W; tmp.height = H; beeld(tmp.getContext("2d"), zijImg, zijF, g, 0, 0, W, H);
@@ -853,6 +855,87 @@
         ctx.fillStyle = "rgba(255,244,230,.25)"; ctx.fillRect(L, 1172, W - 2 * L, 1);
         ctx.fillStyle = "#fff4e6"; ctx.font = F(700, 34); spatie(ctx, `${namen[0]} – ${namen[1]}`, L, 1220, 5);
         infoKort(1262, "rgba(255,244,230,.6)", true); bron = [];
+      },
+      /* Data-reeks (zelfde stijl als VORM): één feit, groot en droog */
+      punt() {
+        ctx.fillStyle = "#f1ece2"; ctx.fillRect(0, 0, W, H);
+        for (let i = 0; i < 16000; i++) { ctx.fillStyle = `rgba(0,0,0,${Math.random() * .035})`; ctx.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+        const INK = "#14120f", st = (opt.standLijst || []).slice().sort((a, b) => a.positie - b.positie);
+        const wij = st.find(x => /gchc/i.test(x.team)), zij = st.find(x => x.team === tegen);
+        logoOp(L, 50, 52); ctx.fillStyle = INK; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        const vers = zij && wij ? Math.abs(zij.punten - wij.punten) : 0;
+        ctx.fillStyle = INK; ctx.font = F(700, 190); ctx.textAlign = "left"; ctx.fillText(`${vers} ${vers === 1 ? "PUNT" : "PUNTEN"}.`, L - 8, 300);
+        ctx.font = F(500, 22); spatie(ctx, "HET VERSCHIL IN DE STAND", L, 350, 7);
+        /* de twee regels uit de stand, de onze in oranje */
+        const regels = [zij, wij].filter(Boolean).sort((a, b) => a.positie - b.positie);
+        regels.forEach((r, k) => { const y = 470 + k * 200, ons = /gchc/i.test(r.team);
+          ctx.fillStyle = ons ? "#f26a1b" : "#14120f"; ctx.fillRect(L, y, W - 2 * L - 120, 170);
+          ctx.fillStyle = "#fff"; ctx.font = F(700, 110); ctx.textAlign = "left"; ctx.fillText(String(r.positie), L + 30, y + 128);
+          ctx.font = F(700, 64); ctx.fillText(ons ? "KAMELEN" : kortTeam(r.team).toUpperCase(), L + 150, y + 108);
+          ctx.textAlign = "right"; ctx.font = F(700, 90); ctx.fillText(String(r.punten), W - L - 150, y + 122); ctx.textAlign = "left"; });
+        /* pijl: wij gaan erover */
+        ctx.strokeStyle = "#f26a1b"; ctx.lineWidth = 12; ctx.lineCap = "round"; const ax = W - L - 50;
+        ctx.beginPath(); ctx.moveTo(ax, 790); ctx.quadraticCurveTo(ax + 50, 650, ax, 520); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ax - 24, 548); ctx.lineTo(ax, 512); ctx.lineTo(ax + 30, 540); ctx.stroke();
+        ctx.fillStyle = INK; ctx.fillRect(L, 1112, W - 2 * L, 2);
+        ctx.font = F(700, 38); spatie(ctx, `${namen[0]} – ${namen[1]}`, L, 1170, 5);
+        infoKort(1212, "rgba(20,18,15,.7)", true); selectieRegel(1262, "rgba(20,18,15,.6)", false, 20); bron = [];
+      },
+
+      vorige() {
+        ctx.fillStyle = "#f1ece2"; ctx.fillRect(0, 0, W, H);
+        for (let i = 0; i < 16000; i++) { ctx.fillStyle = `rgba(0,0,0,${Math.random() * .035})`; ctx.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+        const INK = "#14120f", o = opt.mini || {};
+        const v = (opt.alleUitslagen || []).filter(x => x.score && (x.thuis === tegen || x.uit === tegen) && (/gchc/i.test(x.thuis) || /gchc/i.test(x.uit))).sort((a, b) => b.datum.localeCompare(a.datum))[0];
+        logoOp(L, 50, 52); ctx.fillStyle = INK; ctx.font = F(500, 22); spatie(ctx, ronde, W - L, 92, 7, "right");
+        const bord = (y, titel, thuisN, uitN, a, b, kleurA, kleurB) => {
+          ctx.fillStyle = INK; ctx.font = F(700, o.deze ? 120 : 190); ctx.textAlign = "left"; ctx.fillText(titel, L - 8, y);
+          const by = y + (o.deze ? 50 : 70), bw = (W - 2 * L - 30) / 2, bh = o.deze ? 250 : 380;
+          [[thuisN, a, kleurA], [uitN, b, kleurB]].forEach(([n, sc, kl], k) => { const x = L + k * (bw + 30);
+            ctx.fillStyle = kl; ctx.fillRect(x, by, bw, bh);
+            ctx.fillStyle = "#fff"; ctx.font = F(700, 34); spatie(ctx, n, x + bw / 2, by + 56, 5, "center");
+            ctx.font = F(700, o.deze ? 170 : 280); ctx.textAlign = "center"; ctx.fillText(sc, x + bw / 2, by + bh - (o.deze ? 34 : 50)); ctx.textAlign = "left"; });
+        };
+        if (v) { const [a, b] = v.score.split("-"), ta = /gchc/i.test(v.thuis) ? "KAMELEN" : kortTeam(v.thuis).toUpperCase(), tb = /gchc/i.test(v.uit) ? "KAMELEN" : kortTeam(v.uit).toUpperCase();
+          const winA = +a > +b, kl = n => n === "KAMELEN" ? "#f26a1b" : "#14120f";
+          bord(o.deze ? 260 : 300, "VORIGE KEER.", ta, tb, a, b, kl(ta), kl(tb));
+          if (o.deze) { const th = namen[0], ut = namen[1]; bord(760, "DEZE KEER.", th, ut, "?", "?", th === "KAMELEN" ? "#f26a1b" : "#14120f", ut === "KAMELEN" ? "#f26a1b" : "#14120f"); }
+          ctx.fillStyle = "rgba(20,18,15,.6)"; ctx.font = F(500, 22); spatie(ctx, new Date(v.datum + "T12:00").toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" }).toUpperCase(), L, o.deze ? 300 : 352, 6); }
+        ctx.fillStyle = INK; ctx.fillRect(L, 1112, W - 2 * L, 2);
+        ctx.font = F(700, 38); spatie(ctx, `${namen[0]} – ${namen[1]}`, L, 1170, 5);
+        infoKort(1212, "rgba(20,18,15,.7)", true); selectieRegel(1262, "rgba(20,18,15,.6)", false, 20); bron = [];
+      },
+
+      /* De derby's als lp: tracklist = alle onderlinge derby's van dit seizoen, de selectie als bezetting */
+      derbyplaat() {
+        ctx.fillStyle = "#121212"; ctx.fillRect(0, 0, W, H);
+        const gr = ctx.createRadialGradient(W / 2, 460, 50, W / 2, 460, 800); gr.addColorStop(0, "rgba(242,106,27,.18)"); gr.addColorStop(1, "rgba(242,106,27,0)"); ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+        const S = 600, hx = 90, hy = 110, px = hx + S - 110, py = hy + S / 2, R = S / 2 - 10;
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = 30; ctx.fillStyle = "#0b0b0b"; ctx.beginPath(); ctx.arc(px, py, R, 0, 7); ctx.fill(); ctx.restore();
+        for (let r = R - 8; r > 105; r -= 5) { ctx.strokeStyle = `rgba(255,255,255,${.03 + (r % 15 === 0 ? .03 : 0)})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(px, py, r, 0, 7); ctx.stroke(); }
+        ctx.fillStyle = "#f26a1b"; ctx.beginPath(); ctx.arc(px, py, 95, 0, 7); ctx.fill();
+        if (logo) { const w2 = 110, h2 = w2 * logo.height / logo.width; ctx.drawImage(kameelVorm("#14120f", w2), px - w2 / 2, py - h2 / 2 - 10); }
+        ctx.fillStyle = "#0b0b0b"; ctx.beginPath(); ctx.arc(px, py, 6, 0, 7); ctx.fill();
+        /* hoes: links onze helft, rechts die van hen */
+        ctx.save(); ctx.shadowColor = "rgba(0,0,0,.7)"; ctx.shadowBlur = 50; ctx.fillStyle = "#1e5a3c"; ctx.fillRect(hx, hy, S, S); ctx.restore();
+        ctx.fillStyle = "#e9e4da"; ctx.beginPath(); ctx.moveTo(hx + S * .78, hy); ctx.lineTo(hx + S, hy); ctx.lineTo(hx + S, hy + S); ctx.lineTo(hx + S * .22, hy + S); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#fff4e6"; ctx.font = F(700, 88); ctx.textAlign = "left"; ctx.fillText("KAMELEN", hx + 32, hy + 112);
+        ctx.fillStyle = "#14120f"; ctx.font = F(700, 88); ctx.textAlign = "right"; ctx.fillText(tk.toUpperCase(), hx + S - 32, hy + S - 140); ctx.textAlign = "left";
+        ctx.fillStyle = "#14120f"; ctx.font = F(500, 24); ctx.textAlign = "right"; spatie(ctx, "DE DERBY'S, SEIZOEN 26/27", hx + S - 32, hy + S - 100, 4, "right");
+        ctx.font = F(300, 22); spatie(ctx, "LIVE OPGENOMEN IN GRONINGEN", hx + S - 32, hy + S - 66, 4, "right"); ctx.textAlign = "left";
+        /* tracklist: alle duels met deze club */
+        const club = clubVan(tegen), duels = [...(opt.alleUitslagen || []), ...(opt.seizoen || [])].filter((x, i, a) => a.findIndex(y => y.datum === x.datum && y.thuis === x.thuis) === i)
+          .filter(x => (/gchc/i.test(x.thuis) || /gchc/i.test(x.uit)) && clubVan(/gchc/i.test(x.thuis) ? x.uit : x.thuis) === club).sort((a, b) => a.datum.localeCompare(b.datum));
+        ctx.fillStyle = "#fff4e6"; ctx.font = F(700, 22); spatie(ctx, "TRACKLIST", L, 800, 8);
+        duels.forEach((x, k) => { const y = 846 + k * 40, nu = x.datum === m.datum, ta = /gchc/i.test(x.thuis) ? "Kamelen" : kortTeam(x.thuis), tb = /gchc/i.test(x.uit) ? "Kamelen" : kortTeam(x.uit);
+          ctx.fillStyle = "#f26a1b"; ctx.font = F(700, 24); ctx.textAlign = "left"; ctx.fillText(String(k + 1).padStart(2, "0"), L, y);
+          ctx.fillStyle = nu ? "#f26a1b" : "rgba(255,244,230,.88)"; ctx.font = F(nu ? 700 : 500, 26); ctx.fillText(`${ta} – ${tb}`, L + 54, y);
+          ctx.textAlign = "right"; ctx.fillText(nu ? "nieuw, live" : (x.score ? x.score.replace("-", ":") : "nog te spelen"), W - L, y); ctx.textAlign = "left"; });
+        ctx.fillStyle = "rgba(255,244,230,.25)"; ctx.fillRect(L, 1150, W - 2 * L, 1);
+        const lijst = spelers.length ? spelers.map(n => n[0] + n.slice(1).toLowerCase()) : ["volgt"];
+        ctx.fillStyle = "rgba(255,244,230,.6)"; ctx.font = F(500, 21); ctx.textAlign = "left"; let r2 = "Bezetting: ", yb = 1190;
+        lijst.forEach((n, k) => { const s2 = n + (k < lijst.length - 1 ? ", " : "."); if (ctx.measureText(r2 + s2).width > W - 2 * L) { ctx.fillText(r2, L, yb); yb += 28; r2 = ""; } r2 += s2; }); ctx.fillText(r2, L, yb);
+        infoKort(yb + 50, "rgba(255,244,230,.75)", true); bron = [];
       },
       /* Minimaal: één echte foto, een paar woorden, verder niets */
       minimaal() {
