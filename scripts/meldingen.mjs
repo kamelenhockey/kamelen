@@ -130,7 +130,7 @@ for (const k of api.gesloten || []) {
   if (kamelen.length || ezels.length)
     meld(`kz-${m.datum}`, `Kameel van de dag: ${kamelen.join(" & ") || "–"} 🐪`, `Ezel van de dag: ${ezels.join(" & ") || "–"}. Die trekt een liter! 🫏`, SITE + "#stemmen");
 }
-/* 7. Kamelen-Scorito: persoonlijke herinnering voor wie nog niet voorspelde.
+/* 7. Kamelen-Scorito: persoonlijke herinnering voor wie nog niet voorspelde of de bonusvraag nog niet beantwoordde.
       De avond ervoor (ochtendwedstrijd, 20:00) of 3 uur ervoor, en nog een keer 1 uur voor de aftrap. */
 for (const m of programma) {
   if (!m.tijd) continue;
@@ -139,11 +139,21 @@ for (const m of programma) {
   const laatste = new Date(af - uur);
   if (nu < eerste || nu >= af) continue;
   const voorspeld = new Set((api.voorspellingen || []).filter(v => v.wedstrijd === `${m.thuis} – ${m.uit}` && new Date(v.aftrap).getTime() === af.getTime()).map(v => canon(v.naam)));
-  const wie = [...SPELERS, ...COACHES].filter(n => !voorspeld.has(n));
+  /* Bonusvraag van de beheerder: wie heeft die nog niet beantwoord? */
+  const bq = (api.bonusvragen || {})[sleutel(m)];
+  const bonusGedaan = new Set((api.bonusantwoorden || []).filter(a => a.wedstrijd === sleutel(m)).map(a => canon(a.naam)));
   const tegenstander = `${isUs(m.thuis) ? "thuis" : "uit"} tegen ${tegen(m)}`;
-  for (const n of wie) {
-    if (nu >= laatste) persoonlijk(`scorito1u-${m.datum}`, n, "Nog 1 uur! 🔮", `Je hebt de Kamelen-Scorito voor ${tegenstander} nog niet ingevuld. Om ${m.tijd} sluit hij.`, SITE + "#toto");
-    else persoonlijk(`scorito-${m.datum}`, n, "Nog niet voorspeld? 🔮", `Vul de Kamelen-Scorito in voor ${tegenstander}. Hij sluit om ${m.tijd}${uurAftrap < 12 ? " morgenochtend" : ""}.`, SITE + "#toto");
+  const morgen = uurAftrap < 12 ? " morgenochtend" : "";
+  for (const n of [...SPELERS, ...COACHES]) {
+    const geenVoorsp = !voorspeld.has(n), geenBonus = !!(bq && bq.vraag) && !bonusGedaan.has(n);
+    if (geenVoorsp) {
+      const ook = geenBonus ? " en beantwoord de bonusvraag" : "";
+      if (nu >= laatste) persoonlijk(`scorito1u-${m.datum}`, n, "Nog 1 uur! 🔮", `Je hebt de Kamelen-Scorito voor ${tegenstander} nog niet ingevuld${geenBonus ? " (en de bonusvraag ook niet)" : ""}. Om ${m.tijd} sluit hij.`, SITE + "#toto");
+      else persoonlijk(`scorito-${m.datum}`, n, "Nog niet voorspeld? 🔮", `Vul de Kamelen-Scorito in voor ${tegenstander}${ook}. Hij sluit om ${m.tijd}${morgen}.`, SITE + "#toto");
+    } else if (geenBonus) {
+      if (nu >= laatste) persoonlijk(`bonus1u-${m.datum}`, n, "Bonusvraag nog open ⭐", `${bq.vraag} Nog 1 uur om te antwoorden, om ${m.tijd} sluit hij.`, SITE + "#toto");
+      else persoonlijk(`bonus-${m.datum}`, n, "Vergeet de bonusvraag niet ⭐", `Je voorspelling staat, maar de bonusvraag voor ${tegenstander} nog niet: ${bq.vraag}`, SITE + "#toto");
+    }
   }
 }
 
