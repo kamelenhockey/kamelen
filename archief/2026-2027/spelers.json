@@ -1,0 +1,153 @@
+{
+ "toelichting": "Selectie van de Kamelen. 'naam' wordt overal op de site getoond; 'ook' zijn andere namen of bijnamen die in de sheets of opstelling voorkomen. Namen die hier niet staan, worden als invaller getoond. 'verjaardag' is MM-DD, 'sinds' is het jaar waarin iemand Kameel werd. 'aanvoerder' is \"aanvoerder\" of \"oud-aanvoerder\".",
+ "spelers": [
+  {
+   "naam": "Mini",
+   "ook": [
+    "Maarten"
+   ],
+   "verjaardag": "07-14",
+   "sinds": 2023,
+   "aanvoerder": "aanvoerder"
+  },
+  {
+   "naam": "Jesse",
+   "ook": [],
+   "verjaardag": "09-16",
+   "sinds": 2017,
+   "aanvoerder": "oud-aanvoerder"
+  },
+  {
+   "naam": "Casper",
+   "ook": [],
+   "verjaardag": "11-05",
+   "sinds": 2021,
+   "aanvoerder": "aanvoerder"
+  },
+  {
+   "naam": "Jon",
+   "ook": [],
+   "verjaardag": "01-05",
+   "sinds": 2023
+  },
+  {
+   "naam": "Philip",
+   "ook": [
+    "Phil"
+   ],
+   "verjaardag": "05-18",
+   "sinds": 2023
+  },
+  {
+   "naam": "Tutu",
+   "ook": [
+    "Wouter",
+    "Wouter B"
+   ],
+   "verjaardag": "06-24",
+   "sinds": 2023
+  },
+  {
+   "naam": "Thijn",
+   "ook": [],
+   "verjaardag": "01-09",
+   "sinds": 2024
+  },
+  {
+   "naam": "Ali",
+   "ook": [
+    "Klaplong"
+   ],
+   "verjaardag": "10-12",
+   "sinds": 2024
+  },
+  {
+   "naam": "Tijmen",
+   "ook": [
+    "Thijmen"
+   ],
+   "verjaardag": "12-26",
+   "sinds": 2025
+  },
+  {
+   "naam": "Julius",
+   "ook": [
+    "Juul"
+   ],
+   "verjaardag": "07-06",
+   "sinds": 2025
+  },
+  {
+   "naam": "Ids",
+   "ook": [],
+   "verjaardag": "02-08",
+   "sinds": 2025
+  },
+  {
+   "naam": "Snack",
+   "ook": [
+    "Hector"
+   ],
+   "verjaardag": "03-27",
+   "sinds": 2025
+  },
+  {
+   "naam": "Nick",
+   "ook": [],
+   "verjaardag": "11-24",
+   "sinds": 2025
+  },
+  {
+   "naam": "Dirk",
+   "ook": [],
+   "verjaardag": "06-17",
+   "sinds": 2026
+  },
+  {
+   "naam": "David",
+   "ook": [],
+   "verjaardag": "04-13",
+   "sinds": 2026
+  },
+  {
+   "naam": "Boudewijn",
+   "ook": [
+    "Boudwijn"
+   ],
+   "verjaardag": "02-15",
+   "sinds": 2026
+  },
+  {
+   "naam": "Malcolm",
+   "ook": [],
+   "verjaardag": "12-28",
+   "sinds": 2026
+  },
+  {
+   "naam": "Harm",
+   "ook": [],
+   "verjaardag": "03-26",
+   "sinds": 2025
+  },
+  {
+   "naam": "Karnemelk",
+   "ook": [],
+   "verjaardag": "12-17",
+   "sinds": 2024
+  },
+  {
+   "naam": "Marijn",
+   "ook": [],
+   "verjaardag": "05-18",
+   "sinds": 2026
+  }
+ ],
+ "invallers": [
+  {
+   "naam": "Corné",
+   "ook": [
+    "Corne"
+   ]
+  }
+ ]
+}

@@ -1956,6 +1956,21 @@ i.lg-gedaan{background:var(--ink)}i.lg-open{background:var(--orange)}
 .bc-knoppen{display:flex;justify-content:flex-end;gap:8px}
 .wm-beheer{border-top:2px dashed var(--line);padding-top:14px}
 .wm-beheer-label{display:inline-flex;align-items:center;gap:6px;margin-bottom:6px;padding:3px 10px;border-radius:99px;background:var(--orange-soft);color:var(--orange-ink,#7a4300);font-size:.75rem;font-weight:700}
+.nt-ander{margin-top:14px;padding:12px;border-radius:12px;background:var(--sky-soft,#e6f1f7)}
+.nt-ander h4{margin:0 0 8px;font-size:.9rem}
+.nt-ander-wed+.nt-ander-wed{margin-top:10px}
+.nt-ander-kop{display:block;margin-bottom:4px;color:var(--ink-2);font-weight:700}
+/* Seizoensarchief */
+.arch-balk{position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:8px 14px;background:var(--ink);color:#fff;font-size:.88rem;font-weight:600}
+.arch-balk button{border:0;border-radius:99px;padding:5px 12px;background:var(--orange);color:var(--ink);font:inherit;font-weight:800;cursor:pointer}
+.arch-dlg{border:0;border-radius:18px;padding:0;width:min(400px,92vw);box-shadow:0 24px 60px -20px rgba(22,54,80,.55)}
+.arch-dlg::backdrop{background:rgba(22,54,80,.45);backdrop-filter:blur(3px)}
+.arch-in{padding:20px;display:grid;gap:12px}.arch-in h2{margin:0;font-size:1.15rem}.arch-in p{margin:0;font-size:.85rem;color:var(--muted)}
+.arch-lijst{display:grid;gap:8px}
+.arch-item{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border:1.5px solid var(--line);border-radius:14px;background:var(--surface,#fff);font:inherit;text-align:left;cursor:pointer;color:var(--ink)}
+.arch-item:hover{border-color:var(--ink)}.arch-item.aan{border-color:var(--orange);background:var(--orange-soft)}
+.arch-item b{font-size:1.05rem}.arch-item small{display:block;color:var(--muted);font-size:.78rem}
+.arch-plek{margin-left:auto;display:grid;place-items:center;min-width:44px;height:44px;border-radius:12px;background:var(--ink);color:#fff;font-weight:800;font-size:.95rem}
 </style>
 </head>
 <body>
@@ -2026,7 +2041,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
     <li class="nav-more nav-dd"><button type="button" id="nav-more-btn" aria-expanded="false" aria-controls="nav-more-menu">Meer <span class="pijl" aria-hidden="true">▾</span></button>
       <div class="nav-more-menu" id="nav-more-menu" hidden>
         <a href="#beheer" data-view-link="beheer" data-beheer-link hidden>🛠️ Beheer</a><a href="#beheer" data-beheer-login>🔑 Inloggen als beheerder</a>
-        <a href="#push-card" data-push-link>🔔 Meldingen</a><a href="#" data-widget-uitleg>📱 Widget op je iPhone</a><a href="#" data-wrapped>🎁 Kamelen Wrapped</a>
+        <a href="#push-card" data-push-link>🔔 Meldingen</a><a href="#" data-widget-uitleg>📱 Widget op je iPhone</a><a href="#" data-archief-open>📚 Vorige seizoenen</a><a href="#" data-wrapped>🎁 Kamelen Wrapped</a>
         <div class="nm-lijn"></div><a href="#" data-uitloggen>Uitloggen</a>
       </div>
     </li>
@@ -2085,7 +2100,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   </section>
 
   <section class="card wide" id="seizoen" data-page="stand" aria-labelledby="h-seizoen">
-    <div class="card-head"><div><h2 id="h-seizoen">Seizoensverloop</h2><p>Positie in de stand na elke speeldag</p></div>
+    <div class="card-head"><div><h2 id="h-seizoen">Seizoensverloop</h2><p>Positie in de stand na elke speeldag</p></div><button type="button" class="btn sm ghost" data-archief-open>📚 Ander seizoen</button>
       <label class="cmp">Vergelijk met <select id="cmp-team"></select></label></div>
     <div class="chart-legend" id="chart-legend"></div>
     <div class="chart-wrap" id="chart-wrap"><svg id="chart" role="img" aria-labelledby="h-seizoen"></svg><div class="chart-tip" id="chart-tip" hidden></div></div>
@@ -2531,6 +2546,7 @@ document.getElementById("slot-form").addEventListener("submit", async e => {
   <a href="#regels" data-view-link="regels">Kamelen-regels</a>
   <a href="#push-card" data-push-link>🔔 Meldingen</a>
   <a href="#" data-widget-uitleg>📱 Widget op je iPhone</a>
+  <a href="#" data-archief-open>📚 Vorige seizoenen</a>
   <div class="ms-h">Spellen</div>
   <a href="#rad" data-view-link="rad">Kamelen-rad</a>
   <a href="#race" data-view-link="race">Kamelen-racen</a>
@@ -4038,16 +4054,22 @@ const LITERS_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFR
 const DOELPUNTEN_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9drQ8p4-okcLNq1_VMu-Hs50ffbdlPNfxF7hxUHGFDwTMtgA1Rf57k4xNIyS004_SVIWv2UMZGHBw/pub?gid=0&single=true&output=csv";
 const fetchText = u => fetch(u, {cache:"no-store"}).then(r => { if (!r.ok) throw new Error(r.status); return r.text(); });
 const loadJson = f => fetch(f, {cache:"no-store"}).then(r => r.ok ? r.json() : {}).catch(() => ({}));
-const loadLitersLive = () => fetchText(LITERS_CSV).then(t => {
+const litersUitCsv = t => {
   const rows = parseCsv(t).slice(1).filter(x => (x[0]||"").trim());
   if (!rows.length) throw new Error("leeg");
   return rows.map(x => ({naam:x[0]||"",datum:x[1]||"",reden:x[2]||"",hoeveel:x[3]||"",status:x[4]||""}));
-});
+};
+const loadLitersLive = () => fetchText(LITERS_CSV).then(litersUitCsv);
+/* Seizoensarchief: een eerder seizoen bekijken (opgeslagen in archief/<seizoen>/) */
+const ARCHIEF_LS = "kamelen-archief-seizoen";
+const archiefKeuze = () => { try { return localStorage.getItem(ARCHIEF_LS) || ""; } catch { return ""; } };
+window.archiefKeuze = archiefKeuze;
 const loadDoelpunten = () => fetchText(DOELPUNTEN_CSV).catch(() => fetchText("doelpunten.csv")).then(t => leesDoelpunten(parseCsv(t))).catch(() => []);
 
 /* stil = op de achtergrond bijwerken: geen spellen of formulieren resetten, geen foutmelding */
 const SNAPSHOT = "kamelen-gegevens";
-const haalAlles = () => Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("opstelling.json"), loadLitersLive().catch(() => null), loadDoelpunten(), loadJson("spelers.json")])
+const haalArchief = k => { const a = f => `archief/${k}/${f}`; return Promise.all([loadJson(a("competitie.json")), loadJson(a("liters.json")), loadJson(a("opstelling.json")), fetchText(a("liters.csv")).then(litersUitCsv).catch(() => null), fetchText(a("doelpunten.csv")).then(t => leesDoelpunten(parseCsv(t))).catch(() => []), loadJson(a("spelers.json"))]); };
+const haalAlles = () => archiefKeuze() ? haalArchief(archiefKeuze()) : Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("opstelling.json"), loadLitersLive().catch(() => null), loadDoelpunten(), loadJson("spelers.json")])
   .then(r => { if (r[0] && r[0].programma) try { localStorage.setItem(SNAPSHOT, JSON.stringify({ t: Date.now(), r })); } catch {} return r; });
 /* Door een beheerder als afgelast gemeld (opgeslagen in het script, hier bewaard zodat het meteen klopt) */
 const AFG_HAND = "kamelen-afgelast-hand";
@@ -4104,7 +4126,7 @@ return (bron ? Promise.resolve(bron) : haalAlles())
 /* Snel openen: eerst wat er de vorige keer was, dan op de achtergrond de nieuwste gegevens */
 (() => {
   let snap = null; try { snap = JSON.parse(localStorage.getItem(SNAPSHOT) || "null"); } catch {}
-  if (snap && Array.isArray(snap.r) && snap.r.length === 6 && Date.now() - snap.t < 14 * 864e5)
+  if (!archiefKeuze() && snap && Array.isArray(snap.r) && snap.r.length === 6 && Date.now() - snap.t < 14 * 864e5)
     laadGegevens(false, snap.r).catch(() => laadGegevens(false)).finally(() => { laadKlaar(); setTimeout(() => stilVerversen(), 30); });
   else laadGegevens(false).finally(laadKlaar);
 })();
@@ -4357,11 +4379,11 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796954500"></script>
-<script src="toto.js?v=1796954500"></script>
-<script src="pong.js?v=1796954500"></script>
-<script src="pongregels.js?v=1796954500"></script>
-<script src="beerpong.js?v=1796954500"></script>
+<script src="mex.js?v=1796954600"></script>
+<script src="toto.js?v=1796954600"></script>
+<script src="pong.js?v=1796954600"></script>
+<script src="pongregels.js?v=1796954600"></script>
+<script src="beerpong.js?v=1796954600"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -4370,20 +4392,20 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796954500"></script>
-<script src="extra.js?v=1796954500"></script>
-<script src="coach.js?v=1796954500"></script>
-<script src="statistieken.js?v=1796954500"></script>
-<script src="wrapped.js?v=1796954500"></script>
-<script src="race.js?v=1796954500"></script>
-<script src="rad.js?v=1796954500"></script>
-<script src="fotos.js?v=1796954500"></script>
-<script src="quotes.js?v=1796954500"></script>
-<script src="ideeen.js?v=1796954500"></script>
-<script src="seizoen.js?v=1796954500"></script>
-<script src="zege.js?v=1796954500"></script>
-<script src="karavaan.js?v=1796954500"></script>
-<script src="design-proef.js?v=1796954500"></script>
-<script src="push.js?v=1796954500"></script>
+<script src="stemmen.js?v=1796954600"></script>
+<script src="extra.js?v=1796954600"></script>
+<script src="coach.js?v=1796954600"></script>
+<script src="statistieken.js?v=1796954600"></script>
+<script src="wrapped.js?v=1796954600"></script>
+<script src="race.js?v=1796954600"></script>
+<script src="rad.js?v=1796954600"></script>
+<script src="fotos.js?v=1796954600"></script>
+<script src="quotes.js?v=1796954600"></script>
+<script src="ideeen.js?v=1796954600"></script>
+<script src="seizoen.js?v=1796954600"></script>
+<script src="zege.js?v=1796954600"></script>
+<script src="karavaan.js?v=1796954600"></script>
+<script src="design-proef.js?v=1796954600"></script>
+<script src="push.js?v=1796954600"></script>
 </body>
 </html>

@@ -37,11 +37,19 @@
     if (!_not || vers) _not = post({ type: "notities" }).then(r => r && r.ok ? r.notities || [] : []).catch(() => { _not = null; return []; });
     return _not; };
   const ntTijd = t => { const d = new Date(t); return isNaN(d) ? "" : d.toLocaleDateString("nl-NL", { day: "numeric", month: "short" }) + " " + d.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }); };
+  /* De tegenstander uit een wedstrijdsleutel ("datum|thuis|uit") */
+  const tegenVan = key => { const [, th, ui] = String(key).split("|"); return isUs(th || "") ? ui : th; };
   async function notitieBlok(key) {
-    const l = (await notities()).filter(n => n.wedstrijd === key);
+    const alle = await notities(), l = alle.filter(n => n.wedstrijd === key);
+    /* Notities bij een andere wedstrijd tegen dezelfde tegenstander: die horen er ook bij */
+    const tegen = tegenVan(key), [datum] = String(key).split("|");
+    const ander = tegen ? alle.filter(n => n.wedstrijd !== key && tegenVan(n.wedstrijd) === tegen) : [];
+    const perWed = new Map(); ander.forEach(n => { if (!perWed.has(n.wedstrijd)) perWed.set(n.wedstrijd, []); perWed.get(n.wedstrijd).push(n); });
+    const wedLabel = k => { const [d, th, ui] = k.split("|"); const m = onze().find(x => sleutel(x) === k); return `${d < datum ? "Vorige" : "Volgende"} wedstrijd tegen ${esc(tegen)} · ${fmtDay(d, { day: "numeric", month: "short" })}${m && m.score ? ` · ${esc(m.score)}` : ""}`; };
+    const andereHtml = perWed.size ? `<div class="nt-ander"><h4>📎 Ook tegen ${esc(tegen)}</h4>${[...perWed.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([k, ns]) => `<div class="nt-ander-wed"><small class="nt-ander-kop">${wedLabel(k)}</small>${ns.map(n => `<div class="nt"><p>${esc(n.tekst)}</p><small>${esc(n.door || "")} · ${ntTijd(n.tijd)}</small><button type="button" data-nt-weg="${esc(n.id)}" data-nt-van="${esc(k)}" aria-label="Notitie weghalen">×</button></div>`).join("")}</div>`).join("")}</div>` : "";
     return `<div class="nt-lijst">${l.map(n => `<div class="nt"><p>${esc(n.tekst)}</p><small>${esc(n.door || "")} · ${ntTijd(n.tijd)}</small><button type="button" data-nt-weg="${esc(n.id)}" aria-label="Notitie weghalen">×</button></div>`).join("") || `<p class="muted">Nog geen notities.</p>`}</div>
       <form class="nt-vorm" data-nt-key="${esc(key)}"><textarea maxlength="2000" placeholder="Bijvoorbeeld: tegenstander speelt met één spits, nummer 7 is snel, wij bouwen op via links."></textarea>
-        <div class="cb-rij"><button class="btn sm" type="submit">Notitie toevoegen</button><span class="tt-status" role="status"></span></div></form>`;
+        <div class="cb-rij"><button class="btn sm" type="submit">Notitie toevoegen</button><span class="tt-status" role="status"></span></div></form>${andereHtml}`;
   }
 
   /* Wie doet er mee: de selectie uit de app, anders de aanwezigen uit het afwezigheidsblad */
@@ -427,7 +435,7 @@
       <div data-nt-box="${esc(ntKeuze)}">${await notitieBlok(ntKeuze)}</div>`;
     box.querySelector(".bq-wedk.aan")?.scrollIntoView({ block: "nearest", inline: "center" });
   }
-  const verversNotities = async key => { await notities(true); document.querySelectorAll(`[data-nt-box="${CSS.escape(key)}"]`).forEach(async b => { b.innerHTML = await notitieBlok(key); }); if (document.getElementById("cb-notities")) tekenNotities(); };
+  const verversNotities = async key => { await notities(true); document.querySelectorAll("[data-nt-box]").forEach(async b => { b.innerHTML = await notitieBlok(b.dataset.ntBox); }); if (document.getElementById("cb-notities")) tekenNotities(); };
   document.addEventListener("click", async e => {
     const w = e.target.closest("[data-nt-wed]"); if (w) { ntKeuze = w.dataset.ntWed; return tekenNotities(); }
     const x = e.target.closest("[data-nt-weg]"); if (!x) return;

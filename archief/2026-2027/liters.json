@@ -1,0 +1,211 @@
+{
+ "bijgewerkt": "2026-11-27T20:47:28.228Z",
+ "naamCorrecties": {
+  "Boudwijn": "Boudewijn"
+ },
+ "liters": [
+  {
+   "naam": "Nick",
+   "datum": "27 aug training",
+   "reden": "Niet op komen dagen",
+   "hoeveel": "1L",
+   "status": "Gedaan"
+  },
+  {
+   "naam": "Ids",
+   "datum": "27 aug training",
+   "reden": "Niet op komen dagen",
+   "hoeveel": "1L",
+   "status": ""
+  },
+  {
+   "naam": "Phil",
+   "datum": "3 sept training",
+   "reden": "Te laat afmelden",
+   "hoeveel": "1L",
+   "status": "Gedaan"
+  },
+  {
+   "naam": "Harm",
+   "datum": "27 aug training",
+   "reden": "Niet op komen dagen",
+   "hoeveel": "1L",
+   "status": ""
+  },
+  {
+   "naam": "Snack ",
+   "datum": "Martini",
+   "reden": "Stick nakken Cap",
+   "hoeveel": "Stille meter + any liter (casper)",
+   "status": ""
+  },
+  {
+   "naam": "Jon",
+   "datum": "10 sept training",
+   "reden": "Te laat afmelden",
+   "hoeveel": "1L",
+   "status": "Gedaan"
+  },
+  {
+   "naam": "Phil",
+   "datum": "10 sept training",
+   "reden": "Te laat afmelden",
+   "hoeveel": "1L",
+   "status": ""
+  },
+  {
+   "naam": "Boudewijn",
+   "datum": "10 sept training",
+   "reden": "Teampas kwijt",
+   "hoeveel": "1L",
+   "status": "Gedaan"
+  },
+  {
+   "naam": "Marijn",
+   "datum": "10 sept training",
+   "reden": "Teampas kwijt",
+   "hoeveel": "1L",
+   "status": "Gedaan"
+  },
+  {
+   "naam": "Dirk",
+   "datum": "10 sept training",
+   "reden": "Teampas kwijt",
+   "hoeveel": "1L",
+   "status": "Gedaan"
+  },
+  {
+   "naam": "David",
+   "datum": "10 sept training",
+   "reden": "Teampas kwijt",
+   "hoeveel": "1L",
+   "status": "Gedaan "
+  },
+  {
+   "naam": "Malcolm",
+   "datum": "10 sept training",
+   "reden": "Teampas kwijt",
+   "hoeveel": "1L",
+   "status": "Gedaan"
+  },
+  {
+   "naam": "Tutu",
+   "datum": "12 sept wedstrijd ",
+   "reden": "Te laat afmelden",
+   "hoeveel": "1L",
+   "status": ""
+  },
+  {
+   "naam": "Boudewijn",
+   "datum": "17 sept training",
+   "reden": "Te laat afmelden ",
+   "hoeveel": "1L",
+   "status": "Gedaan"
+  },
+  {
+   "naam": "Malcolm",
+   "datum": "17 sept training ",
+   "reden": "Te laat afmelden",
+   "hoeveel": "1L",
+   "status": "Gedaan"
+  },
+  {
+   "naam": "Jon",
+   "datum": "17 sept training ",
+   "reden": "Te laat afmelden",
+   "hoeveel": "1L",
+   "status": "Gedaan"
+  },
+  {
+   "naam": "Jon",
+   "datum": "17 sept training",
+   "reden": "Liegen over reden",
+   "hoeveel": "1L",
+   "status": "Gedaan"
+  },
+  {
+   "naam": "Malcolm",
+   "datum": "8 okt training ",
+   "reden": "Niet afgemeld",
+   "hoeveel": "2L",
+   "status": "Gedaan"
+  },
+  {
+   "naam": "Nick",
+   "datum": "8 okt training",
+   "reden": "Door training geslapen",
+   "hoeveel": "2L",
+   "status": ""
+  },
+  {
+   "naam": "Malcolm",
+   "datum": "15 okt training",
+   "reden": "Niet afgemeld",
+   "hoeveel": "2L",
+   "status": ""
+  },
+  {
+   "naam": "Phil",
+   "datum": "22 okt training",
+   "reden": "Te laat afgemeld ",
+   "hoeveel": "1L",
+   "status": ""
+  },
+  {
+   "naam": "Boudewijn",
+   "datum": "27 okt training",
+   "reden": "Honderdman weglopen",
+   "hoeveel": "1L",
+   "status": "Gedaan"
+  },
+  {
+   "naam": "Malcolm ",
+   "datum": "1 nov  wedstrijd",
+   "reden": "Te laat afmelden door zuip ",
+   "hoeveel": "Stille meter",
+   "status": ""
+  },
+  {
+   "naam": "David ",
+   "datum": "5 nov training ",
+   "reden": "Te laat afmelden ",
+   "hoeveel": "1L",
+   "status": ""
+  },
+  {
+   "naam": " Tutu",
+   "datum": "5 nov training ",
+   "reden": "Te laat afmelden ",
+   "hoeveel": "1L",
+   "status": ""
+  },
+  {
+   "naam": "Malcolm ",
+   "datum": "5 nov training",
+   "reden": "Niet op komen dagen ",
+   "hoeveel": "2L",
+   "status": ""
+  },
+  {
+   "naam": "Snack ",
+   "datum": "13 nov training",
+   "reden": "100man weglopen",
+   "hoeveel": "1L",
+   "status": ""
+  },
+  {
+   "naam": "Jesse",
+   "datum": "17 nov wedstrijd",
+   "reden": "Ezel van de dag (tegen Eemsmond H1)",
+   "hoeveel": "1L",
+   "status": ""
+  },
+  {
+   "naam": "David",
+   "datum": "5 nov training",
+   "reden": "Te laat afmelden ",
+   "hoeveel": "1L",
+   "status": "Gedaan"
+  }
+ ]
+}

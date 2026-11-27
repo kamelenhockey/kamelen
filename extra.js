@@ -172,3 +172,39 @@
     const t = e.target.closest("[data-vg-terug]"); if (t) return openPlayer(t.dataset.vgTerug);
   });
 })();
+
+/* ---------- Seizoensarchief: terugkijken naar een vorig seizoen ---------- */
+(() => {
+  const LS = "kamelen-archief-seizoen";
+  const kies = k => { try { k ? localStorage.setItem(LS, k) : localStorage.removeItem(LS); } catch {} location.reload(); };
+  const huidig = () => (window.archiefKeuze ? window.archiefKeuze() : "");
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  async function lijst() { try { const r = await fetch("archief/index.json", { cache: "no-store" }); return r.ok ? await r.json() : []; } catch { return []; } }
+  /* Balk bovenaan zolang je een oud seizoen bekijkt */
+  async function balk() {
+    const k = huidig(); if (!k) return;
+    const l = await lijst(), s = l.find(x => x.seizoen === k);
+    if (l.length && l[0].seizoen === k) return kies("");     // dat is gewoon het huidige seizoen
+    const b = document.createElement("div"); b.className = "arch-balk"; b.setAttribute("role", "status");
+    b.innerHTML = `<span>📚 Je bekijkt seizoen ${esc(s ? s.label : k)}: stand, uitslagen, topscorers en liters van toen</span><button type="button" data-archief-terug>Terug naar nu</button>`;
+    document.body.prepend(b);
+  }
+  async function open() {
+    document.getElementById("more-sheet")?.setAttribute("hidden", ""); document.body.classList.remove("sheet-open");
+    const nm = document.getElementById("nav-more-menu"); if (nm) nm.hidden = true;
+    let d = document.getElementById("arch-dlg");
+    if (!d) { d = document.createElement("dialog"); d.id = "arch-dlg"; d.className = "arch-dlg"; document.body.appendChild(d);
+      d.addEventListener("click", e => { if (e.target === d || e.target.closest("[data-arch-sluit]")) d.close(); const i = e.target.closest("[data-arch-kies]"); if (i) kies(i.dataset.archKies); }); }
+    const l = await lijst(), k = huidig() || (l[0] && l[0].seizoen);
+    d.innerHTML = `<div class="arch-in"><h2>📚 Seizoenen</h2><p>Elk seizoen wordt automatisch bewaard, ook als hockey.nl het weggooit. Kies een seizoen om de stand, het seizoensverloop, de uitslagen, topscorers en liters van toen te bekijken.</p>
+      <div class="arch-lijst">${l.map((s, i) => `<button type="button" class="arch-item${s.seizoen === k ? " aan" : ""}" data-arch-kies="${i === 0 ? "" : esc(s.seizoen)}"><span><b>${esc(s.label)}${i === 0 ? " · nu" : ""}</b><small>${esc(s.competitie || "")}</small></span>${s.eindstand ? `<span class="arch-plek" title="${i === 0 ? "Huidige plek" : "Eindplek"}">${s.eindstand}e</span>` : ""}</button>`).join("") || `<p>Nog geen seizoenen bewaard.</p>`}</div>
+      ${l.length < 2 ? `<p>Dit is het eerste bewaarde seizoen. Vanaf volgend seizoen kun je hier terugkijken.</p>` : ""}
+      <div style="text-align:right"><button type="button" class="btn sm ghost" data-arch-sluit>Sluiten</button></div></div>`;
+    d.showModal();
+  }
+  document.addEventListener("click", e => {
+    if (e.target.closest("[data-archief-open]")) { e.preventDefault(); open(); }
+    if (e.target.closest("[data-archief-terug]")) kies("");
+  });
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", balk); else balk();
+})();
