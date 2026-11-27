@@ -3365,7 +3365,8 @@ function predictedTable(){
     if (a > b){ H.pt += 3; H.w++; U.v++; } else if (a < b){ U.pt += 3; U.w++; H.v++; } else { H.pt++; U.pt++; H.g++; U.g++; }
   }
   /* Gelijk op punten zonder nieuwe uitslagen: de officiële volgorde van de bond aanhouden */
-  const rows = Object.values(by).sort((x,y) => y.pt - x.pt || x.gs - y.gs || (!x.extra && !y.extra ? x.positie - y.positie : 0) || (y.dv-y.dt) - (x.dv-x.dt) || y.dv - x.dv || x.positie - y.positie);
+  const aftr = DATA.puntenAftrek || {}, verlies = t => 3 * t.gs - (t.pt + (aftr[t.team] || 0));
+  const rows = Object.values(by).sort((x,y) => y.pt - x.pt || verlies(x) - verlies(y) || (!x.extra && !y.extra ? x.positie - y.positie : 0) || (y.dv-y.dt) - (x.dv-x.dt) || y.dv - x.dv || x.positie - y.positie);
   rows.forEach((r,i) => r.nieuw = i + 1);
   return { rows, n };
 }
@@ -3382,7 +3383,7 @@ function renderPredTable(){
         <td class="r hide-sm">${r.w}</td><td class="r hide-sm">${r.g}</td><td class="r hide-sm">${r.v}</td>
         <td class="r ${ds>0?"gd-pos":ds<0?"gd-neg":""}">${ds>0?"+":""}${ds}</td><td class="r pts">${r.pt}${aftrek[r.team]?"<sup>*</sup>":""}</td></tr>`; }).join("")}
     </tbody></table></div>
-    <p class="note">Volgorde zoals hockey.nl: punten, dan minder gespeelde wedstrijden, dan doelsaldo, dan doelpunten voor.${Object.keys(aftrek).length ? " * inclusief puntenaftrek." : ""}</p>`;
+    <p class="note">Volgorde zoals hockey.nl: punten, dan minste verliespunten (puntenaftrek telt daar niet in mee), dan doelsaldo, dan doelpunten voor.${Object.keys(aftrek).length ? " * inclusief puntenaftrek." : ""}</p>`;
   const us = rows.find(r => isUs(r.team));
   if (us){
     const d = us.positie - us.nieuw;
@@ -3506,7 +3507,9 @@ function seasonPositions(){
       if (a > b) H.pt += 3; else if (a < b) U.pt += 3; else { H.pt++; U.pt++; }
     }
     for (const t of teams) if (moment[t] === d) st[t].pt -= (aftrek[t] || 0);
-    const order = [...teams].sort((x,y) => st[y].pt - st[x].pt || st[x].gs - st[y].gs || (st[y].dv-st[y].dt) - (st[x].dv-st[x].dt) || st[y].dv - st[x].dv || x.localeCompare(y));
+    /* Bij gelijke punten telt de bond eerst de verliespunten: gemiste punten uit gespeelde wedstrijden (puntenaftrek telt daar niet in mee) */
+    const verlies = t => 3 * st[t].gs - (st[t].pt + (moment[t] ? (moment[t] <= d ? aftrek[t] || 0 : 0) : aftrek[t] || 0));
+    const order = [...teams].sort((x,y) => st[y].pt - st[x].pt || verlies(x) - verlies(y) || (st[y].dv-st[y].dt) - (st[x].dv-st[x].dt) || st[y].dv - st[x].dv || x.localeCompare(y));
     /* Laatste speeldag: officiële stand van de bond (die telt bij gelijke punten soms anders) */
     if (i >= res.length && (DATA.stand||[]).every(s => !st[s.team] || st[s.team].gs === s.gespeeld)) order.sort((x,y) => ((DATA.stand.find(s=>s.team===x)||{}).positie||99) - ((DATA.stand.find(s=>s.team===y)||{}).positie||99));
     out.push({ datum: d, pos: Object.fromEntries(order.map((t,k) => [t, k+1])), pt: Object.fromEntries(teams.map(t => [t, st[t].pt])) });
@@ -4354,11 +4357,11 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796954400"></script>
-<script src="toto.js?v=1796954400"></script>
-<script src="pong.js?v=1796954400"></script>
-<script src="pongregels.js?v=1796954400"></script>
-<script src="beerpong.js?v=1796954400"></script>
+<script src="mex.js?v=1796954500"></script>
+<script src="toto.js?v=1796954500"></script>
+<script src="pong.js?v=1796954500"></script>
+<script src="pongregels.js?v=1796954500"></script>
+<script src="beerpong.js?v=1796954500"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -4367,20 +4370,20 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796954400"></script>
-<script src="extra.js?v=1796954400"></script>
-<script src="coach.js?v=1796954400"></script>
-<script src="statistieken.js?v=1796954400"></script>
-<script src="wrapped.js?v=1796954400"></script>
-<script src="race.js?v=1796954400"></script>
-<script src="rad.js?v=1796954400"></script>
-<script src="fotos.js?v=1796954400"></script>
-<script src="quotes.js?v=1796954400"></script>
-<script src="ideeen.js?v=1796954400"></script>
-<script src="seizoen.js?v=1796954400"></script>
-<script src="zege.js?v=1796954400"></script>
-<script src="karavaan.js?v=1796954400"></script>
-<script src="design-proef.js?v=1796954400"></script>
-<script src="push.js?v=1796954400"></script>
+<script src="stemmen.js?v=1796954500"></script>
+<script src="extra.js?v=1796954500"></script>
+<script src="coach.js?v=1796954500"></script>
+<script src="statistieken.js?v=1796954500"></script>
+<script src="wrapped.js?v=1796954500"></script>
+<script src="race.js?v=1796954500"></script>
+<script src="rad.js?v=1796954500"></script>
+<script src="fotos.js?v=1796954500"></script>
+<script src="quotes.js?v=1796954500"></script>
+<script src="ideeen.js?v=1796954500"></script>
+<script src="seizoen.js?v=1796954500"></script>
+<script src="zege.js?v=1796954500"></script>
+<script src="karavaan.js?v=1796954500"></script>
+<script src="design-proef.js?v=1796954500"></script>
+<script src="push.js?v=1796954500"></script>
 </body>
 </html>
