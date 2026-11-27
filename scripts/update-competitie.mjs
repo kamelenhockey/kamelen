@@ -52,11 +52,12 @@ const page = await browser.newPage({
 page.on("response", r => { if (r.status() >= 400) log.push(`HTTP ${r.status()} ${r.url().slice(0, 150)}`); });
 page.on("console", m => { if (m.type() === "error") log.push(`console: ${m.text().slice(0, 200)}`); });
 const startjaar = seizoenStartjaar();
-let programmaTekst, uitslagenTekst, overzichtTekst, wedstrijdLinks = [];
+let programmaTekst, uitslagenTekst, overzichtTekst, wedstrijdLinks = [], programmaHtml = "";
 try {
   programmaTekst = await leesTekst(page, "program", "Personaliseer weergave");
   wedstrijdLinks = await page.evaluate(() => [...document.querySelector("match-center").shadowRoot.querySelectorAll('a[href^="#/match/"]')]
     .map(a => ({ id: a.getAttribute("href").split("/").pop(), tekst: a.innerText || "" })));
+  if (process.env.KAMELEN_DEBUG) programmaHtml = await page.evaluate(() => document.querySelector("match-center").shadowRoot.innerHTML);
   uitslagenTekst = await leesTekst(page, "results", "Personaliseer weergave");
   overzichtTekst = await leesTekst(page, "overview", "Stand per");
 } catch (e) {
@@ -68,6 +69,10 @@ if (process.env.KAMELEN_DEBUG) {
   const r = programmaTekst.split("\n").map(x => x.trim()).filter(Boolean);
   r.forEach((x, i) => { if (/gchc/i.test(x)) console.log("PROGRAMMA:", JSON.stringify(r.slice(Math.max(0, i - 3), i + 4))); });
   console.log("LINKS:", JSON.stringify(wedstrijdLinks.filter(l => /gchc/i.test(l.tekst)).slice(0, 4)));
+  const html = programmaHtml;
+  const re = /afgelast|cancel|postpon|uitgesteld|verplaatst|status/gi; let m, n = 0;
+  while ((m = re.exec(html)) && n++ < 12) console.log("HTML-TREFFER:", JSON.stringify(html.slice(Math.max(0, m.index - 300), m.index + 200)));
+  const i = html.indexOf("Leeuwarden"); if (i >= 0) console.log("HTML-LEEUWARDEN:", JSON.stringify(html.slice(Math.max(0, i - 1500), i + 400)));
 }
 // Veld en adres van onze eerstvolgende 3 wedstrijden (staan op de wedstrijdpagina)
 const ONS = /gchc/i;
