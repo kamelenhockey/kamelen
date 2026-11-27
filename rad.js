@@ -8,25 +8,25 @@
      Brede vakjes: Zelf bak en Zelf halve leo, zodat de draaier altijd de grootste kans heeft om zelf te drinken. */
   const VAKKEN = [
     { kort: "Aanvoerdersbak", tekst: "Aanvoerdersbak (ook oud-aanvoerders)" },
-    { kort: "Zelf halve leo", tekst: "Zelf een halve leo", zelf: true, gewicht: 2.5 },
+    { kort: "Zelf halve leo", tekst: "Zelf een halve leo", zelf: true, don: true, gewicht: 2.5 },
     { kort: "Middenveldbak", tekst: "Middenveldbak" },
     { kort: "Nog een keer ×2", tekst: "Nog een keer draaien én verdubbelaar", opnieuw: true, dubbel: true },
     { kort: "Keepersbak", tekst: "Keepersbak" },
-    { kort: "Bak uitdelen", tekst: "Bak uitdelen" },
+    { kort: "Bak uitdelen", tekst: "Bak uitdelen", don: true, uitdelen: true },
     { kort: "Lichtingbak", tekst: "Lichtingbak: een bak met iedereen uit jouw lichting" },
     { kort: "HUIS", tekst: "HUIS!", gewicht: .3, huis: true, kleur: "#c0392b" },
     { kort: "Nog een keer", tekst: "Nog een keer draaien", opnieuw: true },
     { kort: "Feutenbak", tekst: "Feutenbak" },
     { kort: "Oudkamelenbak", tekst: "Oudkamelenbak (iedereen die eerder bij de Kamelen speelde)" },
     { kort: "Aanvoerders delen uit", tekst: "Aanvoerders (ook oud-aanvoerders) mogen een bak uitdelen" },
-    { kort: "Halve leo uitdelen", tekst: "Halve leo uitdelen" },
+    { kort: "Halve leo uitdelen", tekst: "Halve leo uitdelen", don: true, uitdelen: true },
     { kort: "LITER", tekst: "Liter trekken!", gewicht: .35, klein: true, kleur: "#d4a017" },
     { kort: "Verdedigersbak", tekst: "Verdedigersbak" },
     { kort: "Coachbak", tekst: "Coachbak" },
     { kort: "Topscorersbak", tekst: "Topscorersbak (de top 3 topscorers van de Kamelen)" },
-    { kort: "Dubbelloops uitdelen", tekst: "Dubbelloops uitdelen" },
-    { kort: "DUBBELLOOPS", tekst: "Dubbelloops! Zelf twee tegelijk.", gewicht: .35, klein: true, kleur: "#6b4fa0" },
-    { kort: "Zelf bak", tekst: "Zelf een bak", zelf: true, gewicht: 2.5 },
+    { kort: "Dubbelloops uitdelen", tekst: "Dubbelloops uitdelen", don: true, uitdelen: true },
+    { kort: "DUBBELLOOPS", tekst: "Dubbelloops! Zelf twee tegelijk.", gewicht: .6, klein: true, kleur: "#6b4fa0", don: true },
+    { kort: "Zelf bak", tekst: "Zelf een bak", zelf: true, don: true, gewicht: 2.5 },
     { kort: "Aanvalbak", tekst: "Aanvalbak" },
     { kort: "Veteranenbak", tekst: "Veteranenbak: iedereen die in zijn 5e jaar of langer bij de Kamelen zit" }
   ];
@@ -189,8 +189,8 @@
       const x = verdubbelaar ? 2 ** verdubbelaar : 1;
       tekst = x > 1 ? `${vak.tekst} <b class="rad-x">×${x}</b>` : vak.tekst;
       uit.innerHTML = `<div class="rad-res${vak.huis ? " huis" : vak.klein ? " klein" : ""}" ${vak.kleur ? `style="color:${vak.kleur}"` : ""}>${tekst}</div>${vak.huis ? `<p>Al het bier op tafel (behalve de pitchers)!</p>` : ""}
-        ${vak.zelf ? `<button type="button" class="btn rad-don-knop" id="rad-don">🎲 Dubbel of niks?</button>` : ""}`;
-      if (vak.zelf) { donVak = { vak, x }; document.getElementById("rad-don").addEventListener("click", startDon); }
+        ${vak.don ? `<button type="button" class="rad-don-knop" id="rad-don"><span class="dk-ic" aria-hidden="true">🎲</span><span><b>Dubbel of niks?</b><small>${vak.uitdelen ? "Dubbel uitdelen of niemand drinkt" : "Dubbel drinken of je bent vrij"}</small></span></button>` : ""}`;
+      if (vak.don) { donVak = { vak, x }; document.getElementById("rad-don").addEventListener("click", startDon); }
       verdubbelaar = 0;
       knop.textContent = "Draai aan het rad";
     }
@@ -242,7 +242,7 @@
       donBezig = false;
       const { vak, x } = donVak; donVak = null;
       const box2 = document.getElementById("don-box");
-      const res = dubbel ? `${vak.tekst} <b class="rad-x">×${x * 2}</b>` : `Je bent vrij, geen bak.`;
+      const res = dubbel ? `${vak.tekst} <b class="rad-x">×${x * 2}</b>` : vak.uitdelen ? `Niemand hoeft te drinken.` : `Je bent vrij, geen bak.`;
       if (dubbel) { tril([200, 80, 200, 80, 450]); alarm(); } else tril([60]);
       if (box2) box2.insertAdjacentHTML("beforeend", `<div class="rad-res don-res ${dubbel ? "dub" : "niks"}">${dubbel ? "DUBBEL!" : "NIKS!"}</div><p class="don-uit">${res}</p>`);
       document.getElementById("don-draai")?.remove();
