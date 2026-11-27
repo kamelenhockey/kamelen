@@ -40,8 +40,13 @@ function aftrap(m) { // Date (UTC) van de aftrap
 }
 const plusDagen = (iso, n) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const nu = new Date(), nl = nlDelen(nu), uur = 3600e3;
-const ons = [...(comp.uitslagen || []), ...(comp.programma || [])].filter(m => isUs(m.thuis + m.uit));
-const programma = (comp.programma || []).filter(m => isUs(m.thuis + m.uit));
+let api = {};
+try { api = await fetch(API).then(r => r.json()); } catch (e) { console.log("API niet bereikbaar", e.message); }
+/* Door een beheerder als afgelast gemeld: geen meldingen meer voor die wedstrijd */
+const afgHand = new Set((api.afgelast || []).map(a => a.wedstrijd));
+const nietAfgelast = m => !afgHand.has(`${m.datum}|${m.thuis}|${m.uit}`);
+const ons = [...(comp.uitslagen || []), ...(comp.programma || []).filter(nietAfgelast)].filter(m => isUs(m.thuis + m.uit));
+const programma = (comp.programma || []).filter(m => isUs(m.thuis + m.uit)).filter(nietAfgelast);
 const uitslagen = (comp.uitslagen || []).filter(m => isUs(m.thuis + m.uit));
 
 const te = [];   // { id, title, body, url }
@@ -104,8 +109,6 @@ for (const m of uitslagen) {
 }
 /* 4. Stemmen open (75 minuten na de aftrap): alleen voor wie meespeelde en de coaches.
       Drie uur later nog een herinnering voor wie nog niet stemde (zolang de stemming open is). */
-let api = {};
-try { api = await fetch(API).then(r => r.json()); } catch (e) { console.log("API niet bereikbaar", e.message); }
 const kaart = await aanwezigKaart();
 for (const m of ons) {
   if (m.datum < "2026-11-17") continue;

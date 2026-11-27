@@ -3993,6 +3993,19 @@ const loadDoelpunten = () => fetchText(DOELPUNTEN_CSV).catch(() => fetchText("do
 const SNAPSHOT = "kamelen-gegevens";
 const haalAlles = () => Promise.all([loadJson("competitie.json"), loadJson("liters.json"), loadJson("opstelling.json"), loadLitersLive().catch(() => null), loadDoelpunten(), loadJson("spelers.json")])
   .then(r => { if (r[0] && r[0].programma) try { localStorage.setItem(SNAPSHOT, JSON.stringify({ t: Date.now(), r })); } catch {} return r; });
+/* Door een beheerder als afgelast gemeld (opgeslagen in het script, hier bewaard zodat het meteen klopt) */
+const AFG_HAND = "kamelen-afgelast-hand";
+function pasHandmatigAfgelastToe(){
+  let l = []; try { l = JSON.parse(localStorage.getItem(AFG_HAND) || "[]"); } catch {}
+  DATA.afgelast = DATA.afgelast || [];
+  for (const k of l){
+    const [datum, thuis, uit] = String(k).split("|"); if (!uit) continue;
+    if ((DATA.uitslagen || []).some(m => m.datum === datum && m.thuis === thuis && m.uit === uit)) continue;
+    const w = (DATA.programma || []).find(m => m.datum === datum && m.thuis === thuis && m.uit === uit);
+    DATA.programma = (DATA.programma || []).filter(m => m !== w);
+    if (!DATA.afgelast.some(a => a.datum === datum && a.thuis === thuis && a.uit === uit)) DATA.afgelast.push({ thuis, uit, datum, tijd: w ? w.tijd || null : null, nieuweDatum: null, bevestigd: true, handmatig: true });
+  }
+}
 /* bron = eerder bewaarde gegevens: dan meteen tonen zonder op internet te wachten */
 function laadGegevens(stil, bron){
 const y = window.scrollY, pagina = document.body.dataset.page;
@@ -4001,6 +4014,7 @@ return (bron ? Promise.resolve(bron) : haalAlles())
     initRoster(roster);
     DATA = { aftrekMoment: { "GCHC H13": "2026-10-18" }, ...comp, ...lit, ...(live ? {liters: live} : {}), opstelling: ops.spelers || [], opstellingWedstrijd: ops.wedstrijd || null, doelpunten }; _trendVorig = null;
     (DATA.doelpunten || []).forEach(w => w.goals.forEach(g => { g.wie = canon(g.wie); }));
+    pasHandmatigAfgelastToe();
     if (!comp.programma && !DATA.liters) throw new Error("geen gegevens");
     if (DATA.competitie) document.getElementById("league").textContent = DATA.competitie;
     /* Elk onderdeel apart: als er één faalt, werkt de rest gewoon door */
@@ -4015,7 +4029,9 @@ return (bron ? Promise.resolve(bron) : haalAlles())
     if (!formBezig("quotes")) veilig(() => window.renderQuotes?.());
     if (!formBezig("ideeen")) veilig(() => window.renderIdeeen?.());
     if (!formBezig("beheer")) veilig(() => location.hash === "#beheer" && window.renderBeheer?.());
-    veilig(() => window.kamelenApi().then(j => { if (j && j.profielfotos) zetProfielfotos(j.profielfotos); }));
+    veilig(() => window.kamelenApi().then(j => { if (j && j.profielfotos) zetProfielfotos(j.profielfotos);
+      if (j && Array.isArray(j.afgelast)) { const nieuw = JSON.stringify(j.afgelast.map(a => a.wedstrijd).sort()); let oud = "[]"; try { oud = localStorage.getItem(AFG_HAND) || "[]"; } catch {}
+        if (nieuw !== oud) { try { localStorage.setItem(AFG_HAND, nieuw); } catch {} laadGegevens(true); } } }));
     /* Na het ophalen van de stemmen (ezel-liters) de statistieken nog eens bijwerken */
     Promise.resolve(formBezig("stemmen") ? null : veilig(() => window.renderStemmen?.())).catch(() => {}).finally(() => veilig(() => window.renderStatistieken?.()));
     const f = x => { const d = new Date(x); return isNaN(d) ? "onbekend" : d.toLocaleString("nl-NL",{dateStyle:"long",timeStyle:"short",timeZone:"Europe/Amsterdam"}); };
@@ -4285,11 +4301,11 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796925000"></script>
-<script src="toto.js?v=1796925000"></script>
-<script src="pong.js?v=1796925000"></script>
-<script src="pongregels.js?v=1796925000"></script>
-<script src="beerpong.js?v=1796925000"></script>
+<script src="mex.js?v=1796928600"></script>
+<script src="toto.js?v=1796928600"></script>
+<script src="pong.js?v=1796928600"></script>
+<script src="pongregels.js?v=1796928600"></script>
+<script src="beerpong.js?v=1796928600"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -4298,20 +4314,20 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796925000"></script>
-<script src="extra.js?v=1796925000"></script>
-<script src="coach.js?v=1796925000"></script>
-<script src="statistieken.js?v=1796925000"></script>
-<script src="wrapped.js?v=1796925000"></script>
-<script src="race.js?v=1796925000"></script>
-<script src="rad.js?v=1796925000"></script>
-<script src="fotos.js?v=1796925000"></script>
-<script src="quotes.js?v=1796925000"></script>
-<script src="ideeen.js?v=1796925000"></script>
-<script src="seizoen.js?v=1796925000"></script>
-<script src="zege.js?v=1796925000"></script>
-<script src="karavaan.js?v=1796925000"></script>
-<script src="design-proef.js?v=1796925000"></script>
-<script src="push.js?v=1796925000"></script>
+<script src="stemmen.js?v=1796928600"></script>
+<script src="extra.js?v=1796928600"></script>
+<script src="coach.js?v=1796928600"></script>
+<script src="statistieken.js?v=1796928600"></script>
+<script src="wrapped.js?v=1796928600"></script>
+<script src="race.js?v=1796928600"></script>
+<script src="rad.js?v=1796928600"></script>
+<script src="fotos.js?v=1796928600"></script>
+<script src="quotes.js?v=1796928600"></script>
+<script src="ideeen.js?v=1796928600"></script>
+<script src="seizoen.js?v=1796928600"></script>
+<script src="zege.js?v=1796928600"></script>
+<script src="karavaan.js?v=1796928600"></script>
+<script src="design-proef.js?v=1796928600"></script>
+<script src="push.js?v=1796928600"></script>
 </body>
 </html>

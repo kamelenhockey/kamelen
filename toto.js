@@ -154,10 +154,6 @@
           <div class="tt-when">${fmtDay(volgende.datum)}${volgende.tijd ? ` · ${esc(volgende.tijd)}` : ""} · voorspellen kan tot de aftrap</div></div>
         ${CFG.api ? "" : `<a class="btn mx-big" href="${esc(CFG.form)}" target="_blank" rel="noopener">Doe je voorspelling</a>`}
       </div>
-      ${(DATA.afgelast || []).filter(a => a.bevestigd && !a.gespeeld && nu - aftrap(a) < 10 * 864e5).map(a => {
-        const bewaard = a.nieuweDatum ? [...(perMatch.get(sleutel({ datum: a.nieuweDatum, thuis: a.thuis, uit: a.uit }))?.voorsp.values() || [])].filter(r => !r.model).length : 0;
-        return `<p class="tt-afgelast">⛔ <b>${esc(a.thuis)} – ${esc(a.uit)}</b> van ${fmtDay(a.datum, { day: "numeric", month: "long" })} is afgelast. ${a.nieuweDatum ? `${bewaard ? `De ${bewaard} ${bewaard === 1 ? "voorspelling" : "voorspellingen"} daarvoor ${bewaard === 1 ? "blijft" : "blijven"} staan voor de nieuwe datum, ${fmtDay(a.nieuweDatum, { day: "numeric", month: "long" })}.` : `De nieuwe datum is ${fmtDay(a.nieuweDatum, { day: "numeric", month: "long" })}.`}` : "Voorspellingen daarvoor blijven bewaard tot er een nieuwe datum is."} Voor de wedstrijd hierboven voorspel je opnieuw.</p>`;
-      }).join("")}
       ${CFG.api ? formulier(volgende) + bonusBlok(volgende) : ""}
       <div class="tt-voted"><span class="k">${v.size - v.has(MODEL_NAAM)} ${v.size - v.has(MODEL_NAAM) === 1 ? "voorspelling" : "voorspellingen"}</span>${[...v.values()].map(r => r.model ? `<span class="tt-chip tt-model">🐪 Model: <b>${scoreTekst(r.voor, r.tegen, volgende)}</b></span>` : `<span class="tt-chip">${esc(r.naam)}</span>`).join("")}${v.size - v.has(MODEL_NAAM) ? `<span class="tt-hint">Wat ze voorspeld hebben zie je na de aftrap. Het model laat zijn gok alvast zien.</span>` : ""}</div>`;
     }

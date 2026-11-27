@@ -92,6 +92,14 @@ await browser.close();
    Zo'n wedstrijd gaat uit het programma en staat meteen als afgelast in de app. Komt hij op hockey.nl
    met een nieuwe datum terug, dan wordt dat vanzelf de inhaaldatum. */
 const handmatig = JSON.parse(await readFile("afgelast-handmatig.json", "utf8").catch(() => "[]"));
+/* ...en wat een beheerder of coach in de app als afgelast meldde (opgeslagen in het Apps Script) */
+try {
+  const api = (await readFile("index.html", "utf8")).match(/api:\s*"(https:\/\/script\.google\.com[^"]+)"/)?.[1];
+  if (api) for (const a of (await fetch(api).then(r => r.json())).afgelast || []) {
+    const [datum, thuis, uit] = String(a.wedstrijd).split("|");
+    if (uit && !handmatig.some(h => h.datum === datum && h.thuis === thuis && h.uit === uit)) handmatig.push({ datum, thuis, uit });
+  }
+} catch (e) { console.log("Afgelast uit de app niet opgehaald:", e.message); }
 const isHandmatig = w => handmatig.some(h => h.thuis === w.thuis && h.uit === w.uit && h.datum === w.datum);
 const programma = parseProgramma(programmaTekst, startjaar).filter(w => !isHandmatig(w)).map(w => {
   const d = details[`${w.datum}|${w.thuis}|${w.uit}`];

@@ -372,15 +372,44 @@
         ${komend.map(m => `<div class="cb-rij"><span><b>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}</b><br><small>${fmtDay(m.datum, { weekday: "short", day: "numeric", month: "short" })} · ${selectieVan(m).length ? `${selectieVan(m).length} spelers` : "selectie nog niet bekend"}${ops[sleutel(m)] ? " · ✓ opstelling staat" : ""}</small></span>
           <button type="button" class="btn sm" data-coach-bewerk="${esc(sleutel(m))}">${ops[sleutel(m)] ? "Aanpassen" : "Maken"}</button></div>`).join("") || `<p class="muted">Geen komende wedstrijden.</p>`}
       </section>
+      <section class="card" id="cb-afgelast"></section>
       <section class="card" id="cb-notities"></section>
       <section class="card" id="cb-bonus-box"></section>
       <section class="card"><h2 class="cb-h">Snel naar</h2><div class="cb-links">
         <a class="btn sm ghost" href="#stemmen">Kameel &amp; ezel sluiten</a><a class="btn sm ghost" href="#liters">Liter-incassobureau</a><a class="btn sm ghost" href="#toto">Kamelen-Scorito</a><a class="btn sm ghost" href="#fotos">Foto's en quotes</a></div></section>
       <section class="card"><h2 class="cb-h">App</h2><div class="cb-rij"><span><small>Ingelogd als ${esc((window.IK || {}).naam || "?")}${(window.IK || {}).rol === "coach" ? " (coach)" : ""}${bcode() ? " · beheercode op dit apparaat" : ""} · versie ${esc(VERSIE)}</small></span></div>
         <div class="cb-links"><button type="button" class="btn sm ghost" data-cb="wis">Bewaarde gegevens wissen en opnieuw laden</button>${bcode() ? `<button type="button" class="btn sm ghost" data-cb="uit">Beheercode van dit apparaat halen</button>` : ""}</div></section>`;
-    tekenBonus(); tekenNotities();
+    tekenBonus(); tekenNotities(); tekenAfgelast();
   }
   window.renderBeheer = renderBeheer;
+  /* ---------- Wedstrijd afgelast melden ---------- */
+  function tekenAfgelast() {
+    const box = document.getElementById("cb-afgelast"); if (!box) return;
+    const vandaag = new Date(); vandaag.setHours(0, 0, 0, 0);
+    const komend = onze().filter(m => toDate(m.datum, m.tijd || "12:00") >= vandaag && !m.score).slice(0, 6);
+    const hand = (DATA.afgelast || []).filter(a => a.handmatig && !a.nieuweDatum && toDate(a.datum, a.tijd || "12:00") >= vandaag);
+    box.innerHTML = `<h2 class="cb-h">Wedstrijd afgelast</h2><p class="muted">Staat een afgelasting nog niet op hockey.nl? Meld hem hier. Dan verdwijnt de wedstrijd meteen uit het programma, de Scorito en de herinneringen, en staat hij als afgelast op Home. De widget volgt binnen een uur. Komt er op hockey.nl een nieuwe datum, dan neemt de app die vanzelf over.</p>
+      ${hand.map(a => { const k = `${a.datum}|${a.thuis}|${a.uit}`; let l = []; try { l = JSON.parse(localStorage.getItem("kamelen-afgelast-hand") || "[]"); } catch {}
+        return `<div class="cb-rij"><span><b>${esc(naamWed(a))}</b><br><small>${fmtDay(a.datum, { weekday: "short", day: "numeric", month: "short" })} · afgelast</small></span>${l.includes(k) ? `<button type="button" class="btn sm ghost" data-afg="${esc(k)}" data-afg-weg="1">Gaat toch door</button>` : `<small class="muted">vast ingesteld</small>`}</div>`; }).join("")}
+      ${komend.map(m => `<div class="cb-rij"><span><b>${esc(naamWed(m))}</b><br><small>${fmtDay(m.datum, { weekday: "short", day: "numeric", month: "short" })}${m.tijd ? ` · ${esc(m.tijd)}` : ""}</small></span><button type="button" class="btn sm ghost" data-afg="${esc(sleutel(m))}">Afgelast</button></div>`).join("") || (hand.length ? "" : `<p class="muted">Geen komende wedstrijden.</p>`)}
+      <span class="tt-status" id="afg-st" role="status"></span>`;
+  }
+  document.addEventListener("click", async e => {
+    const b = e.target.closest("[data-afg]"); if (!b) return;
+    const weg = !!b.dataset.afgWeg, [datum, thuis, uit] = b.dataset.afg.split("|");
+    if (!confirm(weg ? `${naamWed({ thuis, uit })} gaat toch door?` : `${naamWed({ thuis, uit })} van ${fmtDay(datum, { day: "numeric", month: "long" })} als afgelast melden?`)) return;
+    const st = document.getElementById("afg-st"); st.textContent = "Opslaan…"; b.disabled = true;
+    try { const r = await post({ type: "afgelast", wedstrijd: b.dataset.afg, weg });
+      if (!r.ok) { st.textContent = foutTekst(r.fout); b.disabled = false; return; }
+      st.textContent = weg ? "Staat weer in het programma." : "Gemeld als afgelast.";
+      await window.kamelenApi?.(true);
+      let l = []; try { l = JSON.parse(localStorage.getItem("kamelen-afgelast-hand") || "[]"); } catch {}
+      l = weg ? l.filter(x => x !== b.dataset.afg) : [...new Set([...l, b.dataset.afg])];
+      try { localStorage.setItem("kamelen-afgelast-hand", JSON.stringify(l.sort())); } catch {}
+      if (weg) { DATA.afgelast = (DATA.afgelast || []).filter(a => !(a.handmatig && `${a.datum}|${a.thuis}|${a.uit}` === b.dataset.afg)); }
+      await laadGegevens(true); renderBeheer();
+    } catch { st.textContent = "Geen verbinding."; b.disabled = false; }
+  });
   let ntKeuze = null;
   async function tekenNotities() {
     const box = document.getElementById("cb-notities"); if (!box) return;

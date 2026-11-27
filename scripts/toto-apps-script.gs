@@ -38,6 +38,7 @@ const ideeTab_ = () => tab_("Ideeen", ["Tijdstempel", "Id", "Door", "Idee", "Soo
 /* Coachfunctie en Scorito-bonusvraag */
 const opstelTab_ = () => tab_("Opstellingen", ["Tijdstempel", "Wedstrijd", "Opstelling", "Door"]);
 const bonusTab_ = () => tab_("Bonusvragen", ["Tijdstempel", "Wedstrijd", "Vraag", "Opties", "Antwoord", "Punten", "Aftrap", "Door"]);
+const afgelastTab_ = () => tab_("Afgelast", ["Tijdstempel", "Wedstrijd", "Door", "Status"]);
 const notitieTab_ = () => tab_("Notities", ["Tijdstempel", "Wedstrijd", "Tekst", "Door", "Id"]);
 const bonusAntTab_ = () => tab_("Bonusantwoorden", ["Tijdstempel", "Naam", "Wedstrijd", "Antwoord", "Aftrap"]);
 /* Laatste regel per wedstrijd */
@@ -224,7 +225,10 @@ function doGet(e) {
   Object.keys(bq).forEach(w => { const r = bq[w].r; if (!r[2]) return; bonusvragen[w] = { vraag: r[2], opties: String(r[3] || "").split("|").filter(String), antwoord: r[4] || null, punten: Number(r[5]) || 2, aftrap: r[6] }; });
   const bonusantwoorden = bonusAntTab_().getDataRange().getValues().slice(1).filter(r => r[1]).map(r => {
     const open = r[4] && new Date(r[4]) > nu; return { tijd: r[0], naam: r[1], wedstrijd: r[2], antwoord: open ? null : r[3] }; });
-  return json_({ ok: true, voorspellingen, stemmen, gesloten: dicht, fotos, quotes, profielfotos, ideeen, reacties, bonusvragen, bonusantwoorden });
+  /* Handmatig afgelaste wedstrijden (door een beheerder of coach gemeld, nog niet op hockey.nl) */
+  const afgelast = []; const af = laatstePer_(afgelastTab_(), 1);
+  Object.keys(af).forEach(w => { if (af[w].r[3] === "afgelast") afgelast.push({ wedstrijd: w, door: af[w].r[2], tijd: af[w].r[0] }); });
+  return json_({ ok: true, voorspellingen, stemmen, gesloten: dicht, fotos, quotes, profielfotos, ideeen, reacties, bonusvragen, bonusantwoorden, afgelast });
 }
 
 function doPost(e) {
@@ -300,6 +304,12 @@ function doPost(e) {
       const magBeheren = gelijk_(d.beheercode, BEHEERCODE) || isCoach_(ik);
       /* Opstellingen zijn alleen voor coaches en beheerders: niet in de openbare lijst, maar apart opvragen */
       /* Notities per wedstrijd: alleen voor coaches en beheerders */
+      if (d.type === "afgelast") {
+        if (!magBeheren) return json_({ ok: false, fout: "geen rechten" });
+        const w = String(d.wedstrijd || "").slice(0, 120); if (!/^\d{4}-\d{2}-\d{2}\|/.test(w)) return json_({ ok: false, fout: "invoer" });
+        afgelastTab_().appendRow([new Date(), w, ik, d.weg ? "weg" : "afgelast"]);
+        return json_({ ok: true });
+      }
       if (d.type === "notities") {
         if (!magBeheren) return json_({ ok: false, fout: "geen rechten" });
         const notities = notitieTab_().getDataRange().getValues().slice(1).filter(r => r[1] && r[2]).map(r => ({ tijd: r[0], wedstrijd: r[1], tekst: r[2], door: r[3], id: String(r[4]) }));
