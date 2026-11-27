@@ -1840,6 +1840,16 @@ h1,h2,h3{font-family:var(--font-display)}
 .don-res.dub{color:var(--orange)}.don-res.niks{color:#b9d8e8}
 .don-uit{margin:2px 0 0;font-weight:700}
 .don-uit .rad-x{color:var(--orange)}
+/* Afgelaste wedstrijden op home */
+.afg-kaart{display:grid;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:6px;text-decoration:none;color:var(--ink);box-shadow:0 6px 18px -14px rgba(22,54,80,.5)}
+.afg-rij{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:12px;padding:6px}
+.afg-dag{position:relative;width:44px;height:48px;border-radius:10px;background:var(--sky);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;overflow:hidden}
+.afg-dag small{font-size:.62rem;font-weight:700;color:var(--ink-2);text-transform:lowercase}
+.afg-dag b{font-family:var(--font-display);font-weight:400;font-size:1.35rem;opacity:.55}
+.afg-dag::after{content:"";position:absolute;left:-6px;right:-6px;top:50%;height:3px;background:var(--orange);transform:rotate(-28deg);border-radius:2px}
+.afg-tekst{display:grid;gap:4px;min-width:0}.afg-sub{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.afg-tekst b{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.afg-tekst small{font-size:.78rem;font-weight:700;color:var(--orange-ink)}
+.afg-inhaal{font-size:.72rem;font-weight:700;color:var(--ink);background:var(--sky-soft);border-radius:999px;padding:4px 9px;white-space:nowrap}
 /* Bonusvraag-beheer */
 .bq-wed{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:8px -4px 10px;padding:2px 4px}
 .bq-wed::-webkit-scrollbar{display:none}
@@ -2866,9 +2876,16 @@ async function toonUitslagkaart(){
 window.toonUitslagkaart = toonUitslagkaart;
 function renderAfgelast(){
   const el = document.getElementById("afgelast-banner"); if (!el) return;
-  const nu = Date.now();
-  const recent = afgelastLijst().filter(a => nu - toDate(a.datum, a.tijd || "12:00") < 10 * 864e5 && !a.gespeeld);
-  el.innerHTML = recent.map(a => `<a class="kz-banner afgelast" href="#wedstrijden"><span>⛔</span><span><b>Afgelast: ${esc(a.thuis)} – ${esc(a.uit)}</b><br><small>Was ${fmtDay(a.datum, { weekday: "short", day: "numeric", month: "short" })} · ${a.nieuweDatum ? `nieuwe datum ${fmtDay(a.nieuweDatum, { weekday: "short", day: "numeric", month: "short" })}` : "nieuwe datum nog niet bekend"}</small></span></a>`).join("");
+  /* Alleen wedstrijden die nog moesten komen: een afgelaste wedstrijd van vorige week weet iedereen al */
+  const vandaag = new Date(); vandaag.setHours(0, 0, 0, 0);
+  const komend = afgelastLijst().filter(a => toDate(a.datum, a.tijd || "12:00") >= vandaag && !a.gespeeld)
+    .sort((x, y) => x.datum.localeCompare(y.datum));
+  if (!komend.length) { el.innerHTML = ""; return; }
+  const naam = t => isUs(t) ? "Kamelen" : kortTeam(t);
+  el.innerHTML = `<a class="afg-kaart" href="#wedstrijden">${komend.map(a => {
+    const d = new Date(`${a.datum}T12:00:00`);
+    return `<div class="afg-rij"><span class="afg-dag" aria-hidden="true"><small>${d.toLocaleDateString("nl-NL", { month: "short" }).replace(".", "")}</small><b>${d.getDate()}</b></span>
+      <span class="afg-tekst"><b>${esc(naam(a.thuis))} – ${esc(naam(a.uit))}</b><span class="afg-sub"><small>Afgelast</small><span class="afg-inhaal">${a.nieuweDatum ? `Inhaal ${fmtDay(a.nieuweDatum, { weekday: "short", day: "numeric", month: "short" })}` : "Inhaaldatum volgt"}</span></span></span></div>`; }).join("")}</a>`;
 }
 function renderProgram(){
   const vandaag = new Date(); vandaag.setHours(0, 0, 0, 0);
@@ -4264,11 +4281,11 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796903400"></script>
-<script src="toto.js?v=1796903400"></script>
-<script src="pong.js?v=1796903400"></script>
-<script src="pongregels.js?v=1796903400"></script>
-<script src="beerpong.js?v=1796903400"></script>
+<script src="mex.js?v=1796910600"></script>
+<script src="toto.js?v=1796910600"></script>
+<script src="pong.js?v=1796910600"></script>
+<script src="pongregels.js?v=1796910600"></script>
+<script src="beerpong.js?v=1796910600"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -4277,20 +4294,20 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796903400"></script>
-<script src="extra.js?v=1796903400"></script>
-<script src="coach.js?v=1796903400"></script>
-<script src="statistieken.js?v=1796903400"></script>
-<script src="wrapped.js?v=1796903400"></script>
-<script src="race.js?v=1796903400"></script>
-<script src="rad.js?v=1796903400"></script>
-<script src="fotos.js?v=1796903400"></script>
-<script src="quotes.js?v=1796903400"></script>
-<script src="ideeen.js?v=1796903400"></script>
-<script src="seizoen.js?v=1796903400"></script>
-<script src="zege.js?v=1796903400"></script>
-<script src="karavaan.js?v=1796903400"></script>
-<script src="design-proef.js?v=1796903400"></script>
-<script src="push.js?v=1796903400"></script>
+<script src="stemmen.js?v=1796910600"></script>
+<script src="extra.js?v=1796910600"></script>
+<script src="coach.js?v=1796910600"></script>
+<script src="statistieken.js?v=1796910600"></script>
+<script src="wrapped.js?v=1796910600"></script>
+<script src="race.js?v=1796910600"></script>
+<script src="rad.js?v=1796910600"></script>
+<script src="fotos.js?v=1796910600"></script>
+<script src="quotes.js?v=1796910600"></script>
+<script src="ideeen.js?v=1796910600"></script>
+<script src="seizoen.js?v=1796910600"></script>
+<script src="zege.js?v=1796910600"></script>
+<script src="karavaan.js?v=1796910600"></script>
+<script src="design-proef.js?v=1796910600"></script>
+<script src="push.js?v=1796910600"></script>
 </body>
 </html>
