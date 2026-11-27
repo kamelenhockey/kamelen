@@ -174,7 +174,7 @@
         <button type="button" class="btn sm cs-opslaan" data-cs="opslaan">Opslaan</button></div>
       <div class="cs-body" data-geen-swipe data-geen-trek>
         ${ed.live ? liveBalk() : `<div class="cs-teller"><span>Veld <b>${o.veld.length}</b>/11</span><span>Bank <b>${o.bank.length}</b></span><span class="cs-knoppen"><button type="button" class="cs-link" data-cs="auto">Standaard</button><button type="button" class="cs-link" data-cs="leeg">Leegmaken</button></span></div>
-        <button type="button" class="cs-live-start" data-cs="live">⏱️ Langs de lijn: wissels en speeltijd bijhouden</button>`}
+        <button type="button" class="cs-live-start" data-cs="live"><span class="cs-ls-ico" aria-hidden="true">⏱️</span><span class="cs-ls-tekst"><b>Langs de lijn</b><small>Wissels en speeltijd bijhouden</small></span><span class="cs-ls-go">Start ▸</span></button>`}
         <p class="cs-hint${ed.gekozen ? " actief" : ed.melding ? " lang" : ""}" role="status">${ed.live ? liveHint() : hint}</p>
         ${veldHtml(o, true, x => bankChip(x, ed.gekozen === bNaam(x) ? " aan" : ""))}
         ${ed.live ? liveOverzicht() : ""}
