@@ -2684,12 +2684,17 @@ function renderStats(){
    2. Poisson-model (25%): aanvalskracht tegen verdedigingskracht. Recente wedstrijden tellen zwaarder
       (halfwaardetijd 30 dagen), uitslagen worden afgekapt op 6 doelpunten zodat een 1-8 niet alles bepaalt,
       en elk team krijgt 3 'gemiddelde' wedstrijden als demping. Dit model levert ook de verwachte score.
+   3. Zekerheid (nov 2026): de kansen worden scherper naarmate er meer gespeeld is (temperatuur 1 → 1,7).
+      Backtest op 52 wedstrijden: log-loss 0,841 → 0,806, Brier 0,491 → 0,466.
+   4. Vorig seizoen: als het seizoensarchief een vorig seizoen heeft, begint elk team met zijn Elo-rating
+      van toen, half teruggezet naar 1500 (nieuwe teams starten op 1500).
    Afstelling (zie scripts/model-afstellen.mjs): K=60, thuis=60, gelijkspelkans 20%, Elo-gewicht 0,75. */
 function poisson(l, k){ let p = Math.exp(-l); for (let i = 1; i <= k; i++) p *= l / i; return p; }
-const MODEL = { eloK: 60, eloThuis: 60, eloGelijk: .2, eloSchaal: 400, eloGewicht: .75, halfwaarde: 30, demping: 3, plafond: 6 };
+const MODEL = { eloK: 60, eloThuis: 60, eloGelijk: .2, eloSchaal: 400, eloGewicht: .75, halfwaarde: 30, demping: 3, plafond: 6, scherpte: .7, scherpVanaf: 2, scherpOver: 4 };
 function scoreVan(m){ return String(m.score || "").split("-").map(Number); }
 function eloKans(res, thuis, uit){
-  const r = {}, g = t => r[t] ?? 1500;
+  /* Start van het seizoen: rating van vorig seizoen (half teruggezet naar 1500), anders 1500 */
+  const r = { ...(DATA.eloStart || {}) }, g = t => r[t] ?? 1500;
   res.forEach(m => { const [a, b] = scoreVan(m), d = g(m.thuis) + MODEL.eloThuis - g(m.uit), ph = 1 / (1 + Math.pow(10, -d / 400));
     const s = a > b ? 1 : a === b ? .5 : 0, delta = MODEL.eloK * (Math.log(Math.abs(a - b) + 1) + 1) * (s - ph);
     r[m.thuis] = g(m.thuis) + delta; r[m.uit] = g(m.uit) - delta; });
@@ -2722,9 +2727,22 @@ function voorspelWedstrijd(thuis, uit, totDatum){
   const t = pW + pG + pV; pW /= t; pG /= t; pV /= t;
   /* Elo-deel en combineren */
   const e = eloKans(res, thuis, uit), x = MODEL.eloGewicht;
-  const W = x * e.W + (1 - x) * pW, G = x * e.G + (1 - x) * pG, V = x * e.V + (1 - x) * pV;
+  let W = x * e.W + (1 - x) * pW, G = x * e.G + (1 - x) * pG, V = x * e.V + (1 - x) * pV;
+  /* Zekerheid laten meegroeien met het seizoen: na een paar speelrondes zat het model structureel te voorzichtig
+     (wat het 60% gaf, gebeurde in 75% van de gevallen). Vanaf 2 wedstrijden per team worden de kansen
+     geleidelijk scherper, tot het volle effect na 6 wedstrijden. */
+  const teams = new Set(res.flatMap(m => [m.thuis, m.uit])).size || 1, perTeam = 2 * res.length / teams;
+  const T = 1 + MODEL.scherpte * Math.max(0, Math.min(1, (perTeam - MODEL.scherpVanaf) / MODEL.scherpOver));
+  if (T !== 1) { const w = W ** T, gg = G ** T, v = V ** T, s = w + gg + v; W = w / s; G = gg / s; V = v / s; }
   const uitkomst = W >= V && W >= G ? "W" : V >= G ? "V" : "G";
-  return { lh, lu, pW: W, pG: G, pV: V, uitslag: beste[uitkomst].slice(0, 2), uitkomst, kh, ku, rating: e.rating };
+  /* Verwachte doelpunten in lijn brengen met de kansen: het Poisson-deel kan een ander team net sterker vinden dan
+     het geheel. Schuif de verwachting tot winst-min-verlies klopt (backtest: fout in verwachte goals 1,57 → 1,53). */
+  const verschil = (a, b) => { let w = 0, v = 0; for (let i = 0; i <= 14; i++) for (let j = 0; j <= 14; j++) { if (i === j) continue; const p = poisson(a, i) * poisson(b, j); if (i > j) w += p; else v += p; } return w - v; };
+  let lo = -1.5, hi = 1.5; for (let it = 0; it < 24; it++) { const k = (lo + hi) / 2; if (verschil(lh * Math.exp(k), lu * Math.exp(-k)) < W - V) lo = k; else hi = k; }
+  const k = (lo + hi) / 2, xh = lh * Math.exp(k), xu = lu * Math.exp(-k);
+  let uitslag = [0, 0], bp = -1;
+  for (let i = 0; i <= 14; i++) for (let j = 0; j <= 14; j++) { if ((i > j ? "W" : i === j ? "G" : "V") !== uitkomst) continue; const p = poisson(xh, i) * poisson(xu, j); if (p > bp) { bp = p; uitslag = [i, j]; } }
+  return { lh: xh, lu: xu, pW: W, pG: G, pV: V, uitslag, uitkomst, kh, ku, rating: e.rating };
 }
 /* Backtest: hoe vaak klopte winst/gelijk/verlies, steeds met alleen de gegevens van vóór die wedstrijd? */
 function modelScore(){
@@ -4084,6 +4102,27 @@ function pasHandmatigAfgelastToe(){
     if (!DATA.afgelast.some(a => a.datum === datum && a.thuis === thuis && a.uit === uit)) DATA.afgelast.push({ thuis, uit, datum, tijd: w ? w.tijd || null : null, nieuweDatum: null, bevestigd: true, handmatig: true });
   }
 }
+/* Voorspelmodel: Elo-startrating uit het vorige seizoen (seizoensarchief), bewaard op dit apparaat */
+const ELO_LS = "kamelen-elo-start";
+const seizoenSleutel = () => { const d = [...(DATA.uitslagen || []), ...(DATA.programma || [])].map(m => m.datum).filter(Boolean).sort()[0]; if (!d) return ""; const [j, m] = d.split("-").map(Number), s = m >= 8 ? j : j - 1; return `${s}-${s + 1}`; };
+function eloStartVan(){ try { const c = JSON.parse(localStorage.getItem(ELO_LS) || "null"); return c && c.seizoen === seizoenSleutel() ? c.ratings : {}; } catch { return {}; } }
+async function vulEloStart(){
+  const nu = seizoenSleutel(); if (!nu) return;
+  try {
+    const l = await fetch("archief/index.json", { cache: "no-store" }).then(r => r.ok ? r.json() : []);
+    const vorig = l.map(s => s.seizoen).filter(s => s < nu).sort().pop();
+    if (!vorig) { localStorage.setItem(ELO_LS, JSON.stringify({ seizoen: nu, ratings: {} })); return; }
+    const oud = await fetch(`archief/${vorig}/competitie.json`).then(r => r.json());
+    const res = (oud.uitslagen || []).filter(m => /^\d+-\d+$/.test(String(m.score || ""))).sort((a, b) => a.datum.localeCompare(b.datum));
+    const r = {}, g = t => r[t] ?? 1500;
+    res.forEach(m => { const [a, b] = scoreVan(m), d = g(m.thuis) + MODEL.eloThuis - g(m.uit), ph = 1 / (1 + Math.pow(10, -d / 400));
+      const s = a > b ? 1 : a === b ? .5 : 0, delta = MODEL.eloK * (Math.log(Math.abs(a - b) + 1) + 1) * (s - ph); r[m.thuis] = g(m.thuis) + delta; r[m.uit] = g(m.uit) - delta; });
+    const teams = new Set([...(DATA.stand || []).map(t => t.team), ...(DATA.programma || []).flatMap(m => [m.thuis, m.uit])]);
+    const ratings = Object.fromEntries(Object.entries(r).filter(([t]) => teams.has(t)).map(([t, v]) => [t, 1500 + (v - 1500) / 2]));
+    localStorage.setItem(ELO_LS, JSON.stringify({ seizoen: nu, van: vorig, ratings }));
+    DATA.eloStart = ratings;
+  } catch {}
+}
 /* bron = eerder bewaarde gegevens: dan meteen tonen zonder op internet te wachten */
 function laadGegevens(stil, bron){
 const y = window.scrollY, pagina = document.body.dataset.page;
@@ -4093,6 +4132,7 @@ return (bron ? Promise.resolve(bron) : haalAlles())
     DATA = { aftrekMoment: { "GCHC H13": "2026-10-18" }, ...comp, ...lit, ...(live ? {liters: live} : {}), opstelling: ops.spelers || [], opstellingWedstrijd: ops.wedstrijd || null, doelpunten }; _trendVorig = null;
     (DATA.doelpunten || []).forEach(w => w.goals.forEach(g => { g.wie = canon(g.wie); }));
     pasHandmatigAfgelastToe();
+    DATA.eloStart = eloStartVan(); vulEloStart();
     if (!comp.programma && !DATA.liters) throw new Error("geen gegevens");
     if (DATA.competitie) document.getElementById("league").textContent = DATA.competitie;
     /* Elk onderdeel apart: als er één faalt, werkt de rest gewoon door */
@@ -4379,11 +4419,11 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796954600"></script>
-<script src="toto.js?v=1796954600"></script>
-<script src="pong.js?v=1796954600"></script>
-<script src="pongregels.js?v=1796954600"></script>
-<script src="beerpong.js?v=1796954600"></script>
+<script src="mex.js?v=1796954700"></script>
+<script src="toto.js?v=1796954700"></script>
+<script src="pong.js?v=1796954700"></script>
+<script src="pongregels.js?v=1796954700"></script>
+<script src="beerpong.js?v=1796954700"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -4392,20 +4432,20 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796954600"></script>
-<script src="extra.js?v=1796954600"></script>
-<script src="coach.js?v=1796954600"></script>
-<script src="statistieken.js?v=1796954600"></script>
-<script src="wrapped.js?v=1796954600"></script>
-<script src="race.js?v=1796954600"></script>
-<script src="rad.js?v=1796954600"></script>
-<script src="fotos.js?v=1796954600"></script>
-<script src="quotes.js?v=1796954600"></script>
-<script src="ideeen.js?v=1796954600"></script>
-<script src="seizoen.js?v=1796954600"></script>
-<script src="zege.js?v=1796954600"></script>
-<script src="karavaan.js?v=1796954600"></script>
-<script src="design-proef.js?v=1796954600"></script>
-<script src="push.js?v=1796954600"></script>
+<script src="stemmen.js?v=1796954700"></script>
+<script src="extra.js?v=1796954700"></script>
+<script src="coach.js?v=1796954700"></script>
+<script src="statistieken.js?v=1796954700"></script>
+<script src="wrapped.js?v=1796954700"></script>
+<script src="race.js?v=1796954700"></script>
+<script src="rad.js?v=1796954700"></script>
+<script src="fotos.js?v=1796954700"></script>
+<script src="quotes.js?v=1796954700"></script>
+<script src="ideeen.js?v=1796954700"></script>
+<script src="seizoen.js?v=1796954700"></script>
+<script src="zege.js?v=1796954700"></script>
+<script src="karavaan.js?v=1796954700"></script>
+<script src="design-proef.js?v=1796954700"></script>
+<script src="push.js?v=1796954700"></script>
 </body>
 </html>
