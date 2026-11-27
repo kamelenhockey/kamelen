@@ -4,10 +4,11 @@
    ========================================================= */
 (function () {
   const box = document.getElementById("rad"); if (!box) return;
-  /* Volgorde door elkaar. Smalle vakjes (kleine kans): Huis, Liter toevoegen en Dubbelloops. */
+  /* Volgorde door elkaar. Smalle vakjes (kleine kans): Huis, Liter toevoegen en Dubbelloops.
+     Brede vakjes: Zelf bak en Zelf halve leo, zodat de draaier altijd de grootste kans heeft om zelf te drinken. */
   const VAKKEN = [
     { kort: "Aanvoerdersbak", tekst: "Aanvoerdersbak (ook oud-aanvoerders)" },
-    { kort: "Zelf halve leo", tekst: "Zelf een halve leo", zelf: true },
+    { kort: "Zelf halve leo", tekst: "Zelf een halve leo", zelf: true, gewicht: 2.5 },
     { kort: "Middenveldbak", tekst: "Middenveldbak" },
     { kort: "Nog een keer ×2", tekst: "Nog een keer draaien én verdubbelaar", opnieuw: true, dubbel: true },
     { kort: "Keepersbak", tekst: "Keepersbak" },
@@ -25,7 +26,7 @@
     { kort: "Topscorersbak", tekst: "Topscorersbak (de top 3 topscorers van de Kamelen)" },
     { kort: "Dubbelloops uitdelen", tekst: "Dubbelloops uitdelen" },
     { kort: "DUBBELLOOPS", tekst: "Dubbelloops! Zelf twee tegelijk.", gewicht: .35, klein: true, kleur: "#6b4fa0" },
-    { kort: "Zelf bak", tekst: "Zelf een bak", zelf: true },
+    { kort: "Zelf bak", tekst: "Zelf een bak", zelf: true, gewicht: 2.5 },
     { kort: "Aanvalbak", tekst: "Aanvalbak" },
     { kort: "Veteranenbak", tekst: "Veteranenbak: iedereen die in zijn 5e jaar of langer bij de Kamelen zit" }
   ];
