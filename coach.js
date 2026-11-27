@@ -494,6 +494,7 @@
   document.addEventListener("click", async e => {
     const a = e.target.closest("[data-widget-uitleg]"); if (a) { e.preventDefault();
       document.getElementById("more-sheet").hidden = true; document.body.classList.remove("sheet-open");
+      const nm = document.getElementById("nav-more-menu"); if (nm) { nm.hidden = true; document.getElementById("nav-more-btn")?.setAttribute("aria-expanded", "false"); }
       const dlg = document.getElementById("teamDialog");
       document.getElementById("dlg-sub").textContent = "iPhone"; document.getElementById("dlg-title").textContent = "Kamelen-widget";
       document.getElementById("dlg-body").innerHTML = `<p>De volgende wedstrijd, hoe lang het nog duurt, de stand en de laatste uitslagen op je beginscherm. Er is een indeling voor klein, middel, groot en het vergrendelscherm.</p>
@@ -530,6 +531,6 @@
     } catch { st.innerHTML = `Kopiëren lukte niet. <a href="widget/kamelen-widget-laden.js" target="_blank">Open het script</a> en kopieer het zelf.`; }
   });
   addEventListener("hashchange", () => { zichtbaarheid(); if (location.hash === "#beheer") renderBeheer(); });
-  document.addEventListener("click", e => { if (e.target.closest("#more-btn")) zichtbaarheid(); }, true);
+  document.addEventListener("click", e => { if (e.target.closest("#more-btn, #nav-more-btn")) zichtbaarheid(); }, true);
   setTimeout(() => { zichtbaarheid(); if (isBeheer()) opstellingen(); if (location.hash === "#beheer") renderBeheer(); }, 0);
 })();
