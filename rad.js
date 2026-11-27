@@ -25,7 +25,7 @@
     { kort: "Lichtingbak", tekst: "Lichtingbak: een bak met iedereen uit jouw lichting", gewicht: .982 },
     { kort: "Feutenbak", tekst: "Feutenbak", gewicht: 1.6 },
     { kort: "Verdedigersbak", tekst: "Verdedigersbak", gewicht: .982 },
-    { kort: "Topscorersbak", tekst: "Topscorersbak (de top 3 topscorers van de Kamelen)", gewicht: .982 },
+    { kort: "Topscorersbak", tekst: "Topscorersbak (wie de meeste goals heeft; bij een gedeelde eerste plek drinken ze allemaal)", gewicht: .982 },
     { kort: "Aanvoerders delen uit", tekst: "Aanvoerders (ook oud-aanvoerders) mogen een bak uitdelen", gewicht: .982 },
     { kort: "HUIS", tekst: "HUIS!", gewicht: .3, huis: true, kleur: "#c0392b" },
     { kort: "Halve leo uitdelen", tekst: "Halve leo uitdelen", don: true, uitdelen: true, gewicht: .694 },
