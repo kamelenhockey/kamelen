@@ -4,38 +4,42 @@
    ========================================================= */
 (function () {
   const box = document.getElementById("rad"); if (!box) return;
-  /* Volgorde door elkaar. Smalle vakjes (kleine kans): Huis, Liter toevoegen en Dubbelloops.
+  /* Volgorde: gespiegeld rond de pijl. Bovenaan Dubbelloops, onderaan de Lichtingbak, links en rechts de brede
+     Zelf-vakken. Naast elk rotvakje (Huis, Liter, Dubbelloops) staat een goed vakje (uitdelen of nog een keer),
+     en de posities en groepen staan verspreid. Smalle vakjes (kleine kans): Huis, Liter en Dubbelloops.
      Brede vakjes: Zelf bak en Zelf halve leo, zodat de draaier altijd de grootste kans heeft om zelf te drinken. */
   const VAKKEN = [
-    { kort: "Aanvoerdersbak", tekst: "Aanvoerdersbak (ook oud-aanvoerders)" },
-    { kort: "Zelf halve leo", tekst: "Zelf een halve leo", zelf: true, don: true, gewicht: 2.5 },
-    { kort: "Middenveldbak", tekst: "Middenveldbak" },
+    { kort: "DUBBELLOOPS", tekst: "Dubbelloops! Zelf twee tegelijk.", gewicht: .6, klein: true, kleur: "#6b4fa0", don: true },
     { kort: "Nog een keer ×2", tekst: "Nog een keer draaien én verdubbelaar", opnieuw: true, dubbel: true },
-    { kort: "Keepersbak", tekst: "Keepersbak" },
-    { kort: "Bak uitdelen", tekst: "Bak uitdelen", don: true, uitdelen: true },
-    { kort: "Lichtingbak", tekst: "Lichtingbak: een bak met iedereen uit jouw lichting" },
-    { kort: "HUIS", tekst: "HUIS!", gewicht: .3, huis: true, kleur: "#c0392b" },
-    { kort: "Nog een keer", tekst: "Nog een keer draaien", opnieuw: true },
-    { kort: "Feutenbak", tekst: "Feutenbak" },
-    { kort: "Oudkamelenbak", tekst: "Oudkamelenbak (iedereen die eerder bij de Kamelen speelde)" },
-    { kort: "Aanvoerders delen uit", tekst: "Aanvoerders (ook oud-aanvoerders) mogen een bak uitdelen" },
-    { kort: "Halve leo uitdelen", tekst: "Halve leo uitdelen", don: true, uitdelen: true },
-    { kort: "LITER", tekst: "Liter trekken!", gewicht: .35, klein: true, kleur: "#d4a017" },
-    { kort: "Verdedigersbak", tekst: "Verdedigersbak" },
+    { kort: "Veteranenbak", tekst: "Veteranenbak: iedereen die in zijn 5e jaar of langer bij de Kamelen zit" },
+    { kort: "Aanvalbak", tekst: "Aanvalbak" },
     { kort: "Coachbak", tekst: "Coachbak" },
+    { kort: "Bak uitdelen", tekst: "Bak uitdelen", don: true, uitdelen: true },
+    { kort: "HUIS", tekst: "HUIS!", gewicht: .3, huis: true, kleur: "#c0392b" },
+    { kort: "Halve leo uitdelen", tekst: "Halve leo uitdelen", don: true, uitdelen: true },
+    { kort: "Feutenbak", tekst: "Feutenbak" },
+    { kort: "Keepersbak", tekst: "Keepersbak" },
+    { kort: "Zelf bak", tekst: "Zelf een bak", zelf: true, don: true, gewicht: 2.5 },
+    { kort: "Lichtingbak", tekst: "Lichtingbak: een bak met iedereen uit jouw lichting" },
+    { kort: "Zelf halve leo", tekst: "Zelf een halve leo", zelf: true, don: true, gewicht: 2.5 },
+    { kort: "Verdedigersbak", tekst: "Verdedigersbak" },
     { kort: "Topscorersbak", tekst: "Topscorersbak (de top 3 topscorers van de Kamelen)" },
     { kort: "Dubbelloops uitdelen", tekst: "Dubbelloops uitdelen", don: true, uitdelen: true },
-    { kort: "DUBBELLOOPS", tekst: "Dubbelloops! Zelf twee tegelijk.", gewicht: .6, klein: true, kleur: "#6b4fa0", don: true },
-    { kort: "Zelf bak", tekst: "Zelf een bak", zelf: true, don: true, gewicht: 2.5 },
-    { kort: "Aanvalbak", tekst: "Aanvalbak" },
-    { kort: "Veteranenbak", tekst: "Veteranenbak: iedereen die in zijn 5e jaar of langer bij de Kamelen zit" }
+    { kort: "LITER", tekst: "Liter trekken!", gewicht: .35, klein: true, kleur: "#d4a017" },
+    { kort: "Aanvoerders delen uit", tekst: "Aanvoerders (ook oud-aanvoerders) mogen een bak uitdelen" },
+    { kort: "Oudkamelenbak", tekst: "Oudkamelenbak (iedereen die eerder bij de Kamelen speelde)" },
+    { kort: "Middenveldbak", tekst: "Middenveldbak" },
+    { kort: "Aanvoerdersbak", tekst: "Aanvoerdersbak (ook oud-aanvoerders)" },
+    { kort: "Nog een keer", tekst: "Nog een keer draaien", opnieuw: true }
   ];
   const KLEUREN = ["#163650", "#f08c1c", "#b9d8e8", "#2c4b63", "#f6b46a", "#e6f1f7"];
   const TEKSTKLEUR = { "#163650": "#fff", "#2c4b63": "#fff", "#f08c1c": "#163650", "#f6b46a": "#163650", "#b9d8e8": "#163650", "#e6f1f7": "#163650" };
   const totaal = VAKKEN.reduce((s, v) => s + (v.gewicht || 1), 0);
   let hoek = 0; VAKKEN.forEach(v => { v.van = hoek; hoek += (v.gewicht || 1) / totaal * 360; v.tot = hoek; });
 
-  let draai = 0, vorigeDraai = 0, bezig = false, verdubbelaar = 0, geschiedenis = [];
+  /* Begin met het eerste vakje (Dubbelloops) precies onder de pijl, zodat het rad er symmetrisch uitziet */
+  const startHoek = -(VAKKEN[0].van + VAKKEN[0].tot) / 2;
+  let draai = startHoek, vorigeDraai = startHoek, bezig = false, verdubbelaar = 0, geschiedenis = [];
 
   const pt = (r, a) => { const rad = (a - 90) * Math.PI / 180; return [200 + r * Math.cos(rad), 200 + r * Math.sin(rad)]; };
   function vakPad(v) {
