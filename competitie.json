@@ -34,16 +34,6 @@
    "uit": "HCSO H1"
   },
   {
-   "datum": "2026-11-29",
-   "thuis": "GCHC H13",
-   "tijd": "15:30",
-   "uit": "Leeuwarden H2-O",
-   "wedstrijdId": "2105976",
-   "veld": "Veld 2 (Semiveld)",
-   "accommodatie": "Paddepoel",
-   "adres": "Blauwborgje 26 9747AC Groningen"
-  },
-  {
    "datum": "2027-02-28",
    "thuis": "Daring H1",
    "tijd": null,
@@ -910,6 +900,16 @@
    "tijd": "09:00",
    "nieuweDatum": "2027-02-28",
    "vermist": "2026-11-22T12:59:00.000Z",
+   "bevestigd": true
+  },
+  {
+   "thuis": "GCHC H13",
+   "uit": "Leeuwarden H2-O",
+   "datum": "2026-11-29",
+   "tijd": "15:30",
+   "nieuweDatum": null,
+   "vermist": "2026-11-27T22:20:00.000Z",
+   "handmatig": true,
    "bevestigd": true
   }
  ]

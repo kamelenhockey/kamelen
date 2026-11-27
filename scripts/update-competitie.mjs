@@ -88,7 +88,12 @@ for (const w of onze) {
 }
 await browser.close();
 
-const programma = parseProgramma(programmaTekst, startjaar).map(w => {
+/* Handmatig afgelast (staat nog niet op hockey.nl): afgelast-handmatig.json, [{ thuis, uit, datum }].
+   Zo'n wedstrijd gaat uit het programma en staat meteen als afgelast in de app. Komt hij op hockey.nl
+   met een nieuwe datum terug, dan wordt dat vanzelf de inhaaldatum. */
+const handmatig = JSON.parse(await readFile("afgelast-handmatig.json", "utf8").catch(() => "[]"));
+const isHandmatig = w => handmatig.some(h => h.thuis === w.thuis && h.uit === w.uit && h.datum === w.datum);
+const programma = parseProgramma(programmaTekst, startjaar).filter(w => !isHandmatig(w)).map(w => {
   const d = details[`${w.datum}|${w.thuis}|${w.uit}`];
   return d ? { ...w, wedstrijdId: d.id, veld: d.veld, accommodatie: d.accommodatie, adres: d.adres } : w;
 });
@@ -127,7 +132,12 @@ for (const a of afgelast) {
 // Alleen tonen als hij echt niet gespeeld is: geen uitslag 30 uur na de aftrap, of een nieuwe datum
 afgelast = afgelast.filter(a => !(a.gespeeld && a.gespeeld === a.datum))
   .filter(a => { const nu = nuOns.get(`${a.thuis}|${a.uit}`); return !(nu && !nu.score && nu.datum === a.datum); });   // toch weer op de oude datum: vergissing
-afgelast.forEach(a => { a.bevestigd = !!a.nieuweDatum || nuMs - new Date(`${a.datum}T${a.tijd || "12:00"}:00`).getTime() > 30 * 3600e3; });
+for (const h of handmatig) {
+  if (afgelast.some(a => a.thuis === h.thuis && a.uit === h.uit && a.datum === h.datum)) continue;
+  const w = (oud.programma || []).find(x => x.thuis === h.thuis && x.uit === h.uit && x.datum === h.datum) || h;
+  afgelast.push({ thuis: h.thuis, uit: h.uit, datum: h.datum, tijd: w.tijd || null, nieuweDatum: null, vermist: new Date().toISOString(), handmatig: true });
+}
+afgelast.forEach(a => { a.bevestigd = !!a.nieuweDatum || isHandmatig(a) || nuMs - new Date(`${a.datum}T${a.tijd || "12:00"}:00`).getTime() > 30 * 3600e3; });
 
 const nieuw = {
   ...oud,
