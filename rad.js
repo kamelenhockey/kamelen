@@ -27,7 +27,7 @@
     { kort: "DUBBELLOOPS", tekst: "Dubbelloops! Zelf twee tegelijk.", gewicht: .35, klein: true, kleur: "#6b4fa0" },
     { kort: "Zelf bak", tekst: "Zelf een bak", zelf: true },
     { kort: "Aanvalbak", tekst: "Aanvalbak" },
-    { kort: "Veteranenbak", tekst: "Veteranenbak (wie er het langst bij zit)" }
+    { kort: "Veteranenbak", tekst: "Veteranenbak: iedereen die in zijn 5e jaar of langer bij de Kamelen zit" }
   ];
   const KLEUREN = ["#163650", "#f08c1c", "#b9d8e8", "#2c4b63", "#f6b46a", "#e6f1f7"];
   const TEKSTKLEUR = { "#163650": "#fff", "#2c4b63": "#fff", "#f08c1c": "#163650", "#f6b46a": "#163650", "#b9d8e8": "#163650", "#e6f1f7": "#163650" };

@@ -1363,6 +1363,9 @@ body:not([data-page="home"]) .hero-acties{top:50%!important;transform:translateY
 .hero-acties .ik-chip:hover,.hero-acties .ververs-knop:hover{background:#fff}
 @media (max-height:520px) and (orientation:landscape) and (pointer:coarse){.hero-acties{top:50%!important;transform:translateY(-50%)}}
 @media (max-width:760px){body[data-page="home"] .hero .wrap{padding-top:64px!important}}
+/* In de smalle balk (niet op home) is er geen plek voor drie knoppen: zoeken zit daar in Meer, en je naam valt weg op smalle schermen */
+body:not([data-page="home"]) .hero-acties [data-zoek-open]{display:none}
+@media (max-width:440px){body:not([data-page="home"]) .hero-acties .ik-chip > span:last-child{display:none}body:not([data-page="home"]) .hero-acties .ik-chip{padding:0 4px}}
 @media (max-width:560px){.hero-acties{top:8px;right:10px}.ververs-knop{width:36px;height:36px}.ik-chip{font-size:.82rem}.hero .ik-chip .avatar{width:28px;height:28px;min-width:28px}}
 .pred-model{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin:0 0 12px;padding:12px 14px;border-radius:14px;background:var(--ink);color:#fff}
 .pmod-tekst{display:grid;gap:2px;min-width:0;flex:1 1 220px}
@@ -4261,11 +4264,11 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796899800"></script>
-<script src="toto.js?v=1796899800"></script>
-<script src="pong.js?v=1796899800"></script>
-<script src="pongregels.js?v=1796899800"></script>
-<script src="beerpong.js?v=1796899800"></script>
+<script src="mex.js?v=1796903400"></script>
+<script src="toto.js?v=1796903400"></script>
+<script src="pong.js?v=1796903400"></script>
+<script src="pongregels.js?v=1796903400"></script>
+<script src="beerpong.js?v=1796903400"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -4274,20 +4277,20 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796899800"></script>
-<script src="extra.js?v=1796899800"></script>
-<script src="coach.js?v=1796899800"></script>
-<script src="statistieken.js?v=1796899800"></script>
-<script src="wrapped.js?v=1796899800"></script>
-<script src="race.js?v=1796899800"></script>
-<script src="rad.js?v=1796899800"></script>
-<script src="fotos.js?v=1796899800"></script>
-<script src="quotes.js?v=1796899800"></script>
-<script src="ideeen.js?v=1796899800"></script>
-<script src="seizoen.js?v=1796899800"></script>
-<script src="zege.js?v=1796899800"></script>
-<script src="karavaan.js?v=1796899800"></script>
-<script src="design-proef.js?v=1796899800"></script>
-<script src="push.js?v=1796899800"></script>
+<script src="stemmen.js?v=1796903400"></script>
+<script src="extra.js?v=1796903400"></script>
+<script src="coach.js?v=1796903400"></script>
+<script src="statistieken.js?v=1796903400"></script>
+<script src="wrapped.js?v=1796903400"></script>
+<script src="race.js?v=1796903400"></script>
+<script src="rad.js?v=1796903400"></script>
+<script src="fotos.js?v=1796903400"></script>
+<script src="quotes.js?v=1796903400"></script>
+<script src="ideeen.js?v=1796903400"></script>
+<script src="seizoen.js?v=1796903400"></script>
+<script src="zege.js?v=1796903400"></script>
+<script src="karavaan.js?v=1796903400"></script>
+<script src="design-proef.js?v=1796903400"></script>
+<script src="push.js?v=1796903400"></script>
 </body>
 </html>
