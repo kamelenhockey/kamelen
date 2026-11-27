@@ -20,6 +20,7 @@
   function index() {
     const uit = [];
     PAGINAS.forEach(([v, t, extra]) => uit.push({ soort: "Onderdelen", titel: t, sub: "", tekst: `${t} ${extra}`, doe: () => { location.hash = v === "home" ? "" : v; } }));
+    if (!isBeheer() && (window.IK || {}).rol !== "gast") uit.push({ soort: "Onderdelen", titel: "Beheercode invullen", sub: "inloggen als beheerder", tekst: "beheer beheercode beheerder inloggen code admin", doe: () => window.kamelenBeheerPopup?.() });
     if (isBeheer()) uit.push({ soort: "Onderdelen", titel: "Beheer", sub: "opstellingen, bonusvraag, notities", tekst: "beheer opstelling coach bonusvraag notities", doe: () => { location.hash = "beheer"; } });
     uit.push({ soort: "Onderdelen", titel: "Widget op je iPhone", sub: "uitleg", tekst: "widget iphone scriptable", doe: () => document.querySelector("[data-widget-uitleg]")?.click() });
     try { playerData().forEach(p => uit.push({ soort: "Spelers", titel: p.naam, sub: p.invaller ? "Invaller" : "Kameel", tekst: `${p.naam} ${p.bijnaam || ""}`, doe: () => openPlayer(p.naam) })); } catch {}

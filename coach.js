@@ -359,7 +359,7 @@
   async function renderBeheer() {
     zichtbaarheid();
     const box = document.getElementById("beheer"); if (!box) return;
-    if (!isBeheer()) { box.innerHTML = `<div class="card"><h2 class="cb-h">Inloggen als beheerder</h2><p class="muted">Vul de beheercode in. Hij wordt alleen op dit apparaat bewaard; daarna zie je in het menu Meer de knop Beheer en bij elke wedstrijd de opstelling.</p><form id="cb-login" class="cb-rij"><input id="cb-code" type="password" placeholder="Beheercode" autocomplete="off"><button class="btn sm" type="submit">Inloggen</button></form><span class="tt-status" id="cb-st" role="status"></span></div>`; return; }
+    if (!isBeheer()) { box.innerHTML = `<div class="card"><h2 class="cb-h">Inloggen als beheerder</h2><p class="muted">Vul de beheercode in. Hij wordt alleen op dit apparaat bewaard; daarna zie je in het menu Meer de knop Beheer en bij elke wedstrijd de opstelling.</p><form id="cb-login" class="cb-rij"><input type="text" name="username" value="Kamelen beheer" autocomplete="username" hidden readonly><input id="cb-code" name="password" type="password" placeholder="Beheercode" autocomplete="current-password" enterkeyhint="go"><button class="btn sm" type="submit">Inloggen</button></form><span class="tt-status" id="cb-st" role="status"></span></div>`; return; }
     const j = await window.kamelenApi?.().catch(() => ({})) || {};
     const nu = Date.now(), alle = onze(), komend = alle.filter(m => toDate(m.datum, m.tijd || "23:00") > nu - 3 * 3600e3).slice(0, 6);
     const gespeeld = alle.filter(m => m.score).reverse();
@@ -522,6 +522,44 @@
     if (b.dataset.cb === "wis") { try { localStorage.removeItem("kamelen-gegevens"); } catch {} (caches?.keys?.() || Promise.resolve([])).then(k => Promise.all(k.map(n => caches.delete(n)))).finally(() => location.reload()); }
     if (b.dataset.cb === "uit") { try { localStorage.removeItem("kamelen-beheer"); } catch {} renderBeheer(); }
   });
+  /* ---------- Snel de beheercode invullen: pop-up vanaf overal ---------- */
+  function beheerPopup() {
+    let d = document.getElementById("bc-dlg");
+    if (!d) {
+      d = document.createElement("dialog"); d.id = "bc-dlg"; d.className = "bc-dlg";
+      d.innerHTML = `<form id="bc-form" method="dialog">
+        <div class="bc-kop"><span class="bc-ico" aria-hidden="true">🔑</span><div><h2>Beheercode</h2><p>Eén keer invullen, daarna onthoudt dit apparaat hem.</p></div></div>
+        <input type="text" name="username" value="Kamelen beheer" autocomplete="username" hidden readonly>
+        <input id="bc-code" name="password" type="password" autocomplete="current-password" placeholder="Beheercode" aria-label="Beheercode" enterkeyhint="go" required>
+        <label class="bc-toon"><input type="checkbox" id="bc-toon"> Code tonen</label>
+        <div class="bc-knoppen"><button type="button" class="btn sm ghost" data-bc-sluit>Annuleren</button><button type="submit" class="btn sm" id="bc-knop">Inloggen</button></div>
+        <span class="tt-status" id="bc-st" role="status"></span></form>`;
+      document.body.appendChild(d);
+      d.addEventListener("click", e => { if (e.target === d || e.target.closest("[data-bc-sluit]")) d.close(); });
+      d.querySelector("#bc-toon").addEventListener("change", e => { d.querySelector("#bc-code").type = e.target.checked ? "text" : "password"; });
+      d.querySelector("#bc-form").addEventListener("submit", async e => {
+        e.preventDefault();
+        const code = d.querySelector("#bc-code").value.trim(), st = d.querySelector("#bc-st"), knop = d.querySelector("#bc-knop"); if (!code) return;
+        st.textContent = "Controleren…"; knop.disabled = true;
+        try { const r = await fetch(CFG().api, { method: "POST", body: JSON.stringify({ type: "beheer", actie: "check", beheercode: code }) }).then(x => x.json());
+          if (r.ok) { try { localStorage.setItem("kamelen-beheer", code); } catch {} st.textContent = "Gelukt!"; zichtbaarheid(); if (isBeheer()) opstellingen(true);
+            setTimeout(() => { d.close(); if (location.hash === "#beheer") renderBeheer(); else location.hash = "#beheer"; }, 350); }
+          else { st.textContent = "Die beheercode klopt niet."; d.querySelector("#bc-code").select(); } }
+        catch { st.textContent = "Geen verbinding."; }
+        knop.disabled = false;
+      });
+    }
+    d.querySelector("#bc-st").textContent = ""; d.querySelector("#bc-code").value = "";
+    document.getElementById("more-sheet")?.setAttribute("hidden", ""); document.body.classList.remove("sheet-open");
+    const nm = document.getElementById("nav-more-menu"); if (nm) nm.hidden = true;
+    d.showModal(); setTimeout(() => d.querySelector("#bc-code").focus(), 30);
+  }
+  window.kamelenBeheerPopup = beheerPopup;
+  /* Elke "Inloggen als beheerder"-link opent meteen de pop-up */
+  document.addEventListener("click", e => { const a = e.target.closest("[data-beheer-login], [data-bc-open]"); if (!a) return; e.preventDefault(); beheerPopup(); }, true);
+  /* Snelkoppeling: tik 5× snel op de titel "Kamelen" bovenaan */
+  { let tikken = 0, t0 = 0;
+    document.addEventListener("click", e => { if (!e.target.closest(".hero h1, .nav-merk")) return; const nu = Date.now(); tikken = nu - t0 < 600 ? tikken + 1 : 1; t0 = nu; if (tikken >= 5) { tikken = 0; if (isBeheer()) location.hash = "#beheer"; else beheerPopup(); } }); }
   /* ---------- iPhone-widget: uitleg en script kopiëren ---------- */
   document.addEventListener("click", async e => {
     const a = e.target.closest("[data-widget-uitleg]"); if (a) { e.preventDefault();

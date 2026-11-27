@@ -8,29 +8,32 @@
      Zelf-vakken. Naast elk rotvakje (Huis, Liter, Dubbelloops) staat een goed vakje (uitdelen of nog een keer),
      en de posities en groepen staan verspreid. Smalle vakjes (kleine kans): Huis, Liter en Dubbelloops.
      Brede vakjes: Zelf bak en Zelf halve leo, zodat de draaier altijd de grootste kans heeft om zelf te drinken. */
+  /* Indeling: de 3 kleinste vakjes (Dubbelloops, Liter, Huis) staan als een Mercedes-ster op 0°, 120° en 240°.
+     Zelf bak (90°) en Zelf halve leo (270°) staan precies tegenover elkaar; Feutenbak onderaan (180°).
+     De gewichten van de gewone vakjes zijn zo berekend dat dit exact uitkomt. */
   const VAKKEN = [
     { kort: "DUBBELLOOPS", tekst: "Dubbelloops! Zelf twee tegelijk.", gewicht: .6, klein: true, kleur: "#6b4fa0", don: true },
-    { kort: "Nog een keer ×2", tekst: "Nog een keer draaien én verdubbelaar", opnieuw: true, dubbel: true },
-    { kort: "Veteranenbak", tekst: "Veteranenbak: iedereen die in zijn 5e jaar of langer bij de Kamelen zit" },
-    { kort: "Aanvalbak", tekst: "Aanvalbak" },
-    { kort: "Coachbak", tekst: "Coachbak" },
-    { kort: "Bak uitdelen", tekst: "Bak uitdelen", don: true, uitdelen: true },
-    { kort: "HUIS", tekst: "HUIS!", gewicht: .3, huis: true, kleur: "#c0392b" },
-    { kort: "Halve leo uitdelen", tekst: "Halve leo uitdelen", don: true, uitdelen: true },
-    { kort: "Feutenbak", tekst: "Feutenbak" },
-    { kort: "Keepersbak", tekst: "Keepersbak" },
-    { kort: "Zelf bak", tekst: "Zelf een bak", zelf: true, don: true, gewicht: 2.5 },
-    { kort: "Lichtingbak", tekst: "Lichtingbak: een bak met iedereen uit jouw lichting" },
-    { kort: "Zelf halve leo", tekst: "Zelf een halve leo", zelf: true, don: true, gewicht: 2.5 },
-    { kort: "Verdedigersbak", tekst: "Verdedigersbak" },
-    { kort: "Topscorersbak", tekst: "Topscorersbak (de top 3 topscorers van de Kamelen)" },
-    { kort: "Dubbelloops uitdelen", tekst: "Dubbelloops uitdelen", don: true, uitdelen: true },
+    { kort: "Nog een keer ×2", tekst: "Nog een keer draaien én verdubbelaar", opnieuw: true, dubbel: true, gewicht: 1.113 },
+    { kort: "Veteranenbak", tekst: "Veteranenbak: iedereen die in zijn 5e jaar of langer bij de Kamelen zit", gewicht: 1.113 },
+    { kort: "Aanvalbak", tekst: "Aanvalbak", gewicht: 1.113 },
+    { kort: "Coachbak", tekst: "Coachbak", gewicht: 1.113 },
+    { kort: "Zelf bak", tekst: "Zelf een bak", zelf: true, don: true, gewicht: 2.2 },
+    { kort: "Bak uitdelen", tekst: "Bak uitdelen", don: true, uitdelen: true, gewicht: .689 },
     { kort: "LITER", tekst: "Liter trekken!", gewicht: .35, klein: true, kleur: "#d4a017" },
-    { kort: "Aanvoerders delen uit", tekst: "Aanvoerders (ook oud-aanvoerders) mogen een bak uitdelen" },
-    { kort: "Oudkamelenbak", tekst: "Oudkamelenbak (iedereen die eerder bij de Kamelen speelde)" },
-    { kort: "Middenveldbak", tekst: "Middenveldbak" },
-    { kort: "Aanvoerdersbak", tekst: "Aanvoerdersbak (ook oud-aanvoerders)" },
-    { kort: "Nog een keer", tekst: "Nog een keer draaien", opnieuw: true }
+    { kort: "Dubbelloops uitdelen", tekst: "Dubbelloops uitdelen", don: true, uitdelen: true, gewicht: .982 },
+    { kort: "Keepersbak", tekst: "Keepersbak", gewicht: .982 },
+    { kort: "Lichtingbak", tekst: "Lichtingbak: een bak met iedereen uit jouw lichting", gewicht: .982 },
+    { kort: "Feutenbak", tekst: "Feutenbak", gewicht: 1.6 },
+    { kort: "Verdedigersbak", tekst: "Verdedigersbak", gewicht: .982 },
+    { kort: "Topscorersbak", tekst: "Topscorersbak (de top 3 topscorers van de Kamelen)", gewicht: .982 },
+    { kort: "Aanvoerders delen uit", tekst: "Aanvoerders (ook oud-aanvoerders) mogen een bak uitdelen", gewicht: .982 },
+    { kort: "HUIS", tekst: "HUIS!", gewicht: .3, huis: true, kleur: "#c0392b" },
+    { kort: "Halve leo uitdelen", tekst: "Halve leo uitdelen", don: true, uitdelen: true, gewicht: .694 },
+    { kort: "Zelf halve leo", tekst: "Zelf een halve leo", zelf: true, don: true, gewicht: 2.2 },
+    { kort: "Oudkamelenbak", tekst: "Oudkamelenbak (iedereen die eerder bij de Kamelen speelde)", gewicht: 1.118 },
+    { kort: "Middenveldbak", tekst: "Middenveldbak", gewicht: 1.118 },
+    { kort: "Aanvoerdersbak", tekst: "Aanvoerdersbak (ook oud-aanvoerders)", gewicht: 1.118 },
+    { kort: "Nog een keer", tekst: "Nog een keer draaien", opnieuw: true, gewicht: 1.118 }
   ];
   const KLEUREN = ["#163650", "#f08c1c", "#b9d8e8", "#2c4b63", "#f6b46a", "#e6f1f7"];
   const TEKSTKLEUR = { "#163650": "#fff", "#2c4b63": "#fff", "#f08c1c": "#163650", "#f6b46a": "#163650", "#b9d8e8": "#163650", "#e6f1f7": "#163650" };
