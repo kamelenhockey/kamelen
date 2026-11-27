@@ -1822,6 +1822,21 @@ h1,h2,h3{font-family:var(--font-display)}
 .vg-rij span{font-weight:700}
 .vg-rij span.beter{color:var(--ink);background:var(--orange-soft);border-radius:999px;padding:1px 0;box-shadow:inset 0 0 0 2px var(--orange)}
 .vg-noot{font-size:.75rem;margin-top:8px}
+/* Dubbel of niks */
+.rad-don-knop{margin-top:10px;background:var(--orange);color:var(--ink)}
+.don-box{margin:16px auto 0;max-width:360px;text-align:center;padding:16px 14px;border-radius:20px;background:var(--ink);color:#fff;animation:donIn .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes donIn{from{transform:scale(.9);opacity:0}}
+@media (prefers-reduced-motion:reduce){.don-box{animation:none}}
+.don-box h3{font-family:var(--font-display);font-weight:400;font-size:1.6rem;margin:0}
+.don-box>p{margin:4px 0 12px;font-size:.88rem;opacity:.85}
+.don-wrap{position:relative;width:min(260px,100%);margin:0 auto 12px;cursor:pointer}
+.don-svg{width:100%;height:auto;display:block}
+#don-wiel{transform-origin:150px 150px;transform-box:view-box}
+.don-pijl{border-top-color:#fff}
+.don-res{font-family:var(--font-display);font-size:2.2rem;margin-top:6px}
+.don-res.dub{color:var(--orange)}.don-res.niks{color:#b9d8e8}
+.don-uit{margin:2px 0 0;font-weight:700}
+.don-uit .rad-x{color:var(--orange)}
 /* Bonusvraag-beheer */
 .bq-wed{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:8px -4px 10px;padding:2px 4px}
 .bq-wed::-webkit-scrollbar{display:none}
@@ -4246,11 +4261,11 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796892600"></script>
-<script src="toto.js?v=1796892600"></script>
-<script src="pong.js?v=1796892600"></script>
-<script src="pongregels.js?v=1796892600"></script>
-<script src="beerpong.js?v=1796892600"></script>
+<script src="mex.js?v=1796899800"></script>
+<script src="toto.js?v=1796899800"></script>
+<script src="pong.js?v=1796899800"></script>
+<script src="pongregels.js?v=1796899800"></script>
+<script src="beerpong.js?v=1796899800"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -4259,20 +4274,20 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796892600"></script>
-<script src="extra.js?v=1796892600"></script>
-<script src="coach.js?v=1796892600"></script>
-<script src="statistieken.js?v=1796892600"></script>
-<script src="wrapped.js?v=1796892600"></script>
-<script src="race.js?v=1796892600"></script>
-<script src="rad.js?v=1796892600"></script>
-<script src="fotos.js?v=1796892600"></script>
-<script src="quotes.js?v=1796892600"></script>
-<script src="ideeen.js?v=1796892600"></script>
-<script src="seizoen.js?v=1796892600"></script>
-<script src="zege.js?v=1796892600"></script>
-<script src="karavaan.js?v=1796892600"></script>
-<script src="design-proef.js?v=1796892600"></script>
-<script src="push.js?v=1796892600"></script>
+<script src="stemmen.js?v=1796899800"></script>
+<script src="extra.js?v=1796899800"></script>
+<script src="coach.js?v=1796899800"></script>
+<script src="statistieken.js?v=1796899800"></script>
+<script src="wrapped.js?v=1796899800"></script>
+<script src="race.js?v=1796899800"></script>
+<script src="rad.js?v=1796899800"></script>
+<script src="fotos.js?v=1796899800"></script>
+<script src="quotes.js?v=1796899800"></script>
+<script src="ideeen.js?v=1796899800"></script>
+<script src="seizoen.js?v=1796899800"></script>
+<script src="zege.js?v=1796899800"></script>
+<script src="karavaan.js?v=1796899800"></script>
+<script src="design-proef.js?v=1796899800"></script>
+<script src="push.js?v=1796899800"></script>
 </body>
 </html>

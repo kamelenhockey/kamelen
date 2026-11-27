@@ -119,7 +119,7 @@
     const o = (DATA.profielOpkomst || new Map()).get(p.naam);
     const kz = DATA.kzUitslagen || [];
     const tp = DATA.totoProfiel, plek = tp ? tp.stand.findIndex(x => x.naam === p.naam) + 1 : 0, st = plek ? tp.stand[plek - 1] : null;
-    let badges = 0; try { badges = badgeLijst(p).filter(b => b[3]).length; } catch {}
+    let badges = 0; try { badges = badgeLijst(p).filter(b => b.ok).length; } catch {}
     /* punten per wedstrijd met deze speler erbij */
     let w = 0, pt = 0;
     for (const a of DATA.wedAanwezig || []) { if (!a.aanwezig.has(p.naam)) continue; const m = (DATA.uitslagen || []).find(x => x.datum === a.datum && isUs(x.thuis + x.uit)); if (!m) continue;

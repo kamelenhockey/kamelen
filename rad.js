@@ -7,7 +7,7 @@
   /* Volgorde door elkaar. Smalle vakjes (kleine kans): Huis, Liter toevoegen en Dubbelloops. */
   const VAKKEN = [
     { kort: "Aanvoerdersbak", tekst: "Aanvoerdersbak (ook oud-aanvoerders)" },
-    { kort: "Zelf halve leo", tekst: "Zelf een halve leo" },
+    { kort: "Zelf halve leo", tekst: "Zelf een halve leo", zelf: true },
     { kort: "Middenveldbak", tekst: "Middenveldbak" },
     { kort: "Nog een keer ×2", tekst: "Nog een keer draaien én verdubbelaar", opnieuw: true, dubbel: true },
     { kort: "Keepersbak", tekst: "Keepersbak" },
@@ -25,7 +25,7 @@
     { kort: "Topscorersbak", tekst: "Topscorersbak (de top 3 topscorers van de Kamelen)" },
     { kort: "Dubbelloops uitdelen", tekst: "Dubbelloops uitdelen" },
     { kort: "DUBBELLOOPS", tekst: "Dubbelloops! Zelf twee tegelijk.", gewicht: .35, klein: true, kleur: "#6b4fa0" },
-    { kort: "Zelf bak", tekst: "Zelf een bak" },
+    { kort: "Zelf bak", tekst: "Zelf een bak", zelf: true },
     { kort: "Aanvalbak", tekst: "Aanvalbak" },
     { kort: "Veteranenbak", tekst: "Veteranenbak (wie er het langst bij zit)" }
   ];
@@ -77,7 +77,8 @@
   }
 
   function spin() {
-    if (bezig) return; bezig = true;
+    if (bezig || donBezig) return; bezig = true;
+    document.getElementById("don-box")?.remove(); donVak = null;
     const knop = document.getElementById("rad-draai"); knop.disabled = true;
     const uit = document.getElementById("rad-uitslag"); uit.innerHTML = `<span class="muted">Draaien…</span>`;
     /* Kies een willekeurige plek op het rad: grotere vakken hebben meer kans, Huis is smal */
@@ -186,7 +187,9 @@
     } else {
       const x = verdubbelaar ? 2 ** verdubbelaar : 1;
       tekst = x > 1 ? `${vak.tekst} <b class="rad-x">×${x}</b>` : vak.tekst;
-      uit.innerHTML = `<div class="rad-res${vak.huis ? " huis" : vak.klein ? " klein" : ""}" ${vak.kleur ? `style="color:${vak.kleur}"` : ""}>${tekst}</div>${vak.huis ? `<p>Al het bier op tafel (behalve de pitchers)!</p>` : ""}`;
+      uit.innerHTML = `<div class="rad-res${vak.huis ? " huis" : vak.klein ? " klein" : ""}" ${vak.kleur ? `style="color:${vak.kleur}"` : ""}>${tekst}</div>${vak.huis ? `<p>Al het bier op tafel (behalve de pitchers)!</p>` : ""}
+        ${vak.zelf ? `<button type="button" class="btn rad-don-knop" id="rad-don">🎲 Dubbel of niks?</button>` : ""}`;
+      if (vak.zelf) { donVak = { vak, x }; document.getElementById("rad-don").addEventListener("click", startDon); }
       verdubbelaar = 0;
       knop.textContent = "Draai aan het rad";
     }
@@ -194,6 +197,69 @@
     const hist = box.querySelector(".rad-hist");
     const html = `<div class="rad-hist"><h3 class="sub-h">Eerder vanavond</h3><ol>${geschiedenis.slice(0, 8).map(g => `<li>${g}</li>`).join("")}</ol></div>`;
     if (hist) hist.outerHTML = html; else box.insertAdjacentHTML("beforeend", html);
+  }
+
+  /* ---------- Dubbel of niks: een tweede rad met afwisselend DUBBEL en NIKS ---------- */
+  let donVak = null, donDraai = 0, donBezig = false;
+  const DON_N = 10;
+  function donSvg() {
+    const st = 360 / DON_N, p = (r, a) => { const rd = (a - 90) * Math.PI / 180; return [150 + r * Math.cos(rd), 150 + r * Math.sin(rd)]; };
+    let g = "";
+    for (let i = 0; i < DON_N; i++) {
+      const van = i * st, tot = van + st, [x1, y1] = p(140, van), [x2, y2] = p(140, tot), dub = i % 2 === 0, mid = van + st / 2, [tx, ty] = p(92, mid);
+      g += `<path d="M150 150 L${x1.toFixed(1)} ${y1.toFixed(1)} A140 140 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)} Z" fill="${dub ? "#f08c1c" : "#163650"}" stroke="#fff" stroke-width="2"/>
+        <text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" transform="rotate(${mid} ${tx.toFixed(1)} ${ty.toFixed(1)})" text-anchor="middle" dominant-baseline="middle" font-size="15" font-weight="800" fill="${dub ? "#163650" : "#fff"}" font-family="DM Sans, system-ui, sans-serif">${dub ? "DUBBEL" : "NIKS"}</text>`;
+    }
+    return `<svg viewBox="0 0 300 300" class="don-svg" aria-hidden="true"><circle cx="150" cy="150" r="146" fill="#163650"/><g id="don-wiel">${g}</g><circle cx="150" cy="150" r="26" fill="#fff" stroke="#163650" stroke-width="4"/><text x="150" y="151" text-anchor="middle" dominant-baseline="middle" font-size="22">🎲</text></svg><div class="rad-pijl don-pijl" aria-hidden="true"></div>`;
+  }
+  function startDon() {
+    if (!donVak) return;
+    const knop = document.getElementById("rad-draai"); knop.disabled = true;
+    document.getElementById("rad-don")?.remove();
+    const vorige = document.getElementById("don-box"); if (vorige) vorige.remove();
+    const uit = document.getElementById("rad-uitslag");
+    uit.insertAdjacentHTML("afterend", `<div class="don-box" id="don-box"><h3>Dubbel of niks</h3><p>${donVak.vak.tekst}${donVak.x > 1 ? ` ×${donVak.x}` : ""}: draai en kijk of het verdubbelt of verdwijnt.</p>
+      <div class="don-wrap" id="don-wrap" role="button" tabindex="0" aria-label="Draai aan het dubbel-of-niks-rad">${donSvg()}</div>
+      <button type="button" class="btn rad-knop" id="don-draai">Draai!</button></div>`);
+    document.getElementById("don-wiel").style.transform = `rotate(${donDraai}deg)`;
+    const go = () => draaiDon();
+    document.getElementById("don-draai").addEventListener("click", go);
+    document.getElementById("don-wrap").addEventListener("click", go);
+    document.getElementById("don-box").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  function draaiDon() {
+    if (donBezig || !donVak) return; donBezig = true;
+    const knop = document.getElementById("don-draai"); if (knop) knop.disabled = true;
+    const dubbel = Math.random() < .6;
+    const st = 360 / DON_N, opties = [...Array(DON_N).keys()].filter(i => (i % 2 === 0) === dubbel);
+    const i = opties[Math.floor(Math.random() * opties.length)], doel = i * st + st * (.2 + Math.random() * .6);
+    const rest = ((360 - doel) - (donDraai % 360) + 720) % 360, vanaf = donDraai;
+    donDraai += 360 * (4 + Math.floor(Math.random() * 2)) + rest;
+    const wiel = document.getElementById("don-wiel"), pijl = document.querySelector(".don-pijl");
+    geluidAan();
+    const klaarDon = () => {
+      donBezig = false;
+      const { vak, x } = donVak; donVak = null;
+      const box2 = document.getElementById("don-box");
+      const res = dubbel ? `${vak.tekst} <b class="rad-x">×${x * 2}</b>` : `Je bent vrij, geen bak.`;
+      if (dubbel) { tril([200, 80, 200, 80, 450]); alarm(); } else tril([60]);
+      if (box2) box2.insertAdjacentHTML("beforeend", `<div class="rad-res don-res ${dubbel ? "dub" : "niks"}">${dubbel ? "DUBBEL!" : "NIKS!"}</div><p class="don-uit">${res}</p>`);
+      document.getElementById("don-draai")?.remove();
+      geschiedenis[0] = `${geschiedenis[0]} → ${dubbel ? `dubbel (×${x * 2})` : "niks"}`;
+      const hist = box.querySelector(".rad-hist"); if (hist) hist.querySelector("li").textContent = geschiedenis[0];
+      document.getElementById("rad-draai").disabled = false;
+    };
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { wiel.style.transform = `rotate(${donDraai}deg)`; return setTimeout(klaarDon, 50); }
+    const start = performance.now(), DUUR = 4200, afstand = donDraai - vanaf;
+    let vorigeHoek = vanaf;
+    const stap = t => {
+      const p = Math.min(1, (t - start) / DUUR), e = 1 - Math.pow(1 - p, 3.4), hoek = vanaf + afstand * e;
+      wiel.style.transform = `rotate(${hoek}deg)`;
+      if (Math.floor(hoek / st) !== Math.floor(vorigeHoek / st)) { tik(Math.min(1, (1 - p) * 1.4 + .25)); if (pijl) { pijl.classList.remove("tik"); void pijl.offsetWidth; pijl.classList.add("tik"); } }
+      vorigeHoek = hoek;
+      if (p < 1) volgendBeeld(stap); else setTimeout(klaarDon, 150);
+    };
+    volgendBeeld(stap);
   }
 
   window.renderRad = render;
