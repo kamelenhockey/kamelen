@@ -10,27 +10,28 @@
      Brede vakjes: Zelf bak en Zelf halve leo, zodat de draaier altijd de grootste kans heeft om zelf te drinken. */
   /* Indeling: de 3 kleinste vakjes (Dubbelloops, Liter, Huis) staan als een Mercedes-ster op 0°, 120° en 240°.
      Zelf bak (90°) en Zelf halve leo (270°) staan precies tegenover elkaar; Feutenbak onderaan (180°).
+     De vier positiebakken zijn even groot, zodat elke linie evenveel kans heeft.
      De gewichten van de gewone vakjes zijn zo berekend dat dit exact uitkomt. */
   const VAKKEN = [
     { kort: "DUBBELLOOPS", tekst: "Dubbelloops! Zelf twee tegelijk.", gewicht: .6, klein: true, kleur: "#6b4fa0", don: true },
-    { kort: "Nog een keer ×2", tekst: "Nog een keer draaien én verdubbelaar", opnieuw: true, dubbel: true, gewicht: 1.135 },
-    { kort: "Veteranenbak", tekst: "Veteranenbak: iedereen die in zijn 5e jaar of langer bij de Kamelen zit", gewicht: 1.135 },
-    { kort: "Aanvalbak", tekst: "Aanvalbak", gewicht: 1.135 },
-    { kort: "Coachbak", tekst: "Coachbak", gewicht: 1.135 },
+    { kort: "Nog een keer ×2", tekst: "Nog een keer draaien én verdubbelaar", opnieuw: true, dubbel: true, gewicht: 1.132 },
+    { kort: "Veteranenbak", tekst: "Veteranenbak: iedereen die in zijn 5e jaar of langer bij de Kamelen zit", gewicht: 1.132 },
+    { kort: "Aanvalbak", tekst: "Aanvalbak", gewicht: 1.14 },
+    { kort: "Verdedigersbak", tekst: "Verdedigersbak", gewicht: 1.14 },
     { kort: "Zelf bak", tekst: "Zelf een bak", zelf: true, don: true, gewicht: 2.2 },
-    { kort: "Bak uitdelen", tekst: "Bak uitdelen", don: true, uitdelen: true, gewicht: 0.718 },
+    { kort: "Bak uitdelen", tekst: "Bak uitdelen", don: true, uitdelen: true, gewicht: 0.717 },
     { kort: "LITER", tekst: "Liter trekken!", gewicht: .35, klein: true, kleur: "#d4a017" },
-    { kort: "Dubbelloops uitdelen", tekst: "Dubbelloops uitdelen", don: true, uitdelen: true, gewicht: 0.934 },
-    { kort: "Keepersbak", tekst: "Keepersbak", gewicht: 0.934 },
-    { kort: "Lichtingbak", tekst: "Lichtingbak: een bak met iedereen uit jouw lichting", gewicht: 0.934 },
+    { kort: "Dubbelloops uitdelen", tekst: "Dubbelloops uitdelen", don: true, uitdelen: true, gewicht: 0.935 },
+    { kort: "Coachbak", tekst: "Coachbak", gewicht: 0.935 },
+    { kort: "Lichtingbak", tekst: "Lichtingbak: een bak met iedereen uit jouw lichting", gewicht: 0.935 },
     { kort: "Feutenbak", tekst: "Feutenbak", gewicht: 2.0 },
-    { kort: "Verdedigersbak", tekst: "Verdedigersbak", gewicht: 0.934 },
-    { kort: "Topscorersbak", tekst: "Topscorersbak (wie de meeste goals heeft; bij een gedeelde eerste plek drinken ze allemaal)", gewicht: 0.934 },
-    { kort: "Aanvoerders delen uit", tekst: "Aanvoerders (ook oud-aanvoerders) mogen een bak uitdelen", gewicht: 0.934 },
+    { kort: "Oudkamelenbak", tekst: "Oudkamelenbak (iedereen die eerder bij de Kamelen speelde)", gewicht: 0.935 },
+    { kort: "Topscorersbak", tekst: "Topscorersbak (wie de meeste goals heeft; bij een gedeelde eerste plek drinken ze allemaal)", gewicht: 0.935 },
+    { kort: "Aanvoerders delen uit", tekst: "Aanvoerders (ook oud-aanvoerders) mogen een bak uitdelen", gewicht: 0.935 },
     { kort: "HUIS", tekst: "HUIS!", gewicht: .3, huis: true, kleur: "#c0392b" },
-    { kort: "Halve leo uitdelen", tekst: "Halve leo uitdelen", don: true, uitdelen: true, gewicht: 0.723 },
+    { kort: "Halve leo uitdelen", tekst: "Halve leo uitdelen", don: true, uitdelen: true, gewicht: 0.726 },
     { kort: "Zelf halve leo", tekst: "Zelf een halve leo", zelf: true, don: true, gewicht: 2.2 },
-    { kort: "Oudkamelenbak", tekst: "Oudkamelenbak (iedereen die eerder bij de Kamelen speelde)", gewicht: 1.14 },
+    { kort: "Keepersbak", tekst: "Keepersbak", gewicht: 1.14 },
     { kort: "Middenveldbak", tekst: "Middenveldbak", gewicht: 1.14 },
     { kort: "Aanvoerdersbak", tekst: "Aanvoerdersbak (ook oud-aanvoerders)", gewicht: 1.14 },
     { kort: "Nog een keer", tekst: "Nog een keer draaien", opnieuw: true, gewicht: 1.14 }
