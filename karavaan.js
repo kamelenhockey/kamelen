@@ -24,13 +24,18 @@
     while (alle.length < totaal) alle.push({ m: null, soort: "komt" });
     const N = alle.length; if (N < 2) return true;
 
-    const breedte = Math.max(sec.clientWidth, N * 44), H = 200, mid = 112;
-    const pts = alle.map((_, i) => [34 + i * (breedte - 68) / (N - 1), mid + Math.sin(i * .85) * 42 + Math.sin(i * .31) * 12]);
-    const pad = pts.reduce((d, p, i) => {
+    /* De winterstop krijgt extra ruimte op de route, zodat het bevroren stuk duidelijk te zien is */
+    const isWinter = i => i > 0 && alle[i - 1].m && alle[i].m && (new Date(alle[i].m.datum) - new Date(alle[i - 1].m.datum)) / 864e5 > 45;
+    const stap = alle.map((_, i) => i === 0 ? 0 : isWinter(i) ? 3 : 1), som = stap.reduce((a, b) => a + b, 0) || 1;
+    const breedte = Math.max(sec.clientWidth, (som + 1) * 44), H = 210, mid = 112;
+    let acc = 0;
+    const pts = alle.map((_, i) => { acc += stap[i]; return [34 + acc * (breedte - 68) / som, mid + Math.sin(i * .85) * 42 + Math.sin(i * .31) * 12]; });
+    const padTot = n => pts.slice(0, n).reduce((d, p, i) => {
       if (!i) return `M${p[0]} ${p[1]}`;
       const a = pts[i - 2] || pts[i - 1], b = pts[i - 1], c = p, e = pts[i + 1] || p;
       return d + ` C${b[0] + (c[0] - a[0]) / 6} ${b[1] + (c[1] - a[1]) / 6} ${c[0] - (e[0] - b[0]) / 6} ${c[1] - (e[1] - b[1]) / 6} ${c[0]} ${c[1]}`;
     }, "");
+    const pad = padTot(N);
     const nGesp = gespeeld.length, volgende = nGesp; // index van de eerstvolgende etappe
     const wijPt = pts[Math.max(0, nGesp - 1)];
 
@@ -39,8 +44,20 @@
     for (let i = 1; i < N; i++) {
       const a = alle[i - 1].m, b = alle[i].m; if (!a || !b) continue;
       if ((new Date(b.datum) - new Date(a.datum)) / 864e5 > 45) {
-        const x = (pts[i - 1][0] + pts[i][0]) / 2, y = Math.min(pts[i - 1][1], pts[i][1]) - 34;
-        winter = `<g class="kr-winter" transform="translate(${x} ${y})"><text text-anchor="middle" y="0">❄</text><text class="kr-klein" text-anchor="middle" y="14">winterstop</text></g>`;
+        /* Hetzelfde stukje route als in het pad, maar dan bevroren: ijsblauw, met rijp, ijspegels en sneeuwvlokjes */
+        const p0 = pts[i - 2] || pts[i - 1], p1 = pts[i - 1], p2 = pts[i], p3 = pts[i + 1] || pts[i];
+        const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+        const op = t => [0, 1].map(k => (1 - t) ** 3 * p1[k] + 3 * (1 - t) ** 2 * t * c1[k] + 3 * (1 - t) * t * t * c2[k] + t ** 3 * p2[k]);
+        const stuk = `M${p1[0]} ${p1[1]} C${c1[0]} ${c1[1]} ${c2[0]} ${c2[1]} ${p2[0]} ${p2[1]}`;
+        const pegels = [.12, .22, .32, .42, .52, .62, .72, .82, .9].map((t, k) => { const [x, y] = op(t), l = 7 + (k % 3) * 3; return `<path d="M${(x - 2.6).toFixed(1)} ${(y + 2).toFixed(1)} L${x.toFixed(1)} ${(y + 2 + l).toFixed(1)} L${(x + 2.6).toFixed(1)} ${(y + 2).toFixed(1)}Z"/>`; }).join("");
+        const vlok = [.2, .4, .62, .82].map((t, k) => { const [x, y] = op(t); return `<text x="${x.toFixed(1)}" y="${(y - 12 - (k % 2) * 8).toFixed(1)}" text-anchor="middle">❄</text>`; }).join("");
+        /* Het label staat boven het ijs, ver genoeg rechts van de kameel (die bij de laatste uitslag staat) */
+        const mx = Math.min(Math.max(op(.6)[0], p1[0] + 88), p2[0] - 20), ly = Math.min(p1[1], p2[1]) - 40;
+        winter = `<g class="kr-winter">
+          <path d="${stuk}" class="kr-ijs"/><path d="${stuk}" class="kr-rijp"/>
+          <g class="kr-pegels">${pegels}</g><g class="kr-vlokken">${vlok}</g>
+          <g transform="translate(${mx.toFixed(1)} ${ly.toFixed(1)})"><rect x="-46" y="-12" width="92" height="22" rx="11" class="kr-winter-pil"/><text class="kr-klein" text-anchor="middle" y="4">❄ Winterstop</text></g>
+        </g>`;
       }
     }
     const stops = alle.map((s, i) => {
@@ -61,7 +78,7 @@
     doek.innerHTML = `<svg width="${breedte}" height="${H}" viewBox="0 0 ${breedte} ${H}" role="img" aria-label="Karavaanroute van het seizoen">
       <path d="M0 ${H} Q${breedte * .2} ${H - 46} ${breedte * .45} ${H - 22} T${breedte} ${H - 30} V${H} Z" fill="rgba(201,150,80,.16)"/>
       <path d="${pad}" class="kr-pad-rest"/>
-      <path d="${pad}" class="kr-pad-gereisd" pathLength="1000" stroke-dasharray="${nGesp > 1 ? (1000 * (nGesp - 1) / (N - 1)).toFixed(1) : 0} 1000"/>
+      ${nGesp > 1 ? `<path d="${padTot(nGesp)}" class="kr-pad-gereisd"/>` : ""}
       ${winter}${vlagje}${stops}
       <image href="logo.png" width="52" height="40" x="${wijPt[0] - 22}" y="${wijPt[1] - 60}" class="kr-kameel"/>
     </svg>`;
