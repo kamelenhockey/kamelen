@@ -51,8 +51,7 @@
     const ws = onzeWedstrijden();
     const perMatch = new Map(ws.map(m => [sleutel(m), { m, voorsp: new Map() }]));
     /* Een voorspelling hoort bij de wedstrijd waarvoor hij is ingevuld (thuis – uit + oorspronkelijke datum).
-       Is die wedstrijd afgelast en verplaatst, dan verhuist de voorspelling mee naar de nieuwe datum.
-       Is de nieuwe datum nog onbekend, dan wordt hij bewaard maar nergens meegeteld.
+       Wordt die wedstrijd afgelast, dan vervalt de voorspelling: bij de inhaalwedstrijd voorspelt iedereen opnieuw.
        Oude voorspellingen zonder wedstrijdnaam: eerstvolgende wedstrijd na het invullen. */
     const afgelast = DATA.afgelast || [];
     const paar = s => String(s || "").split(/\s+[–-]\s+/).map(x => x.trim());
@@ -63,9 +62,8 @@
       const zelfde = ws.filter(w => w.thuis === th && w.uit === ui);
       if (!zelfde.length) return null;
       if (!dat) return zelfde.find(w => aftrap(w) > r.tijd) || null;
-      const precies = zelfde.find(w => w.datum === dat); if (precies) return precies;
-      const a = afgelast.find(x => x.thuis === th && x.uit === ui && x.datum === dat);
-      return a && a.nieuweDatum ? zelfde.find(w => w.datum === a.nieuweDatum) || null : null;
+      /* Afgelaste wedstrijd: de voorspelling vervalt. Bij de inhaalwedstrijd voorspelt iedereen opnieuw. */
+      return zelfde.find(w => w.datum === dat) || null;
     };
     for (const r of reacties.sort((a, b) => a.tijd - b.tijd)) {
       const m = zoekMatch(r);
