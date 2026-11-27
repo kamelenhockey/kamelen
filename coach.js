@@ -368,20 +368,23 @@
     const sel = volgende ? keuzeVan(volgende) : [];
     const openBonus = gespeeld.filter(m => bq[sleutel(m)] && !bq[sleutel(m)].antwoord);
     box.innerHTML = `
-      <section class="card"><h2 class="cb-h">Opstellingen</h2><p class="muted">Zet de spelers van de selectie op het veld of de bank. Alleen coaches en beheerders zien de opstelling, bij de wedstrijd en hier.</p>
+      <nav class="spring cb-spring" aria-label="Naar onderdeel" data-geen-swipe>${[["cb-opst", "Opstelling"], ["cb-bonus-box", "Bonusvraag"], ["cb-notities", "Notities"], ["cb-afgelast", "Afgelast"], ["cb-app", "App"]].map(([id, t]) => `<a href="#beheer" data-cb-spring="${id}">${t}</a>`).join("")}</nav>
+      <section class="card" id="cb-opst"><h2 class="cb-h">Opstellingen</h2><p class="muted">Zet de spelers van de selectie op het veld of de bank. Alleen coaches en beheerders zien de opstelling, bij de wedstrijd en hier.</p>
         ${komend.map(m => `<div class="cb-rij"><span><b>${esc(isUs(m.thuis) ? "Kamelen" : kortTeam(m.thuis))} – ${esc(isUs(m.uit) ? "Kamelen" : kortTeam(m.uit))}</b><br><small>${fmtDay(m.datum, { weekday: "short", day: "numeric", month: "short" })} · ${selectieVan(m).length ? `${selectieVan(m).length} spelers` : "selectie nog niet bekend"}${ops[sleutel(m)] ? " · ✓ opstelling staat" : ""}</small></span>
           <button type="button" class="btn sm" data-coach-bewerk="${esc(sleutel(m))}">${ops[sleutel(m)] ? "Aanpassen" : "Maken"}</button></div>`).join("") || `<p class="muted">Geen komende wedstrijden.</p>`}
       </section>
-      <section class="card" id="cb-afgelast"></section>
-      <section class="card" id="cb-notities"></section>
       <section class="card" id="cb-bonus-box"></section>
+      <section class="card" id="cb-notities"></section>
+      <section class="card" id="cb-afgelast"></section>
       <section class="card"><h2 class="cb-h">Snel naar</h2><div class="cb-links">
         <a class="btn sm ghost" href="#stemmen">Kameel &amp; ezel sluiten</a><a class="btn sm ghost" href="#liters">Liter-incassobureau</a><a class="btn sm ghost" href="#toto">Kamelen-Scorito</a><a class="btn sm ghost" href="#fotos">Foto's en quotes</a></div></section>
-      <section class="card"><h2 class="cb-h">App</h2><div class="cb-rij"><span><small>Ingelogd als ${esc((window.IK || {}).naam || "?")}${(window.IK || {}).rol === "coach" ? " (coach)" : ""}${bcode() ? " · beheercode op dit apparaat" : ""} · versie ${esc(VERSIE)}</small></span></div>
+      <section class="card" id="cb-app"><h2 class="cb-h">App</h2><div class="cb-rij"><span><small>Ingelogd als ${esc((window.IK || {}).naam || "?")}${(window.IK || {}).rol === "coach" ? " (coach)" : ""}${bcode() ? " · beheercode op dit apparaat" : ""} · versie ${esc(VERSIE)}</small></span></div>
         <div class="cb-links"><button type="button" class="btn sm ghost" data-cb="wis">Bewaarde gegevens wissen en opnieuw laden</button>${bcode() ? `<button type="button" class="btn sm ghost" data-cb="uit">Beheercode van dit apparaat halen</button>` : ""}</div></section>`;
     tekenBonus(); tekenNotities(); tekenAfgelast();
   }
   window.renderBeheer = renderBeheer;
+  document.addEventListener("click", e => { const a = e.target.closest("[data-cb-spring]"); if (!a) return; e.preventDefault();
+    document.getElementById(a.dataset.cbSpring)?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); });
   /* ---------- Wedstrijd afgelast melden ---------- */
   function tekenAfgelast() {
     const box = document.getElementById("cb-afgelast"); if (!box) return;
