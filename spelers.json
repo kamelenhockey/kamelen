@@ -1,5 +1,5 @@
 {
- "toelichting": "Selectie van de Kamelen. 'naam' wordt overal op de site getoond; 'ook' zijn andere namen of bijnamen die in de sheets of opstelling voorkomen. Namen die hier niet staan, worden als invaller getoond. 'verjaardag' is MM-DD, 'sinds' is het jaar waarin iemand Kameel werd.",
+ "toelichting": "Selectie van de Kamelen. 'naam' wordt overal op de site getoond; 'ook' zijn andere namen of bijnamen die in de sheets of opstelling voorkomen. Namen die hier niet staan, worden als invaller getoond. 'verjaardag' is MM-DD, 'sinds' is het jaar waarin iemand Kameel werd. 'aanvoerder' is \"aanvoerder\" of \"oud-aanvoerder\".",
  "spelers": [
   {
    "naam": "Mini",
@@ -7,19 +7,22 @@
     "Maarten"
    ],
    "verjaardag": "07-14",
-   "sinds": 2023
+   "sinds": 2023,
+   "aanvoerder": "aanvoerder"
   },
   {
    "naam": "Jesse",
    "ook": [],
    "verjaardag": "09-16",
-   "sinds": 2017
+   "sinds": 2017,
+   "aanvoerder": "oud-aanvoerder"
   },
   {
    "naam": "Casper",
    "ook": [],
    "verjaardag": "11-05",
-   "sinds": 2021
+   "sinds": 2021,
+   "aanvoerder": "aanvoerder"
   },
   {
    "naam": "Jon",

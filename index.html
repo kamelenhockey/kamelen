@@ -1850,6 +1850,8 @@ h1,h2,h3{font-family:var(--font-display)}
 .afg-tekst{display:grid;gap:4px;min-width:0}.afg-sub{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.afg-tekst b{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .afg-tekst small{font-size:.78rem;font-weight:700;color:var(--orange-ink)}
 .afg-inhaal{font-size:.72rem;font-weight:700;color:var(--ink);background:var(--sky-soft);border-radius:999px;padding:4px 9px;white-space:nowrap}
+.band{display:inline-grid;place-items:center;width:18px;height:18px;margin-left:4px;border-radius:5px;background:var(--orange);color:var(--ink);font-size:.68rem;font-weight:800;vertical-align:2px;font-family:var(--font-body)}
+.band.oud{background:var(--sky);color:var(--ink-2)}
 /* Bonusvraag-beheer */
 .bq-wed{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:8px -4px 10px;padding:2px 4px}
 .bq-wed::-webkit-scrollbar{display:none}
@@ -2527,7 +2529,7 @@ function zetProfielfotos(obj){
 let CANON = new Map(), ROSTER = new Set(), INVALLERS = new Set(), INFO = new Map();
 function initRoster(r){
   CANON = new Map(); ROSTER = new Set(); INVALLERS = new Set(); INFO = new Map();
-  [...(r.spelers || []), ...(r.invallers || [])].forEach(p => INFO.set(p.naam, { verjaardag: p.verjaardag, sinds: p.sinds }));
+  [...(r.spelers || []), ...(r.invallers || [])].forEach(p => INFO.set(p.naam, { verjaardag: p.verjaardag, sinds: p.sinds, aanvoerder: p.aanvoerder }));
   const add = (list, set) => (list || []).forEach(p => { set.add(p.naam); [p.naam, ...(p.ook || [])].forEach(n => CANON.set(n.trim().toLowerCase(), p.naam)); });
   add(r.spelers, ROSTER); add(r.invallers, INVALLERS);
 }
@@ -3586,7 +3588,7 @@ function avatarHtml(p, groot){
 function playerCard(p){
   const initials = p.naam.split(/\s+/).map(x => x[0]).join("").slice(0,2).toUpperCase();
   return `<button type="button" class="player" data-player="${esc(p.naam)}">
-    <div class="top-row">${avatarHtml(p)}<div><div class="nm">${esc(p.naam)}</div>${p.sel ? `<div class="sel">In de selectie</div>` : ""}${p.ingevallen ? `<div class="sel" style="color:var(--muted)">${p.ingevallen.length}× ingevallen</div>` : ""}</div></div>
+    <div class="top-row">${avatarHtml(p)}<div><div class="nm">${esc(p.naam)}${p.aanvoerder ? ` <span class="band${p.aanvoerder === "oud-aanvoerder" ? " oud" : ""}" title="${p.aanvoerder === "aanvoerder" ? "Aanvoerder" : "Oud-aanvoerder"}">C</span>` : ""}</div>${p.aanvoerder ? `<div class="sel" style="color:var(--ink-2)">${p.aanvoerder === "aanvoerder" ? "Aanvoerder" : "Oud-aanvoerder"}</div>` : ""}${p.sel ? `<div class="sel">In de selectie</div>` : ""}${p.ingevallen ? `<div class="sel" style="color:var(--muted)">${p.ingevallen.length}× ingevallen</div>` : ""}</div></div>
     ${p.invaller ? "" : (() => { const t = badgeTelling(badgeLijst(p)); return t.aantal ? `<div class="bdg-kaart" title="${t.aantal} badges: ${t.goud} goud, ${t.zilver} zilver, ${t.brons} brons">${t.goud ? `🥇${t.goud} ` : ""}${t.zilver ? `🥈${t.zilver} ` : ""}${t.brons ? `🥉${t.brons}` : ""}<span>${t.aantal} ${t.aantal === 1 ? "badge" : "badges"}</span></div>` : ""; })()}
     <div class="pstats"><div><div class="k">Doelpunten</div><div class="v">${p.goals.length}</div><span class="balls">${p.goals.map(g => `<span class="ball ${ballCls(g.soort)}"></span>`).join("")}</span></div>
       <div><div class="k">Liters</div><div class="v">${p.liters ? fmtL(p.liters.liters) : 0}<small> L</small></div>${p.liters && p.liters.open > 0 ? `<span class="pill open">${fmtL(p.liters.open)} L open</span>` : p.liters ? `<span class="pill done">alles gedaan</span>` : ""}</div></div>
@@ -3615,7 +3617,7 @@ function openPlayer(naam){
   document.getElementById("dlg-head").classList.add("ours-team");
   document.getElementById("dlg-title").textContent = p.naam;
   const dg = p.verjaardag ? dagenTot(p.verjaardag) : null;
-  document.getElementById("dlg-sub").textContent = (p.invaller ? "Invaller" : p.sinds ? `Kameel sinds ${p.sinds}` : "Kameel")
+  document.getElementById("dlg-sub").textContent = (p.aanvoerder === "aanvoerder" ? "Aanvoerder · " : p.aanvoerder === "oud-aanvoerder" ? "Oud-aanvoerder · " : "") + (p.invaller ? "Invaller" : p.sinds ? `Kameel sinds ${p.sinds}` : "Kameel")
     + (p.verjaardag ? ` · jarig op ${fmtVerjaardag(p.verjaardag)}${dg === 0 ? " (vandaag! 🎉)" : dg === 1 ? " (morgen)" : dg <= 7 ? ` (over ${dg} dagen)` : ""}` : "")
     + (p.sel ? " · in de selectie" : "");
   const sc = p.goals.filter(g => g.soort === "sc").length, sb = p.goals.filter(g => g.soort === "sb").length, veld = p.goals.length - sc - sb;
@@ -3720,6 +3722,8 @@ function badgeLijst(p){
   const stemKansen = kz.filter(r => (DATA.wedAanwezig || []).some(w => w.datum === r.m.datum && w.aanwezig.has(p.naam)));
   const L = p.liters;
   return [
+    ["🎖️", "Aanvoerder", "Aanvoerder van de Kamelen", p.aanvoerder === "aanvoerder", "goud"],
+    ["🎗️", "Oud-aanvoerder", "Was aanvoerder van de Kamelen", p.aanvoerder === "oud-aanvoerder", "zilver"],
     ["⚽", "Eerste doelpunt", "Minstens één keer gescoord", p.goals.length >= 1, "brons"],
     ["🏑", "Veldwerker", "Drie doelpunten uit het veld", veldGoals >= 3, "brons"],
     ["🏆", "Matchwinner", "Gescoord in een gewonnen wedstrijd", scoordeIn(m => resultFor(m, ons(m)) === "W"), "brons"],
@@ -4281,11 +4285,11 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796917800"></script>
-<script src="toto.js?v=1796917800"></script>
-<script src="pong.js?v=1796917800"></script>
-<script src="pongregels.js?v=1796917800"></script>
-<script src="beerpong.js?v=1796917800"></script>
+<script src="mex.js?v=1796925000"></script>
+<script src="toto.js?v=1796925000"></script>
+<script src="pong.js?v=1796925000"></script>
+<script src="pongregels.js?v=1796925000"></script>
+<script src="beerpong.js?v=1796925000"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -4294,20 +4298,20 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796917800"></script>
-<script src="extra.js?v=1796917800"></script>
-<script src="coach.js?v=1796917800"></script>
-<script src="statistieken.js?v=1796917800"></script>
-<script src="wrapped.js?v=1796917800"></script>
-<script src="race.js?v=1796917800"></script>
-<script src="rad.js?v=1796917800"></script>
-<script src="fotos.js?v=1796917800"></script>
-<script src="quotes.js?v=1796917800"></script>
-<script src="ideeen.js?v=1796917800"></script>
-<script src="seizoen.js?v=1796917800"></script>
-<script src="zege.js?v=1796917800"></script>
-<script src="karavaan.js?v=1796917800"></script>
-<script src="design-proef.js?v=1796917800"></script>
-<script src="push.js?v=1796917800"></script>
+<script src="stemmen.js?v=1796925000"></script>
+<script src="extra.js?v=1796925000"></script>
+<script src="coach.js?v=1796925000"></script>
+<script src="statistieken.js?v=1796925000"></script>
+<script src="wrapped.js?v=1796925000"></script>
+<script src="race.js?v=1796925000"></script>
+<script src="rad.js?v=1796925000"></script>
+<script src="fotos.js?v=1796925000"></script>
+<script src="quotes.js?v=1796925000"></script>
+<script src="ideeen.js?v=1796925000"></script>
+<script src="seizoen.js?v=1796925000"></script>
+<script src="zege.js?v=1796925000"></script>
+<script src="karavaan.js?v=1796925000"></script>
+<script src="design-proef.js?v=1796925000"></script>
+<script src="push.js?v=1796925000"></script>
 </body>
 </html>
