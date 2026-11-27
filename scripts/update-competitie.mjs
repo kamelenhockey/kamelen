@@ -64,6 +64,11 @@ try {
   await browser.close();
   console.error(e); process.exit(1);
 }
+if (process.env.KAMELEN_DEBUG) {
+  const r = programmaTekst.split("\n").map(x => x.trim()).filter(Boolean);
+  r.forEach((x, i) => { if (/gchc/i.test(x)) console.log("PROGRAMMA:", JSON.stringify(r.slice(Math.max(0, i - 3), i + 4))); });
+  console.log("LINKS:", JSON.stringify(wedstrijdLinks.filter(l => /gchc/i.test(l.tekst)).slice(0, 4)));
+}
 // Veld en adres van onze eerstvolgende 3 wedstrijden (staan op de wedstrijdpagina)
 const ONS = /gchc/i;
 const progVoorlopig = parseProgramma(programmaTekst, startjaar);
@@ -82,6 +87,7 @@ for (const w of onze) {
     await page.waitForTimeout(1500);
     const t = await page.evaluate(() => [...document.querySelector("match-center").shadowRoot.children].map(c => c.innerText || "").join("\n"));
     const regels = t.split("\n").map(r => r.trim()).filter(Boolean);
+    if (process.env.KAMELEN_DEBUG) console.log("DETAIL", w.datum, JSON.stringify(regels.slice(0, 60)));
     const na = k => { const i = regels.indexOf(k); return i >= 0 ? regels[i + 1] : null; };
     details[`${w.datum}|${w.thuis}|${w.uit}`] = { id: link.id, veld: na("Veld"), accommodatie: na("Accommodatie"), adres: na("Adres") };
   } catch (e) { console.log(`Details ${w.thuis}-${w.uit} niet gelukt: ${e.message}`); }
