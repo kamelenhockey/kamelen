@@ -128,8 +128,8 @@
     const o = (await opstellingen())[sleutel(m)];
     const knop = isBeheer() ? `<button type="button" class="btn sm" data-coach-bewerk="${esc(sleutel(m))}">${o ? "✏️ Opstelling aanpassen" : "✏️ Opstelling maken"}</button>` : "";
     if (!o && !knop) { el.remove(); return; }
-    el.innerHTML = `<h3 class="sub-h">Opstelling</h3>${o ? veldHtml(o.opstelling, false) + `<p class="muted cv-door">Gemaakt door ${esc(o.door || "de coach")}</p>` : `<p class="muted">Nog geen opstelling.</p>`}${knop}
-      <h3 class="sub-h" style="margin-top:16px">Notities <small class="muted">(alleen coaches en beheerders)</small></h3><div data-nt-box="${esc(sleutel(m))}">${await notitieBlok(sleutel(m))}</div>`;
+    el.innerHTML = `<span class="wm-beheer-label">🔒 Alleen zichtbaar voor beheerders en coaches</span><h3 class="sub-h">Opstelling</h3>${o ? veldHtml(o.opstelling, false) + `<p class="muted cv-door">Gemaakt door ${esc(o.door || "de coach")}</p>` : `<p class="muted">Nog geen opstelling.</p>`}${knop}
+      <h3 class="sub-h" style="margin-top:16px">Notities</h3><div data-nt-box="${esc(sleutel(m))}">${await notitieBlok(sleutel(m))}</div>`;
   };
   document.addEventListener("click", e => { const b = e.target.closest("[data-coach-bewerk]"); if (!b) return; const m = onze().find(x => sleutel(x) === b.dataset.coachBewerk); if (m) openEditor(m); });
 

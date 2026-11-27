@@ -1954,6 +1954,8 @@ i.lg-gedaan{background:var(--ink)}i.lg-open{background:var(--orange)}
 .bc-dlg input#bc-code:focus{outline:2px solid var(--ink);outline-offset:1px}
 .bc-toon{font-size:.82rem;color:var(--ink-2);display:flex;gap:6px;align-items:center}
 .bc-knoppen{display:flex;justify-content:flex-end;gap:8px}
+.wm-beheer{border-top:2px dashed var(--line);padding-top:14px}
+.wm-beheer-label{display:inline-flex;align-items:center;gap:6px;margin-bottom:6px;padding:3px 10px;border-radius:99px;background:var(--orange-soft);color:var(--orange-ink,#7a4300);font-size:.75rem;font-weight:700}
 </style>
 </head>
 <body>
@@ -3067,7 +3069,6 @@ function openMatch(sleutel){
   if (!gespeeld && ons && window.maakPoster && beheercodeOpgeslagen()) html += `<div class="dlg-sec"><h3 class="sub-h">Wedstrijdposter</h3><div id="wm-poster"><button type="button" class="btn" onclick="toonPoster()">🎨 Maak de poster</button></div></div>`;
   window._posterMatch = m;
   if (gespeeld && ons && window.maakPoster && beheercodeOpgeslagen()) html += `<div class="dlg-sec"><h3 class="sub-h">Uitslagkaart</h3><div id="wm-uitslagkaart"><button type="button" class="btn" onclick="toonUitslagkaart()">📸 Maak de uitslagkaart</button></div></div>`;
-  if (ons) html += `<div class="dlg-sec" id="wm-opstelling"></div>`;
   if (gespeeld && ons) html += `<div class="dlg-sec" id="wm-selectie"><h3 class="sub-h">Selectie</h3><p class="muted">Selectie laden…</p></div>`;
   if (!v) html += `<div class="empty">Er zijn nog te weinig uitslagen om deze wedstrijd te voorspellen.</div>`;
   else {
@@ -3105,6 +3106,8 @@ function openMatch(sleutel){
   const onderling = (DATA.uitslagen || []).filter(x => x !== m && ((x.thuis === m.thuis && x.uit === m.uit) || (x.thuis === m.uit && x.uit === m.thuis)));
   if (onderling.length) html += `<div class="dlg-sec"><h3 class="sub-h">Eerder dit seizoen</h3>${onderling.map(x => `<div class="h2h-rij">${fmtShort(x.datum)}: ${esc(x.thuis)} <b>${esc(x.score)}</b> ${esc(x.uit)}</div>`).join("")}</div>`;
   if (m.accommodatie || m.adres) html += `<div class="dlg-sec"><h3 class="sub-h">Locatie</h3><p class="wm-loc">${esc(m.accommodatie || "")}${m.adres ? `<br><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(m.adres)}" target="_blank" rel="noopener">${esc(m.adres)}</a>` : ""}</p></div>`;
+  /* Opstelling en notities: alleen voor beheerders en coaches, onderaan */
+  if (ons && window.kamelenIsBeheer && window.kamelenIsBeheer()) html += `<div class="dlg-sec wm-beheer" id="wm-opstelling"></div>`;
   document.getElementById("dlg-body").innerHTML = html;
   document.getElementById("dlg-body").scrollTop = 0;
   if (!dlg.open){ try { dlg.showModal(); } catch { dlg.setAttribute("open", ""); } }
@@ -4351,11 +4354,11 @@ window.kamelenApi = (vers) => {
   return _api;
 };
 </script>
-<script src="mex.js?v=1796954300"></script>
-<script src="toto.js?v=1796954300"></script>
-<script src="pong.js?v=1796954300"></script>
-<script src="pongregels.js?v=1796954300"></script>
-<script src="beerpong.js?v=1796954300"></script>
+<script src="mex.js?v=1796954400"></script>
+<script src="toto.js?v=1796954400"></script>
+<script src="pong.js?v=1796954400"></script>
+<script src="pongregels.js?v=1796954400"></script>
+<script src="beerpong.js?v=1796954400"></script>
 <script>
 window.STATS_CONFIG = {
   wedstrijden: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSyZ0BNstIFRzEszqjoN0j_hG2q6AaZZ43tpw6OtztChcx_FJz7OZGUm1jxlYvOwKu9zEjN12Cb03h5/pub?gid=1818619826&single=true&output=csv",
@@ -4364,20 +4367,20 @@ window.STATS_CONFIG = {
   uitsluiten: [{ namen: ["Harm", "Karnemelk", "Tom"], tot: "2027-01-15" }]
 };
 </script>
-<script src="stemmen.js?v=1796954300"></script>
-<script src="extra.js?v=1796954300"></script>
-<script src="coach.js?v=1796954300"></script>
-<script src="statistieken.js?v=1796954300"></script>
-<script src="wrapped.js?v=1796954300"></script>
-<script src="race.js?v=1796954300"></script>
-<script src="rad.js?v=1796954300"></script>
-<script src="fotos.js?v=1796954300"></script>
-<script src="quotes.js?v=1796954300"></script>
-<script src="ideeen.js?v=1796954300"></script>
-<script src="seizoen.js?v=1796954300"></script>
-<script src="zege.js?v=1796954300"></script>
-<script src="karavaan.js?v=1796954300"></script>
-<script src="design-proef.js?v=1796954300"></script>
-<script src="push.js?v=1796954300"></script>
+<script src="stemmen.js?v=1796954400"></script>
+<script src="extra.js?v=1796954400"></script>
+<script src="coach.js?v=1796954400"></script>
+<script src="statistieken.js?v=1796954400"></script>
+<script src="wrapped.js?v=1796954400"></script>
+<script src="race.js?v=1796954400"></script>
+<script src="rad.js?v=1796954400"></script>
+<script src="fotos.js?v=1796954400"></script>
+<script src="quotes.js?v=1796954400"></script>
+<script src="ideeen.js?v=1796954400"></script>
+<script src="seizoen.js?v=1796954400"></script>
+<script src="zege.js?v=1796954400"></script>
+<script src="karavaan.js?v=1796954400"></script>
+<script src="design-proef.js?v=1796954400"></script>
+<script src="push.js?v=1796954400"></script>
 </body>
 </html>
